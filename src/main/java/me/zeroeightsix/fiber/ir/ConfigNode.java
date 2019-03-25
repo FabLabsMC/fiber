@@ -4,27 +4,24 @@ import com.google.common.collect.ImmutableMap;
 import me.zeroeightsix.fiber.ConfigValueBuilder;
 import me.zeroeightsix.fiber.Converter;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.function.Function;
 
-public abstract class ConfigNode<S> {
+public final class ConfigNode {
 
 	private String name;
 	private HashMap<String, ConfigNode> subSettingsHashMap = new HashMap<>();
 	private HashMap<String, ConfigValue> settingHashMap = new HashMap<>();
 	private HashMap<String, Object> cachedValueMap = new HashMap<>();
+	private Function<Class, Converter> converterFunction;
 
-	public ConfigNode(String name) {
+	public ConfigNode(Function<Class, Converter> converterFunction, String name) {
+		this.converterFunction = converterFunction;
 		this.name = name;
 	}
 
-	/**
-	 * Creates a new settings object with no name. This should be used only for root settings.ConfigValueBuilder
-	 */
-	public ConfigNode() {
-		this(null);
+	public ConfigNode(String name) {
+		this(null, name);
 	}
 
 	/**
@@ -32,7 +29,7 @@ public abstract class ConfigNode<S> {
 	 *
 	 * @return the created {@link ConfigValueBuilder}
 	 */
-	public ConfigValueBuilder<S, Object> builder() {
+	public ConfigValueBuilder<Object> builder() {
 		return builder(Object.class);
 	}
 
@@ -43,7 +40,7 @@ public abstract class ConfigNode<S> {
 	 * @param <T>   The class of type of the to-be created {@link ConfigValueBuilder}
 	 * @return The created {@link ConfigValueBuilder}
 	 */
-	public <T> ConfigValueBuilder<S, T> builder(Class<T> clazz) {
+	public <T> ConfigValueBuilder<T> builder(Class<T> clazz) {
 		return new ConfigValueBuilder<>(this, clazz);
 	}
 
@@ -55,7 +52,7 @@ public abstract class ConfigNode<S> {
 	 */
 	public ConfigNode sub(String name) {
 		if (!subSettingsHashMap.containsKey(name)) {
-			subSettingsHashMap.put(name, createSub(name));
+			subSettingsHashMap.put(name, new ConfigNode(converterFunction, name));
 		}
 		return subSettingsHashMap.get(name);
 	}
@@ -95,9 +92,12 @@ public abstract class ConfigNode<S> {
 	public <T> void registerAndRecover(ConfigValue<T> configValue) {
 		String name = configValue.getName();
 		settingHashMap.put(name, configValue);
-		if (cachedValueMap.containsKey(name)) {
-			attemptSet(name, configValue.getConverter().deserialize((S) cachedValueMap.get(name)));
-			cachedValueMap.remove(name);
+		if (converterFunction != null && cachedValueMap.containsKey(name)) {
+			Converter converter = converterFunction.apply(configValue.getType());
+			if (converter != null) {
+				attemptSet(name, converter.deserialize(cachedValueMap.get(name)));
+				cachedValueMap.remove(name);
+			}
 		}
 	}
 
@@ -106,32 +106,6 @@ public abstract class ConfigNode<S> {
 		getSetting(name).setValue(value);
 		return true;
 	}
-
-	/**
-	 * Creates a new {@link ConfigNode} object
-	 *
-	 * @param name the name for this settings object
-	 * @return A new {@link ConfigNode} object
-	 */
-	protected abstract ConfigNode<S> createSub(String name);
-
-	/**
-	 * Writes this {@link ConfigNode} object to the given {@link OutputStream}
-	 *
-	 * @param stream     The stream to write to
-	 * @param compressed Whether or not the output should be as small as possible
-	 */
-	public abstract void serialize(OutputStream stream, boolean compressed) throws IOException;
-
-	/**
-	 * Reads from the given {@link InputStream} and mutates this {@link ConfigNode}.
-	 *
-	 * @param stream   The stream to read from
-	 * @param compress Whether or not the output has been compressed
-	 */
-	public abstract void deserialize(InputStream stream, boolean compress) throws IOException;
-
-	public abstract <T> Converter<S, T> provideConverter(Class<T> type);
 
 	/**
 	 * @return This {@link ConfigNode}' name
@@ -162,6 +136,10 @@ public abstract class ConfigNode<S> {
 
 	public ImmutableMap<String, Object> getCachedValuesImmutable() {
 		return new ImmutableMap.Builder<String, Object>().putAll(getCachedValues()).build();
+	}
+
+	public void setConverterFunction(Function<Class, Converter> converterFunction) {
+		this.converterFunction = converterFunction;
 	}
 
 }

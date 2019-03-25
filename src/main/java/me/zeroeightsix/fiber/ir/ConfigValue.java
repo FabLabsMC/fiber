@@ -1,6 +1,5 @@
 package me.zeroeightsix.fiber.ir;
 
-import me.zeroeightsix.fiber.Converter;
 import me.zeroeightsix.fiber.constraint.Constraint;
 
 import java.util.List;
@@ -16,19 +15,17 @@ public class ConfigValue<T> {
 	private T value;
 
 	private Class<T> type;
-	private Converter<?, T> converter;
 
 	// Only used when generating a schema
 	final List<Constraint> constraintList;
 
-	public ConfigValue(String comment, String name, BiConsumer<T, T> consumer, Predicate<T> restriction, T value, Class<T> type, Converter<?, T> converter, List<Constraint> constraintList) {
+	public ConfigValue(String comment, String name, BiConsumer<T, T> consumer, Predicate<T> restriction, T value, Class<T> type, List<Constraint> constraintList) {
 		this.comment = comment;
 		this.name = name;
 		this.consumer = consumer;
 		this.restriction = restriction;
 		this.value = value;
 		this.type = type;
-		this.converter = converter;
 		this.constraintList = constraintList;
 	}
 
@@ -61,10 +58,6 @@ public class ConfigValue<T> {
 
 	public boolean hasComment() {
 		return !comment.isEmpty();
-	}
-
-	public <S> Converter<S, T> getConverter() {
-		return (Converter<S, T>) converter;
 	}
 
 	public List<Constraint> getConstraintList() {
