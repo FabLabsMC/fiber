@@ -1,5 +1,6 @@
-package me.zeroeightsix.fiber;
+package me.zeroeightsix.fiber.ir;
 
+import me.zeroeightsix.fiber.Converter;
 import me.zeroeightsix.fiber.constraint.Constraint;
 
 import java.util.List;
@@ -20,7 +21,7 @@ public class Setting<T> {
 	// Only used when generating a schema
 	final List<Constraint> constraintList;
 
-	Setting(String comment, String name, BiConsumer<T, T> consumer, Predicate<T> restriction, T value, Class<T> type, Converter<?, T> converter, List<Constraint> constraintList) {
+	public Setting(String comment, String name, BiConsumer<T, T> consumer, Predicate<T> restriction, T value, Class<T> type, Converter<?, T> converter, List<Constraint> constraintList) {
 		this.comment = comment;
 		this.name = name;
 		this.consumer = consumer;
@@ -62,7 +63,7 @@ public class Setting<T> {
 		return !comment.isEmpty();
 	}
 
-	<S> Converter<S, T> getConverter() {
+	public <S> Converter<S, T> getConverter() {
 		return (Converter<S, T>) converter;
 	}
 

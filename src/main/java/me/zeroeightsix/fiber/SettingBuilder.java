@@ -2,6 +2,8 @@ package me.zeroeightsix.fiber;
 
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.ConstraintsBuilder;
+import me.zeroeightsix.fiber.ir.Setting;
+import me.zeroeightsix.fiber.ir.Settings;
 
 import java.util.ArrayList;
 import java.util.List;

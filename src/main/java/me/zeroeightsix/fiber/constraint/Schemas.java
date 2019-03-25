@@ -4,8 +4,8 @@ import blue.endless.jankson.JsonArray;
 import blue.endless.jankson.JsonElement;
 import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.JsonPrimitive;
-import me.zeroeightsix.fiber.Setting;
-import me.zeroeightsix.fiber.Settings;
+import me.zeroeightsix.fiber.ir.Setting;
+import me.zeroeightsix.fiber.ir.Settings;
 
 import java.util.List;
 

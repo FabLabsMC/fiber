@@ -1,6 +1,8 @@
-package me.zeroeightsix.fiber;
+package me.zeroeightsix.fiber.ir;
 
 import com.google.common.collect.ImmutableMap;
+import me.zeroeightsix.fiber.Converter;
+import me.zeroeightsix.fiber.SettingBuilder;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,7 +21,7 @@ public abstract class Settings<S> {
 	}
 
 	/**
-	 * Creates a new settings object with no name. This should be used only for root settings.
+	 * Creates a new settings object with no name. This should be used only for root settings.SettingBuilder
 	 */
 	public Settings() {
 		this(null);
@@ -90,11 +92,11 @@ public abstract class Settings<S> {
 	/**
 	 * Registers a setting and sets its value if there was a value cached for its name.
 	 */
-	<T> void registerAndRecover(Setting<T> setting) {
+	public <T> void registerAndRecover(Setting<T> setting) {
 		String name = setting.getName();
 		settingHashMap.put(name, setting);
 		if (cachedValueMap.containsKey(name)) {
-			attemptSet(name, setting.<S>getConverter().deserialize((S) cachedValueMap.get(name)));
+			attemptSet(name, setting.getConverter().deserialize((S) cachedValueMap.get(name)));
 			cachedValueMap.remove(name);
 		}
 	}
