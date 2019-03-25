@@ -1,0 +1,9 @@
+# IDEA
+/.idea
+/out
+
+# Gradle
+/.gradle
+
+# Testing
+/*.json5
