@@ -3,13 +3,10 @@ package me.zeroeightsix.fiber.ir;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
-import me.zeroeightsix.fiber.builder.Converter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
-import java.util.function.Function;
 
 public final class ConfigNode {
 

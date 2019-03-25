@@ -1,9 +1,6 @@
 package me.zeroeightsix.fiber;
 
-import blue.endless.jankson.Jankson;
-import blue.endless.jankson.JsonElement;
-import blue.endless.jankson.JsonObject;
-import blue.endless.jankson.JsonPrimitive;
+import blue.endless.jankson.*;
 import blue.endless.jankson.impl.SyntaxError;
 import me.zeroeightsix.fiber.builder.Converter;
 import me.zeroeightsix.fiber.ir.Cache;
@@ -21,7 +18,7 @@ public class JanksonSettings {
 			@Override
 			public Object get(String name) {
 				Object o = super.get(name);
-				if (o == null) return null;
+				if (o == null || o instanceof JsonNull) return null;
 				return JanksonSettings.provideConverter((Class) o.getClass()).deserialize(o);
 			}
 		};
@@ -62,10 +59,14 @@ public class JanksonSettings {
 		JsonObject object = new JsonObject();
 
 		node.getCachesImmutable().forEach(cache -> cache.getCachedNames().forEach(name -> {
-            System.out.println("Serializing cached item " + name);
 			Object o = cache.get(name);
-            System.out.println("Value " + o + " (" + o.getClass() + ")");
-			object.put(name, (JsonElement) JanksonSettings.provideConverter((Class) o.getClass()).serialize(o));
+			JsonElement element;
+			if (o == null) {
+				element = JsonNull.INSTANCE;
+			} else {
+				element = (JsonElement) JanksonSettings.provideConverter((Class) o.getClass()).serialize(o);
+			}
+			object.put(name, element);
 		}));
 
 		node.getSettingsImmutable().forEach((s, setting) -> {
