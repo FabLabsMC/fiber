@@ -1,10 +1,14 @@
 package me.zeroeightsix.fiber.ir;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
 import me.zeroeightsix.fiber.builder.Converter;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Function;
 
 public final class ConfigNode {
@@ -12,19 +16,17 @@ public final class ConfigNode {
 	private String name;
 	private HashMap<String, ConfigNode> subSettingsHashMap = new HashMap<>();
 	private HashMap<String, ConfigValue> settingHashMap = new HashMap<>();
-	private HashMap<String, Object> cachedValueMap = new HashMap<>();
-	private Function<Class, Converter> converterFunction;
+	private List<Cache> caches = new ArrayList<>();
 
-	public ConfigNode(Function<Class, Converter> converterFunction, String name) {
-		this.converterFunction = converterFunction;
+	public ConfigNode(String name) {
 		this.name = name;
 	}
 
-	public ConfigNode(String name) {
-		this(null, name);
-	}
+    public ConfigNode() {
+	    this(null);
+    }
 
-	/**
+    /**
 	 * Creates a new {@link ConfigValueBuilder} with type {@link Object}
 	 *
 	 * @return the created {@link ConfigValueBuilder}
@@ -52,7 +54,7 @@ public final class ConfigNode {
 	 */
 	public ConfigNode sub(String name) {
 		if (!subSettingsHashMap.containsKey(name)) {
-			subSettingsHashMap.put(name, new ConfigNode(converterFunction, name));
+			subSettingsHashMap.put(name, new ConfigNode(name));
 		}
 		return subSettingsHashMap.get(name);
 	}
@@ -63,11 +65,17 @@ public final class ConfigNode {
 	 * @param name  The name of the setting
 	 * @param value The new value of the setting
 	 */
-	public void set(String name, Object value) {
+	public boolean set(String name, Object value) {
 		if (hasSetting(name)) {
-			if (attemptSet(name, value)) return;
+            return attemptSet(name, value);
 		}
-		cachedValueMap.put(name, value);
+		return false;
+	}
+
+	public void setOrCache(String name, Object value, Cache cache) {
+		if (!set(name, value)) {
+		    cache.put(name, value);
+		}
 	}
 
 	/**
@@ -92,13 +100,14 @@ public final class ConfigNode {
 	public <T> void registerAndRecover(ConfigValue<T> configValue) {
 		String name = configValue.getName();
 		settingHashMap.put(name, configValue);
-		if (converterFunction != null && cachedValueMap.containsKey(name)) {
-			Converter converter = converterFunction.apply(configValue.getType());
-			if (converter != null) {
-				attemptSet(name, converter.deserialize(cachedValueMap.get(name)));
-				cachedValueMap.remove(name);
-			}
-		}
+
+		for (Cache cache : caches) {
+		    Object o = cache.get(name);
+		    if (o == null) continue;
+		    configValue.setValue((T) o);
+		    cache.remove(name);
+		    return;
+        }
 	}
 
 	private boolean attemptSet(String name, Object value) {
@@ -118,10 +127,6 @@ public final class ConfigNode {
 		return settingHashMap;
 	}
 
-	protected HashMap<String, Object> getCachedValues() {
-		return cachedValueMap;
-	}
-
 	protected HashMap<String, ConfigNode> getSubSettings() {
 		return subSettingsHashMap;
 	}
@@ -134,12 +139,11 @@ public final class ConfigNode {
 		return new ImmutableMap.Builder<String, ConfigValue>().putAll(getSettings()).build();
 	}
 
-	public ImmutableMap<String, Object> getCachedValuesImmutable() {
-		return new ImmutableMap.Builder<String, Object>().putAll(getCachedValues()).build();
+	public ImmutableList<Cache> getCachesImmutable() {
+		return new ImmutableList.Builder<Cache>().addAll(caches).build();
 	}
 
-	public void setConverterFunction(Function<Class, Converter> converterFunction) {
-		this.converterFunction = converterFunction;
+    public void addCache(Cache cache) {
+    	caches.add(cache);
 	}
-
 }

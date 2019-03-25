@@ -6,6 +6,7 @@ import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.JsonPrimitive;
 import blue.endless.jankson.impl.SyntaxError;
 import me.zeroeightsix.fiber.builder.Converter;
+import me.zeroeightsix.fiber.ir.Cache;
 import me.zeroeightsix.fiber.ir.ConfigNode;
 
 import java.io.IOException;
@@ -16,17 +17,25 @@ import java.util.Map;
 public class JanksonSettings {
 
 	public static void deserialize(ConfigNode node, InputStream stream) throws IOException {
-	    node.setConverterFunction(JanksonSettings::provideConverter);
+	    Cache cache = new Cache() {
+			@Override
+			public Object get(String name) {
+				Object o = super.get(name);
+				if (o == null) return null;
+				return JanksonSettings.provideConverter((Class) o.getClass()).deserialize(o);
+			}
+		};
+	    node.addCache(cache);
 		Jankson jankson = Jankson.builder().build();
 		try {
 			JsonElement element = jankson.load(stream);
-			JanksonSettings.deserialize(node, element);
+			JanksonSettings.deserialize(node, element, cache);
 		} catch (SyntaxError syntaxError) {
 			syntaxError.printStackTrace();
 		}
 	}
 
-	private static void deserialize(ConfigNode node, JsonElement element) {
+	private static void deserialize(ConfigNode node, JsonElement element, Cache cache) {
 		if (!(element instanceof JsonObject)) {
 			throw new IllegalStateException("Root of configuration must be a jankson object");
 		}
@@ -37,9 +46,9 @@ public class JanksonSettings {
 			JsonElement child = entry.getValue();
 
 			if (child instanceof JsonObject) {
-			    deserialize(node.sub(key), child);
+			    deserialize(node.sub(key), child, cache);
 			} else {
-			    node.set(key, child);
+			    node.setOrCache(key, child, cache);
 			}
 		}
 	}
@@ -52,7 +61,13 @@ public class JanksonSettings {
 	private static JsonObject serialize(ConfigNode node) {
 		JsonObject object = new JsonObject();
 
-		node.getCachedValuesImmutable().forEach((s, value) -> object.put(s, ((JsonElement) value)));
+		node.getCachesImmutable().forEach(cache -> cache.getCachedNames().forEach(name -> {
+            System.out.println("Serializing cached item " + name);
+			Object o = cache.get(name);
+            System.out.println("Value " + o + " (" + o.getClass() + ")");
+			object.put(name, (JsonElement) JanksonSettings.provideConverter((Class) o.getClass()).serialize(o));
+		}));
+
 		node.getSettingsImmutable().forEach((s, setting) -> {
 			object.put(s, (JsonElement) provideConverter(setting.getType()).serialize(setting.getValue()));
 			if (setting.hasComment())
