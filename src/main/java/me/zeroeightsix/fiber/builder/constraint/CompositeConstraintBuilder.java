@@ -1,4 +1,9 @@
-package me.zeroeightsix.fiber.constraint;
+package me.zeroeightsix.fiber.builder.constraint;
+
+import me.zeroeightsix.fiber.constraint.CompositeType;
+import me.zeroeightsix.fiber.constraint.Constraint;
+import me.zeroeightsix.fiber.constraint.Constraints;
+import me.zeroeightsix.fiber.constraint.ValuedConstraint;
 
 import java.util.List;
 
@@ -43,9 +48,9 @@ public final class CompositeConstraintBuilder<T> extends AbstractConstraintsBuil
 		}
 	}
 
-	abstract class AbstractCompositeConstraint<T> extends ValuedConstraint<String, T> {
+	public abstract class AbstractCompositeConstraint<T> extends ValuedConstraint<String, T> {
 
-		protected final List<Constraint> constraints;
+		public final List<Constraint> constraints;
 
 		public AbstractCompositeConstraint(CompositeType type, List<Constraint> constraints) {
 			super(Constraints.COMPOSITE, type.getName());

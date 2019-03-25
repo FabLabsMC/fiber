@@ -1,6 +1,8 @@
-package me.zeroeightsix.fiber.constraint;
+package me.zeroeightsix.fiber.builder.constraint;
 
-import me.zeroeightsix.fiber.ConfigValueBuilder;
+import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
+import me.zeroeightsix.fiber.constraint.CompositeType;
+import me.zeroeightsix.fiber.constraint.Constraint;
 
 import java.util.List;
 

@@ -1,9 +1,12 @@
-package me.zeroeightsix.fiber.constraint;
+package me.zeroeightsix.fiber;
 
 import blue.endless.jankson.JsonArray;
 import blue.endless.jankson.JsonElement;
 import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.JsonPrimitive;
+import me.zeroeightsix.fiber.builder.constraint.CompositeConstraintBuilder;
+import me.zeroeightsix.fiber.constraint.Constraint;
+import me.zeroeightsix.fiber.constraint.ValuedConstraint;
 import me.zeroeightsix.fiber.ir.ConfigValue;
 import me.zeroeightsix.fiber.ir.ConfigNode;
 

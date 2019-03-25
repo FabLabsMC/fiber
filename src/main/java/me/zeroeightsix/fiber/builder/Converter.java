@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber;
+package me.zeroeightsix.fiber.builder;
 
 public interface Converter<F, T> {
 

@@ -1,8 +1,8 @@
 package me.zeroeightsix.fiber.ir;
 
 import com.google.common.collect.ImmutableMap;
-import me.zeroeightsix.fiber.ConfigValueBuilder;
-import me.zeroeightsix.fiber.Converter;
+import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
+import me.zeroeightsix.fiber.builder.Converter;
 
 import java.util.HashMap;
 import java.util.function.Function;

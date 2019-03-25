@@ -1,7 +1,7 @@
-package me.zeroeightsix.fiber;
+package me.zeroeightsix.fiber.builder;
 
 import me.zeroeightsix.fiber.constraint.Constraint;
-import me.zeroeightsix.fiber.constraint.ConstraintsBuilder;
+import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
 import me.zeroeightsix.fiber.ir.ConfigValue;
 import me.zeroeightsix.fiber.ir.ConfigNode;
 

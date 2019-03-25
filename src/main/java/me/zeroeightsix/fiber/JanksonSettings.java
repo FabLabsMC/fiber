@@ -5,6 +5,7 @@ import blue.endless.jankson.JsonElement;
 import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.JsonPrimitive;
 import blue.endless.jankson.impl.SyntaxError;
+import me.zeroeightsix.fiber.builder.Converter;
 import me.zeroeightsix.fiber.ir.ConfigNode;
 
 import java.io.IOException;
