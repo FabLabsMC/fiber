@@ -2,8 +2,8 @@ package me.zeroeightsix.fiber;
 
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.ConstraintsBuilder;
-import me.zeroeightsix.fiber.ir.Setting;
-import me.zeroeightsix.fiber.ir.Settings;
+import me.zeroeightsix.fiber.ir.ConfigValue;
+import me.zeroeightsix.fiber.ir.ConfigNode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-public class SettingBuilder<S, T> {
+public class ConfigValueBuilder<S, T> {
 
 	Class<T> type;
 
@@ -21,18 +21,18 @@ public class SettingBuilder<S, T> {
 	private List<Constraint> constraints = new ArrayList<>();
 	private String name;
 	private Converter<S, T> converter;
-	private Settings registry;
+	private ConfigNode registry;
 	private boolean isFinal = false;
 
-	public SettingBuilder(Settings registry, Class<T> type) {
+	public ConfigValueBuilder(ConfigNode registry, Class<T> type) {
 		this.registry = registry;
 		this.type = type;
 	}
 
 	/**
-	 * Attempts to create a copy of given SettingBuilder. Will attempt to cast everything.
+	 * Attempts to create a copy of given ConfigValueBuilder. Will attempt to cast everything.
 	 */
-	protected SettingBuilder(SettingBuilder<S, Object> copy, Class<T> type) {
+	protected ConfigValueBuilder(ConfigValueBuilder<S, Object> copy, Class<T> type) {
 		this(copy.registry, type);
 		this.value = (T) copy.value;
 		this.comment = copy.comment;
@@ -41,37 +41,37 @@ public class SettingBuilder<S, T> {
 		this.converter = (Converter<S, T>) copy.converter;
 	}
 
-	public <A> SettingBuilder type(Class<? extends A> clazz) {
-		return new SettingBuilder(this, clazz);
+	public <A> ConfigValueBuilder type(Class<? extends A> clazz) {
+		return new ConfigValueBuilder(this, clazz);
 	}
 
-	public SettingBuilder<S, T> comment(String comment) {
+	public ConfigValueBuilder<S, T> comment(String comment) {
 		if (!this.comment.isEmpty()) this.comment += "\n";
 		this.comment += comment;
 		return this;
 	}
 
-	public SettingBuilder<S, T> listen(BiConsumer<T, T> consumer) {
+	public ConfigValueBuilder<S, T> listen(BiConsumer<T, T> consumer) {
 		consumers.add(consumer);
 		return this;
 	}
 
-	public SettingBuilder<S, T> name(String name) {
+	public ConfigValueBuilder<S, T> name(String name) {
 		this.name = name;
 		return this;
 	}
 
-	public SettingBuilder<S, T> defaultValue(T value) {
+	public ConfigValueBuilder<S, T> defaultValue(T value) {
 		this.value = value;
 		return this;
 	}
 
-	public SettingBuilder<S, T> converter(Converter<S, T> converter) {
+	public ConfigValueBuilder<S, T> converter(Converter<S, T> converter) {
 		this.converter = converter;
 		return this;
 	}
 
-	public SettingBuilder<S, T> setFinal() {
+	public ConfigValueBuilder<S, T> setFinal() {
 		this.isFinal = true;
 		return this;
 	}
@@ -80,15 +80,15 @@ public class SettingBuilder<S, T> {
 		return new ConstraintsBuilder<>(constraints, type, this);
 	}
 
-	public Setting<T> build() {
-		return registerAndSet(new Setting<>(comment, name, (a, b) -> consumers.forEach(consumer -> consumer.accept(a, b)), buildRestriction(), value, type, converter == null ? registry.provideConverter(type) : converter, this.constraints));
+	public ConfigValue<T> build() {
+		return registerAndSet(new ConfigValue<>(comment, name, (a, b) -> consumers.forEach(consumer -> consumer.accept(a, b)), buildRestriction(), value, type, converter == null ? registry.provideConverter(type) : converter, this.constraints));
 	}
 
-	private Setting<T> registerAndSet(Setting<T> setting) {
-		if (setting.getName() != null) {
-			registry.registerAndRecover(setting);
+	private ConfigValue<T> registerAndSet(ConfigValue<T> configValue) {
+		if (configValue.getName() != null) {
+			registry.registerAndRecover(configValue);
 		}
-		return setting;
+		return configValue;
 	}
 
 	protected Predicate<T> buildRestriction() {

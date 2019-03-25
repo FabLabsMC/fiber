@@ -4,27 +4,27 @@ import blue.endless.jankson.JsonArray;
 import blue.endless.jankson.JsonElement;
 import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.JsonPrimitive;
-import me.zeroeightsix.fiber.ir.Setting;
-import me.zeroeightsix.fiber.ir.Settings;
+import me.zeroeightsix.fiber.ir.ConfigValue;
+import me.zeroeightsix.fiber.ir.ConfigNode;
 
 import java.util.List;
 
 public class Schemas {
 
-	public static JsonObject createSchema(Settings settings) {
+	public static JsonObject createSchema(ConfigNode settings) {
 		JsonObject object = new JsonObject();
 
-		settings.getSettingsImmutable().forEach((key, setting) -> object.put((String) key, createSchema((Setting) setting)));
-		settings.getSubSettingsImmutable().forEach((key, settingsObject) -> object.put((String) key, createSchema((Settings) settingsObject)));
+		settings.getSettingsImmutable().forEach((key, setting) -> object.put((String) key, createSchema((ConfigValue) setting)));
+		settings.getSubSettingsImmutable().forEach((key, settingsObject) -> object.put((String) key, createSchema((ConfigNode) settingsObject)));
 
 		return object;
 	}
 
-	private static JsonObject createSchema(Setting setting) {
+	private static JsonObject createSchema(ConfigValue configValue) {
 		JsonObject object = new JsonObject();
-		object.put("comment", new JsonPrimitive(setting.getComment()));
-		object.put("class", new JsonPrimitive(setting.getType().getTypeName()));
-		object.put("constraints", createSchema(setting.getConstraintList()));
+		object.put("comment", new JsonPrimitive(configValue.getComment()));
+		object.put("class", new JsonPrimitive(configValue.getType().getTypeName()));
+		object.put("constraints", createSchema(configValue.getConstraintList()));
 		return object;
 	}
 

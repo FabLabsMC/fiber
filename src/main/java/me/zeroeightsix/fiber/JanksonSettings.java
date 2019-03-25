@@ -5,14 +5,14 @@ import blue.endless.jankson.JsonElement;
 import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.JsonPrimitive;
 import blue.endless.jankson.impl.SyntaxError;
-import me.zeroeightsix.fiber.ir.Settings;
+import me.zeroeightsix.fiber.ir.ConfigNode;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Map;
 
-public class JanksonSettings extends Settings<JsonElement> {
+public class JanksonSettings extends ConfigNode<JsonElement> {
 
 	public JanksonSettings(String name) {
 		super(name);
@@ -85,7 +85,7 @@ public class JanksonSettings extends Settings<JsonElement> {
 	}
 
 	@Override
-	protected Settings createSub(String name) {
+	protected ConfigNode createSub(String name) {
 		return new JanksonSettings(name);
 	}
 

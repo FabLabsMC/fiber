@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
-public class Setting<T> {
+public class ConfigValue<T> {
 
 	private final String comment;
 	private final String name;
@@ -21,7 +21,7 @@ public class Setting<T> {
 	// Only used when generating a schema
 	final List<Constraint> constraintList;
 
-	public Setting(String comment, String name, BiConsumer<T, T> consumer, Predicate<T> restriction, T value, Class<T> type, Converter<?, T> converter, List<Constraint> constraintList) {
+	public ConfigValue(String comment, String name, BiConsumer<T, T> consumer, Predicate<T> restriction, T value, Class<T> type, Converter<?, T> converter, List<Constraint> constraintList) {
 		this.comment = comment;
 		this.name = name;
 		this.consumer = consumer;
