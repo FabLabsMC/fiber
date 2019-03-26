@@ -2,6 +2,7 @@ package me.zeroeightsix.fiber.ir;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import me.zeroeightsix.fiber.ConfigOperations;
 import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
 
 import java.util.ArrayList;
@@ -69,6 +70,15 @@ public final class ConfigNode {
 		return false;
 	}
 
+	public <T> boolean putValue(ConfigValue<T> value) {
+		if (hasSetting(value.getName())) {
+			ConfigOperations.mergeTo(value, getSetting(value.getName()));
+			return false;
+		}
+		register(value);
+		return true;
+	}
+
 	public void setOrCache(String name, Object value, Cache cache) {
 		if (!set(name, value)) {
 		    cache.put(name, value);
@@ -91,12 +101,16 @@ public final class ConfigNode {
 		return settingHashMap.get(name);
 	}
 
+	public void register(ConfigValue configValue) {
+		settingHashMap.put(configValue.getName(), configValue);
+	}
+
 	/**
 	 * Registers a configValue and sets its value if there was a value cached for its name.
 	 */
 	public <T> void registerAndRecover(ConfigValue<T> configValue) {
 		String name = configValue.getName();
-		settingHashMap.put(name, configValue);
+		register(configValue);
 
 		for (Cache cache : caches) {
 		    Object o = cache.get(name);
