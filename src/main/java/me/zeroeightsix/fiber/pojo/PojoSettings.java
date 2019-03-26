@@ -43,6 +43,8 @@ public class PojoSettings {
     private static List<ConfigValueBuilder> buildFieldNodes(Object pojo, SettingNamingConvention convention, ConfigNode node) {
         return Arrays.stream(pojo.getClass().getDeclaredFields()).map(field -> {
             // TODO: Process field annotations
+            String comment = getComment(field.getAnnotation(Comment.class));
+
             String name = field.getName();
             String conventionName = convention.name(name);
             name = (conventionName == null || conventionName.isEmpty()) ? name : conventionName;
@@ -66,8 +68,13 @@ public class PojoSettings {
 
             return node.builder(type)
                     .name(name)
+                    .comment(comment)
                     .defaultValue(value);
         }).collect(Collectors.toList());
+    }
+
+    private static String getComment(Comment annotation) {
+        return annotation == null ? null : annotation.value();
     }
 
     private static SettingNamingConvention createNamingConvention(Class<? extends SettingNamingConvention> namingConvention) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {

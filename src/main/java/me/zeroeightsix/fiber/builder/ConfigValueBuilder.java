@@ -44,6 +44,7 @@ public class ConfigValueBuilder<T> {
 	}
 
 	public ConfigValueBuilder<T> comment(String comment) {
+		if (comment == null) return this;
 		if (!this.comment.isEmpty()) this.comment += "\n";
 		this.comment += comment;
 		return this;
