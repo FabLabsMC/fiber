@@ -219,6 +219,7 @@ try {
 ### Fields
 In your POJO class, every field, unless annotated using `@Setting.Ignored`, is considered a setting.
 
+#### Final
 These fields **must** be `final`. This is to force users to provide default values and keep them from setting the values at runtime as the configuration can't pick up fields being set directly.
 
 ```java
@@ -232,3 +233,33 @@ Creates the following IR:
     - Type `java.lang.Integer`
     - Default value `5`
     - Name `mySetting`
+
+##### Note
+If you, for some reason, need a field to not be final, it's possible to annotate it so the deserialiser will treat it as final:
+```java
+@Setting.NoForceFinal
+public int a = 5;
+```
+
+Or, for your entire POJO  class:
+```java
+@Settings(noForceFinals = true)
+public class MyPojo {
+    public int a = 5;
+}
+```
+
+#### Additional properties
+Adding a comment to a setting:
+```java
+@Comment("A comment.")
+public final int a = 5;
+```
+Adding constraints to a setting:
+```java
+@Setting(constraints = {
+        @Constraint.Min(10),
+        @Constraint.Max(20)
+})
+public final int a = 5;
+```
