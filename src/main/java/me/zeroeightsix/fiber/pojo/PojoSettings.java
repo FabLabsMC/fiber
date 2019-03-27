@@ -59,7 +59,7 @@ public class PojoSettings {
 
             Object value = null;
             try {
-                value = field.get(pojo).getClass();
+                value = field.get(pojo);
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
