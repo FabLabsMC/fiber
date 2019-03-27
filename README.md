@@ -234,20 +234,20 @@ Creates the following IR:
     - Default value `5`
     - Name `mySetting`
 
-##### Note
-If you, for some reason, need a field to not be final, it's possible to annotate it so the deserialiser will treat it as final:
-```java
-@Setting.NoForceFinal
-public int a = 5;
-```
-
-Or, for your entire POJO  class:
-```java
-@Settings(noForceFinals = true)
-public class MyPojo {
-    public int a = 5;
-}
-```
+> ##### Note
+> If you, for some reason, need a field to not be final, it's possible to annotate it so the deserialiser will treat it as final:
+> ```java
+> @Setting.NoForceFinal
+> public int a = 5;
+> ```
+> 
+> Or, for your entire POJO  class:
+> ```java
+> @Settings(noForceFinals = true)
+> public class MyPojo {
+>     public int a = 5;
+> }
+> ```
 
 #### Additional properties
 Adding a comment to a setting:
