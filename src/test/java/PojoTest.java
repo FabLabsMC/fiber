@@ -6,13 +6,12 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PojoTest {
 
     @Test
-    @DisplayName("1 field -> IR")
+    @DisplayName("Convert POJO to IR")
     public void testPojoIR() throws IllegalAccessException {
         ConfigNode node = new ConfigNode();
         OneFieldPojo pojo = new OneFieldPojo();
@@ -28,6 +27,19 @@ public class PojoTest {
         Integer integer = (Integer) value.getValue();
         assertEquals(integer, 5);
     }
+
+    @Test
+    @DisplayName("Throw no final exception")
+    public void testNoFinal() {
+        ConfigNode node = new ConfigNode();
+        NoFinalPojo pojo = new NoFinalPojo();
+        assertThrows(IllegalStateException.class, () -> PojoSettings.applyToIR(node, pojo));
+    }
+
+    private static class NoFinalPojo {
+        private int a = 5;
+    }
+
     private static class OneFieldPojo {
         private final int a = 5;
     }
