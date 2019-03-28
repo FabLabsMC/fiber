@@ -263,3 +263,19 @@ Adding constraints to a setting:
 })
 public final int a = 5;
 ```
+Setting a settings value as final (can only be modified from the source it's being deserialised from)
+```java
+@Setting.Final()
+pulbic final int a = 5;
+```
+
+#### Listeners
+Listeners are defined as a `BiConsumer`, annotated using `@Listener(<settingName>)`
+```java
+public final int a = 5;
+
+@Listener("a")
+private final BiConsumer<Integer, Integer> aListener = (then, now) -> {
+        System.out.println("Changed value from " + then + " to " + now);
+};
+```
