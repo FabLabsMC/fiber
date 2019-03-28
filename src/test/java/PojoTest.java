@@ -1,6 +1,6 @@
 import me.zeroeightsix.fiber.ir.ConfigNode;
 import me.zeroeightsix.fiber.ir.ConfigValue;
-import me.zeroeightsix.fiber.pojo.PojoSettings;
+import me.zeroeightsix.fiber.annotations.PojoSettings;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

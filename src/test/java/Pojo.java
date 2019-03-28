@@ -1,4 +1,4 @@
-import me.zeroeightsix.fiber.pojo.Comment;
+import me.zeroeightsix.fiber.annotations.Comment;
 
 public class Pojo {
 

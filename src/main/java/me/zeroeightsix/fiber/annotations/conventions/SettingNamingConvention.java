@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber.pojo.conventions;
+package me.zeroeightsix.fiber.annotations.conventions;
 
 public interface SettingNamingConvention {
 

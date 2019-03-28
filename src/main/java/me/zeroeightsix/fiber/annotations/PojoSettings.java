@@ -1,11 +1,11 @@
-package me.zeroeightsix.fiber.pojo;
+package me.zeroeightsix.fiber.annotations;
 
 import com.google.common.primitives.Primitives;
 import me.zeroeightsix.fiber.ConfigOperations;
 import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
 import me.zeroeightsix.fiber.ir.ConfigNode;
-import me.zeroeightsix.fiber.pojo.conventions.NoNamingConvention;
-import me.zeroeightsix.fiber.pojo.conventions.SettingNamingConvention;
+import me.zeroeightsix.fiber.annotations.conventions.NoNamingConvention;
+import me.zeroeightsix.fiber.annotations.conventions.SettingNamingConvention;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
