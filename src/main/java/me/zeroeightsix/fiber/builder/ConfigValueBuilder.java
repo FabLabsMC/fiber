@@ -51,7 +51,9 @@ public class ConfigValueBuilder<T> {
 	}
 
 	public ConfigValueBuilder<T> listen(BiConsumer<T, T> consumer) {
-		consumers.add(consumer);
+		if (consumer != null) {
+			consumers.add(consumer);
+		}
 		return this;
 	}
 

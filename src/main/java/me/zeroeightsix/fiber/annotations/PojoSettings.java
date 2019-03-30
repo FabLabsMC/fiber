@@ -6,11 +6,14 @@ import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
 import me.zeroeightsix.fiber.ir.ConfigNode;
 import me.zeroeightsix.fiber.annotations.conventions.NoNamingConvention;
 import me.zeroeightsix.fiber.annotations.conventions.SettingNamingConvention;
+import me.zeroeightsix.fiber.ir.ConfigValue;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 public class PojoSettings {
@@ -37,19 +40,64 @@ public class PojoSettings {
             }
         }
 
-        List<ConfigValueBuilder> builderList = buildFieldNodes(pojo, namingConvention, node, forceFinals);
-        builderList.forEach(ConfigValueBuilder::build);
+        parsePojo(pojo, namingConvention, node, forceFinals);
         return node;
     }
 
-    private static List<ConfigValueBuilder> buildFieldNodes(Object pojo, SettingNamingConvention convention, ConfigNode node, boolean forceFinals) {
-        return Arrays.stream(pojo.getClass().getDeclaredFields()).map(field -> {
-            SettingProperties properties = getProperties(field);
-            if (properties.ignored) return null;
+    private static List<ConfigValue> parsePojo(Object pojo, SettingNamingConvention convention, ConfigNode node, boolean forceFinals) {
+        final Map<String, Pair<ConfigValueBuilder, Class>> builderMap = new HashMap<>();
+        final Map<String, Pair<BiConsumer, Class>> listenerMap = new HashMap<>();
+
+        for (Field field : pojo.getClass().getDeclaredFields()) {
+            FieldProperties properties = getProperties(field);
+            if (properties.ignored) continue;
 
             // Get angry if not final
             if (forceFinals && !properties.noForceFinal && !Modifier.isFinal(field.getModifiers())) {
                 throw new IllegalStateException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must be final");
+            }
+
+            if (field.isAnnotationPresent(Listener.class)) {
+                if (!field.getType().equals(BiConsumer.class)) {
+                    throw new IllegalStateException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must be a BiConsumer");
+                }
+
+                Listener annot = field.getAnnotation(Listener.class);
+                String settingName = annot.value();
+
+
+                ParameterizedType genericTypes = (ParameterizedType) field.getGenericType();
+                if (genericTypes.getActualTypeArguments().length != 2) {
+                    throw new IllegalStateException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must have 2 generic types");
+                } else if (genericTypes.getActualTypeArguments()[0] != genericTypes.getActualTypeArguments()[1]) {
+                    throw new IllegalStateException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must have 2 identical generic types");
+                }
+                Class genericType = (Class) genericTypes.getActualTypeArguments()[0];
+
+                BiConsumer consumer;
+                try {
+                    consumer = (BiConsumer) field.get(pojo);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                    continue;
+                }
+                if (consumer == null) {
+                    continue;
+                }
+
+                if (builderMap.containsKey(settingName)) {
+                    Pair<ConfigValueBuilder, Class> builderClassPair = builderMap.get(settingName);
+                    ConfigValueBuilder builder = builderClassPair.a;
+                    Class clazz = builderClassPair.b;
+                    if (!clazz.equals(genericType)) {
+                        throw new IllegalStateException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must be of type " + clazz.getCanonicalName());
+                    }
+                    builder.listen(consumer);
+                } else {
+                    listenerMap.put(settingName, new Pair<>(consumer, genericType));
+                }
+
+                continue;
             }
 
             // Get type
@@ -84,8 +132,21 @@ public class PojoSettings {
             }
             field.setAccessible(isAccessible);
 
-            return builder;
-        }).filter(Objects::nonNull).collect(Collectors.toList());
+            // Check for listeners
+            if (listenerMap.containsKey(name)) {
+                Pair<BiConsumer, Class> consumerClassPair = listenerMap.get(name);
+
+                if (!consumerClassPair.b.equals(type)) {
+                    throw new IllegalStateException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() +" has a listener of type " + consumerClassPair.b.getCanonicalName() + ", while it has to be of type " + type.getCanonicalName());
+                }
+
+                builder.listen(consumerClassPair.a);
+            }
+
+            builderMap.put(name, new Pair(builder, type));
+        }
+
+        return builderMap.values().stream().map(pair -> pair.a.build()).collect(Collectors.toList());
     }
 
     private static String getComment(Comment annotation) {
@@ -100,29 +161,39 @@ public class PojoSettings {
         return namingConvention.getDeclaredConstructor().newInstance();
     }
 
-    private static SettingProperties getProperties(Field field) {
+    private static FieldProperties getProperties(Field field) {
         String comment = getComment(field);
         boolean ignored = field.isAnnotationPresent(Setting.Ignored.class);
         boolean noForceFinal = field.isAnnotationPresent(Setting.NoForceFinal.class);
         boolean finalValue = field.isAnnotationPresent(Setting.Final.class);
         Set<Constraint> constraints = new HashSet<>();
 
-        return new SettingProperties(comment, ignored, noForceFinal, finalValue, constraints);
+        return new FieldProperties(comment, ignored, noForceFinal, finalValue, constraints);
     }
 
-    private static class SettingProperties {
+    private static class FieldProperties {
         final String comment;
         final boolean ignored;
         final boolean noForceFinal;
         final boolean finalValue;
         final Set<Constraint> constraintSet;
 
-        public SettingProperties(String comment, boolean ignored, boolean noForceFinal, boolean finalValue, Set<Constraint> constraintSet) {
+        public FieldProperties(String comment, boolean ignored, boolean noForceFinal, boolean finalValue, Set<Constraint> constraintSet) {
             this.comment = comment;
             this.ignored = ignored;
             this.noForceFinal = noForceFinal;
             this.finalValue = finalValue;
             this.constraintSet = constraintSet;
+        }
+    }
+
+    private static class Pair<A, B> {
+        A a;
+        B b;
+
+        public Pair(A a, B b) {
+            this.a = a;
+            this.b = b;
         }
     }
 
