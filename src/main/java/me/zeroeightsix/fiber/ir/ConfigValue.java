@@ -39,8 +39,9 @@ public class ConfigValue<T> {
 
 	public boolean setValue(T value) {
 		if (restriction.test(value)) return false;
+		T oldValue = this.value;
 		this.value = value;
-		this.consumer.accept(value, this.value);
+		this.consumer.accept(oldValue, value);
 		return true;
 	}
 
