@@ -74,12 +74,16 @@ public class PojoSettings {
                 }
                 Class genericType = (Class) genericTypes.getActualTypeArguments()[0];
 
+                boolean isAccessible = field.isAccessible();
+                field.setAccessible(true);
                 BiConsumer consumer;
                 try {
                     consumer = (BiConsumer) field.get(pojo);
                 } catch (IllegalAccessException e) {
                     e.printStackTrace();
                     continue;
+                } finally {
+                    field.setAccessible(isAccessible);
                 }
                 if (consumer == null) {
                     continue;
@@ -178,7 +182,7 @@ public class PojoSettings {
         final boolean finalValue;
         final Set<Constraint> constraintSet;
 
-        public FieldProperties(String comment, boolean ignored, boolean noForceFinal, boolean finalValue, Set<Constraint> constraintSet) {
+        FieldProperties(String comment, boolean ignored, boolean noForceFinal, boolean finalValue, Set<Constraint> constraintSet) {
             this.comment = comment;
             this.ignored = ignored;
             this.noForceFinal = noForceFinal;
