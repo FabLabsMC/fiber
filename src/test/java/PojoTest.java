@@ -3,6 +3,7 @@ import me.zeroeightsix.fiber.annotations.Setting;
 import me.zeroeightsix.fiber.ir.ConfigNode;
 import me.zeroeightsix.fiber.ir.ConfigValue;
 import me.zeroeightsix.fiber.annotations.PojoSettings;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -13,10 +14,16 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PojoTest {
 
+    private ConfigNode node;
+
+    @BeforeEach
+    void setup() {
+        node = new ConfigNode();
+    }
+
     @Test
     @DisplayName("Convert POJO to IR")
     void testPojoIR() throws IllegalAccessException {
-        ConfigNode node = new ConfigNode();
         OneFieldPojo pojo = new OneFieldPojo();
         PojoSettings.applyToIR(node, pojo);
 
@@ -34,7 +41,6 @@ class PojoTest {
     @Test
     @DisplayName("Throw no final exception")
     void testNoFinal() {
-        ConfigNode node = new ConfigNode();
         NoFinalPojo pojo = new NoFinalPojo();
         assertThrows(IllegalStateException.class, () -> PojoSettings.applyToIR(node, pojo));
     }
@@ -42,7 +48,6 @@ class PojoTest {
     @Test
     @DisplayName("Listener")
     void testListener() throws IllegalAccessException {
-        ConfigNode node = new ConfigNode();
         ListenerPojo pojo = new ListenerPojo();
         PojoSettings.applyToIR(node, pojo);
 
@@ -55,7 +60,6 @@ class PojoTest {
     @Test
     @DisplayName("Listener with different generics")
     void testTwoGenerics() {
-        ConfigNode node = new ConfigNode();
         NonMatchingListenerPojo pojo = new NonMatchingListenerPojo();
         assertThrows(IllegalStateException.class, () -> PojoSettings.applyToIR(node, pojo));
     }
@@ -63,7 +67,6 @@ class PojoTest {
     @Test
     @DisplayName("Listener with wrong generic type")
     void testWrongGenerics() {
-        ConfigNode node = new ConfigNode();
         WrongGenericListenerPojo pojo = new WrongGenericListenerPojo();
         assertThrows(IllegalStateException.class, () -> PojoSettings.applyToIR(node, pojo));
     }
