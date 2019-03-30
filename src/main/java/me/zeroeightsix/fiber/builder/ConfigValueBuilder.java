@@ -44,13 +44,16 @@ public class ConfigValueBuilder<T> {
 	}
 
 	public ConfigValueBuilder<T> comment(String comment) {
+		if (comment == null) return this;
 		if (!this.comment.isEmpty()) this.comment += "\n";
 		this.comment += comment;
 		return this;
 	}
 
 	public ConfigValueBuilder<T> listen(BiConsumer<T, T> consumer) {
-		consumers.add(consumer);
+		if (consumer != null) {
+			consumers.add(consumer);
+		}
 		return this;
 	}
 

@@ -21,6 +21,11 @@ configurations.api.get().extendsFrom(configurations.shadow.get())
 dependencies {
     api(group = "blue.endless", name = "jankson", version = "1.1.1")
     api(group = "com.google.guava", name = "guava", version = "27.1-jre")
+    testImplementation(group = "org.junit.jupiter", name = "junit-jupiter", version = "5.4.1")
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
 }
 
 val shadowJar by tasks.getting(ShadowJar::class) {

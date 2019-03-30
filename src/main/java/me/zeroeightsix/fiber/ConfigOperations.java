@@ -21,7 +21,10 @@ public class ConfigOperations {
      * @param to    The mutated {@link ConfigNode} that will inherit <code>value</code>
      */
     public static void mergeTo(ConfigValue value, ConfigNode to) {
-        to.set(value.getName(), value.getValue());
+        to.putValue(value);
     }
 
+    public static <T> void mergeTo(ConfigValue<T> from, ConfigValue<T> to) {
+        from.setValue(to.getValue());
+    }
 }
