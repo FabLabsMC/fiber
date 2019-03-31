@@ -3,6 +3,7 @@ package me.zeroeightsix.fiber.annotations;
 import com.google.common.primitives.Primitives;
 import me.zeroeightsix.fiber.ConfigOperations;
 import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
+import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
 import me.zeroeightsix.fiber.ir.ConfigNode;
 import me.zeroeightsix.fiber.annotations.conventions.NoNamingConvention;
 import me.zeroeightsix.fiber.annotations.conventions.SettingNamingConvention;
@@ -64,7 +65,6 @@ public class PojoSettings {
 
                 Listener annot = field.getAnnotation(Listener.class);
                 String settingName = annot.value();
-
 
                 ParameterizedType genericTypes = (ParameterizedType) field.getGenericType();
                 if (genericTypes.getActualTypeArguments().length != 2) {
@@ -147,6 +147,16 @@ public class PojoSettings {
                 builder.listen(consumerClassPair.a);
             }
 
+            ConstraintsBuilder constraintsBuilder = builder.constraints();
+            // Check for constraints
+            if (field.isAnnotationPresent(Constrain.Min.class)) {
+                constraintsBuilder.min(field.getAnnotation(Constrain.Min.class).value());
+            }
+            if (field.isAnnotationPresent(Constrain.Max.class)) {
+                constraintsBuilder.max(field.getAnnotation(Constrain.Max.class).value());
+            }
+            constraintsBuilder.finish();
+
             builderMap.put(name, new Pair(builder, type));
         }
 
@@ -170,7 +180,7 @@ public class PojoSettings {
         boolean ignored = field.isAnnotationPresent(Setting.Ignored.class);
         boolean noForceFinal = field.isAnnotationPresent(Setting.NoForceFinal.class);
         boolean finalValue = field.isAnnotationPresent(Setting.Final.class);
-        Set<Constraint> constraints = new HashSet<>();
+        Set<Constrain> constraints = new HashSet<>();
 
         return new FieldProperties(comment, ignored, noForceFinal, finalValue, constraints);
     }
@@ -180,9 +190,9 @@ public class PojoSettings {
         final boolean ignored;
         final boolean noForceFinal;
         final boolean finalValue;
-        final Set<Constraint> constraintSet;
+        final Set<Constrain> constraintSet;
 
-        FieldProperties(String comment, boolean ignored, boolean noForceFinal, boolean finalValue, Set<Constraint> constraintSet) {
+        FieldProperties(String comment, boolean ignored, boolean noForceFinal, boolean finalValue, Set<Constrain> constraintSet) {
             this.comment = comment;
             this.ignored = ignored;
             this.noForceFinal = noForceFinal;

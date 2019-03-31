@@ -1,3 +1,4 @@
+import me.zeroeightsix.fiber.annotations.Constrain;
 import me.zeroeightsix.fiber.annotations.Listener;
 import me.zeroeightsix.fiber.annotations.Setting;
 import me.zeroeightsix.fiber.ir.ConfigNode;
@@ -71,6 +72,17 @@ class PojoTest {
         assertThrows(IllegalStateException.class, () -> PojoSettings.applyToIR(node, pojo));
     }
 
+    @Test
+    @DisplayName("Numerical constraints")
+    void testNumericalConstraints() throws IllegalAccessException {
+        NumericalConstraintsPojo pojo = new NumericalConstraintsPojo();
+        PojoSettings.applyToIR(node, pojo);
+        ConfigValue value = node.getSetting("a");
+        assertEquals(false, value.setValue(-10));
+        assertEquals(true, value.setValue(5));
+        assertEquals(false, value.setValue(20));
+    }
+
     private static class NoFinalPojo {
         private int a = 5;
     }
@@ -101,6 +113,12 @@ class PojoTest {
 
         @Listener("a")
         private final BiConsumer<Double, Double> aListener = (now, then) -> {};
+    }
+
+    private static class NumericalConstraintsPojo {
+        @Constrain.Min(0)
+        @Constrain.Max(10)
+        private final int a = 5;
     }
 
 }

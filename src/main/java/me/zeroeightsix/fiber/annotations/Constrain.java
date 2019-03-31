@@ -4,14 +4,16 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Constraint {
+public @interface Constrain {
 
+    @Retention(RetentionPolicy.RUNTIME)
     @interface Min {
-        double min();
+        double value();
     }
 
+    @Retention(RetentionPolicy.RUNTIME)
     @interface Max {
-        double max();
+        double value();
     }
 
 }

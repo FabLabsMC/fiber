@@ -15,6 +15,4 @@ public @interface Setting {
     @Retention(RetentionPolicy.RUNTIME)
     @interface Ignored {}
 
-    Constraint[] constraints() default {};
-
 }
