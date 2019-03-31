@@ -34,8 +34,8 @@ repositories {
 
 configurations.api.get().extendsFrom(configurations.shadow.get())
 dependencies {
-    api(group = "blue.endless", name = "jankson", version = "1.1.1")
-    api(group = "com.google.guava", name = "guava", version = "27.1-jre")
+    shadow(group = "blue.endless", name = "jankson", version = "1.1.1")
+    shadow(group = "com.google.guava", name = "guava", version = "27.1-jre")
     testImplementation(group = "org.junit.jupiter", name = "junit-jupiter", version = "5.4.1")
 }
 
@@ -65,9 +65,12 @@ val javadocJar = tasks.create<Jar>("javadocJar") {
 publishing {
     publications {
         val main = create("main", MavenPublication::class.java) {
-            artifact(shadowJar)
+            artifact(shadowJar) {
+                classifier = "" // why do i need this GRADLE ?
+            }
             artifact(sourcesJar)
             artifact(javadocJar)
+            project.shadow.component(this)
         }
         if(isCI) {
             create("snapshot", MavenPublication::class.java) {
@@ -78,7 +81,7 @@ publishing {
                             appendNode("groupId", main.groupId)
                             appendNode("artifactId", main.artifactId)
                             appendNode("version", main.version)
-                            appendNode("scope", "api")
+//                            appendNode("scope", "api")
                         }
                     }
                 }
