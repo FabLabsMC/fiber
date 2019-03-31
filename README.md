@@ -257,16 +257,14 @@ public final int a = 5;
 ```
 Adding constraints to a setting:
 ```java
-@Setting(constraints = {
-        @Constraint.Min(10),
-        @Constraint.Max(20)
-})
+@Constrain.Min(10)
+@Constrain.Max(20)
 public final int a = 5;
 ```
 Setting a settings value as final (can only be modified from the source it's being deserialised from)
 ```java
 @Setting.Final()
-pulbic final int a = 5;
+public final int a = 5;
 ```
 
 #### Listeners
