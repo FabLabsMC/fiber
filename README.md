@@ -237,7 +237,7 @@ Creates the following IR:
 > ##### Note
 > If you, for some reason, need a field to not be final, it's possible to annotate it so the deserialiser will treat it as final:
 > ```java
-> @Setting.NoForceFinal
+> @Setting.NoForceFinal()
 > public int a = 5;
 > ```
 > 
