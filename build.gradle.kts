@@ -1,13 +1,32 @@
+import moe.nikky.counter.CounterExtension
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
     `java-library`
     `maven-publish`
     id("com.github.johnrengelman.shadow") version "5.0.0"
+    id("moe.nikky.persistentCounter") version "0.0.8-SNAPSHOT"
 }
 
+//applyy {
+//
+//}
+
+val major: String by project
+val minor : String by project
+val patch: String by project
+
+val branch = System.getenv("GIT_BRANCH")
+    ?.takeUnless { it == "master" }
+    ?.let { "-$it" }
+    ?: ""
+val isCI = System.getenv("BUILD_NUMBER") != null
+
+val counter: CounterExtension = project.extensions.getByType()
+val buildnumber = counter.variable(id = "buildnumber", key = "$major.$minor.$patch$branch")
+
 group = "me.zeroeightsix"
-version = "1.0-SNAPSHOT"
+version = "$major.$minor.$patch" + if (isCI) "-$buildnumber" else "-dev"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -53,6 +72,15 @@ publishing {
             artifact(shadowJar)
             artifact(sourcesJar)
             artifact(javadocJar)
+        }
+        if(isCI) {
+            create("snapshot", MavenPublication::class.java) {
+                artifact(shadowJar)
+                artifact(sourcesJar)
+                artifact(javadocJar)
+                
+                version = "$major.$minor.$patch-SNAPSHOT"
+            }
         }
     }
     repositories {

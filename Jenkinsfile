@@ -23,5 +23,11 @@ pipeline {
                 sh "./gradlew publish"
             }
         }
+
+        stage("counter") {
+            steps {
+                sh "./gradlew buildnumberIncrement"
+            }
+        }
     }
 }
