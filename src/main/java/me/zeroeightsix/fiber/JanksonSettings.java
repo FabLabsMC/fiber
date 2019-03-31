@@ -3,8 +3,8 @@ package me.zeroeightsix.fiber;
 import blue.endless.jankson.*;
 import blue.endless.jankson.impl.SyntaxError;
 import me.zeroeightsix.fiber.builder.Converter;
-import me.zeroeightsix.fiber.ir.Cache;
-import me.zeroeightsix.fiber.ir.ConfigNode;
+import me.zeroeightsix.fiber.tree.Cache;
+import me.zeroeightsix.fiber.tree.ConfigNode;
 
 import java.io.IOException;
 import java.io.InputStream;

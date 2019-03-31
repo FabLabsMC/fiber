@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber.ir;
+package me.zeroeightsix.fiber.tree;
 
 import me.zeroeightsix.fiber.constraint.Constraint;
 

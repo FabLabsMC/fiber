@@ -1,9 +1,9 @@
 package me.zeroeightsix.fiber;
 
-import me.zeroeightsix.fiber.ir.ConfigNode;
-import me.zeroeightsix.fiber.ir.ConfigValue;
+import me.zeroeightsix.fiber.tree.ConfigNode;
+import me.zeroeightsix.fiber.tree.ConfigValue;
 
-public class ConfigOperations {
+public class NodeOperations {
 
     /**
      * Merges two {@link ConfigNode} objects

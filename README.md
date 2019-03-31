@@ -210,7 +210,7 @@ ConfigNode node = new ConfigNode();
 POJO myPojo = new POJO();
 
 try {
-    PojoSettings.applyToIR(node, pojo);
+    AnnotatedSettings.applyToNode(node, pojo);
 } catch (IllegalAccessException e) {
     e.printStackTrace();
 }

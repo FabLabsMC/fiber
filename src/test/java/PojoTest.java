@@ -1,9 +1,9 @@
 import me.zeroeightsix.fiber.annotations.Constrain;
 import me.zeroeightsix.fiber.annotations.Listener;
 import me.zeroeightsix.fiber.annotations.Setting;
-import me.zeroeightsix.fiber.ir.ConfigNode;
-import me.zeroeightsix.fiber.ir.ConfigValue;
-import me.zeroeightsix.fiber.annotations.PojoSettings;
+import me.zeroeightsix.fiber.tree.ConfigNode;
+import me.zeroeightsix.fiber.tree.ConfigValue;
+import me.zeroeightsix.fiber.annotations.AnnotatedSettings;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,7 +26,7 @@ class PojoTest {
     @DisplayName("Convert POJO to IR")
     void testPojoIR() throws IllegalAccessException {
         OneFieldPojo pojo = new OneFieldPojo();
-        PojoSettings.applyToIR(node, pojo);
+        AnnotatedSettings.applyToNode(node, pojo);
 
         Map<String, ConfigValue> settingMap = node.getSettingsImmutable();
         assertEquals(1, settingMap.size(), "Setting map is 1 entry large");
@@ -43,14 +43,14 @@ class PojoTest {
     @DisplayName("Throw no final exception")
     void testNoFinal() {
         NoFinalPojo pojo = new NoFinalPojo();
-        assertThrows(IllegalStateException.class, () -> PojoSettings.applyToIR(node, pojo));
+        assertThrows(IllegalStateException.class, () -> AnnotatedSettings.applyToNode(node, pojo));
     }
 
     @Test
     @DisplayName("Listener")
     void testListener() throws IllegalAccessException {
         ListenerPojo pojo = new ListenerPojo();
-        PojoSettings.applyToIR(node, pojo);
+        AnnotatedSettings.applyToNode(node, pojo);
 
         ConfigValue value = node.getSetting("a");
         assertNotNull(value, "Setting exists");
@@ -62,21 +62,21 @@ class PojoTest {
     @DisplayName("Listener with different generics")
     void testTwoGenerics() {
         NonMatchingListenerPojo pojo = new NonMatchingListenerPojo();
-        assertThrows(IllegalStateException.class, () -> PojoSettings.applyToIR(node, pojo));
+        assertThrows(IllegalStateException.class, () -> AnnotatedSettings.applyToNode(node, pojo));
     }
 
     @Test
     @DisplayName("Listener with wrong generic type")
     void testWrongGenerics() {
         WrongGenericListenerPojo pojo = new WrongGenericListenerPojo();
-        assertThrows(IllegalStateException.class, () -> PojoSettings.applyToIR(node, pojo));
+        assertThrows(IllegalStateException.class, () -> AnnotatedSettings.applyToNode(node, pojo));
     }
 
     @Test
     @DisplayName("Numerical constraints")
     void testNumericalConstraints() throws IllegalAccessException {
         NumericalConstraintsPojo pojo = new NumericalConstraintsPojo();
-        PojoSettings.applyToIR(node, pojo);
+        AnnotatedSettings.applyToNode(node, pojo);
         ConfigValue value = node.getSetting("a");
         assertEquals(false, value.setValue(-10));
         assertEquals(true, value.setValue(5));

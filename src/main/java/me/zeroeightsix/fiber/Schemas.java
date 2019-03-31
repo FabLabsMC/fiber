@@ -7,8 +7,8 @@ import blue.endless.jankson.JsonPrimitive;
 import me.zeroeightsix.fiber.builder.constraint.CompositeConstraintBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.ValuedConstraint;
-import me.zeroeightsix.fiber.ir.ConfigValue;
-import me.zeroeightsix.fiber.ir.ConfigNode;
+import me.zeroeightsix.fiber.tree.ConfigValue;
+import me.zeroeightsix.fiber.tree.ConfigNode;
 
 import java.util.List;
 

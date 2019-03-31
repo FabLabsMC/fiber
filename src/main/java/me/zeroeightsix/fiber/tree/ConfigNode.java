@@ -1,8 +1,8 @@
-package me.zeroeightsix.fiber.ir;
+package me.zeroeightsix.fiber.tree;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import me.zeroeightsix.fiber.ConfigOperations;
+import me.zeroeightsix.fiber.NodeOperations;
 import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
 
 import java.util.ArrayList;
@@ -72,7 +72,7 @@ public final class ConfigNode {
 
 	public <T> boolean putValue(ConfigValue<T> value) {
 		if (hasSetting(value.getName())) {
-			ConfigOperations.mergeTo(value, getSetting(value.getName()));
+			NodeOperations.mergeTo(value, getSetting(value.getName()));
 			return false;
 		}
 		register(value);

@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber.ir;
+package me.zeroeightsix.fiber.tree;
 
 import java.util.HashMap;
 import java.util.Set;

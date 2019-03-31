@@ -1,13 +1,13 @@
 package me.zeroeightsix.fiber.annotations;
 
 import com.google.common.primitives.Primitives;
-import me.zeroeightsix.fiber.ConfigOperations;
+import me.zeroeightsix.fiber.NodeOperations;
 import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
 import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
-import me.zeroeightsix.fiber.ir.ConfigNode;
+import me.zeroeightsix.fiber.tree.ConfigNode;
 import me.zeroeightsix.fiber.annotations.conventions.NoNamingConvention;
 import me.zeroeightsix.fiber.annotations.conventions.SettingNamingConvention;
-import me.zeroeightsix.fiber.ir.ConfigValue;
+import me.zeroeightsix.fiber.tree.ConfigValue;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -17,11 +17,11 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
-public class PojoSettings {
+public class AnnotatedSettings {
 
-    public static void applyToIR(ConfigNode mergeTo, Object pojo) throws IllegalAccessException {
+    public static void applyToNode(ConfigNode mergeTo, Object pojo) throws IllegalAccessException {
         ConfigNode node = parsePojo(pojo);
-        ConfigOperations.mergeTo(node, mergeTo);
+        NodeOperations.mergeTo(node, mergeTo);
     }
 
     private static ConfigNode parsePojo(Object pojo) throws IllegalAccessException {
