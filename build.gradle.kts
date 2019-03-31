@@ -81,7 +81,7 @@ publishing {
                             appendNode("groupId", main.groupId)
                             appendNode("artifactId", main.artifactId)
                             appendNode("version", main.version)
-//                            appendNode("scope", "api")
+                            appendNode("scope", "api")
                         }
                     }
                 }
