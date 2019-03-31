@@ -75,16 +75,12 @@ publishing {
         if(isCI) {
             create("snapshot", MavenPublication::class.java) {
                 version = "$major.$minor.$patch-SNAPSHOT"
-                pom.withXml {
-                    asNode().appendNode("dependencies").apply {
-                        appendNode("dependency").apply {
-                            appendNode("groupId", main.groupId)
-                            appendNode("artifactId", main.artifactId)
-                            appendNode("version", main.version)
-                            appendNode("scope", "api")
-                        }
-                    }
+                artifact(shadowJar) {
+                    classifier = "" // why do i need this GRADLE ?
                 }
+                artifact(sourcesJar)
+                artifact(javadocJar)
+                project.shadow.component(this)
             }
         }
     }
