@@ -8,10 +8,6 @@ plugins {
     id("moe.nikky.persistentCounter") version "0.0.8-SNAPSHOT"
 }
 
-//applyy {
-//
-//}
-
 val major: String by project
 val minor : String by project
 val patch: String by project
@@ -68,18 +64,24 @@ val javadocJar = tasks.create<Jar>("javadocJar") {
 
 publishing {
     publications {
-        create("main", MavenPublication::class.java) {
+        val main = create("main", MavenPublication::class.java) {
             artifact(shadowJar)
             artifact(sourcesJar)
             artifact(javadocJar)
         }
         if(isCI) {
             create("snapshot", MavenPublication::class.java) {
-                artifact(shadowJar)
-                artifact(sourcesJar)
-                artifact(javadocJar)
-                
                 version = "$major.$minor.$patch-SNAPSHOT"
+                pom.withXml {
+                    asNode().appendNode("dependencies").apply {
+                        appendNode("dependency").apply {
+                            appendNode("groupId", main.groupId)
+                            appendNode("artifactId", main.artifactId)
+                            appendNode("version", main.version)
+                            appendNode("scope", "api")
+                        }
+                    }
+                }
             }
         }
     }
