@@ -1,13 +1,28 @@
+import moe.nikky.counter.CounterExtension
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
     `java-library`
     `maven-publish`
     id("com.github.johnrengelman.shadow") version "5.0.0"
+    id("moe.nikky.persistentCounter") version "0.0.8-SNAPSHOT"
 }
 
+val major: String by project
+val minor : String by project
+val patch: String by project
+
+val branch = System.getenv("GIT_BRANCH")
+    ?.takeUnless { it == "master" }
+    ?.let { "-$it" }
+    ?: ""
+val isCI = System.getenv("BUILD_NUMBER") != null
+
+val counter: CounterExtension = project.extensions.getByType()
+val buildnumber = counter.variable(id = "buildnumber", key = "$major.$minor.$patch$branch")
+
 group = "me.zeroeightsix"
-version = "1.0-SNAPSHOT"
+version = "$major.$minor.$patch" + if (isCI) "-$buildnumber" else "-dev"
 
 java {
     sourceCompatibility = JavaVersion.VERSION_1_8
@@ -19,8 +34,8 @@ repositories {
 
 configurations.api.get().extendsFrom(configurations.shadow.get())
 dependencies {
-    api(group = "blue.endless", name = "jankson", version = "1.1.1")
-    api(group = "com.google.guava", name = "guava", version = "27.1-jre")
+    shadow(group = "blue.endless", name = "jankson", version = "1.1.1")
+    shadow(group = "com.google.guava", name = "guava", version = "27.1-jre")
     testImplementation(group = "org.junit.jupiter", name = "junit-jupiter", version = "5.4.1")
 }
 
@@ -49,10 +64,24 @@ val javadocJar = tasks.create<Jar>("javadocJar") {
 
 publishing {
     publications {
-        create("main", MavenPublication::class.java) {
-            artifact(shadowJar)
+        val main = create("main", MavenPublication::class.java) {
+            artifact(shadowJar) {
+                classifier = "" // why do i need this GRADLE ?
+            }
             artifact(sourcesJar)
             artifact(javadocJar)
+            project.shadow.component(this)
+        }
+        if(isCI) {
+            create("snapshot", MavenPublication::class.java) {
+                version = "$major.$minor.$patch-SNAPSHOT"
+                artifact(shadowJar) {
+                    classifier = "" // why do i need this GRADLE ?
+                }
+                artifact(sourcesJar)
+                artifact(javadocJar)
+                project.shadow.component(this)
+            }
         }
     }
     repositories {
