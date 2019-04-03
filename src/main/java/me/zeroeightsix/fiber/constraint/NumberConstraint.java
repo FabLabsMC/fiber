@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.constraint;
 
-import me.zeroeightsix.fiber.RuntimeFiberException;
+import me.zeroeightsix.fiber.exceptions.RuntimeFiberException;
 
 import java.math.BigDecimal;
 

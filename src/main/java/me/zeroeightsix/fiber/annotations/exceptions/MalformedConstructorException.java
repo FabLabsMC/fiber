@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.annotations.exceptions;
 
-import me.zeroeightsix.fiber.FiberException;
+import me.zeroeightsix.fiber.exceptions.FiberException;
 
 public class MalformedConstructorException extends FiberException {
     public MalformedConstructorException(String s) {

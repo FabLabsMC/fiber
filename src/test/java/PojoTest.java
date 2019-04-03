@@ -1,7 +1,7 @@
 import me.zeroeightsix.fiber.annotations.Constrain;
 import me.zeroeightsix.fiber.annotations.Listener;
 import me.zeroeightsix.fiber.annotations.Setting;
-import me.zeroeightsix.fiber.FiberException;
+import me.zeroeightsix.fiber.exceptions.FiberException;
 import me.zeroeightsix.fiber.tree.ConfigNode;
 import me.zeroeightsix.fiber.tree.ConfigValue;
 import me.zeroeightsix.fiber.annotations.AnnotatedSettings;

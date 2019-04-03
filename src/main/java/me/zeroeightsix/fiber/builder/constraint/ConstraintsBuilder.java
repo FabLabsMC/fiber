@@ -1,7 +1,6 @@
 package me.zeroeightsix.fiber.builder.constraint;
 
-import me.zeroeightsix.fiber.FiberException;
-import me.zeroeightsix.fiber.RuntimeFiberException;
+import me.zeroeightsix.fiber.exceptions.RuntimeFiberException;
 import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
 import me.zeroeightsix.fiber.constraint.CompositeType;
 import me.zeroeightsix.fiber.constraint.Constraint;
