@@ -1,5 +1,6 @@
 package me.zeroeightsix.fiber.builder.constraint;
 
+import me.zeroeightsix.fiber.exceptions.RuntimeFiberException;
 import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
 import me.zeroeightsix.fiber.constraint.CompositeType;
 import me.zeroeightsix.fiber.constraint.Constraint;
@@ -19,12 +20,12 @@ public class ConstraintsBuilder<T> extends AbstractConstraintsBuilder<T> {
 		return new CompositeConstraintBuilder<>(type, sourceConstraints, this.type, this);
 	}
 
-	public ConstraintsBuilder<T> min(T min) {
+	public ConstraintsBuilder<T> min(T min) throws RuntimeFiberException {
 		addNumericalLowerBound(min);
 		return this;
 	}
 
-	public ConstraintsBuilder<T> max(T min) {
+	public ConstraintsBuilder<T> max(T min) throws RuntimeFiberException {
 		addNumericalUpperBound(min);
 		return this;
 	}

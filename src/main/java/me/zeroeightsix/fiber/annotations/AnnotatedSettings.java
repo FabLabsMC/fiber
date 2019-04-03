@@ -2,6 +2,9 @@ package me.zeroeightsix.fiber.annotations;
 
 import com.google.common.primitives.Primitives;
 import me.zeroeightsix.fiber.NodeOperations;
+import me.zeroeightsix.fiber.exceptions.FiberException;
+import me.zeroeightsix.fiber.annotations.exceptions.MalformedConstructorException;
+import me.zeroeightsix.fiber.annotations.exceptions.MalformedFieldException;
 import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
 import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
 import me.zeroeightsix.fiber.tree.ConfigNode;
@@ -19,12 +22,12 @@ import java.util.stream.Collectors;
 
 public class AnnotatedSettings {
 
-    public static void applyToNode(ConfigNode mergeTo, Object pojo) throws IllegalAccessException {
+    public static void applyToNode(ConfigNode mergeTo, Object pojo) throws FiberException {
         ConfigNode node = parsePojo(pojo);
         NodeOperations.mergeTo(node, mergeTo);
     }
 
-    private static ConfigNode parsePojo(Object pojo) throws IllegalAccessException {
+    private static ConfigNode parsePojo(Object pojo) throws FiberException {
         ConfigNode node = new ConfigNode(null);
         boolean forceFinals = true;
         SettingNamingConvention namingConvention = new NoNamingConvention();
@@ -37,7 +40,7 @@ public class AnnotatedSettings {
             try {
                 namingConvention = createNamingConvention(settingsAnnotation.namingConvention());
             } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-                throw new IllegalAccessException("Naming convention must have an empty constructor");
+                throw new MalformedConstructorException("Naming convention must have an empty constructor");
             }
         }
 
@@ -45,7 +48,7 @@ public class AnnotatedSettings {
         return node;
     }
 
-    private static List<ConfigValue> parsePojo(Object pojo, SettingNamingConvention convention, ConfigNode node, boolean forceFinals) {
+    private static List<ConfigValue> parsePojo(Object pojo, SettingNamingConvention convention, ConfigNode node, boolean forceFinals) throws MalformedFieldException {
         final Map<String, Pair<ConfigValueBuilder, Class>> builderMap = new HashMap<>();
         final Map<String, Pair<BiConsumer, Class>> listenerMap = new HashMap<>();
 
@@ -55,7 +58,7 @@ public class AnnotatedSettings {
 
             // Get angry if not final
             if (forceFinals && !properties.noForceFinal && !Modifier.isFinal(field.getModifiers())) {
-                throw new IllegalStateException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must be final");
+                throw new MalformedFieldException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must be final");
             }
 
             if (field.isAnnotationPresent(Listener.class)) {
@@ -68,7 +71,7 @@ public class AnnotatedSettings {
         return builderMap.values().stream().map(pair -> pair.a.build()).collect(Collectors.toList());
     }
 
-    private static void parseSetting(Object pojo, SettingNamingConvention convention, ConfigNode node, Map<String, Pair<ConfigValueBuilder, Class>> builderMap, Map<String, Pair<BiConsumer, Class>> listenerMap, Field field, FieldProperties properties) {
+    private static void parseSetting(Object pojo, SettingNamingConvention convention, ConfigNode node, Map<String, Pair<ConfigValueBuilder, Class>> builderMap, Map<String, Pair<BiConsumer, Class>> listenerMap, Field field, FieldProperties properties) throws MalformedFieldException {
         // Get type
         Class type = field.getType();
         if (type.isPrimitive()) {
@@ -106,7 +109,7 @@ public class AnnotatedSettings {
             Pair<BiConsumer, Class> consumerClassPair = listenerMap.get(name);
 
             if (!consumerClassPair.b.equals(type)) {
-                throw new IllegalStateException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() +" has a listener of type " + consumerClassPair.b.getCanonicalName() + ", while it has to be of type " + type.getCanonicalName());
+                throw new MalformedFieldException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() +" has a listener of type " + consumerClassPair.b.getCanonicalName() + ", while it has to be of type " + type.getCanonicalName());
             }
 
             builder.listen(consumerClassPair.a);
@@ -129,9 +132,9 @@ public class AnnotatedSettings {
         constraintsBuilder.finish();
     }
 
-    private static void parseListener(Object pojo, Map<String, Pair<ConfigValueBuilder, Class>> builderMap, Map<String, Pair<BiConsumer, Class>> listenerMap, Field field) {
+    private static void parseListener(Object pojo, Map<String, Pair<ConfigValueBuilder, Class>> builderMap, Map<String, Pair<BiConsumer, Class>> listenerMap, Field field) throws MalformedFieldException {
         if (!field.getType().equals(BiConsumer.class)) {
-            throw new IllegalStateException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must be a BiConsumer");
+            throw new MalformedFieldException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must be a BiConsumer");
         }
 
         Listener annot = field.getAnnotation(Listener.class);
@@ -139,9 +142,9 @@ public class AnnotatedSettings {
 
         ParameterizedType genericTypes = (ParameterizedType) field.getGenericType();
         if (genericTypes.getActualTypeArguments().length != 2) {
-            throw new IllegalStateException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must have 2 generic types");
+            throw new MalformedFieldException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must have 2 generic types");
         } else if (genericTypes.getActualTypeArguments()[0] != genericTypes.getActualTypeArguments()[1]) {
-            throw new IllegalStateException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must have 2 identical generic types");
+            throw new MalformedFieldException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must have 2 identical generic types");
         }
         Class genericType = (Class) genericTypes.getActualTypeArguments()[0];
 
@@ -165,7 +168,7 @@ public class AnnotatedSettings {
             ConfigValueBuilder builder = builderClassPair.a;
             Class clazz = builderClassPair.b;
             if (!clazz.equals(genericType)) {
-                throw new IllegalStateException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must be of type " + clazz.getCanonicalName());
+                throw new MalformedFieldException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must be of type " + clazz.getCanonicalName());
             }
             builder.listen(consumer);
         } else {

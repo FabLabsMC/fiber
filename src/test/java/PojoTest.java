@@ -1,6 +1,7 @@
 import me.zeroeightsix.fiber.annotations.Constrain;
 import me.zeroeightsix.fiber.annotations.Listener;
 import me.zeroeightsix.fiber.annotations.Setting;
+import me.zeroeightsix.fiber.exceptions.FiberException;
 import me.zeroeightsix.fiber.tree.ConfigNode;
 import me.zeroeightsix.fiber.tree.ConfigValue;
 import me.zeroeightsix.fiber.annotations.AnnotatedSettings;
@@ -24,7 +25,7 @@ class PojoTest {
 
     @Test
     @DisplayName("Convert POJO to IR")
-    void testPojoIR() throws IllegalAccessException {
+    void testPojoIR() throws FiberException {
         OneFieldPojo pojo = new OneFieldPojo();
         AnnotatedSettings.applyToNode(node, pojo);
 
@@ -40,15 +41,15 @@ class PojoTest {
     }
 
     @Test
-    @DisplayName("Throw no final exception")
+    @DisplayName("Throw no final exceptions")
     void testNoFinal() {
         NoFinalPojo pojo = new NoFinalPojo();
-        assertThrows(IllegalStateException.class, () -> AnnotatedSettings.applyToNode(node, pojo));
+        assertThrows(FiberException.class, () -> AnnotatedSettings.applyToNode(node, pojo));
     }
 
     @Test
     @DisplayName("Listener")
-    void testListener() throws IllegalAccessException {
+    void testListener() throws FiberException {
         ListenerPojo pojo = new ListenerPojo();
         AnnotatedSettings.applyToNode(node, pojo);
 
@@ -62,19 +63,19 @@ class PojoTest {
     @DisplayName("Listener with different generics")
     void testTwoGenerics() {
         NonMatchingListenerPojo pojo = new NonMatchingListenerPojo();
-        assertThrows(IllegalStateException.class, () -> AnnotatedSettings.applyToNode(node, pojo));
+        assertThrows(FiberException.class, () -> AnnotatedSettings.applyToNode(node, pojo));
     }
 
     @Test
     @DisplayName("Listener with wrong generic type")
     void testWrongGenerics() {
         WrongGenericListenerPojo pojo = new WrongGenericListenerPojo();
-        assertThrows(IllegalStateException.class, () -> AnnotatedSettings.applyToNode(node, pojo));
+        assertThrows(FiberException.class, () -> AnnotatedSettings.applyToNode(node, pojo));
     }
 
     @Test
     @DisplayName("Numerical constraints")
-    void testNumericalConstraints() throws IllegalAccessException {
+    void testNumericalConstraints() throws FiberException {
         NumericalConstraintsPojo pojo = new NumericalConstraintsPojo();
         AnnotatedSettings.applyToNode(node, pojo);
         ConfigValue value = node.getSetting("a");

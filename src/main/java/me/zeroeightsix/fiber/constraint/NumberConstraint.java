@@ -1,13 +1,15 @@
 package me.zeroeightsix.fiber.constraint;
 
+import me.zeroeightsix.fiber.exceptions.RuntimeFiberException;
+
 import java.math.BigDecimal;
 
 public class NumberConstraint<T extends Number> extends ValuedConstraint<T, T> {
 
-	public NumberConstraint(Constraints type, T value) {
+	public NumberConstraint(Constraints type, T value) throws RuntimeFiberException {
 		super(type, value);
 		if (!type.isNumerical()) {
-			throw new IllegalArgumentException("type must be numerical");
+			throw new RuntimeFiberException("Couldn't create numerical constraint: type must be numerical");
 		}
 	}
 

@@ -1,5 +1,6 @@
 package me.zeroeightsix.fiber.builder.constraint;
 
+import me.zeroeightsix.fiber.exceptions.RuntimeFiberException;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.Constraints;
 import me.zeroeightsix.fiber.constraint.NumberConstraint;
@@ -19,12 +20,12 @@ abstract class AbstractConstraintsBuilder<T> {
 		this.type = type;
 	}
 
-	void addNumericalLowerBound(T bound) {
+	void addNumericalLowerBound(T bound) throws RuntimeFiberException {
 		checkNumerical(bound);
 		newConstraints.add(new NumberConstraint<>(Constraints.NUMERICAL_LOWER_BOUND, (Number) bound));
 	}
 
-	void addNumericalUpperBound(T bound) {
+	void addNumericalUpperBound(T bound) throws RuntimeFiberException {
 		checkNumerical(bound);
 		newConstraints.add(new NumberConstraint<>(Constraints.NUMERICAL_UPPER_BOUND, (Number) bound));
 	}
