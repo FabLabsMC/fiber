@@ -59,108 +59,118 @@ public class AnnotatedSettings {
             }
 
             if (field.isAnnotationPresent(Listener.class)) {
-                if (!field.getType().equals(BiConsumer.class)) {
-                    throw new IllegalStateException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must be a BiConsumer");
-                }
-
-                Listener annot = field.getAnnotation(Listener.class);
-                String settingName = annot.value();
-
-                ParameterizedType genericTypes = (ParameterizedType) field.getGenericType();
-                if (genericTypes.getActualTypeArguments().length != 2) {
-                    throw new IllegalStateException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must have 2 generic types");
-                } else if (genericTypes.getActualTypeArguments()[0] != genericTypes.getActualTypeArguments()[1]) {
-                    throw new IllegalStateException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must have 2 identical generic types");
-                }
-                Class genericType = (Class) genericTypes.getActualTypeArguments()[0];
-
-                boolean isAccessible = field.isAccessible();
-                field.setAccessible(true);
-                BiConsumer consumer;
-                try {
-                    consumer = (BiConsumer) field.get(pojo);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                    continue;
-                } finally {
-                    field.setAccessible(isAccessible);
-                }
-                if (consumer == null) {
-                    continue;
-                }
-
-                if (builderMap.containsKey(settingName)) {
-                    Pair<ConfigValueBuilder, Class> builderClassPair = builderMap.get(settingName);
-                    ConfigValueBuilder builder = builderClassPair.a;
-                    Class clazz = builderClassPair.b;
-                    if (!clazz.equals(genericType)) {
-                        throw new IllegalStateException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must be of type " + clazz.getCanonicalName());
-                    }
-                    builder.listen(consumer);
-                } else {
-                    listenerMap.put(settingName, new Pair<>(consumer, genericType));
-                }
-
-                continue;
+                parseListener(pojo, builderMap, listenerMap, field);
+            } else {
+                parseSetting(pojo, convention, node, builderMap, listenerMap, field, properties);
             }
-
-            // Get type
-            Class type = field.getType();
-            if (type.isPrimitive()) {
-                type = Primitives.wrap(type); // We're dealing with boxed primitives
-            }
-
-            // Construct builder by type
-            ConfigValueBuilder builder = node.builder(type)
-                    .comment(properties.comment);
-
-            // Set final if final
-            if (properties.finalValue) {
-                builder.setFinal();
-            }
-
-            // Get name
-            String name = field.getName();
-            String conventionName = convention.name(name);
-            name = (conventionName == null || conventionName.isEmpty()) ? name : conventionName;
-            builder.name(name);
-
-            // Get value
-            boolean isAccessible = field.isAccessible();
-            field.setAccessible(true);
-            try {
-                Object value = field.get(pojo);
-                builder.defaultValue(value);
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-            field.setAccessible(isAccessible);
-
-            // Check for listeners
-            if (listenerMap.containsKey(name)) {
-                Pair<BiConsumer, Class> consumerClassPair = listenerMap.get(name);
-
-                if (!consumerClassPair.b.equals(type)) {
-                    throw new IllegalStateException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() +" has a listener of type " + consumerClassPair.b.getCanonicalName() + ", while it has to be of type " + type.getCanonicalName());
-                }
-
-                builder.listen(consumerClassPair.a);
-            }
-
-            ConstraintsBuilder constraintsBuilder = builder.constraints();
-            // Check for constraints
-            if (field.isAnnotationPresent(Constrain.Min.class)) {
-                constraintsBuilder.min(field.getAnnotation(Constrain.Min.class).value());
-            }
-            if (field.isAnnotationPresent(Constrain.Max.class)) {
-                constraintsBuilder.max(field.getAnnotation(Constrain.Max.class).value());
-            }
-            constraintsBuilder.finish();
-
-            builderMap.put(name, new Pair(builder, type));
         }
 
         return builderMap.values().stream().map(pair -> pair.a.build()).collect(Collectors.toList());
+    }
+
+    private static void parseSetting(Object pojo, SettingNamingConvention convention, ConfigNode node, Map<String, Pair<ConfigValueBuilder, Class>> builderMap, Map<String, Pair<BiConsumer, Class>> listenerMap, Field field, FieldProperties properties) {
+        // Get type
+        Class type = field.getType();
+        if (type.isPrimitive()) {
+            type = Primitives.wrap(type); // We're dealing with boxed primitives
+        }
+
+        // Construct builder by type
+        ConfigValueBuilder builder = node.builder(type)
+                .comment(properties.comment);
+
+        // Set final if final
+        if (properties.finalValue) {
+            builder.setFinal();
+        }
+
+        // Get name
+        String name = field.getName();
+        String conventionName = convention.name(name);
+        name = (conventionName == null || conventionName.isEmpty()) ? name : conventionName;
+        builder.name(name);
+
+        // Get value
+        boolean isAccessible = field.isAccessible();
+        field.setAccessible(true);
+        try {
+            Object value = field.get(pojo);
+            builder.defaultValue(value);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        field.setAccessible(isAccessible);
+
+        // Check for listeners
+        if (listenerMap.containsKey(name)) {
+            Pair<BiConsumer, Class> consumerClassPair = listenerMap.get(name);
+
+            if (!consumerClassPair.b.equals(type)) {
+                throw new IllegalStateException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() +" has a listener of type " + consumerClassPair.b.getCanonicalName() + ", while it has to be of type " + type.getCanonicalName());
+            }
+
+            builder.listen(consumerClassPair.a);
+        }
+
+        parseConstraints(field, builder);
+
+        builderMap.put(name, new Pair(builder, type));
+    }
+
+    private static void parseConstraints(Field field, ConfigValueBuilder builder) {
+        ConstraintsBuilder constraintsBuilder = builder.constraints();
+        // Check for constraints
+        if (field.isAnnotationPresent(Constrain.Min.class)) {
+            constraintsBuilder.min(field.getAnnotation(Constrain.Min.class).value());
+        }
+        if (field.isAnnotationPresent(Constrain.Max.class)) {
+            constraintsBuilder.max(field.getAnnotation(Constrain.Max.class).value());
+        }
+        constraintsBuilder.finish();
+    }
+
+    private static void parseListener(Object pojo, Map<String, Pair<ConfigValueBuilder, Class>> builderMap, Map<String, Pair<BiConsumer, Class>> listenerMap, Field field) {
+        if (!field.getType().equals(BiConsumer.class)) {
+            throw new IllegalStateException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must be a BiConsumer");
+        }
+
+        Listener annot = field.getAnnotation(Listener.class);
+        String settingName = annot.value();
+
+        ParameterizedType genericTypes = (ParameterizedType) field.getGenericType();
+        if (genericTypes.getActualTypeArguments().length != 2) {
+            throw new IllegalStateException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must have 2 generic types");
+        } else if (genericTypes.getActualTypeArguments()[0] != genericTypes.getActualTypeArguments()[1]) {
+            throw new IllegalStateException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must have 2 identical generic types");
+        }
+        Class genericType = (Class) genericTypes.getActualTypeArguments()[0];
+
+        boolean isAccessible = field.isAccessible();
+        field.setAccessible(true);
+        BiConsumer consumer;
+        try {
+            consumer = (BiConsumer) field.get(pojo);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+            return;
+        } finally {
+            field.setAccessible(isAccessible);
+        }
+        if (consumer == null) {
+            return;
+        }
+
+        if (builderMap.containsKey(settingName)) {
+            Pair<ConfigValueBuilder, Class> builderClassPair = builderMap.get(settingName);
+            ConfigValueBuilder builder = builderClassPair.a;
+            Class clazz = builderClassPair.b;
+            if (!clazz.equals(genericType)) {
+                throw new IllegalStateException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must be of type " + clazz.getCanonicalName());
+            }
+            builder.listen(consumer);
+        } else {
+            listenerMap.put(settingName, new Pair<>(consumer, genericType));
+        }
     }
 
     private static String getComment(Comment annotation) {
