@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber.annotations.exceptions;
+package me.zeroeightsix.fiber;
 
 public class FiberException extends Exception {
 

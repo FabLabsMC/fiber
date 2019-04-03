@@ -2,7 +2,7 @@ package me.zeroeightsix.fiber.annotations;
 
 import com.google.common.primitives.Primitives;
 import me.zeroeightsix.fiber.NodeOperations;
-import me.zeroeightsix.fiber.annotations.exceptions.FiberException;
+import me.zeroeightsix.fiber.FiberException;
 import me.zeroeightsix.fiber.annotations.exceptions.MalformedConstructorException;
 import me.zeroeightsix.fiber.annotations.exceptions.MalformedFieldException;
 import me.zeroeightsix.fiber.builder.ConfigValueBuilder;

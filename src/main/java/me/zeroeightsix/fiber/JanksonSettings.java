@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class JanksonSettings {
 
-	public static void deserialize(ConfigNode node, InputStream stream) throws IOException {
+	public static void deserialize(ConfigNode node, InputStream stream) throws IOException, FiberException {
 	    Cache cache = new Cache() {
 			@Override
 			public Object get(String name) {
@@ -24,17 +24,18 @@ public class JanksonSettings {
 		};
 	    node.addCache(cache);
 		Jankson jankson = Jankson.builder().build();
+		JsonElement element = null;
 		try {
-			JsonElement element = jankson.load(stream);
-			JanksonSettings.deserialize(node, element, cache);
+			element = jankson.load(stream);
 		} catch (SyntaxError syntaxError) {
-			syntaxError.printStackTrace();
+			throw new FiberException("Configuration file was malformed", syntaxError);
 		}
+		JanksonSettings.deserialize(node, element, cache);
 	}
 
-	private static void deserialize(ConfigNode node, JsonElement element, Cache cache) {
+	private static void deserialize(ConfigNode node, JsonElement element, Cache cache) throws FiberException {
 		if (!(element instanceof JsonObject)) {
-			throw new IllegalStateException("Root of configuration must be a jankson object");
+			throw new FiberException("Root of configuration must be a jankson object");
 		}
 
 		JsonObject object = (JsonObject) element;

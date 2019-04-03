@@ -1,5 +1,7 @@
 package me.zeroeightsix.fiber.annotations.exceptions;
 
+import me.zeroeightsix.fiber.FiberException;
+
 public class MalformedFieldException extends FiberException {
     public MalformedFieldException(String s) {
         super(s);
