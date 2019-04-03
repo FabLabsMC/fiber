@@ -1,5 +1,5 @@
 # fiber
-A configuration system made for Fabric
+A configuration system made for [Fabric](https://github.com/FabricMC)
 
 ## Concept
 Fiber provides a configuration system based on a tree-like IR (immediate representation).
