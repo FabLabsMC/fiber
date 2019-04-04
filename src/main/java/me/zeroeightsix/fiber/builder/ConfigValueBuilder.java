@@ -9,11 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class ConfigValueBuilder<T> {
 
-	Class<T> type;
+	final Class<T> type;
 
 	T value;
 	String comment = "";
@@ -23,24 +22,9 @@ public class ConfigValueBuilder<T> {
 	private ConfigNode node;
 	private boolean isFinal = false;
 
-	public ConfigValueBuilder(ConfigNode registry, Class<T> type) {
-		this.node = registry;
+	public ConfigValueBuilder(ConfigNode node, Class<T> type) {
+		this.node = node;
 		this.type = type;
-	}
-
-	/**
-	 * Attempts to create a copy of given ConfigValueBuilder. Will attempt to cast everything.
-	 */
-	protected ConfigValueBuilder(ConfigValueBuilder<Object> copy, Class<T> type) {
-		this(copy.node, type);
-		this.value = (T) copy.value;
-		this.comment = copy.comment;
-		this.consumers = copy.consumers.stream().map(consumer -> (BiConsumer<T, T>) consumer::accept).collect(Collectors.toList());
-		this.name = copy.name;
-	}
-
-	public <A> ConfigValueBuilder type(Class<? extends A> clazz) {
-		return new ConfigValueBuilder(this, clazz);
 	}
 
 	public ConfigValueBuilder<T> comment(String comment) {
