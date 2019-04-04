@@ -2,7 +2,6 @@ package me.zeroeightsix.fiber;
 
 import blue.endless.jankson.*;
 import blue.endless.jankson.impl.SyntaxError;
-import me.zeroeightsix.fiber.builder.Converter;
 import me.zeroeightsix.fiber.exceptions.FiberException;
 import me.zeroeightsix.fiber.tree.Cache;
 import me.zeroeightsix.fiber.tree.ConfigNode;
@@ -94,4 +93,10 @@ public class JanksonSettings {
 		};
 	}
 
+    public interface Converter<F, T> {
+
+        F serialize(T data);
+        T deserialize(F object);
+
+    }
 }
