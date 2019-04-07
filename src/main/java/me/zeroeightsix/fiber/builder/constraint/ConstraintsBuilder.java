@@ -20,12 +20,12 @@ public class ConstraintsBuilder<T> extends AbstractConstraintsBuilder<T> {
 		return new CompositeConstraintBuilder<>(type, sourceConstraints, this.type, this);
 	}
 
-	public ConstraintsBuilder<T> min(T min) throws RuntimeFiberException {
+	public ConstraintsBuilder<T> minNumerical(T min) throws RuntimeFiberException {
 		addNumericalLowerBound(min);
 		return this;
 	}
 
-	public ConstraintsBuilder<T> max(T min) throws RuntimeFiberException {
+	public ConstraintsBuilder<T> maxNumerical(T min) throws RuntimeFiberException {
 		addNumericalUpperBound(min);
 		return this;
 	}
