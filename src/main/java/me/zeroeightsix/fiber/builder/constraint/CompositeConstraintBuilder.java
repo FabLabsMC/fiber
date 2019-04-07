@@ -67,11 +67,7 @@ public final class CompositeConstraintBuilder<T> extends AbstractConstraintsBuil
 
 		@Override
 		public boolean test(T value) {
-			return constraints.stream().anyMatch(constraint -> {
-				boolean b = constraint.test(value);
-				//System.out.println(constraint.getType().getIdentifier().getName() + "\t" + value + " (" + b + ")");
-				return b;
-			});
+			return constraints.stream().anyMatch(constraint -> constraint.test(value));
 		}
 
 	}
