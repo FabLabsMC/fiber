@@ -4,11 +4,9 @@ import blue.endless.jankson.*;
 import blue.endless.jankson.impl.Marshaller;
 import blue.endless.jankson.impl.SyntaxError;
 import me.zeroeightsix.fiber.exceptions.FiberException;
-import me.zeroeightsix.fiber.tree.ConfigNode;
-import me.zeroeightsix.fiber.tree.HasValue;
-import me.zeroeightsix.fiber.tree.Node;
-import me.zeroeightsix.fiber.tree.Property;
+import me.zeroeightsix.fiber.tree.*;
 
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -27,7 +25,7 @@ public class JanksonSettings {
 		JanksonSettings.deserialize(node, object);
 	}
 
-	private static void deserialize(Node node, JsonObject element) {
+	private static void deserialize(Node node, JsonObject element) throws FiberException {
 		JsonObject object = element;
 		for (Map.Entry<String, JsonElement> entry : object.entrySet()) {
 			String key = entry.getKey();
@@ -35,10 +33,23 @@ public class JanksonSettings {
 
 			if (child instanceof JsonObject) {
 				ConfigNode fork = new ConfigNode(key, object.getComment(key));
-				node.getItems().add(fork);
+				node.add(fork);
 				deserialize(fork, (JsonObject) child);
 			} else {
-				// TODO
+				// TODO: Fiber marshaller system
+				TreeItem item = node.lookup(key);
+				if (item != null) {
+                    if (item instanceof Property) {
+                        Property property = (Property) item;
+                        Class type = property.getType();
+                        property.setValue(Marshaller.getFallback().marshall(type, child));
+                    } else {
+                        throw new FiberException("Value read for non-property node: " + item.getName());
+                    }
+				} else {
+                    JanksonTransparentNode transparentNode = new JanksonTransparentNode(key, child);
+                    node.add(transparentNode);
+                }
 			}
 		}
 	}
@@ -63,29 +74,40 @@ public class JanksonSettings {
 			}
 		});
 
-/*		node.getCachesImmutable().forEach(cache -> cache.getCachedNames().forEach(name -> {
-			Object o = cache.get(name);
-			JsonElement element;
-			if (o == null) {
-				element = JsonNull.INSTANCE;
-			} else {
-				element = (JsonElement) JanksonSettings.provideConverter((Class) o.getClass()).serialize(o);
-			}
-			object.put(name, element);
-		}));
-
-		node.getSettingsImmutable().forEach((s, setting) -> {
-			object.put(s, (JsonElement) provideConverter(setting.getType()).serialize(setting.getValue()));
-			if (setting.hasComment())
-				object.setComment(s, setting.getComment());
-		});
-		node.getSubSettingsImmutable().forEach((s, configNode) -> object.put(s, JanksonSettings.serialize(configNode)));*/
-
 		return object;
 	}
 
 	private static JsonElement serialize(Property property) {
+		// TODO: Fiber marshaller system
 		return Marshaller.getFallback().serialize(property.getValue());
+	}
+
+	private static class JanksonTransparentNode implements Transparent {
+
+	    private final String name;
+	    private final JsonElement value;
+
+        public JanksonTransparentNode(String name, JsonElement value) {
+            this.name = name;
+            this.value = value;
+        }
+
+        @Nullable
+        @Override
+        public <A> A marshal(Class<A> type) {
+            // TODO: Fiber marshaller
+            return Marshaller.getFallback().marshall(type, this.value);
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+		@Override
+		public String toString() {
+			return getClass().getSimpleName() + "[name=" + getName() + "]";
+		}
 	}
 
 }
