@@ -40,13 +40,14 @@ public class ConfigValueBuilder<T> {
     }
 
     public ConfigValue<T> build() {
-        ConfigValue<T> built = new ConfigValue<>(name, comment);
+        ConfigValue<T> built = new ConfigValue<>(name, comment, type);
 
         if (parentNode != null) {
             // We don't know what kind of evil collection we're about to add a node to.
+            // Though, we don't really want to throw an exception on this method because no developer likes try-catching every setting they build.
             // Let's tread with caution.
             try {
-                parentNode.getItems().add(built);
+                parentNode.add(built);
             } catch (Exception e) {
                 throw new RuntimeFiberException("Failed to register leaf to node, exception thrown (" + e.getMessage() + ")", e);
             }

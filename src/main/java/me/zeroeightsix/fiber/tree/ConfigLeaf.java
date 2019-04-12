@@ -25,4 +25,8 @@ public class ConfigLeaf implements TreeItem {
         return comment;
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "[name=" + getName() + ", comment=" + getComment() + "]";
+    }
 }

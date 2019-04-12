@@ -2,6 +2,7 @@ package me.zeroeightsix.fiber.tree;
 
 import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class ConfigValue<T> extends ConfigNode implements Property<T> {
@@ -9,14 +10,23 @@ public class ConfigValue<T> extends ConfigNode implements Property<T> {
     @Nullable
     private T value;
 
-    public ConfigValue(@Nullable String name, @Nullable String comment) {
+    @Nonnull
+    private final Class<T> type;
+
+    public ConfigValue(@Nullable String name, @Nullable String comment, @Nonnull Class<T> type) {
         super(name, comment);
+        this.type = type;
     }
 
     @Override
     @Nullable
     public T getValue() {
         return value;
+    }
+
+    @Override
+    public Class<T> getType() {
+        return type;
     }
 
     @Override

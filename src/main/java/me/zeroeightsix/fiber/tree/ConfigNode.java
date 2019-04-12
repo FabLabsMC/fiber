@@ -18,16 +18,6 @@ public class ConfigNode extends ConfigLeaf implements Node, Commentable {
         this(null, null);
     }
 
-    @Override
-    public String getName() {
-        return null;
-    }
-
-    @Override
-    public String getComment() {
-        return null;
-    }
-
     @Nonnull
     @Override
     public Set<TreeItem> getItems() {
