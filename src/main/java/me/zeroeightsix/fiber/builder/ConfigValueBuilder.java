@@ -1,78 +1,58 @@
 package me.zeroeightsix.fiber.builder;
 
-import me.zeroeightsix.fiber.constraint.Constraint;
-import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
+import me.zeroeightsix.fiber.exceptions.RuntimeFiberException;
 import me.zeroeightsix.fiber.tree.ConfigValue;
-import me.zeroeightsix.fiber.tree.ConfigNode;
+import me.zeroeightsix.fiber.tree.Node;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Predicate;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class ConfigValueBuilder<T> {
 
-	final Class<T> type;
+    @Nonnull
+    private final Class<T> type;
+    @Nullable
+    private String name;
+    @Nullable
+    private String comment = null;
 
-	T value;
-	String comment = "";
-	private List<BiConsumer<T, T>> consumers = new ArrayList<>();
-	private List<Constraint> constraints = new ArrayList<>();
-	private String name;
-	private ConfigNode node;
-	private boolean isFinal = false;
+    // Special snowflake that doesn't really belong in a builder.
+    // Used to easily register nodes to another node.
+    private Node parentNode = null;
 
-	public ConfigValueBuilder(ConfigNode node, Class<T> type) {
-		this.node = node;
-		this.type = type;
-	}
+    public ConfigValueBuilder(@Nonnull Class<T> type) {
+        this.type = type;
+    }
 
-	public ConfigValueBuilder<T> comment(String comment) {
-		if (comment == null) return this;
-		if (!this.comment.isEmpty()) this.comment += "\n";
-		this.comment += comment;
-		return this;
-	}
+    public ConfigValueBuilder<T> name(String name) {
+        this.name = name;
+        return this;
+    }
 
-	public ConfigValueBuilder<T> listen(BiConsumer<T, T> consumer) {
-		if (consumer != null) {
-			consumers.add(consumer);
-		}
-		return this;
-	}
+    public ConfigValueBuilder<T> comment(String comment) {
+        this.comment = comment;
+        return this;
+    }
 
-	public ConfigValueBuilder<T> name(String name) {
-		this.name = name;
-		return this;
-	}
+    public ConfigValueBuilder<T> registerTo(Node node) {
+        parentNode = node;
+        return this;
+    }
 
-	public ConfigValueBuilder<T> defaultValue(T value) {
-		this.value = value;
-		return this;
-	}
+    public ConfigValue<T> build() {
+        ConfigValue<T> built = new ConfigValue<>(name, comment);
 
-	public ConfigValueBuilder<T> setFinal() {
-		this.isFinal = true;
-		return this;
-	}
+        if (parentNode != null) {
+            // We don't know what kind of evil collection we're about to add a node to.
+            // Let's tread with caution.
+            try {
+                parentNode.getItems().add(built);
+            } catch (Exception e) {
+                throw new RuntimeFiberException("Failed to register leaf to node, exception thrown (" + e.getMessage() + ")", e);
+            }
+        }
 
-	public ConstraintsBuilder<T> constraints() {
-		return new ConstraintsBuilder<>(constraints, type, this);
-	}
+        return built;
+    }
 
-	public ConfigValue<T> build() {
-		return registerAndSet(new ConfigValue<>(comment, name, (a, b) -> consumers.forEach(consumer -> consumer.accept(a, b)), buildRestriction(), value, type, this.constraints));
-	}
-
-	private ConfigValue<T> registerAndSet(ConfigValue<T> configValue) {
-		if (configValue.getName() != null) {
-			node.registerAndRecover(configValue);
-		}
-		return configValue;
-	}
-
-	protected Predicate<T> buildRestriction() {
-		return isFinal ? t -> true : t -> constraints.stream().anyMatch(constraint -> constraint.test(t));
-		//return isFinal ? t -> true : (restrictions.isEmpty() ? t -> false : t -> restrictions.stream().anyMatch(function -> !function.apply(t)));
-	}
 }

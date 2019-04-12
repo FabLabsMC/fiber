@@ -1,68 +1,32 @@
 package me.zeroeightsix.fiber.tree;
 
-import me.zeroeightsix.fiber.constraint.Constraint;
+import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
 
-import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Predicate;
+import javax.annotation.Nullable;
 
-public class ConfigValue<T> {
+public class ConfigValue<T> extends ConfigNode implements Property<T> {
 
-	private final String comment;
-	private final String name;
-	private final BiConsumer<T, T> consumer;
-	private final Predicate<T> restriction;
-	private T value;
+    @Nullable
+    private T value;
 
-	private Class<T> type;
+    public ConfigValue(@Nullable String name, @Nullable String comment) {
+        super(name, comment);
+    }
 
-	// Only used when generating a schema
-	final List<Constraint> constraintList;
+    @Override
+    @Nullable
+    public T getValue() {
+        return value;
+    }
 
-	public ConfigValue(String comment, String name, BiConsumer<T, T> consumer, Predicate<T> restriction, T value, Class<T> type, List<Constraint> constraintList) {
-		this.comment = comment;
-		this.name = name;
-		this.consumer = consumer;
-		this.restriction = restriction;
-		this.value = value;
-		this.type = type;
-		this.constraintList = constraintList;
-	}
+    @Override
+    public boolean setValue(@Nullable T value) {
+        this.value = value;
+        return true;
+    }
 
-	public String getName() {
-		return name;
-	}
-
-	public T getValue() {
-		return value;
-	}
-
-	public boolean setValue(T value) {
-		if (restriction.test(value)) return false;
-		T oldValue = this.value;
-		this.value = value;
-		this.consumer.accept(oldValue, value);
-		return true;
-	}
-
-	public BiConsumer<T, T> getConsumer() {
-		return consumer;
-	}
-
-	public String getComment() {
-		return comment;
-	}
-
-	public Class<T> getType() {
-		return type;
-	}
-
-	public boolean hasComment() {
-		return !comment.isEmpty();
-	}
-
-	public List<Constraint> getConstraintList() {
-		return constraintList;
-	}
+    public static <T> ConfigValueBuilder<T> builder(Class<T> type) {
+        return new ConfigValueBuilder<>(type);
+    }
 
 }

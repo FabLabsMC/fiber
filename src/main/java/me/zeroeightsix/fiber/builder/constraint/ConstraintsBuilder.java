@@ -1,7 +1,7 @@
 package me.zeroeightsix.fiber.builder.constraint;
 
 import me.zeroeightsix.fiber.exceptions.RuntimeFiberException;
-import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
+import me.zeroeightsix.fiber.builder.ConfigValueOldBuilder;
 import me.zeroeightsix.fiber.constraint.CompositeType;
 import me.zeroeightsix.fiber.constraint.Constraint;
 
@@ -9,9 +9,9 @@ import java.util.List;
 
 public class ConstraintsBuilder<T> extends AbstractConstraintsBuilder<T> {
 
-	final ConfigValueBuilder<T> source;
+	final ConfigValueOldBuilder<T> source;
 
-	public ConstraintsBuilder(List<Constraint> sourceConstraints, Class<T> type, ConfigValueBuilder<T> source) {
+	public ConstraintsBuilder(List<Constraint> sourceConstraints, Class<T> type, ConfigValueOldBuilder<T> source) {
 		super(sourceConstraints, type);
 		this.source = source;
 	}
@@ -30,7 +30,7 @@ public class ConstraintsBuilder<T> extends AbstractConstraintsBuilder<T> {
 		return this;
 	}
 
-	public ConfigValueBuilder<T> finish() {
+	public ConfigValueOldBuilder<T> finish() {
 		super.addConstraints();
 		return source;
 	}

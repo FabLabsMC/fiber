@@ -2,8 +2,8 @@ import me.zeroeightsix.fiber.annotations.Constrain;
 import me.zeroeightsix.fiber.annotations.Listener;
 import me.zeroeightsix.fiber.annotations.Setting;
 import me.zeroeightsix.fiber.exceptions.FiberException;
-import me.zeroeightsix.fiber.tree.ConfigNode;
-import me.zeroeightsix.fiber.tree.ConfigValue;
+import me.zeroeightsix.fiber.tree.ConfigNodeOld;
+import me.zeroeightsix.fiber.tree.ConfigValueOld;
 import me.zeroeightsix.fiber.annotations.AnnotatedSettings;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -16,11 +16,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PojoTest {
 
-    private ConfigNode node;
+    private ConfigNodeOld node;
 
     @BeforeEach
     void setup() {
-        node = new ConfigNode();
+        node = new ConfigNodeOld();
     }
 
     @Test
@@ -29,9 +29,9 @@ class PojoTest {
         OneFieldPojo pojo = new OneFieldPojo();
         AnnotatedSettings.applyToNode(node, pojo);
 
-        Map<String, ConfigValue> settingMap = node.getSettingsImmutable();
+        Map<String, ConfigValueOld> settingMap = node.getSettingsImmutable();
         assertEquals(1, settingMap.size(), "Setting map is 1 entry large");
-        ConfigValue value = settingMap.get("a");
+        ConfigValueOld value = settingMap.get("a");
         assertNotNull(value, "Setting exists");
         assertNotNull(value.getValue(), "Setting value is non-null");
         assertEquals(Integer.class, value.getType(), "Setting type is correct");
@@ -53,7 +53,7 @@ class PojoTest {
         ListenerPojo pojo = new ListenerPojo();
         AnnotatedSettings.applyToNode(node, pojo);
 
-        ConfigValue value = node.getSetting("a");
+        ConfigValueOld value = node.getSetting("a");
         assertNotNull(value, "Setting exists");
         value.setValue(10);
         assertEquals(true, pojo.listened);
@@ -78,7 +78,7 @@ class PojoTest {
     void testNumericalConstraints() throws FiberException {
         NumericalConstraintsPojo pojo = new NumericalConstraintsPojo();
         AnnotatedSettings.applyToNode(node, pojo);
-        ConfigValue value = node.getSetting("a");
+        ConfigValueOld value = node.getSetting("a");
         assertEquals(false, value.setValue(-10));
         assertEquals(true, value.setValue(5));
         assertEquals(false, value.setValue(20));

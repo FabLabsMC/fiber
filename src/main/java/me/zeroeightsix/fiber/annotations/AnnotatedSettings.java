@@ -5,12 +5,12 @@ import me.zeroeightsix.fiber.NodeOperations;
 import me.zeroeightsix.fiber.exceptions.FiberException;
 import me.zeroeightsix.fiber.annotations.exceptions.MalformedConstructorException;
 import me.zeroeightsix.fiber.annotations.exceptions.MalformedFieldException;
-import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
+import me.zeroeightsix.fiber.builder.ConfigValueOldBuilder;
 import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
-import me.zeroeightsix.fiber.tree.ConfigNode;
+import me.zeroeightsix.fiber.tree.ConfigNodeOld;
 import me.zeroeightsix.fiber.annotations.conventions.NoNamingConvention;
 import me.zeroeightsix.fiber.annotations.conventions.SettingNamingConvention;
-import me.zeroeightsix.fiber.tree.ConfigValue;
+import me.zeroeightsix.fiber.tree.ConfigValueOld;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -22,13 +22,13 @@ import java.util.stream.Collectors;
 
 public class AnnotatedSettings {
 
-    public static void applyToNode(ConfigNode mergeTo, Object pojo) throws FiberException {
-        ConfigNode node = parsePojo(pojo);
-        NodeOperations.mergeTo(node, mergeTo);
+    public static void applyToNode(ConfigNodeOld mergeTo, Object pojo) throws FiberException {
+        ConfigNodeOld node = parsePojo(pojo);
+        // TODO: NodeOperations.mergeTo(node, mergeTo);
     }
 
-    private static ConfigNode parsePojo(Object pojo) throws FiberException {
-        ConfigNode node = new ConfigNode(null);
+    private static ConfigNodeOld parsePojo(Object pojo) throws FiberException {
+        ConfigNodeOld node = new ConfigNodeOld(null);
         boolean forceFinals = true;
         SettingNamingConvention namingConvention = new NoNamingConvention();
         Class pojoClass = pojo.getClass();
@@ -48,8 +48,8 @@ public class AnnotatedSettings {
         return node;
     }
 
-    private static List<ConfigValue> parsePojo(Object pojo, SettingNamingConvention convention, ConfigNode node, boolean forceFinals) throws MalformedFieldException {
-        final Map<String, Pair<ConfigValueBuilder, Class>> builderMap = new HashMap<>();
+    private static List<ConfigValueOld> parsePojo(Object pojo, SettingNamingConvention convention, ConfigNodeOld node, boolean forceFinals) throws MalformedFieldException {
+        final Map<String, Pair<ConfigValueOldBuilder, Class>> builderMap = new HashMap<>();
         final Map<String, Pair<BiConsumer, Class>> listenerMap = new HashMap<>();
 
         for (Field field : pojo.getClass().getDeclaredFields()) {
@@ -71,7 +71,7 @@ public class AnnotatedSettings {
         return builderMap.values().stream().map(pair -> pair.a.build()).collect(Collectors.toList());
     }
 
-    private static void parseSetting(Object pojo, SettingNamingConvention convention, ConfigNode node, Map<String, Pair<ConfigValueBuilder, Class>> builderMap, Map<String, Pair<BiConsumer, Class>> listenerMap, Field field, FieldProperties properties) throws MalformedFieldException {
+    private static void parseSetting(Object pojo, SettingNamingConvention convention, ConfigNodeOld node, Map<String, Pair<ConfigValueOldBuilder, Class>> builderMap, Map<String, Pair<BiConsumer, Class>> listenerMap, Field field, FieldProperties properties) throws MalformedFieldException {
         // Get type
         Class type = field.getType();
         if (type.isPrimitive()) {
@@ -79,7 +79,7 @@ public class AnnotatedSettings {
         }
 
         // Construct builder by type
-        ConfigValueBuilder builder = node.builder(type)
+        ConfigValueOldBuilder builder = node.builder(type)
                 .comment(properties.comment);
 
         // Set final if final
@@ -120,19 +120,19 @@ public class AnnotatedSettings {
         builderMap.put(name, new Pair(builder, type));
     }
 
-    private static void parseConstraints(Field field, ConfigValueBuilder builder) {
+    private static void parseConstraints(Field field, ConfigValueOldBuilder builder) {
         ConstraintsBuilder constraintsBuilder = builder.constraints();
         // Check for constraints
         if (field.isAnnotationPresent(Constrain.Min.class)) {
-            constraintsBuilder.min(field.getAnnotation(Constrain.Min.class).value());
+            constraintsBuilder.minNumerical(field.getAnnotation(Constrain.Min.class).value());
         }
         if (field.isAnnotationPresent(Constrain.Max.class)) {
-            constraintsBuilder.max(field.getAnnotation(Constrain.Max.class).value());
+            constraintsBuilder.maxNumerical(field.getAnnotation(Constrain.Max.class).value());
         }
         constraintsBuilder.finish();
     }
 
-    private static void parseListener(Object pojo, Map<String, Pair<ConfigValueBuilder, Class>> builderMap, Map<String, Pair<BiConsumer, Class>> listenerMap, Field field) throws MalformedFieldException {
+    private static void parseListener(Object pojo, Map<String, Pair<ConfigValueOldBuilder, Class>> builderMap, Map<String, Pair<BiConsumer, Class>> listenerMap, Field field) throws MalformedFieldException {
         if (!field.getType().equals(BiConsumer.class)) {
             throw new MalformedFieldException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must be a BiConsumer");
         }
@@ -164,8 +164,8 @@ public class AnnotatedSettings {
         }
 
         if (builderMap.containsKey(settingName)) {
-            Pair<ConfigValueBuilder, Class> builderClassPair = builderMap.get(settingName);
-            ConfigValueBuilder builder = builderClassPair.a;
+            Pair<ConfigValueOldBuilder, Class> builderClassPair = builderMap.get(settingName);
+            ConfigValueOldBuilder builder = builderClassPair.a;
             Class clazz = builderClassPair.b;
             if (!clazz.equals(genericType)) {
                 throw new MalformedFieldException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must be of type " + clazz.getCanonicalName());
