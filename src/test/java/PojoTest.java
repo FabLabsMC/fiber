@@ -2,25 +2,27 @@ import me.zeroeightsix.fiber.annotations.Constrain;
 import me.zeroeightsix.fiber.annotations.Listener;
 import me.zeroeightsix.fiber.annotations.Setting;
 import me.zeroeightsix.fiber.exceptions.FiberException;
-import me.zeroeightsix.fiber.tree.ConfigNodeOld;
-import me.zeroeightsix.fiber.tree.ConfigValueOld;
+import me.zeroeightsix.fiber.tree.*;
+import me.zeroeightsix.fiber.tree.ConfigValue;
 import me.zeroeightsix.fiber.annotations.AnnotatedSettings;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class PojoTest {
 
-    private ConfigNodeOld node;
+    private ConfigNode node;
 
     @BeforeEach
     void setup() {
-        node = new ConfigNodeOld();
+        node = new ConfigNode();
     }
 
     @Test
@@ -29,15 +31,17 @@ class PojoTest {
         OneFieldPojo pojo = new OneFieldPojo();
         AnnotatedSettings.applyToNode(node, pojo);
 
-        Map<String, ConfigValueOld> settingMap = node.getSettingsImmutable();
-        assertEquals(1, settingMap.size(), "Setting map is 1 entry large");
-        ConfigValueOld value = settingMap.get("a");
-        assertNotNull(value, "Setting exists");
-        assertNotNull(value.getValue(), "Setting value is non-null");
-        assertEquals(Integer.class, value.getType(), "Setting type is correct");
-        assertEquals(Integer.class, value.getValue().getClass(), "Setting value reflects correct type");
-        Integer integer = (Integer) value.getValue();
-        assertEquals(integer, 5);
+        Set<TreeItem> items = node.getItems();
+        assertEquals(1, items.size(), "Setting map is 1 entry large");
+        TreeItem item = node.lookup("a");
+        assertNotNull(item, "Setting exists");
+        assertTrue(ConfigValue.class.isAssignableFrom(item.getClass()), "Setting is a ConfigValue");
+        ConfigValue configValue = (ConfigValue) item;
+        assertNotNull(configValue.getValue(), "Setting value is non-null");
+        assertEquals(Integer.class, configValue.getType(), "Setting type is correct");
+        assertEquals(Integer.class, configValue.getValue().getClass(), "Setting value reflects correct type");
+        Integer integer = (Integer) configValue.getValue();
+        assertEquals(integer, 5, "Setting value is correct");
     }
 
     @Test
@@ -53,10 +57,11 @@ class PojoTest {
         ListenerPojo pojo = new ListenerPojo();
         AnnotatedSettings.applyToNode(node, pojo);
 
-        ConfigValueOld value = node.getSetting("a");
-        assertNotNull(value, "Setting exists");
-        value.setValue(10);
-        assertEquals(true, pojo.listened);
+        TreeItem treeItem = node.lookup("a");
+        assertNotNull(treeItem, "Setting exists");
+        assertTrue(treeItem instanceof Property, "Setting is a property");
+        ((Property) treeItem).setValue(10);
+        assertEquals(true, pojo.listened, "Listener was triggered");
     }
 
     @Test
@@ -78,7 +83,7 @@ class PojoTest {
     void testNumericalConstraints() throws FiberException {
         NumericalConstraintsPojo pojo = new NumericalConstraintsPojo();
         AnnotatedSettings.applyToNode(node, pojo);
-        ConfigValueOld value = node.getSetting("a");
+        Property value = (Property) node.lookup("a");
         assertEquals(false, value.setValue(-10));
         assertEquals(true, value.setValue(5));
         assertEquals(false, value.setValue(20));

@@ -14,7 +14,7 @@ public class NodeOperations {
     }
 
     /**
-     * Merges a leaf node ({@link ConfigValueOld}) into a {@link ConfigNode}
+     * Merges a leaf node ({@link ConfigValue}) into a {@link ConfigNode}
      * @param value The leaf node to be inherited
      * @param to    The mutated {@link ConfigNode} that will inherit <code>value</code>
      */
@@ -23,7 +23,7 @@ public class NodeOperations {
         // to.getItems().add()
     }
 
-    public static <T> void mergeTo(ConfigValueOld<T> from, ConfigValueOld<T> to) {
+    public static <T> void mergeTo(ConfigValue<T> from, ConfigValue<T> to) {
         from.setValue(to.getValue());
     }
 }

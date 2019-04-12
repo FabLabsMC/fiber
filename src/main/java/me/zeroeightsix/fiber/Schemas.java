@@ -7,27 +7,34 @@ import blue.endless.jankson.JsonPrimitive;
 import me.zeroeightsix.fiber.builder.constraint.CompositeConstraintBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.ValuedConstraint;
-import me.zeroeightsix.fiber.tree.ConfigNodeOld;
-import me.zeroeightsix.fiber.tree.ConfigValueOld;
+import me.zeroeightsix.fiber.tree.*;
 
 import java.util.List;
 
 public class Schemas {
 
-	public static JsonObject createSchema(ConfigNodeOld settings) {
+	public static JsonObject createSchema(Node node) {
 		JsonObject object = new JsonObject();
 
-		settings.getSettingsImmutable().forEach((key, setting) -> object.put((String) key, createSchema((ConfigValueOld) setting)));
-		settings.getSubSettingsImmutable().forEach((key, settingsObject) -> object.put((String) key, createSchema((ConfigNodeOld) settingsObject)));
+		node.getItems().forEach(item -> {
+			// TODO: Maybe allow for custom schema deserialisers? / generic metadata
+			if (item instanceof Node) {
+				object.put(item.getName(), createSchema((Node) item));
+				return;
+			} else if (item instanceof ConfigValue) {
+				object.put(item.getName(), createSchema((ConfigValue) item));
+			}
+		});
 
 		return object;
 	}
 
-	private static JsonObject createSchema(ConfigValueOld configValue) {
+	private static JsonObject createSchema(ConfigValue item) {
 		JsonObject object = new JsonObject();
-		object.put("comment", new JsonPrimitive(configValue.getComment()));
-		object.put("class", new JsonPrimitive(configValue.getType().getTypeName()));
-		object.put("constraints", createSchema(configValue.getConstraintList()));
+		if (item.getComment() != null) {
+			object.put("comment", new JsonPrimitive(item.getComment()));
+		}
+		// TODO: More info
 		return object;
 	}
 
