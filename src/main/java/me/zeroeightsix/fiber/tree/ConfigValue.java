@@ -5,7 +5,7 @@ import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class ConfigValue<T> extends ConfigNode implements Property<T> {
+public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
 
     @Nullable
     private T value;

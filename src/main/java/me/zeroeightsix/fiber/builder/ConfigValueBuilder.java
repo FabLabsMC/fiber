@@ -49,7 +49,7 @@ public class ConfigValueBuilder<T> {
             try {
                 parentNode.add(built);
             } catch (Exception e) {
-                throw new RuntimeFiberException("Failed to register leaf to node, exception thrown (" + e.getMessage() + ")", e);
+                throw new RuntimeFiberException("Failed to register leaf to node", e);
             }
         }
 

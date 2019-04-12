@@ -31,26 +31,20 @@ public class JanksonSettings {
 			String key = entry.getKey();
 			JsonElement child = entry.getValue();
 
-			if (child instanceof JsonObject) {
-				ConfigNode fork = new ConfigNode(key, object.getComment(key));
-				node.add(fork);
-				deserialize(fork, (JsonObject) child);
-			} else {
-				// TODO: Fiber marshaller system
-				TreeItem item = node.lookup(key);
-				if (item != null) {
-                    if (item instanceof Property) {
-                        Property property = (Property) item;
-                        Class type = property.getType();
-                        property.setValue(Marshaller.getFallback().marshall(type, child));
-                    } else {
-                        throw new FiberException("Value read for non-property node: " + item.getName());
-                    }
-				} else {
-                    JanksonTransparentNode transparentNode = new JanksonTransparentNode(key, child);
-                    node.add(transparentNode);
+            // TODO: Fiber marshaller system
+            TreeItem item = node.lookup(key);
+            if (item != null) {
+                if (item instanceof Property) {
+                    Property property = (Property) item;
+                    Class type = property.getType();
+                    property.setValue(Marshaller.getFallback().marshall(type, child));
+                } else {
+                    throw new FiberException("Value read for non-property node: " + item.getName());
                 }
-			}
+            } else {
+                JanksonTransparentNode transparentNode = new JanksonTransparentNode(key, child);
+                node.add(transparentNode);
+            }
 		}
 	}
 
@@ -70,16 +64,16 @@ public class JanksonSettings {
 			}
 
 			if (treeItem instanceof HasValue) {
-				object.put(treeItem.getName(), Marshaller.getFallback().serialize(((HasValue) treeItem).getValue()));
+				object.put(treeItem.getName(), serialize((HasValue) treeItem));
 			}
 		});
 
 		return object;
 	}
 
-	private static JsonElement serialize(Property property) {
+	private static JsonElement serialize(HasValue hasValue) {
 		// TODO: Fiber marshaller system
-		return Marshaller.getFallback().serialize(property.getValue());
+		return Marshaller.getFallback().serialize(hasValue.getValue());
 	}
 
 	private static class JanksonTransparentNode implements Transparent {

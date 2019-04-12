@@ -32,10 +32,10 @@ public interface Node extends TreeItem {
                     getItems().remove(existing);
                     getItems().add(item);
                 } else {
-                    throw new FiberException("Transparent node replaced by non-property node");
+                    throw new FiberException("Attempt to replace transparent node by non-property node " + item.getName());
                 }
             } else {
-                throw new FiberException("Attempt to replace non-transparent node");
+                throw new FiberException("Attempt to replace non-transparent node " + existing.getName());
             }
         }
     }
