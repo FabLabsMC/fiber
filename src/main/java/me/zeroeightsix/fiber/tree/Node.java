@@ -1,6 +1,7 @@
 package me.zeroeightsix.fiber.tree;
 
 import me.zeroeightsix.fiber.exceptions.FiberException;
+import sun.reflect.generics.tree.Tree;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -20,7 +21,7 @@ public interface Node extends TreeItem {
                 .orElse(null);
     }
 
-    default void add(@Nonnull TreeItem item) throws FiberException {
+    default TreeItem add(@Nonnull TreeItem item) throws FiberException {
         TreeItem existing = lookup(item.getName());
         if (existing == null) {
             getItems().add(item);
@@ -38,6 +39,11 @@ public interface Node extends TreeItem {
                 throw new FiberException("Attempt to replace non-transparent node " + existing.getName());
             }
         }
+        return item;
+    }
+
+    default Node fork(String name) throws FiberException {
+        return (Node) add(new ConfigNode(name, null));
     }
 
 }

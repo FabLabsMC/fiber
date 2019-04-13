@@ -18,12 +18,12 @@ public final class CompositeConstraintBuilder<T> extends AbstractConstraintsBuil
 		this.compositeType = compositeType;
 	}
 
-	public CompositeConstraintBuilder<T> min(T min) {
+	public CompositeConstraintBuilder<T> minNumerical(T min) {
 		addNumericalLowerBound(min);
 		return this;
 	}
 
-	public CompositeConstraintBuilder<T> max(T min) {
+	public CompositeConstraintBuilder<T> maxNumerical(T min) {
 		addNumericalUpperBound(min);
 		return this;
 	}

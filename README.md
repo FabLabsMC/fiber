@@ -41,43 +41,36 @@ Fiber strives to be capable of the following
 ConfigNode node = new ConfigNode();
 ```
 
-### Building settings
-**Note**: There's an annotation driven system that wraps around this. See [annotations](#annotations)
+### Building nodes
+> **Note**: There's an annotation driven system that wraps around this. See [annotations](#annotations)
 
-Start off by getting a builder from your `ConfigNode`:
+Grab a builder from `ConfigValue`, set the desired properties and build:
 ```java
-node.builder()
-```
-And give it a type to work with:
-```java
-node.builder(Integer.class)
-// OR
-node.builder().type(Integer.class)
-```
-Set some properties:
-```java
-node.builder(Integer.class)
-    .name("MySettingName")
-    .comment("A comment.")
-    .listen((then, now) -> {
+ConfigValue<Integer> myValue = ConfigValue.builder(Integer.class)
+    .withName("MySettingName")
+    .withComment("A comment.")
+    .withListener((then, now) -> {
         System.out.println("Value changed from " + then + " to " + now);
     })
-    .defaultValue(10)
-```
-And build!
-```java
-ConfigValue<Integer> myValue = node.builder(Integer.class)
-    ...
+    .withParent(node)
+    .withDefaultValue(10)
     .build()
 ```
+`.withParent(Node node)` won't actually modify the setting itself, but will register the setting to the `ConfigNode` you made earlier.
 
-### Using settings
+### Using nodes
 Quite straightforward:
 ```java
-ConfigValue<Integer> myValue = node.builder(Integer.class).defaultValue(10).build();
+ConfigValue<Integer> myValue = ConfigValue.builder(Integer.class)
+    .withParent(node)
+    .withDefaultValue(10)
+    .constraints()
+    .maxNumerical(20)
+    .finish()
+    .build();
 
 Integer t = myValue.getValue(); // = 10
-boolean pass = myValue.setValue(30); // Will return false if 30 isn't within our settings' constraints. In this case, there are none. = true
+boolean pass = myValue.setValue(30); // = false as 30 isn't within our nodes constraints. In this case, there are none. = true
 
 String myValueName = myValue.getName();
 String myValueComment = myValue.getComment();
@@ -87,28 +80,28 @@ String myValueComment = myValue.getComment();
 ### Constraints
 It's possible to add constraints to your setting, while building:
 ```java
-ConfigValue<Integer> mySetting = settings.builder(Integer.class)
-        .name("MySettingName")
+ConfigValue<Integer> mySetting = ConfigValue.builder(Integer.class)
+        .withName("MySettingName")
         .constraints()
-            .composite(CompositeType.INVERT)
-                .min(10)
-                .max(20)
-                .finishComposite()
-            .min(0)
-            .finish()
+        .composite(CompositeType.INVERT)
+        .minNumerical(10)
+        .maxNumerical(20)
+        .finishComposite()
+        .minNumerical(0)
+        .finish()
         .build();
 ```
 Let's take a deeper look. The constraint is built from two parts:
 ```java
-            .composite(CompositeType.INVERT)
-                .min(10)
-                .max(20)
-                .finishComposite()
+        .composite(CompositeType.INVERT)
+        .minNumerical(10)
+        .maxNumerical(20)
+        .finishComposite()
 ```
 and
 ```java
-            .min(0)
-            .finish()
+        .minNumerical(0)
+        .finish()
 ```
 In the first one, we're assembling a composite. This is a constraint, made up of several other constraints, and will composite the return values of the constraints.
 In our example, we're using `CompsiteType.INVERT`: this means that in order to pass the constraint, the value must **not** pass the all of the composite's child constraints.
@@ -124,7 +117,7 @@ passed = !(constraint1 && constraint2) && constraint3
 ```
 Apply the actual values:
 ```java
-passed = !(value >= 10 && value <= 20) && value >= 0)
+passed = !(value >= 10 && value <= 20) && value >= 0
 ```
 Let's double check:
 ```java
@@ -148,42 +141,49 @@ Prints:
 ```
 
 ### Browsing
-For security, getting lists of nodes from a non-leaf node will return a Immutable list or map. If you intend to perform a lot of lookup operations, try to generate these as least as possible.
-
-An example of how to use them:
 ```java
-private static void printNode(String prefix, ConfigNode node) {
-    System.out.println(prefix + "- node " + node.getName());
-    node.getSettingsImmutable().forEach((name, setting) -> System.out.println(prefix + "   - " + name + " " + setting.getType()));
-    node.getSubSettingsImmutable().forEach((name, subNode) -> printNode(prefix + "   ", subNode));
-}
+public class Main {
+    private static void printNode(String prefix, Node node) {
+        System.out.println(prefix + "Node " + node.getName());
+        node.getItems().forEach(item -> {
+            if (item instanceof Node) {
+                printNode(prefix + "  ", (Node) item);
+            } else {
+                System.out.println(prefix + "  Leaf " + item.getName());
+            }
+        });
+    }
+    
+    static {
+        ConfigNode node = new ConfigNode();
+        
+        ConfigValue<Integer> node1 = ConfigValue.builder(Integer.class)
+                .withName("A")
+                .withDefaultValue(10)
+                .withParent(node)
+                .build();
+        ConfigValue<Integer> node2 = ConfigValue.builder(Integer.class)
+                .withName("C")
+                .withDefaultValue(10)
+                .withParent(node.fork("B"))
+                .build();
 
-static {
-    ConfigValue<Integer> node1 = settings.builder(Integer.class)
-            .name("A")
-            .defaultValue(10)
-            .build();
-    ConfigValue<Integer> node2 = settings.sub("B")
-            .builder(Integer.class)
-            .name("B")
-            .defaultValue(10)
-            .build();
-            
-    printNode("", settings);
+        printNode("", node);
+    }
 }
 ```
 ```
-- node null
-   - A class java.lang.Integer
-   - node B
-      - B class java.lang.Integer
+Node null
+  Node B
+    Leaf C
+  Leaf A
 ```
 
 ## Serialisation
 
 ### Using Jankson
 ```java
-JanksonSettings.serialize(settings, Files.newOutputStream(Paths.get(myFileName + ".json5")), compress);
+JanksonSettings.serialize(node, Files.newOutputStream(Paths.get(myFileName + ".json5")), compress);
 ```
 
 ### Using annotations
@@ -193,7 +193,7 @@ See [annotations](#annotations)
 
 ### Using Jankson
 ```java
-JanksonSettings.deserialize(settings, Files.newInputStream(Paths.get(myFileName + ".json5")));
+JanksonSettings.deserialize(node, Files.newInputStream(Paths.get(myFileName + ".json5")));
 ```
 
 ### Using annotations
