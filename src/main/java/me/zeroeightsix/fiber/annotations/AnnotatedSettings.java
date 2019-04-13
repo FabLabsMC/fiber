@@ -2,6 +2,7 @@ package me.zeroeightsix.fiber.annotations;
 
 import com.google.common.primitives.Primitives;
 import me.zeroeightsix.fiber.NodeOperations;
+import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
 import me.zeroeightsix.fiber.exceptions.FiberException;
 import me.zeroeightsix.fiber.annotations.exceptions.MalformedConstructorException;
 import me.zeroeightsix.fiber.annotations.exceptions.MalformedFieldException;
@@ -120,8 +121,7 @@ public class AnnotatedSettings {
     }
 
     private static void parseConstraints(Field field, ConfigValueBuilder builder) {
-        // TODO
-        /* ConstraintsBuilder constraintsBuilder = builder.constraints();
+        ConstraintsBuilder constraintsBuilder = builder.constraints();
         // Check for constraints
         if (field.isAnnotationPresent(Constrain.Min.class)) {
             constraintsBuilder.minNumerical(field.getAnnotation(Constrain.Min.class).value());
@@ -129,7 +129,7 @@ public class AnnotatedSettings {
         if (field.isAnnotationPresent(Constrain.Max.class)) {
             constraintsBuilder.maxNumerical(field.getAnnotation(Constrain.Max.class).value());
         }
-        constraintsBuilder.finish(); */
+        constraintsBuilder.finish();
     }
 
     private static void parseListener(Object pojo, Map<String, Pair<ConfigValueBuilder, Class>> builderMap, Map<String, Pair<BiConsumer, Class>> listenerMap, Field field) throws MalformedFieldException {

@@ -1,13 +1,16 @@
 package me.zeroeightsix.fiber.builder;
 
+import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
+import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.exceptions.RuntimeFiberException;
 import me.zeroeightsix.fiber.tree.ConfigValue;
 import me.zeroeightsix.fiber.tree.Node;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.function.Predicate;
 
 public class ConfigValueBuilder<T> {
 
@@ -19,8 +22,9 @@ public class ConfigValueBuilder<T> {
     private String comment = null;
     @Nullable
     private T defaultValue = null;
+    private boolean isFinal = false;
     private BiConsumer<T, T> consumer = (t, t2) -> {};
-    private Predicate<T> restriction = t -> true; // Restrictions return true if the given value if within bounds
+    private List<Constraint> constraintList = new ArrayList<>();
 
     // Special snowflake that doesn't really belong in a builder.
     // Used to easily register nodes to another node.
@@ -55,7 +59,7 @@ public class ConfigValueBuilder<T> {
     }
 
     public ConfigValueBuilder<T> setFinal() {
-        this.restriction = t -> false;
+        this.isFinal = true;
         return this;
     }
 
@@ -69,10 +73,12 @@ public class ConfigValueBuilder<T> {
         return this;
     }
 
-    // TODO: Constraints
+    public ConstraintsBuilder<T> constraints() {
+        return new ConstraintsBuilder<>(constraintList, type, this);
+    }
 
     public ConfigValue<T> build() {
-        ConfigValue<T> built = new ConfigValue<>(name, comment, defaultValue, defaultValue, consumer, restriction, type);
+        ConfigValue<T> built = new ConfigValue<>(name, comment, defaultValue, defaultValue, consumer, constraintList, type, isFinal);
 
         if (parentNode != null) {
             // We don't know what kind of evil collection we're about to add a node to.

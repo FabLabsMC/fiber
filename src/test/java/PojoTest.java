@@ -9,8 +9,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
@@ -85,6 +83,7 @@ class PojoTest {
         AnnotatedSettings.applyToNode(node, pojo);
         Property value = (Property) node.lookup("a");
         assertNotNull(value, "Setting exists");
+        System.out.println(((ConfigValue) value).getConstraintList());
         assertEquals(false, value.setValue(-10));
         assertEquals(true, value.setValue(5));
         assertEquals(false, value.setValue(20));
