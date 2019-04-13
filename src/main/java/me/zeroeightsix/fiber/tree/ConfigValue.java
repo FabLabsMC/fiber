@@ -21,8 +21,9 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
     @Nonnull
     private final Class<T> type;
 
-    public ConfigValue(@Nullable String name, @Nullable String comment, @Nullable T defaultValue, @Nonnull BiConsumer<T, T> consumer, @Nonnull Predicate<T> restriction, @Nonnull Class<T> type) {
+    public ConfigValue(@Nullable String name, @Nullable String comment, @Nullable T value, @Nullable T defaultValue, @Nonnull BiConsumer<T, T> consumer, @Nonnull Predicate<T> restriction, @Nonnull Class<T> type) {
         super(name, comment);
+        this.value = value;
         this.defaultValue = defaultValue;
         this.consumer = consumer;
         this.restriction = restriction;
@@ -52,6 +53,11 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
     @Nonnull
     public BiConsumer<T, T> getListener() {
         return consumer;
+    }
+
+    @Nullable
+    public T getDefaultValue() {
+        return defaultValue;
     }
 
     public static <T> ConfigValueBuilder<T> builder(Class<T> type) {

@@ -2,6 +2,9 @@ package me.zeroeightsix.fiber;
 
 import me.zeroeightsix.fiber.tree.*;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+
 public class NodeOperations {
 
     /**
@@ -10,7 +13,13 @@ public class NodeOperations {
      * @param to    The mutated {@link ConfigNode} that will inherit <code>from</code>'s values and nodes.
      */
     public static void mergeTo(Node from, Node to) {
-        // TODO
+        Map<String, TreeItem> map = to.getItems().stream().collect(Collectors.toMap(TreeItem::getName, item -> item));
+        from.getItems().forEach(item -> {
+            String name = item.getName();
+            map.put(name, item);
+        });
+        to.getItems().clear();
+        to.getItems().addAll(map.values());
     }
 
     /**
@@ -20,7 +29,6 @@ public class NodeOperations {
      */
     public static void mergeTo(ConfigValue value, Node to) {
         // TODO
-        // to.getItems().add()
     }
 
     public static <T> void mergeTo(ConfigValue<T> from, ConfigValue<T> to) {

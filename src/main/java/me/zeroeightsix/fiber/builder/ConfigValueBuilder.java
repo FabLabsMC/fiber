@@ -72,7 +72,7 @@ public class ConfigValueBuilder<T> {
     // TODO: Constraints
 
     public ConfigValue<T> build() {
-        ConfigValue<T> built = new ConfigValue<>(name, comment, defaultValue, consumer, restriction, type);
+        ConfigValue<T> built = new ConfigValue<>(name, comment, defaultValue, defaultValue, consumer, restriction, type);
 
         if (parentNode != null) {
             // We don't know what kind of evil collection we're about to add a node to.

@@ -1,6 +1,7 @@
 package me.zeroeightsix.fiber.annotations;
 
 import com.google.common.primitives.Primitives;
+import me.zeroeightsix.fiber.NodeOperations;
 import me.zeroeightsix.fiber.exceptions.FiberException;
 import me.zeroeightsix.fiber.annotations.exceptions.MalformedConstructorException;
 import me.zeroeightsix.fiber.annotations.exceptions.MalformedFieldException;
@@ -22,7 +23,7 @@ public class AnnotatedSettings {
 
     public static void applyToNode(ConfigNode mergeTo, Object pojo) throws FiberException {
         ConfigNode node = parsePojo(pojo);
-        // TODO: NodeOperations.mergeTo(node, mergeTo);
+        NodeOperations.mergeTo(node, mergeTo);
     }
 
     private static ConfigNode parsePojo(Object pojo) throws FiberException {
@@ -66,7 +67,7 @@ public class AnnotatedSettings {
             }
         }
 
-        return builderMap.values().stream().map(pair -> pair.a.build()).collect(Collectors.toList());
+        return builderMap.values().stream().map(pair -> pair.a.withParent(node).build()).collect(Collectors.toList());
     }
 
     private static void parseSetting(Object pojo, SettingNamingConvention convention, ConfigNode node, Map<String, Pair<ConfigValueBuilder, Class>> builderMap, Map<String, Pair<BiConsumer, Class>> listenerMap, Field field, FieldProperties properties) throws MalformedFieldException {
