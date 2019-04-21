@@ -4,14 +4,29 @@ import blue.endless.jankson.JsonArray;
 import blue.endless.jankson.JsonElement;
 import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.JsonPrimitive;
+import blue.endless.jankson.impl.Marshaller;
 import me.zeroeightsix.fiber.builder.constraint.CompositeConstraintBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.ValuedConstraint;
 import me.zeroeightsix.fiber.tree.*;
 
+import java.util.HashMap;
 import java.util.List;
 
 public class Schemas {
+
+	public static HashMap<Class, Identifier> classIdentifierHashMap = new HashMap<>();
+
+	static {
+		classIdentifierHashMap.put(Boolean.class, identifier("boolean"));
+		classIdentifierHashMap.put(Byte.class, identifier("byte"));
+		classIdentifierHashMap.put(Short.class, identifier("short"));
+		classIdentifierHashMap.put(Integer.class, identifier("int"));
+		classIdentifierHashMap.put(Long.class, identifier("long"));
+		classIdentifierHashMap.put(Float.class, identifier("float"));
+		classIdentifierHashMap.put(Double.class, identifier("double"));
+		classIdentifierHashMap.put(String.class, identifier("string"));
+	}
 
 	public static JsonObject createSchema(Node node) {
 		JsonObject object = new JsonObject();
@@ -31,10 +46,18 @@ public class Schemas {
 
 	private static JsonObject createSchema(ConfigValue item) {
 		JsonObject object = new JsonObject();
+		if (item.getType() != null && classIdentifierHashMap.containsKey(item.getType())) {
+			object.put("type", new JsonPrimitive(classIdentifierHashMap.get(item.getType())));
+		}
 		if (item.getComment() != null) {
 			object.put("comment", new JsonPrimitive(item.getComment()));
 		}
-		// TODO: More info
+		if (item.getDefaultValue() != null) {
+			object.put("defaultValue", Marshaller.getFallback().serialize(item.getDefaultValue())); // TODO: Fiber marshaller
+		}
+		if (!item.getConstraints().isEmpty()) {
+			object.put("constraints", createSchema(item.getConstraints()));
+		}
 		return object;
 	}
 
@@ -52,6 +75,10 @@ public class Schemas {
 			array.add(object);
 		}
 		return array;
+	}
+
+	private static Identifier identifier(String name) {
+		return new Identifier("fabric", name);
 	}
 
 }

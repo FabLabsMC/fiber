@@ -69,6 +69,11 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
         return defaultValue;
     }
 
+    @Nonnull
+    public List<Constraint> getConstraints() {
+        return constraintList;
+    }
+
     public static <T> ConfigValueBuilder<T> builder(Class<T> type) {
         return new ConfigValueBuilder<>(type);
     }
