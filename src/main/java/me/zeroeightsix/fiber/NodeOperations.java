@@ -32,7 +32,7 @@ public class NodeOperations {
         to.getItems().add(value);
     }
 
-    public static <T> void mergeTo(ConfigValue<T> from, ConfigValue<T> to) {
+    public static <T> void mergeTo(Property<T> from, Property<T> to) {
         to.setValue(from.getValue());
     }
 }
