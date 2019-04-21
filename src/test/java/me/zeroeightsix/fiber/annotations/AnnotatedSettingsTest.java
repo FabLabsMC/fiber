@@ -1,10 +1,10 @@
-import me.zeroeightsix.fiber.annotations.Constrain;
-import me.zeroeightsix.fiber.annotations.Listener;
-import me.zeroeightsix.fiber.annotations.Setting;
+package me.zeroeightsix.fiber.annotations;
+
 import me.zeroeightsix.fiber.exceptions.FiberException;
-import me.zeroeightsix.fiber.tree.*;
+import me.zeroeightsix.fiber.tree.ConfigNode;
 import me.zeroeightsix.fiber.tree.ConfigValue;
-import me.zeroeightsix.fiber.annotations.AnnotatedSettings;
+import me.zeroeightsix.fiber.tree.Property;
+import me.zeroeightsix.fiber.tree.TreeItem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,7 @@ import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class PojoTest {
+class AnnotatedSettingsTest {
 
     private ConfigNode node;
 
