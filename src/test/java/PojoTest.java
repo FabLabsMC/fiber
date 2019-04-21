@@ -83,7 +83,6 @@ class PojoTest {
         AnnotatedSettings.applyToNode(node, pojo);
         Property value = (Property) node.lookup("a");
         assertNotNull(value, "Setting exists");
-        System.out.println(((ConfigValue) value).getConstraintList());
         assertEquals(false, value.setValue(-10));
         assertEquals(true, value.setValue(5));
         assertEquals(false, value.setValue(20));

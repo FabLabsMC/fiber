@@ -28,7 +28,8 @@ public class NodeOperations {
      * @param to    The mutated {@link ConfigNode} that will inherit <code>value</code>
      */
     public static void mergeTo(ConfigValue value, Node to) {
-        // TODO
+        to.remove(value.getName());
+        to.getItems().add(value);
     }
 
     public static <T> void mergeTo(ConfigValue<T> from, ConfigValue<T> to) {

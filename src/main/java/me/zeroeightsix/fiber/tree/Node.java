@@ -5,6 +5,7 @@ import sun.reflect.generics.tree.Tree;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Optional;
 import java.util.Set;
 
 public interface Node extends TreeItem {
@@ -39,6 +40,14 @@ public interface Node extends TreeItem {
                 throw new FiberException("Attempt to replace non-transparent node " + existing.getName());
             }
         }
+        return item;
+    }
+
+    default TreeItem remove(String name) {
+        Optional<TreeItem> itemOptional = getItems().stream().filter(item -> item.getName().equals(name)).findAny();
+        if (!itemOptional.isPresent()) return null;
+        TreeItem item = itemOptional.get();
+        getItems().remove(item);
         return item;
     }
 
