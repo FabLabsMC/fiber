@@ -33,6 +33,6 @@ public class NodeOperations {
     }
 
     public static <T> void mergeTo(ConfigValue<T> from, ConfigValue<T> to) {
-        from.setValue(to.getValue());
+        to.setValue(from.getValue());
     }
 }
