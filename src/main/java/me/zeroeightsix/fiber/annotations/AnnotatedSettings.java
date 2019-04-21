@@ -2,11 +2,11 @@ package me.zeroeightsix.fiber.annotations;
 
 import com.google.common.primitives.Primitives;
 import me.zeroeightsix.fiber.NodeOperations;
+import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
 import me.zeroeightsix.fiber.exceptions.FiberException;
 import me.zeroeightsix.fiber.annotations.exceptions.MalformedConstructorException;
 import me.zeroeightsix.fiber.annotations.exceptions.MalformedFieldException;
 import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
-import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
 import me.zeroeightsix.fiber.tree.ConfigNode;
 import me.zeroeightsix.fiber.annotations.conventions.NoNamingConvention;
 import me.zeroeightsix.fiber.annotations.conventions.SettingNamingConvention;
@@ -28,7 +28,7 @@ public class AnnotatedSettings {
     }
 
     private static ConfigNode parsePojo(Object pojo) throws FiberException {
-        ConfigNode node = new ConfigNode(null);
+        ConfigNode node = new ConfigNode();
         boolean forceFinals = true;
         SettingNamingConvention namingConvention = new NoNamingConvention();
         Class pojoClass = pojo.getClass();
@@ -68,7 +68,7 @@ public class AnnotatedSettings {
             }
         }
 
-        return builderMap.values().stream().map(pair -> pair.a.build()).collect(Collectors.toList());
+        return builderMap.values().stream().map(pair -> pair.a.withParent(node).build()).collect(Collectors.toList());
     }
 
     private static void parseSetting(Object pojo, SettingNamingConvention convention, ConfigNode node, Map<String, Pair<ConfigValueBuilder, Class>> builderMap, Map<String, Pair<BiConsumer, Class>> listenerMap, Field field, FieldProperties properties) throws MalformedFieldException {
@@ -79,26 +79,26 @@ public class AnnotatedSettings {
         }
 
         // Construct builder by type
-        ConfigValueBuilder builder = node.builder(type)
-                .comment(properties.comment);
+        ConfigValueBuilder builder = ConfigValue.builder(type)
+                .withComment(properties.comment);
 
         // Set final if final
         if (properties.finalValue) {
             builder.setFinal();
         }
 
-        // Get name
+        // Get withName
         String name = field.getName();
         String conventionName = convention.name(name);
         name = (conventionName == null || conventionName.isEmpty()) ? name : conventionName;
-        builder.name(name);
+        builder.withName(name);
 
         // Get value
         boolean isAccessible = field.isAccessible();
         field.setAccessible(true);
         try {
             Object value = field.get(pojo);
-            builder.defaultValue(value);
+            builder.withDefaultValue(value);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
@@ -112,7 +112,7 @@ public class AnnotatedSettings {
                 throw new MalformedFieldException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() +" has a listener of type " + consumerClassPair.b.getCanonicalName() + ", while it has to be of type " + type.getCanonicalName());
             }
 
-            builder.listen(consumerClassPair.a);
+            builder.withListener(consumerClassPair.a);
         }
 
         parseConstraints(field, builder);
@@ -124,10 +124,10 @@ public class AnnotatedSettings {
         ConstraintsBuilder constraintsBuilder = builder.constraints();
         // Check for constraints
         if (field.isAnnotationPresent(Constrain.Min.class)) {
-            constraintsBuilder.min(field.getAnnotation(Constrain.Min.class).value());
+            constraintsBuilder.minNumerical(field.getAnnotation(Constrain.Min.class).value());
         }
         if (field.isAnnotationPresent(Constrain.Max.class)) {
-            constraintsBuilder.max(field.getAnnotation(Constrain.Max.class).value());
+            constraintsBuilder.maxNumerical(field.getAnnotation(Constrain.Max.class).value());
         }
         constraintsBuilder.finish();
     }
@@ -170,7 +170,7 @@ public class AnnotatedSettings {
             if (!clazz.equals(genericType)) {
                 throw new MalformedFieldException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must be of type " + clazz.getCanonicalName());
             }
-            builder.listen(consumer);
+            builder.withListener(consumer);
         } else {
             listenerMap.put(settingName, new Pair<>(consumer, genericType));
         }

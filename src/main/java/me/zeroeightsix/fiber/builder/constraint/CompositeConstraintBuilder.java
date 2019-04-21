@@ -18,12 +18,12 @@ public final class CompositeConstraintBuilder<T> extends AbstractConstraintsBuil
 		this.compositeType = compositeType;
 	}
 
-	public CompositeConstraintBuilder<T> min(T min) {
+	public CompositeConstraintBuilder<T> minNumerical(T min) {
 		addNumericalLowerBound(min);
 		return this;
 	}
 
-	public CompositeConstraintBuilder<T> max(T min) {
+	public CompositeConstraintBuilder<T> maxNumerical(T min) {
 		addNumericalUpperBound(min);
 		return this;
 	}
@@ -67,11 +67,7 @@ public final class CompositeConstraintBuilder<T> extends AbstractConstraintsBuil
 
 		@Override
 		public boolean test(T value) {
-			return constraints.stream().anyMatch(constraint -> {
-				boolean b = constraint.test(value);
-				//System.out.println(constraint.getType().getIdentifier().getName() + "\t" + value + " (" + b + ")");
-				return b;
-			});
+			return constraints.stream().anyMatch(constraint -> constraint.test(value));
 		}
 
 	}

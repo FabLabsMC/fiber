@@ -1,5 +1,7 @@
 package me.zeroeightsix.fiber.constraint;
 
+import me.zeroeightsix.fiber.Identifier;
+
 public enum Constraints {
 	NUMERICAL_LOWER_BOUND(true, identifier("min")),
 	NUMERICAL_UPPER_BOUND(true, identifier("max")),
@@ -28,29 +30,6 @@ public enum Constraints {
 
 	public Identifier getIdentifier() {
 		return identifier;
-	}
-
-	public static class Identifier {
-		String domain;
-		String name;
-
-		public Identifier(String domain, String name) {
-			this.domain = domain;
-			this.name = name;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public String getDomain() {
-			return domain;
-		}
-
-		@Override
-		public String toString() {
-			return getDomain() + ":" + getName();
-		}
 	}
 
 }

@@ -1,7 +1,9 @@
 package me.zeroeightsix.fiber;
 
-import me.zeroeightsix.fiber.tree.ConfigNode;
-import me.zeroeightsix.fiber.tree.ConfigValue;
+import me.zeroeightsix.fiber.tree.*;
+
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class NodeOperations {
 
@@ -10,9 +12,14 @@ public class NodeOperations {
      * @param from  The ConfigNode that will be read from, but not mutated.
      * @param to    The mutated {@link ConfigNode} that will inherit <code>from</code>'s values and nodes.
      */
-    public static void mergeTo(ConfigNode from, ConfigNode to) {
-        from.getSettingsImmutable().forEach((name, value) -> mergeTo(value, to));
-        from.getSubSettingsImmutable().forEach((name, node) -> mergeTo(node, to.sub(name)));
+    public static void mergeTo(Node from, Node to) {
+        Map<String, TreeItem> map = to.getItems().stream().collect(Collectors.toMap(TreeItem::getName, item -> item));
+        from.getItems().forEach(item -> {
+            String name = item.getName();
+            map.put(name, item);
+        });
+        to.getItems().clear();
+        to.getItems().addAll(map.values());
     }
 
     /**
@@ -20,11 +27,12 @@ public class NodeOperations {
      * @param value The leaf node to be inherited
      * @param to    The mutated {@link ConfigNode} that will inherit <code>value</code>
      */
-    public static void mergeTo(ConfigValue value, ConfigNode to) {
-        to.putValue(value);
+    public static void mergeTo(ConfigValue value, Node to) {
+        to.remove(value.getName());
+        to.getItems().add(value);
     }
 
-    public static <T> void mergeTo(ConfigValue<T> from, ConfigValue<T> to) {
-        from.setValue(to.getValue());
+    public static <T> void mergeTo(Property<T> from, Property<T> to) {
+        to.setValue(from.getValue());
     }
 }

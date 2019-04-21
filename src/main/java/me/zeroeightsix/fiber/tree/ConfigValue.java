@@ -1,68 +1,81 @@
 package me.zeroeightsix.fiber.tree;
 
+import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
-public class ConfigValue<T> {
+public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
 
-	private final String comment;
-	private final String name;
-	private final BiConsumer<T, T> consumer;
-	private final Predicate<T> restriction;
-	private T value;
+    @Nullable
+    private T value;
+    @Nullable
+    private T defaultValue;
+    @Nonnull
+    private final BiConsumer<T, T> consumer;
+    @Nonnull
+    private final List<Constraint> constraintList;
 
-	private Class<T> type;
+    private final Predicate<T> restriction;
 
-	// Only used when generating a schema
-	final List<Constraint> constraintList;
+    @Nonnull
+    private final Class<T> type;
 
-	public ConfigValue(String comment, String name, BiConsumer<T, T> consumer, Predicate<T> restriction, T value, Class<T> type, List<Constraint> constraintList) {
-		this.comment = comment;
-		this.name = name;
-		this.consumer = consumer;
-		this.restriction = restriction;
-		this.value = value;
-		this.type = type;
-		this.constraintList = constraintList;
-	}
+    public ConfigValue(@Nullable String name, @Nullable String comment, @Nullable T value, @Nullable T defaultValue, @Nonnull BiConsumer<T, T> consumer, @Nonnull List<Constraint> constraintList, @Nonnull Class<T> type, final boolean isFinal) {
+        super(name, comment);
+        this.value = value;
+        this.defaultValue = defaultValue;
+        this.consumer = consumer;
+        this.constraintList = constraintList;
+        this.type = type;
+        if (isFinal) {
+            restriction = t -> false;
+        } else {
+            restriction = t -> constraintList.stream().allMatch(constraint -> constraint.test(t));
+        }
+    }
 
-	public String getName() {
-		return name;
-	}
+    @Override
+    @Nullable
+    public T getValue() {
+        return value;
+    }
 
-	public T getValue() {
-		return value;
-	}
+    @Override
+    public Class<T> getType() {
+        return type;
+    }
 
-	public boolean setValue(T value) {
-		if (restriction.test(value)) return false;
-		T oldValue = this.value;
-		this.value = value;
-		this.consumer.accept(oldValue, value);
-		return true;
-	}
+    @Override
+    public boolean setValue(@Nullable T value) {
+        if (!restriction.test(value)) return false;
+        T oldValue = this.value;
+        this.value = value;
+        this.consumer.accept(oldValue, value);
+        return true;
+    }
 
-	public BiConsumer<T, T> getConsumer() {
-		return consumer;
-	}
+    @Nonnull
+    public BiConsumer<T, T> getListener() {
+        return consumer;
+    }
 
-	public String getComment() {
-		return comment;
-	}
+    @Nullable
+    public T getDefaultValue() {
+        return defaultValue;
+    }
 
-	public Class<T> getType() {
-		return type;
-	}
+    @Nonnull
+    public List<Constraint> getConstraints() {
+        return constraintList;
+    }
 
-	public boolean hasComment() {
-		return !comment.isEmpty();
-	}
-
-	public List<Constraint> getConstraintList() {
-		return constraintList;
-	}
+    public static <T> ConfigValueBuilder<T> builder(Class<T> type) {
+        return new ConfigValueBuilder<>(type);
+    }
 
 }
