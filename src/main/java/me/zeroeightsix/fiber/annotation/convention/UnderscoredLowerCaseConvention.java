@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber.annotations.conventions;
+package me.zeroeightsix.fiber.annotation.convention;
 
 public class UnderscoredLowerCaseConvention implements SettingNamingConvention {
 

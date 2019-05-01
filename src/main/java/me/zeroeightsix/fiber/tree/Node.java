@@ -1,7 +1,6 @@
 package me.zeroeightsix.fiber.tree;
 
-import me.zeroeightsix.fiber.exceptions.FiberException;
-import sun.reflect.generics.tree.Tree;
+import me.zeroeightsix.fiber.exception.FiberException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

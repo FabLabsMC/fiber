@@ -3,7 +3,7 @@ package me.zeroeightsix.fiber;
 import blue.endless.jankson.*;
 import blue.endless.jankson.impl.Marshaller;
 import blue.endless.jankson.impl.SyntaxError;
-import me.zeroeightsix.fiber.exceptions.FiberException;
+import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.tree.*;
 
 import javax.annotation.Nullable;

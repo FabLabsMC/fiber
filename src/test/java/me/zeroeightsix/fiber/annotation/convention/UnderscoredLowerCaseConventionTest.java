@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber.annotations.conventions;
+package me.zeroeightsix.fiber.annotation.convention;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

@@ -1,15 +1,15 @@
-package me.zeroeightsix.fiber.annotations;
+package me.zeroeightsix.fiber.annotation;
 
 import com.google.common.primitives.Primitives;
 import me.zeroeightsix.fiber.NodeOperations;
 import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
-import me.zeroeightsix.fiber.exceptions.FiberException;
-import me.zeroeightsix.fiber.annotations.exceptions.MalformedConstructorException;
-import me.zeroeightsix.fiber.annotations.exceptions.MalformedFieldException;
+import me.zeroeightsix.fiber.exception.FiberException;
+import me.zeroeightsix.fiber.annotation.exception.MalformedConstructorException;
+import me.zeroeightsix.fiber.annotation.exception.MalformedFieldException;
 import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
 import me.zeroeightsix.fiber.tree.ConfigNode;
-import me.zeroeightsix.fiber.annotations.conventions.NoNamingConvention;
-import me.zeroeightsix.fiber.annotations.conventions.SettingNamingConvention;
+import me.zeroeightsix.fiber.annotation.convention.NoNamingConvention;
+import me.zeroeightsix.fiber.annotation.convention.SettingNamingConvention;
 import me.zeroeightsix.fiber.tree.ConfigValue;
 
 import java.lang.reflect.Field;

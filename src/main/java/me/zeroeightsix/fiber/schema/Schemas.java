@@ -1,10 +1,11 @@
-package me.zeroeightsix.fiber;
+package me.zeroeightsix.fiber.schema;
 
 import blue.endless.jankson.JsonArray;
 import blue.endless.jankson.JsonElement;
 import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.JsonPrimitive;
 import blue.endless.jankson.impl.Marshaller;
+import me.zeroeightsix.fiber.Identifier;
 import me.zeroeightsix.fiber.builder.constraint.CompositeConstraintBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.ValuedConstraint;
@@ -15,7 +16,7 @@ import java.util.List;
 
 public class Schemas {
 
-	public static HashMap<Class, Identifier> classIdentifierHashMap = new HashMap<>();
+	private static HashMap<Class, Identifier> classIdentifierHashMap = new HashMap<>();
 
 	static {
 		classIdentifierHashMap.put(Boolean.class, identifier("boolean"));
@@ -35,7 +36,6 @@ public class Schemas {
 			// TODO: Maybe allow for custom schema deserialisers? / generic metadata
 			if (item instanceof Node) {
 				object.put(item.getName(), createSchema((Node) item));
-				return;
 			} else if (item instanceof ConfigValue) {
 				object.put(item.getName(), createSchema((ConfigValue) item));
 			}

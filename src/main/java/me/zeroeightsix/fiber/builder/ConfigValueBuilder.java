@@ -2,7 +2,7 @@ package me.zeroeightsix.fiber.builder;
 
 import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
-import me.zeroeightsix.fiber.exceptions.RuntimeFiberException;
+import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.tree.ConfigValue;
 import me.zeroeightsix.fiber.tree.Node;
 

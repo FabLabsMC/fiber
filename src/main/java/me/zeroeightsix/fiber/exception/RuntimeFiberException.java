@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber.exceptions;
+package me.zeroeightsix.fiber.exception;
 
 public class RuntimeFiberException extends RuntimeException {
 

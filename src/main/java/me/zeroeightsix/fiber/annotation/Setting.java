@@ -1,19 +1,18 @@
-package me.zeroeightsix.fiber.annotations;
+package me.zeroeightsix.fiber.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Constrain {
+public @interface Setting {
 
     @Retention(RetentionPolicy.RUNTIME)
-    @interface Min {
-        double value();
-    }
+    @interface Final {}
 
     @Retention(RetentionPolicy.RUNTIME)
-    @interface Max {
-        double value();
-    }
+    @interface NoForceFinal {}
+
+    @Retention(RetentionPolicy.RUNTIME)
+    @interface Ignored {}
 
 }

@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber.annotations;
+package me.zeroeightsix.fiber.annotation;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;

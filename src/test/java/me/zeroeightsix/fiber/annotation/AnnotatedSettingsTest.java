@@ -1,6 +1,6 @@
-package me.zeroeightsix.fiber.annotations;
+package me.zeroeightsix.fiber.annotation;
 
-import me.zeroeightsix.fiber.exceptions.FiberException;
+import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.tree.ConfigNode;
 import me.zeroeightsix.fiber.tree.ConfigValue;
 import me.zeroeightsix.fiber.tree.Property;
@@ -43,7 +43,7 @@ class AnnotatedSettingsTest {
     }
 
     @Test
-    @DisplayName("Throw no final exceptions")
+    @DisplayName("Throw no final exception")
     void testNoFinal() {
         NoFinalPojo pojo = new NoFinalPojo();
         assertThrows(FiberException.class, () -> AnnotatedSettings.applyToNode(node, pojo));
