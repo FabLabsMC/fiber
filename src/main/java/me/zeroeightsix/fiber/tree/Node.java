@@ -29,7 +29,7 @@ public interface Node extends TreeItem {
             if (existing instanceof Transparent) {
                 if (item instanceof Property) {
                     Class type = ((Property) item).getType();
-                    ((Property) item).setValue(((Transparent) existing).marshal(type));
+                    ((Property) item).setValue(((Transparent) existing).marshall(type));
                     getItems().remove(existing);
                     getItems().add(item);
                 } else {

@@ -1,7 +1,6 @@
 package me.zeroeightsix.fiber;
 
 import blue.endless.jankson.*;
-import blue.endless.jankson.impl.Marshaller;
 import blue.endless.jankson.impl.SyntaxError;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.tree.*;
@@ -14,7 +13,18 @@ import java.util.Map;
 
 public class JanksonSettings {
 
-	public static void deserialize(Node node, InputStream stream) throws IOException, FiberException {
+	@Nullable
+	private Marshaller<JsonElement> marshaller;
+
+	public JanksonSettings(@Nullable Marshaller<JsonElement> marshaller) {
+		this.marshaller = marshaller;
+	}
+
+	public JanksonSettings() {
+		this(null);
+	}
+
+	public void deserialize(Node node, InputStream stream) throws IOException, FiberException {
 		Jankson jankson = Jankson.builder().build();
 		JsonObject object;
 		try {
@@ -22,22 +32,23 @@ public class JanksonSettings {
 		} catch (SyntaxError syntaxError) {
 			throw new FiberException("Configuration file was malformed", syntaxError);
 		}
-		JanksonSettings.deserialize(node, object);
+		deserialize(node, object);
 	}
 
-	private static void deserialize(Node node, JsonObject element) throws FiberException {
+	private void deserialize(Node node, JsonObject element) throws FiberException {
 		JsonObject object = element;
 		for (Map.Entry<String, JsonElement> entry : object.entrySet()) {
 			String key = entry.getKey();
 			JsonElement child = entry.getValue();
 
-            // TODO: Fiber marshaller system
             TreeItem item = node.lookup(key);
             if (item != null) {
                 if (item instanceof Property) {
                     Property property = (Property) item;
                     Class type = property.getType();
-                    property.setValue(Marshaller.getFallback().marshall(type, child));
+                    property.setValue(marshall(type, child));
+                } else if (item instanceof Node && child instanceof JsonObject) {
+                	deserialize((Node) item, (JsonObject) child);
                 } else {
                     throw new FiberException("Value read for non-property node: " + item.getName());
                 }
@@ -48,12 +59,12 @@ public class JanksonSettings {
 		}
 	}
 
-	public static void serialize(Node node, OutputStream stream, boolean compress) throws IOException {
+	public void serialize(Node node, OutputStream stream, boolean compress) throws IOException {
 		JsonObject object = serialize(node);
 		stream.write(object.toJson(!compress, !compress).getBytes());
 	}
 
-	private static JsonObject serialize(Node node) {
+	private JsonObject serialize(Node node) {
 		JsonObject object = new JsonObject();
 
 		node.getItems().forEach(treeItem -> {
@@ -71,26 +82,25 @@ public class JanksonSettings {
 		return object;
 	}
 
-	private static JsonElement serialize(HasValue hasValue) {
-		// TODO: Fiber marshaller system
-		return Marshaller.getFallback().serialize(hasValue.getValue());
+	private JsonElement serialize(HasValue hasValue) {
+		JsonElement element = marshaller != null ? marshaller.marshall(hasValue.getValue()) : null;
+		if (element != null) return element;
+		return blue.endless.jankson.impl.Marshaller.getFallback().serialize(hasValue.getValue());
 	}
 
-	private static class JanksonTransparentNode implements Transparent {
-
+	private class JanksonTransparentNode implements Transparent {
 	    private final String name;
 	    private final JsonElement value;
 
         public JanksonTransparentNode(String name, JsonElement value) {
             this.name = name;
             this.value = value;
-        }
+		}
 
         @Nullable
         @Override
-        public <A> A marshal(Class<A> type) {
-            // TODO: Fiber marshaller
-            return Marshaller.getFallback().marshall(type, this.value);
+        public <A> A marshall(Class<A> type) {
+        	return JanksonSettings.this.marshall(type, this.value);
         }
 
         @Override
@@ -102,6 +112,12 @@ public class JanksonSettings {
 		public String toString() {
 			return getClass().getSimpleName() + "[name=" + getName() + "]";
 		}
+	}
+
+	private <A> A marshall(Class<A> type, JsonElement value) {
+		A object = marshaller != null ? marshaller.marshallReverse(type, value) : null;
+		if (object != null) return object;
+		return blue.endless.jankson.impl.Marshaller.getFallback().marshall(type, value);
 	}
 
 }

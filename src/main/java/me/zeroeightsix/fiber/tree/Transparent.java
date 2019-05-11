@@ -14,6 +14,6 @@ public interface Transparent extends TreeItem {
      * @return      The converted value
      */
     @Nullable
-    <A> A marshal(Class<A> type);
+    <A> A marshall(Class<A> type);
 
 }
