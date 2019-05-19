@@ -11,14 +11,21 @@ import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.ValuedConstraint;
 import me.zeroeightsix.fiber.tree.*;
 
+import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
-public class Schemas {
+public class SchemaGenerator {
 
-	private static HashMap<Class, Identifier> classIdentifierHashMap = new HashMap<>();
+	private HashMap<Class, Identifier> classIdentifierHashMap = new HashMap<>();
 
-	static {
+	@Nullable
+	private me.zeroeightsix.fiber.Marshaller<JsonElement> marshaller;
+
+	public SchemaGenerator(@Nullable me.zeroeightsix.fiber.Marshaller<JsonElement> marshaller) {
+		this.marshaller = marshaller;
+
 		classIdentifierHashMap.put(Boolean.class, identifier("boolean"));
 		classIdentifierHashMap.put(Byte.class, identifier("byte"));
 		classIdentifierHashMap.put(Short.class, identifier("short"));
@@ -29,7 +36,11 @@ public class Schemas {
 		classIdentifierHashMap.put(String.class, identifier("string"));
 	}
 
-	public static JsonObject createSchema(Node node) {
+	public SchemaGenerator() {
+		this(null);
+	}
+
+	public JsonObject createSchema(Node node) {
 		JsonObject object = new JsonObject();
 
 		node.getItems().forEach(item -> {
@@ -44,7 +55,7 @@ public class Schemas {
 		return object;
 	}
 
-	private static JsonObject createSchema(ConfigValue item) {
+	private JsonObject createSchema(ConfigValue item) {
 		JsonObject object = new JsonObject();
 		if (item.getType() != null && classIdentifierHashMap.containsKey(item.getType())) {
 			object.put("type", new JsonPrimitive(classIdentifierHashMap.get(item.getType())));
@@ -53,7 +64,8 @@ public class Schemas {
 			object.put("comment", new JsonPrimitive(item.getComment()));
 		}
 		if (item.getDefaultValue() != null) {
-			object.put("defaultValue", Marshaller.getFallback().serialize(item.getDefaultValue())); // TODO: Fiber marshaller
+			Object o = item.getDefaultValue();
+			object.put("defaultValue", Optional.ofNullable(marshaller != null ? marshaller.marshall(o) : null).orElse(Marshaller.getFallback().serialize(o)));
 		}
 		if (!item.getConstraints().isEmpty()) {
 			object.put("constraints", createSchema(item.getConstraints()));
@@ -61,7 +73,7 @@ public class Schemas {
 		return object;
 	}
 
-	private static JsonElement createSchema(List<Constraint> constraintList) {
+	private JsonElement createSchema(List<Constraint> constraintList) {
 		JsonArray array = new JsonArray();
 		for (Constraint constraint : constraintList) {
 			JsonObject object = new JsonObject();
@@ -77,7 +89,7 @@ public class Schemas {
 		return array;
 	}
 
-	private static Identifier identifier(String name) {
+	private Identifier identifier(String name) {
 		return new Identifier("fabric", name);
 	}
 
