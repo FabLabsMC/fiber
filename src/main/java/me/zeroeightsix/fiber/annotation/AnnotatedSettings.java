@@ -1,6 +1,5 @@
 package me.zeroeightsix.fiber.annotation;
 
-import com.google.common.primitives.Primitives;
 import me.zeroeightsix.fiber.NodeOperations;
 import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
 import me.zeroeightsix.fiber.exception.FiberException;
@@ -75,7 +74,7 @@ public class AnnotatedSettings {
         // Get type
         Class type = field.getType();
         if (type.isPrimitive()) {
-            type = Primitives.wrap(type); // We're dealing with boxed primitives
+            type = wrapPrimitive(type); // We're dealing with boxed primitives
         }
 
         // Construct builder by type
@@ -186,6 +185,18 @@ public class AnnotatedSettings {
 
     private static SettingNamingConvention createNamingConvention(Class<? extends SettingNamingConvention> namingConvention) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         return namingConvention.getDeclaredConstructor().newInstance();
+    }
+
+    private static Class wrapPrimitive(Class type) {
+        if (type.equals(boolean.class)) return Boolean.class;
+        if (type.equals(byte.class)) return Byte.class;
+        if (type.equals(char.class)) return Character.class;
+        if (type.equals(short.class)) return Short.class;
+        if (type.equals(int.class)) return Integer.class;
+        if (type.equals(double.class)) return Double.class;
+        if (type.equals(float.class)) return Float.class;
+        if (type.equals(long.class)) return Long.class;
+        return null;
     }
 
     private static FieldProperties getProperties(Field field) {
