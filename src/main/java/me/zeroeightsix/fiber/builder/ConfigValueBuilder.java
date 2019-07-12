@@ -24,7 +24,7 @@ public class ConfigValueBuilder<T> {
     private T defaultValue = null;
     private boolean isFinal = false;
     private BiConsumer<T, T> consumer = (t, t2) -> {};
-    private List<Constraint> constraintList = new ArrayList<>();
+    private List<Constraint<? super T>> constraintList = new ArrayList<>();
 
     // Special snowflake that doesn't really belong in a builder.
     // Used to easily register nodes to another node.

@@ -11,7 +11,7 @@ public class ConstraintsBuilder<T> extends AbstractConstraintsBuilder<T> {
 
 	final ConfigValueBuilder<T> source;
 
-	public ConstraintsBuilder(List<Constraint> sourceConstraints, Class<T> type, ConfigValueBuilder<T> source) {
+	public ConstraintsBuilder(List<Constraint<? super T>> sourceConstraints, Class<T> type, ConfigValueBuilder<T> source) {
 		super(sourceConstraints, type);
 		this.source = source;
 	}

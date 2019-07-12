@@ -64,9 +64,9 @@ class NodeOperationsTest {
 
     private <T> void testItemFor(Class<T> type, T value, TreeItem item) {
         assertTrue(item != null, "Setting exists");
-        assertTrue(item instanceof Property, "Setting is a property");
-        Property property = (Property) item;
+        assertTrue(item instanceof Property<?>, "Setting is a property");
+        Property<?> property = (Property<?>) item;
         assertEquals(type, property.getType(), "Setting type is correct");
-        assertEquals(value, ((Property) item).getValue(), "Setting value is correct");
+        assertEquals(value, ((Property<?>) item).getValue(), "Setting value is correct");
     }
 }

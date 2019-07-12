@@ -41,22 +41,25 @@ public class JanksonSettings {
 			String key = entry.getKey();
 			JsonElement child = entry.getValue();
 
-            TreeItem item = node.lookup(key);
-            if (item != null) {
-                if (item instanceof Property) {
-                    Property property = (Property) item;
-                    Class type = property.getType();
-                    property.setValue(marshall(type, child));
-                } else if (item instanceof Node && child instanceof JsonObject) {
-                	deserialize((Node) item, (JsonObject) child);
-                } else {
-                    throw new FiberException("Value read for non-property node: " + item.getName());
-                }
-            } else {
-                JanksonTransparentNode transparentNode = new JanksonTransparentNode(key, child);
-                node.add(transparentNode);
-            }
+			TreeItem item = node.lookup(key);
+			if (item != null) {
+				if (item instanceof Property) {
+					setPopertyValue((Property<?>) item, child);
+				} else if (item instanceof Node && child instanceof JsonObject) {
+					deserialize((Node) item, (JsonObject) child);
+				} else {
+					throw new FiberException("Value read for non-property node: " + item.getName());
+				}
+			} else {
+				JanksonTransparentNode transparentNode = new JanksonTransparentNode(key, child);
+				node.add(transparentNode);
+			}
 		}
+	}
+
+	private <T> void setPopertyValue(Property<T> property, JsonElement child) {
+		Class<T> type = property.getType();
+		property.setValue(marshall(type, child));
 	}
 
 	public void serialize(Node node, OutputStream stream, boolean compress) throws IOException {
@@ -75,38 +78,38 @@ public class JanksonSettings {
 			}
 
 			if (treeItem instanceof HasValue) {
-				object.put(treeItem.getName(), serialize((HasValue) treeItem));
+				object.put(treeItem.getName(), serialize((HasValue<?>) treeItem));
 			}
 		});
 
 		return object;
 	}
 
-	private JsonElement serialize(HasValue hasValue) {
+	private JsonElement serialize(HasValue<?> hasValue) {
 		JsonElement element = marshaller != null ? marshaller.marshall(hasValue.getValue()) : null;
 		if (element != null) return element;
 		return blue.endless.jankson.impl.Marshaller.getFallback().serialize(hasValue.getValue());
 	}
 
 	private class JanksonTransparentNode implements Transparent {
-	    private final String name;
-	    private final JsonElement value;
+		private final String name;
+		private final JsonElement value;
 
-        public JanksonTransparentNode(String name, JsonElement value) {
-            this.name = name;
-            this.value = value;
+		public JanksonTransparentNode(String name, JsonElement value) {
+			this.name = name;
+			this.value = value;
 		}
 
-        @Nullable
-        @Override
-        public <A> A marshall(Class<A> type) {
-        	return JanksonSettings.this.marshall(type, this.value);
-        }
+		@Nullable
+		@Override
+		public <A> A marshall(Class<A> type) {
+			return JanksonSettings.this.marshall(type, this.value);
+		}
 
-        @Override
-        public String getName() {
-            return name;
-        }
+		@Override
+		public String getName() {
+			return name;
+		}
 
 		@Override
 		public String toString() {

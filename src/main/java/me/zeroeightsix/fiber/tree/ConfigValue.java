@@ -18,14 +18,14 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
     @Nonnull
     private final BiConsumer<T, T> consumer;
     @Nonnull
-    private final List<Constraint> constraintList;
+    private final List<Constraint<? super T>> constraintList;
 
     private final Predicate<T> restriction;
 
     @Nonnull
     private final Class<T> type;
 
-    public ConfigValue(@Nullable String name, @Nullable String comment, @Nullable T value, @Nullable T defaultValue, @Nonnull BiConsumer<T, T> consumer, @Nonnull List<Constraint> constraintList, @Nonnull Class<T> type, final boolean isFinal) {
+    public ConfigValue(@Nullable String name, @Nullable String comment, @Nullable T value, @Nullable T defaultValue, @Nonnull BiConsumer<T, T> consumer, @Nonnull List<Constraint<? super T>> constraintList, @Nonnull Class<T> type, final boolean isFinal) {
         super(name, comment);
         this.value = value;
         this.defaultValue = defaultValue;
@@ -70,7 +70,7 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
     }
 
     @Nonnull
-    public List<Constraint> getConstraints() {
+    public List<Constraint<? super T>> getConstraints() {
         return constraintList;
     }
 

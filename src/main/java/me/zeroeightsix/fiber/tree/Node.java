@@ -27,8 +27,9 @@ public interface Node extends TreeItem {
             getItems().add(item);
         } else {
             if (existing instanceof Transparent) {
-                if (item instanceof Property) {
-                    Class type = ((Property) item).getType();
+                if (item instanceof Property<?>) {
+                    Class<?> type = ((Property<?>) item).getType();
+                    // cannot add private helper methods to interfaces
                     ((Property) item).setValue(((Transparent) existing).marshall(type));
                     getItems().remove(existing);
                     getItems().add(item);
