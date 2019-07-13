@@ -73,16 +73,16 @@ public class SchemaGenerator {
 		return object;
 	}
 
-	private <T> JsonElement createSchema(List<Constraint<? super T>> constraintList) {
+	private JsonElement createSchema(List<? extends Constraint<?>> constraintList) {
 		JsonArray array = new JsonArray();
-		for (Constraint<? super T> constraint : constraintList) {
+		for (Constraint<?> constraint : constraintList) {
 			JsonObject object = new JsonObject();
 			object.put("identifier", new JsonPrimitive(constraint.getType().getIdentifier().toString()));
 			if (constraint instanceof ValuedConstraint) {
 				object.put("value", new JsonPrimitive(((ValuedConstraint<?, ?>) constraint).getValue()));
 			}
 			if (constraint instanceof CompositeConstraintBuilder.AbstractCompositeConstraint<?>) {
-				object.put("constraints", createSchema(((CompositeConstraintBuilder.AbstractCompositeConstraint<? super T>) constraint).constraints));
+				object.put("constraints", createSchema(((CompositeConstraintBuilder.AbstractCompositeConstraint<?>) constraint).constraints));
 			}
 			array.add(object);
 		}
