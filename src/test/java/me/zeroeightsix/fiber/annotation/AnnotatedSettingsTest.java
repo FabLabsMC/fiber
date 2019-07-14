@@ -88,6 +88,14 @@ class AnnotatedSettingsTest {
         assertEquals(false, value.setValue(20));
     }
 
+    @Test
+    @DisplayName("Only annotated fields")
+    void testOnlyAnnotatedFields() throws FiberException {
+        OnlyAnnotatedFieldsPojo pojo = new OnlyAnnotatedFieldsPojo();
+        AnnotatedSettings.applyToNode(node, pojo);
+        assertEquals(1, node.getItems().size(), "Node has one item");
+    }
+
     private static class NoFinalPojo {
         private int a = 5;
     }
@@ -124,6 +132,14 @@ class AnnotatedSettingsTest {
         @Constrain.Min(0)
         @Constrain.Max(10)
         private final int a = 5;
+    }
+
+    @Settings(onlyAnnotated = true)
+    private static class OnlyAnnotatedFieldsPojo {
+        @Setting
+        private final int a = 5;
+
+        private final int b = 6;
     }
 
 }
