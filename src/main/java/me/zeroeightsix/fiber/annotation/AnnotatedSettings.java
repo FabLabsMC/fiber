@@ -29,12 +29,14 @@ public class AnnotatedSettings {
     private static ConfigNode parsePojo(Object pojo) throws FiberException {
         ConfigNode node = new ConfigNode();
         boolean forceFinals = true;
+        boolean onlyAnnotated = false;
         SettingNamingConvention namingConvention = new NoNamingConvention();
         Class<?> pojoClass = pojo.getClass();
 
         if (pojoClass.isAnnotationPresent(Settings.class)) {
             Settings settingsAnnotation = (Settings) pojoClass.getAnnotation(Settings.class);
             if (settingsAnnotation.noForceFinals()) forceFinals = false;
+            onlyAnnotated = settingsAnnotation.onlyAnnotated();
 
             try {
                 namingConvention = createNamingConvention(settingsAnnotation.namingConvention());
@@ -43,11 +45,11 @@ public class AnnotatedSettings {
             }
         }
 
-        parsePojo(pojo, namingConvention, node, forceFinals);
+        parsePojo(pojo, namingConvention, node, forceFinals, onlyAnnotated);
         return node;
     }
 
-    private static List<ConfigValue<?>> parsePojo(Object pojo, SettingNamingConvention convention, ConfigNode node, boolean forceFinals) throws MalformedFieldException {
+    private static List<ConfigValue<?>> parsePojo(Object pojo, SettingNamingConvention convention, ConfigNode node, boolean forceFinals, boolean onlyAnnotated) throws MalformedFieldException {
 
         final Map<String, BuilderWithClass<?>> builderMap = new HashMap<>();
         final Map<String, ListenerWithClass<?>> listenerMap = new HashMap<>();
@@ -55,6 +57,8 @@ public class AnnotatedSettings {
         for (Field field : pojo.getClass().getDeclaredFields()) {
             FieldProperties properties = getProperties(field);
             if (properties.ignored) continue;
+
+            if (onlyAnnotated && !field.isAnnotationPresent(Setting.class)) continue;
 
             // Get angry if not final
             if (forceFinals && !properties.noForceFinal && !Modifier.isFinal(field.getModifiers())) {
