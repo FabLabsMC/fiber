@@ -83,9 +83,9 @@ class AnnotatedSettingsTest {
         AnnotatedSettings.applyToNode(node, pojo);
         Property value = (Property) node.lookup("a");
         assertNotNull(value, "Setting exists");
-        assertEquals(false, value.setValue(-10));
-        assertEquals(true, value.setValue(5));
-        assertEquals(false, value.setValue(20));
+        assertFalse(value.setValue(-10));
+        assertTrue(value.setValue(5));
+        assertFalse(value.setValue(20));
     }
 
     @Test
