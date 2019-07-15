@@ -12,7 +12,7 @@ public final class CompositeConstraintBuilder<T> extends AbstractConstraintsBuil
 	private final ConstraintsBuilder<T> source;
 	private final CompositeType compositeType;
 
-	public CompositeConstraintBuilder(CompositeType compositeType, List<Constraint> sourceConstraints, Class<T> type, ConstraintsBuilder<T> source) {
+	public CompositeConstraintBuilder(CompositeType compositeType, List<Constraint<? super T>> sourceConstraints, Class<T> type, ConstraintsBuilder<T> source) {
 		super(sourceConstraints, type);
 		this.source = source;
 		this.compositeType = compositeType;
@@ -37,31 +37,31 @@ public final class CompositeConstraintBuilder<T> extends AbstractConstraintsBuil
 	void addConstraints() {
 		switch (compositeType) {
 			case OR:
-				sourceConstraints.add(new OrCompositeConstraint(newConstraints));
+				sourceConstraints.add(new OrCompositeConstraint<>(newConstraints));
 				break;
 			case AND:
-				sourceConstraints.add(new AndCompositeConstraint(newConstraints));
+				sourceConstraints.add(new AndCompositeConstraint<>(newConstraints));
 				break;
 			case INVERT:
-				sourceConstraints.add(new InvertCompositeConstraint(newConstraints));
+				sourceConstraints.add(new InvertCompositeConstraint<>(newConstraints));
 				break;
 		}
 	}
 
-	public abstract class AbstractCompositeConstraint<T> extends ValuedConstraint<String, T> {
+	public static abstract class AbstractCompositeConstraint<T> extends ValuedConstraint<String, T> {
 
-		public final List<Constraint> constraints;
+		public final List<Constraint<? super T>> constraints;
 
-		public AbstractCompositeConstraint(CompositeType type, List<Constraint> constraints) {
+		public AbstractCompositeConstraint(CompositeType type, List<Constraint<? super T>> constraints) {
 			super(Constraints.COMPOSITE, type.getName());
 			this.constraints = constraints;
 		}
 
 	}
 
-	private class AndCompositeConstraint<T> extends AbstractCompositeConstraint<T> {
+	private static class AndCompositeConstraint<T> extends AbstractCompositeConstraint<T> {
 
-		public AndCompositeConstraint(List<Constraint> constraints) {
+		public AndCompositeConstraint(List<Constraint<? super T>> constraints) {
 			super(CompositeType.AND, constraints);
 		}
 
@@ -72,9 +72,9 @@ public final class CompositeConstraintBuilder<T> extends AbstractConstraintsBuil
 
 	}
 
-	private class OrCompositeConstraint<T> extends AbstractCompositeConstraint<T> {
+	private static class OrCompositeConstraint<T> extends AbstractCompositeConstraint<T> {
 
-		public OrCompositeConstraint(List<Constraint> constraints) {
+		public OrCompositeConstraint(List<Constraint<? super T>> constraints) {
 			super(CompositeType.OR, constraints);
 		}
 
@@ -85,9 +85,9 @@ public final class CompositeConstraintBuilder<T> extends AbstractConstraintsBuil
 
 	}
 
-	private class InvertCompositeConstraint<T> extends AbstractCompositeConstraint<T> {
+	private static class InvertCompositeConstraint<T> extends AbstractCompositeConstraint<T> {
 
-		public InvertCompositeConstraint(List<Constraint> constraints) {
+		public InvertCompositeConstraint(List<Constraint<? super T>> constraints) {
 			super(CompositeType.INVERT, constraints);
 		}
 

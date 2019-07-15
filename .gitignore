@@ -3,6 +3,11 @@
 /out
 /build
 
+# Eclipse
+/.classpath
+/.project
+/.settings
+
 # Gradle
 /.gradle
 

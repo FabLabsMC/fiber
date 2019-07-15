@@ -18,7 +18,7 @@ import java.util.Optional;
 
 public class SchemaGenerator {
 
-	private HashMap<Class, Identifier> classIdentifierHashMap = new HashMap<>();
+	private HashMap<Class<?>, Identifier> classIdentifierHashMap = new HashMap<>();
 
 	@Nullable
 	private me.zeroeightsix.fiber.Marshaller<JsonElement> marshaller;
@@ -48,14 +48,14 @@ public class SchemaGenerator {
 			if (item instanceof Node) {
 				object.put(item.getName(), createSchema((Node) item));
 			} else if (item instanceof ConfigValue) {
-				object.put(item.getName(), createSchema((ConfigValue) item));
+				object.put(item.getName(), createSchema((ConfigValue<?>) item));
 			}
 		});
 
 		return object;
 	}
 
-	private JsonObject createSchema(ConfigValue item) {
+	private JsonObject createSchema(ConfigValue<?> item) {
 		JsonObject object = new JsonObject();
 		if (item.getType() != null && classIdentifierHashMap.containsKey(item.getType())) {
 			object.put("type", new JsonPrimitive(classIdentifierHashMap.get(item.getType())));
@@ -73,16 +73,16 @@ public class SchemaGenerator {
 		return object;
 	}
 
-	private JsonElement createSchema(List<Constraint> constraintList) {
+	private JsonElement createSchema(List<? extends Constraint<?>> constraintList) {
 		JsonArray array = new JsonArray();
-		for (Constraint constraint : constraintList) {
+		for (Constraint<?> constraint : constraintList) {
 			JsonObject object = new JsonObject();
 			object.put("identifier", new JsonPrimitive(constraint.getType().getIdentifier().toString()));
 			if (constraint instanceof ValuedConstraint) {
-				object.put("value", new JsonPrimitive(((ValuedConstraint) constraint).getValue()));
+				object.put("value", new JsonPrimitive(((ValuedConstraint<?, ?>) constraint).getValue()));
 			}
-			if (constraint instanceof CompositeConstraintBuilder.AbstractCompositeConstraint) {
-				object.put("constraints", createSchema(((CompositeConstraintBuilder.AbstractCompositeConstraint) constraint).constraints));
+			if (constraint instanceof CompositeConstraintBuilder.AbstractCompositeConstraint<?>) {
+				object.put("constraints", createSchema(((CompositeConstraintBuilder.AbstractCompositeConstraint<?>) constraint).constraints));
 			}
 			array.add(object);
 		}

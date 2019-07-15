@@ -27,7 +27,7 @@ public class NodeOperations {
      * @param value The leaf node to be inherited
      * @param to    The mutated {@link ConfigNode} that will inherit <code>value</code>
      */
-    public static void mergeTo(ConfigValue value, Node to) {
+    public static void mergeTo(ConfigValue<?> value, Node to) {
         to.remove(value.getName());
         to.getItems().add(value);
     }

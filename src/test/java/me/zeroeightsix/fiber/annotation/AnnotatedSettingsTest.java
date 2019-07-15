@@ -34,7 +34,7 @@ class AnnotatedSettingsTest {
         TreeItem item = node.lookup("a");
         assertNotNull(item, "Setting exists");
         assertTrue(ConfigValue.class.isAssignableFrom(item.getClass()), "Setting is a ConfigValue");
-        ConfigValue configValue = (ConfigValue) item;
+        ConfigValue<?> configValue = (ConfigValue<?>) item;
         assertNotNull(configValue.getValue(), "Setting value is non-null");
         assertEquals(Integer.class, configValue.getType(), "Setting type is correct");
         assertEquals(Integer.class, configValue.getValue().getClass(), "Setting value reflects correct type");
@@ -57,8 +57,10 @@ class AnnotatedSettingsTest {
 
         TreeItem treeItem = node.lookup("a");
         assertNotNull(treeItem, "Setting exists");
-        assertTrue(treeItem instanceof Property, "Setting is a property");
-        ((Property) treeItem).setValue(10);
+        assertTrue(treeItem instanceof Property<?>, "Setting is a property");
+        @SuppressWarnings("unchecked")
+        Property<Integer> property = (Property<Integer>) treeItem;
+        property.setValue(10);
         assertEquals(true, pojo.listened, "Listener was triggered");
     }
 
@@ -81,7 +83,8 @@ class AnnotatedSettingsTest {
     void testNumericalConstraints() throws FiberException {
         NumericalConstraintsPojo pojo = new NumericalConstraintsPojo();
         AnnotatedSettings.applyToNode(node, pojo);
-        Property value = (Property) node.lookup("a");
+        @SuppressWarnings("unchecked")
+        Property<Integer> value = (Property<Integer>) node.lookup("a");
         assertNotNull(value, "Setting exists");
         assertFalse(value.setValue(-10));
         assertTrue(value.setValue(5));

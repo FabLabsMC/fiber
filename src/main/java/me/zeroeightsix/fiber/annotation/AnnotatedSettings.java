@@ -31,7 +31,7 @@ public class AnnotatedSettings {
         boolean forceFinals = true;
         boolean onlyAnnotated = false;
         SettingNamingConvention namingConvention = new NoNamingConvention();
-        Class pojoClass = pojo.getClass();
+        Class<?> pojoClass = pojo.getClass();
 
         if (pojoClass.isAnnotationPresent(Settings.class)) {
             Settings settingsAnnotation = (Settings) pojoClass.getAnnotation(Settings.class);
@@ -49,9 +49,10 @@ public class AnnotatedSettings {
         return node;
     }
 
-    private static List<ConfigValue> parsePojo(Object pojo, SettingNamingConvention convention, ConfigNode node, boolean forceFinals, boolean onlyAnnotated) throws MalformedFieldException {
-        final Map<String, Pair<ConfigValueBuilder, Class>> builderMap = new HashMap<>();
-        final Map<String, Pair<BiConsumer, Class>> listenerMap = new HashMap<>();
+    private static List<ConfigValue<?>> parsePojo(Object pojo, SettingNamingConvention convention, ConfigNode node, boolean forceFinals, boolean onlyAnnotated) throws MalformedFieldException {
+
+        final Map<String, BuilderWithClass<?>> builderMap = new HashMap<>();
+        final Map<String, ListenerWithClass<?>> listenerMap = new HashMap<>();
 
         for (Field field : pojo.getClass().getDeclaredFields()) {
             FieldProperties properties = getProperties(field);
@@ -74,15 +75,16 @@ public class AnnotatedSettings {
         return builderMap.values().stream().map(pair -> pair.a.withParent(node).build()).collect(Collectors.toList());
     }
 
-    private static void parseSetting(Object pojo, SettingNamingConvention convention, ConfigNode node, Map<String, Pair<ConfigValueBuilder, Class>> builderMap, Map<String, Pair<BiConsumer, Class>> listenerMap, Field field, FieldProperties properties) throws MalformedFieldException {
+    private static <T> void parseSetting(Object pojo, SettingNamingConvention convention, ConfigNode node, Map<String, BuilderWithClass<?>> builderMap, Map<String, ListenerWithClass<?>> listenerMap, Field field, FieldProperties properties) throws MalformedFieldException {
         // Get type
-        Class type = field.getType();
+        @SuppressWarnings("unchecked")
+        Class<T> type = (Class<T>) field.getType();
         if (type.isPrimitive()) {
             type = wrapPrimitive(type); // We're dealing with boxed primitives
         }
 
         // Construct builder by type
-        ConfigValueBuilder builder = ConfigValue.builder(type)
+        ConfigValueBuilder<T> builder = ConfigValue.builder(type)
                 .withComment(properties.comment);
 
         // Set final if final
@@ -100,7 +102,8 @@ public class AnnotatedSettings {
         boolean isAccessible = field.isAccessible();
         field.setAccessible(true);
         try {
-            Object value = field.get(pojo);
+            @SuppressWarnings("unchecked")
+            T value = (T) field.get(pojo);
             builder.withDefaultValue(value);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
@@ -109,7 +112,8 @@ public class AnnotatedSettings {
 
         // Check for listeners
         if (listenerMap.containsKey(name)) {
-            Pair<BiConsumer, Class> consumerClassPair = listenerMap.get(name);
+            @SuppressWarnings("unchecked")
+            Pair<BiConsumer<T, T>, Class<T>> consumerClassPair = (ListenerWithClass<T>)listenerMap.get(name);
 
             if (!consumerClassPair.b.equals(type)) {
                 throw new MalformedFieldException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() +" has a listener of type " + consumerClassPair.b.getCanonicalName() + ", while it has to be of type " + type.getCanonicalName());
@@ -120,22 +124,23 @@ public class AnnotatedSettings {
 
         parseConstraints(field, builder);
 
-        builderMap.put(name, new Pair(builder, type));
+        builderMap.put(name, new BuilderWithClass<>(builder, type));
     }
 
-    private static void parseConstraints(Field field, ConfigValueBuilder builder) {
-        ConstraintsBuilder constraintsBuilder = builder.constraints();
+    @SuppressWarnings("unchecked")
+    private static <T> void parseConstraints(Field field, ConfigValueBuilder<T> builder) {
+        ConstraintsBuilder<T> constraintsBuilder = builder.constraints();
         // Check for constraints
         if (field.isAnnotationPresent(Constrain.Min.class)) {
-            constraintsBuilder.minNumerical(field.getAnnotation(Constrain.Min.class).value());
+            constraintsBuilder.minNumerical((T)Double.valueOf(field.getAnnotation(Constrain.Min.class).value()));
         }
         if (field.isAnnotationPresent(Constrain.Max.class)) {
-            constraintsBuilder.maxNumerical(field.getAnnotation(Constrain.Max.class).value());
+            constraintsBuilder.maxNumerical((T)Double.valueOf(field.getAnnotation(Constrain.Max.class).value()));
         }
         constraintsBuilder.finish();
     }
 
-    private static void parseListener(Object pojo, Map<String, Pair<ConfigValueBuilder, Class>> builderMap, Map<String, Pair<BiConsumer, Class>> listenerMap, Field field) throws MalformedFieldException {
+    private static <T> void parseListener(Object pojo, Map<String, BuilderWithClass<?>> builderMap, Map<String, ListenerWithClass<?>> listenerMap, Field field) throws MalformedFieldException {
         if (!field.getType().equals(BiConsumer.class)) {
             throw new MalformedFieldException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must be a BiConsumer");
         }
@@ -149,13 +154,15 @@ public class AnnotatedSettings {
         } else if (genericTypes.getActualTypeArguments()[0] != genericTypes.getActualTypeArguments()[1]) {
             throw new MalformedFieldException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must have 2 identical generic types");
         }
-        Class genericType = (Class) genericTypes.getActualTypeArguments()[0];
+        @SuppressWarnings("unchecked")
+        Class<T> genericType = (Class<T>) genericTypes.getActualTypeArguments()[0];
 
         boolean isAccessible = field.isAccessible();
         field.setAccessible(true);
-        BiConsumer consumer;
+        BiConsumer<T, T> consumer;
         try {
-            consumer = (BiConsumer) field.get(pojo);
+            @SuppressWarnings({ "unchecked", "unused" })
+            BiConsumer<T, T> suppress = consumer = (BiConsumer<T, T>) field.get(pojo);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
             return;
@@ -167,15 +174,16 @@ public class AnnotatedSettings {
         }
 
         if (builderMap.containsKey(settingName)) {
-            Pair<ConfigValueBuilder, Class> builderClassPair = builderMap.get(settingName);
-            ConfigValueBuilder builder = builderClassPair.a;
-            Class clazz = builderClassPair.b;
+            @SuppressWarnings("unchecked")
+            Pair<ConfigValueBuilder<T>, Class<T>> builderClassPair = (BuilderWithClass<T>) builderMap.get(settingName);
+            ConfigValueBuilder<T> builder = builderClassPair.a;
+            Class<T> clazz = builderClassPair.b;
             if (!clazz.equals(genericType)) {
                 throw new MalformedFieldException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must be of type " + clazz.getCanonicalName());
             }
             builder.withListener(consumer);
         } else {
-            listenerMap.put(settingName, new Pair<>(consumer, genericType));
+            listenerMap.put(settingName, new ListenerWithClass<>(consumer, genericType));
         }
     }
 
@@ -191,15 +199,16 @@ public class AnnotatedSettings {
         return namingConvention.getDeclaredConstructor().newInstance();
     }
 
-    private static Class wrapPrimitive(Class type) {
-        if (type.equals(boolean.class)) return Boolean.class;
-        if (type.equals(byte.class)) return Byte.class;
-        if (type.equals(char.class)) return Character.class;
-        if (type.equals(short.class)) return Short.class;
-        if (type.equals(int.class)) return Integer.class;
-        if (type.equals(double.class)) return Double.class;
-        if (type.equals(float.class)) return Float.class;
-        if (type.equals(long.class)) return Long.class;
+    @SuppressWarnings("unchecked")
+    private static <T> Class<T> wrapPrimitive(Class<T> type) {
+        if (type.equals(boolean.class)) return (Class<T>) Boolean.class;
+        if (type.equals(byte.class)) return (Class<T>) Byte.class;
+        if (type.equals(char.class)) return (Class<T>) Character.class;
+        if (type.equals(short.class)) return (Class<T>) Short.class;
+        if (type.equals(int.class)) return (Class<T>) Integer.class;
+        if (type.equals(double.class)) return (Class<T>) Double.class;
+        if (type.equals(float.class)) return (Class<T>) Float.class;
+        if (type.equals(long.class)) return (Class<T>) Long.class;
         return null;
     }
 
@@ -236,6 +245,20 @@ public class AnnotatedSettings {
         public Pair(A a, B b) {
             this.a = a;
             this.b = b;
+        }
+    }
+
+    private static class BuilderWithClass<T> extends Pair<ConfigValueBuilder<T>, Class<T>> {
+
+        public BuilderWithClass(ConfigValueBuilder<T> a, Class<T> b) {
+            super(a, b);
+        }
+    }
+
+    private static class ListenerWithClass<T> extends Pair<BiConsumer<T, T>, Class<T>> {
+
+        public ListenerWithClass(BiConsumer<T, T> a, Class<T> b) {
+            super(a, b);
         }
     }
 
