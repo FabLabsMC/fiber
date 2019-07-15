@@ -15,4 +15,6 @@ public @interface Setting {
     @Retention(RetentionPolicy.RUNTIME)
     @interface Ignored {}
 
+    String name() default "";
+
 }

@@ -93,9 +93,13 @@ public class AnnotatedSettings {
         }
 
         // Get withName
-        String name = field.getName();
-        String conventionName = convention.name(name);
-        name = (conventionName == null || conventionName.isEmpty()) ? name : conventionName;
+        String name;
+        if (properties.name != null) name = properties.name;
+        else {
+            name = field.getName();
+            String conventionName = convention.name(name);
+            name = (conventionName == null || conventionName.isEmpty()) ? name : conventionName;
+        }
         builder.withName(name);
 
         // Get value
@@ -214,23 +218,27 @@ public class AnnotatedSettings {
 
     private static FieldProperties getProperties(Field field) {
         String comment = getComment(field);
+        String customName = field.isAnnotationPresent(Setting.class) ? field.getAnnotation(Setting.class).name() : null;
+        if (customName != null && customName.isEmpty()) customName = null;
         boolean ignored = field.isAnnotationPresent(Setting.Ignored.class);
         boolean noForceFinal = field.isAnnotationPresent(Setting.NoForceFinal.class);
         boolean finalValue = field.isAnnotationPresent(Setting.Final.class);
         Set<Constrain> constraints = new HashSet<>();
 
-        return new FieldProperties(comment, ignored, noForceFinal, finalValue, constraints);
+        return new FieldProperties(comment, customName, ignored, noForceFinal, finalValue, constraints);
     }
 
     private static class FieldProperties {
         final String comment;
+        final String name;
         final boolean ignored;
         final boolean noForceFinal;
         final boolean finalValue;
         final Set<Constrain> constraintSet;
 
-        FieldProperties(String comment, boolean ignored, boolean noForceFinal, boolean finalValue, Set<Constrain> constraintSet) {
+        FieldProperties(String comment, String name, boolean ignored, boolean noForceFinal, boolean finalValue, Set<Constrain> constraintSet) {
             this.comment = comment;
+            this.name = name;
             this.ignored = ignored;
             this.noForceFinal = noForceFinal;
             this.finalValue = finalValue;
