@@ -1,18 +1,17 @@
 package me.zeroeightsix.fiber.annotation;
 
 import me.zeroeightsix.fiber.NodeOperations;
-import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
-import me.zeroeightsix.fiber.exception.FiberException;
-import me.zeroeightsix.fiber.annotation.exception.MalformedConstructorException;
-import me.zeroeightsix.fiber.annotation.exception.MalformedFieldException;
-import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
-import me.zeroeightsix.fiber.tree.ConfigNode;
 import me.zeroeightsix.fiber.annotation.convention.NoNamingConvention;
 import me.zeroeightsix.fiber.annotation.convention.SettingNamingConvention;
-import me.zeroeightsix.fiber.tree.ConfigValue;
+import me.zeroeightsix.fiber.annotation.exception.MalformedFieldException;
+import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
+import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
+import me.zeroeightsix.fiber.exception.FiberException;
+import me.zeroeightsix.fiber.tree.ConfigNode;
+import me.zeroeightsix.fiber.tree.Node;
+import me.zeroeightsix.fiber.tree.TreeItem;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.util.*;
@@ -21,146 +20,100 @@ import java.util.stream.Collectors;
 
 public class AnnotatedSettings {
 
-    public static void applyToNode(ConfigNode mergeTo, Object pojo) throws FiberException {
-        ConfigNode node = parsePojo(pojo);
-        NodeOperations.mergeTo(node, mergeTo);
-    }
+    public static <P> void applyToNode(ConfigNode mergeTo, P pojo) throws FiberException {
+        @SuppressWarnings("unchecked")
+        Class<P> pojoClass = (Class<P>) pojo.getClass();
 
-    private static ConfigNode parsePojo(Object pojo) throws FiberException {
-        ConfigNode node = new ConfigNode();
-        boolean forceFinals = true;
-        boolean onlyAnnotated = false;
-        SettingNamingConvention namingConvention = new NoNamingConvention();
-        Class<?> pojoClass = pojo.getClass();
+        boolean noForceFinals;
+        boolean onlyAnnotated;
+        SettingNamingConvention convention;
 
         if (pojoClass.isAnnotationPresent(Settings.class)) {
-            Settings settingsAnnotation = (Settings) pojoClass.getAnnotation(Settings.class);
-            if (settingsAnnotation.noForceFinals()) forceFinals = false;
+            Settings settingsAnnotation = pojoClass.getAnnotation(Settings.class);
+            noForceFinals = settingsAnnotation.noForceFinals();
             onlyAnnotated = settingsAnnotation.onlyAnnotated();
-
-            try {
-                namingConvention = createNamingConvention(settingsAnnotation.namingConvention());
-            } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException | InstantiationException e) {
-                throw new MalformedConstructorException("Naming convention must have an empty constructor");
-            }
+            convention = createConvention(settingsAnnotation.namingConvention());
+        } else { // Assume defaults
+            noForceFinals = onlyAnnotated = false;
+            convention = new NoNamingConvention();
         }
 
-        parsePojo(pojo, namingConvention, node, forceFinals, onlyAnnotated);
+        NodeOperations.mergeTo(constructNode(pojoClass, pojo, noForceFinals, onlyAnnotated, convention), mergeTo);
+    }
+
+    private static <P> Node constructNode(Class<P> pojoClass, P pojo, boolean noForceFinals, boolean onlyAnnotated, SettingNamingConvention convention) throws FiberException {
+        ConfigNode node = new ConfigNode();
+
+        List<Field> defaultEmpty = new ArrayList<>();
+        Map<String, List<Field>> listenerMap = findListeners(pojoClass);
+
+        for (Field field : pojoClass.getDeclaredFields()) {
+            if (!isIncluded(field, onlyAnnotated)) continue;
+            checkViolation(field, noForceFinals);
+            String name = findName(field, convention);
+            node.add(fieldToItem(field, pojo, name, listenerMap.getOrDefault(name, defaultEmpty)));
+        }
+
         return node;
     }
 
-    private static List<ConfigValue<?>> parsePojo(Object pojo, SettingNamingConvention convention, ConfigNode node, boolean forceFinals, boolean onlyAnnotated) throws MalformedFieldException {
-
-        final Map<String, BuilderWithClass<?>> builderMap = new HashMap<>();
-        final Map<String, ListenerWithClass<?>> listenerMap = new HashMap<>();
-
-        for (Field field : pojo.getClass().getDeclaredFields()) {
-            FieldProperties properties = getProperties(field);
-            if (properties.ignored) continue;
-
-            if (onlyAnnotated && !field.isAnnotationPresent(Setting.class)) continue;
-
-            // Get angry if not final
-            if (forceFinals && !properties.noForceFinal && !Modifier.isFinal(field.getModifiers())) {
-                throw new MalformedFieldException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must be final");
-            }
-
-            if (field.isAnnotationPresent(Listener.class)) {
-                parseListener(pojo, builderMap, listenerMap, field);
-            } else {
-                parseSetting(pojo, convention, node, builderMap, listenerMap, field, properties);
-            }
-        }
-
-        return builderMap.values().stream().map(pair -> pair.a.withParent(node).build()).collect(Collectors.toList());
+    private static Map<String, List<Field>> findListeners(Class<?> pojoClass) {
+        return Arrays.stream(pojoClass.getDeclaredFields())
+                .filter(field -> field.isAnnotationPresent(Listener.class))
+                .collect(Collectors.groupingBy(field -> field.getAnnotation(Listener.class).value()));
     }
 
-    private static <T> void parseSetting(Object pojo, SettingNamingConvention convention, ConfigNode node, Map<String, BuilderWithClass<?>> builderMap, Map<String, ListenerWithClass<?>> listenerMap, Field field, FieldProperties properties) throws MalformedFieldException {
-        // Get type
-        @SuppressWarnings("unchecked")
-        Class<T> type = (Class<T>) field.getType();
-        if (type.isPrimitive()) {
-            type = wrapPrimitive(type); // We're dealing with boxed primitives
+    private static boolean isIncluded(Field field, boolean onlyAnnotated) {
+        if (field.isAnnotationPresent(Setting.Ignored.class)) return false;
+        return !onlyAnnotated || field.isAnnotationPresent(Setting.class);
+    }
+
+    private static void checkViolation(Field field, boolean noForceFinals) throws FiberException {
+        if (!noForceFinals && !Modifier.isFinal(field.getModifiers())) throw new FiberException("Field '" + field.getName() + "' must be final");
+    }
+
+    private static <T, P> TreeItem fieldToItem(Field field, P pojo, String name, List<Field> fields) throws FiberException {
+        Class<T> type = getSettingTypeFromField(field);
+
+        ConfigValueBuilder<T> builder = new ConfigValueBuilder<>(type)
+                .withName(name)
+                .withComment(findComment(field))
+                .withDefaultValue(findDefaultValue(field, pojo));
+
+        constrain(builder.constraints(), field);
+
+        for (Field listener : fields) {
+            BiConsumer<T, T> consumer = constructListener(listener, pojo, type);
+            if (consumer == null) continue;
+            builder.withListener(consumer);
         }
 
-        // Construct builder by type
-        ConfigValueBuilder<T> builder = ConfigValue.builder(type)
-                .withComment(properties.comment);
+        return builder.build();
+    }
 
-        // Set final if final
-        if (properties.finalValue) {
-            builder.setFinal();
-        }
+    private static <T> void constrain(ConstraintsBuilder<T> constraints, Field field) {
+        if (field.isAnnotationPresent(Constrain.Min.class)) constraints.minNumerical((T) Double.valueOf(field.getAnnotation(Constrain.Min.class).value()));
+        if (field.isAnnotationPresent(Constrain.Max.class)) constraints.maxNumerical((T) Double.valueOf(field.getAnnotation(Constrain.Max.class).value()));
+        constraints.finish();
+    }
 
-        // Get withName
-        String name;
-        if (properties.name != null) name = properties.name;
-        else {
-            name = field.getName();
-            String conventionName = convention.name(name);
-            name = (conventionName == null || conventionName.isEmpty()) ? name : conventionName;
-        }
-        builder.withName(name);
-
-        // Get value
-        boolean isAccessible = field.isAccessible();
+    private static <T, P> T findDefaultValue(Field field, P pojo) throws FiberException {
+        boolean accessible = field.isAccessible();
         field.setAccessible(true);
+        T value;
         try {
-            @SuppressWarnings("unchecked")
-            T value = (T) field.get(pojo);
-            builder.withDefaultValue(value);
+            value = (T) field.get(pojo);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            throw new FiberException("Couldn't get value for field '" + field.getName() + "'", e);
         }
-        field.setAccessible(isAccessible);
-
-        // Check for listeners
-        if (listenerMap.containsKey(name)) {
-            @SuppressWarnings("unchecked")
-            Pair<BiConsumer<T, T>, Class<T>> consumerClassPair = (ListenerWithClass<T>)listenerMap.get(name);
-
-            if (!consumerClassPair.b.equals(type)) {
-                throw new MalformedFieldException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() +" has a listener of type " + consumerClassPair.b.getCanonicalName() + ", while it has to be of type " + type.getCanonicalName());
-            }
-
-            builder.withListener(consumerClassPair.a);
-        }
-
-        parseConstraints(field, builder);
-
-        builderMap.put(name, new BuilderWithClass<>(builder, type));
+        field.setAccessible(accessible);
+        return value;
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T> void parseConstraints(Field field, ConfigValueBuilder<T> builder) {
-        ConstraintsBuilder<T> constraintsBuilder = builder.constraints();
-        // Check for constraints
-        if (field.isAnnotationPresent(Constrain.Min.class)) {
-            constraintsBuilder.minNumerical((T)Double.valueOf(field.getAnnotation(Constrain.Min.class).value()));
-        }
-        if (field.isAnnotationPresent(Constrain.Max.class)) {
-            constraintsBuilder.maxNumerical((T)Double.valueOf(field.getAnnotation(Constrain.Max.class).value()));
-        }
-        constraintsBuilder.finish();
-    }
+    private static <T, P, A> BiConsumer<T,T> constructListener(Field field, P pojo, Class<A> wantedType) throws FiberException {
+        checkListener(field, wantedType);
 
-    private static <T> void parseListener(Object pojo, Map<String, BuilderWithClass<?>> builderMap, Map<String, ListenerWithClass<?>> listenerMap, Field field) throws MalformedFieldException {
-        if (!field.getType().equals(BiConsumer.class)) {
-            throw new MalformedFieldException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must be a BiConsumer");
-        }
-
-        Listener annot = field.getAnnotation(Listener.class);
-        String settingName = annot.value();
-
-        ParameterizedType genericTypes = (ParameterizedType) field.getGenericType();
-        if (genericTypes.getActualTypeArguments().length != 2) {
-            throw new MalformedFieldException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must have 2 generic types");
-        } else if (genericTypes.getActualTypeArguments()[0] != genericTypes.getActualTypeArguments()[1]) {
-            throw new MalformedFieldException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must have 2 identical generic types");
-        }
         @SuppressWarnings("unchecked")
-        Class<T> genericType = (Class<T>) genericTypes.getActualTypeArguments()[0];
-
         boolean isAccessible = field.isAccessible();
         field.setAccessible(true);
         BiConsumer<T, T> consumer;
@@ -168,39 +121,33 @@ public class AnnotatedSettings {
             @SuppressWarnings({ "unchecked", "unused" })
             BiConsumer<T, T> suppress = consumer = (BiConsumer<T, T>) field.get(pojo);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
-            return;
-        } finally {
-            field.setAccessible(isAccessible);
+            throw new FiberException("Couldn't construct listener", e);
         }
-        if (consumer == null) {
-            return;
+        field.setAccessible(isAccessible);
+
+        return consumer;
+    }
+
+    private static <A> void checkListener(Field field, Class<A> wantedType) throws MalformedFieldException {
+        if (!field.getType().equals(BiConsumer.class)) {
+            throw new MalformedFieldException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must be a BiConsumer");
         }
 
-        if (builderMap.containsKey(settingName)) {
-            @SuppressWarnings("unchecked")
-            Pair<ConfigValueBuilder<T>, Class<T>> builderClassPair = (BuilderWithClass<T>) builderMap.get(settingName);
-            ConfigValueBuilder<T> builder = builderClassPair.a;
-            Class<T> clazz = builderClassPair.b;
-            if (!clazz.equals(genericType)) {
-                throw new MalformedFieldException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must be of type " + clazz.getCanonicalName());
-            }
-            builder.withListener(consumer);
-        } else {
-            listenerMap.put(settingName, new ListenerWithClass<>(consumer, genericType));
+        ParameterizedType genericTypes = (ParameterizedType) field.getGenericType();
+        if (genericTypes.getActualTypeArguments().length != 2) {
+            throw new MalformedFieldException("Listener " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must have 2 generic types");
+        } else if (genericTypes.getActualTypeArguments()[0] != genericTypes.getActualTypeArguments()[1]) {
+            throw new MalformedFieldException("Listener " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must have 2 identical generic types");
+        } else if (!genericTypes.getActualTypeArguments()[0].equals(wantedType)) {
+            throw new MalformedFieldException("Listener " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must have the same generic type as the field it's listening for");
         }
     }
 
-    private static String getComment(Comment annotation) {
-        return annotation == null ? null : annotation.value();
-    }
-
-    private static String getComment(Field field) {
-        return getComment(field.getAnnotation(Comment.class));
-    }
-
-    private static SettingNamingConvention createNamingConvention(Class<? extends SettingNamingConvention> namingConvention) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        return namingConvention.getDeclaredConstructor().newInstance();
+    private static <T> Class<T> getSettingTypeFromField(Field field) {
+        @SuppressWarnings("unchecked")
+        Class<T> type = (Class<T>) field.getType();
+        if (type.isPrimitive()) return wrapPrimitive(type);
+        return type;
     }
 
     @SuppressWarnings("unchecked")
@@ -216,57 +163,26 @@ public class AnnotatedSettings {
         return null;
     }
 
-    private static FieldProperties getProperties(Field field) {
-        String comment = getComment(field);
-        String customName = field.isAnnotationPresent(Setting.class) ? field.getAnnotation(Setting.class).name() : null;
-        if (customName != null && customName.isEmpty()) customName = null;
-        boolean ignored = field.isAnnotationPresent(Setting.Ignored.class);
-        boolean noForceFinal = field.isAnnotationPresent(Setting.NoForceFinal.class);
-        boolean finalValue = field.isAnnotationPresent(Setting.Final.class);
-        Set<Constrain> constraints = new HashSet<>();
-
-        return new FieldProperties(comment, customName, ignored, noForceFinal, finalValue, constraints);
+    private static String findComment(Field field) {
+        if (field.isAnnotationPresent(Comment.class)) return field.getAnnotation(Comment.class).value();
+        return null;
     }
 
-    private static class FieldProperties {
-        final String comment;
-        final String name;
-        final boolean ignored;
-        final boolean noForceFinal;
-        final boolean finalValue;
-        final Set<Constrain> constraintSet;
-
-        FieldProperties(String comment, String name, boolean ignored, boolean noForceFinal, boolean finalValue, Set<Constrain> constraintSet) {
-            this.comment = comment;
-            this.name = name;
-            this.ignored = ignored;
-            this.noForceFinal = noForceFinal;
-            this.finalValue = finalValue;
-            this.constraintSet = constraintSet;
+    private static String findName(Field field, SettingNamingConvention convention) {
+        if (field.isAnnotationPresent(Setting.class)) {
+            String name;
+            Setting settingAnnotation = field.getAnnotation(Setting.class);
+            if (!(name = settingAnnotation.name()).isEmpty()) return name; // If @Setting is present and name is set, return it
         }
+
+        return convention.name(field.getName());
     }
 
-    private static class Pair<A, B> {
-        A a;
-        B b;
-
-        public Pair(A a, B b) {
-            this.a = a;
-            this.b = b;
-        }
-    }
-
-    private static class BuilderWithClass<T> extends Pair<ConfigValueBuilder<T>, Class<T>> {
-
-        public BuilderWithClass(ConfigValueBuilder<T> a, Class<T> b) {
-            super(a, b);
-        }
-    }
-
-    private static class ListenerWithClass<T> extends Pair<BiConsumer<T, T>, Class<T>> {
-
-        public ListenerWithClass(BiConsumer<T, T> a, Class<T> b) {
-            super(a, b);
+    private static SettingNamingConvention createConvention(Class<? extends SettingNamingConvention> namingConvention) throws FiberException {
+        try {
+            return namingConvention.newInstance();
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new FiberException("Could not initialise naming convention", e);
         }
     }
 
