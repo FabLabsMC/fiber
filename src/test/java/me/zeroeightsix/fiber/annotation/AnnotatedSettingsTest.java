@@ -107,6 +107,14 @@ class AnnotatedSettingsTest {
         assertNotNull(node.lookup("custom_name"), "Custom named setting exists");
     }
 
+    @Test
+    @DisplayName("Final setting")
+    void testFinalSetting() throws FiberException {
+        FinalSettingPojo pojo = new FinalSettingPojo();
+        AnnotatedSettings.applyToNode(node, pojo);
+        assertFalse(((ConfigValue<Integer>) node.lookup("a")).setValue(0));
+    }
+
     private static class NoFinalPojo {
         private int a = 5;
     }
@@ -155,6 +163,11 @@ class AnnotatedSettingsTest {
 
     private static class CustomNamePojo {
         @Setting(name = "custom_name")
+        private final int a = 5;
+    }
+
+    private static class FinalSettingPojo {
+        @Setting.Final
         private final int a = 5;
     }
 

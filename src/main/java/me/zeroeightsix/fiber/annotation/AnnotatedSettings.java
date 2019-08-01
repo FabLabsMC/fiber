@@ -78,7 +78,8 @@ public class AnnotatedSettings {
         ConfigValueBuilder<T> builder = new ConfigValueBuilder<>(type)
                 .withName(name)
                 .withComment(findComment(field))
-                .withDefaultValue(findDefaultValue(field, pojo));
+                .withDefaultValue(findDefaultValue(field, pojo))
+                .setFinal(field.isAnnotationPresent(Setting.Final.class));
 
         constrain(builder.constraints(), field);
 

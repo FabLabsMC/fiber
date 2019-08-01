@@ -63,6 +63,11 @@ public class ConfigValueBuilder<T> {
         return this;
     }
 
+    public ConfigValueBuilder<T> setFinal(boolean isFinal) {
+        this.isFinal = isFinal;
+        return this;
+    }
+
     /**
      * Sets the node that the built {@link ConfigValue} will be registered to.
      * @param node  The node this {@link ConfigValue} will be registered to.
