@@ -91,12 +91,14 @@ public class AnnotatedSettings {
         return builder.build();
     }
 
+    @SuppressWarnings("unchecked")
     private static <T> void constrain(ConstraintsBuilder<T> constraints, Field field) {
         if (field.isAnnotationPresent(Constrain.Min.class)) constraints.minNumerical((T) Double.valueOf(field.getAnnotation(Constrain.Min.class).value()));
         if (field.isAnnotationPresent(Constrain.Max.class)) constraints.maxNumerical((T) Double.valueOf(field.getAnnotation(Constrain.Max.class).value()));
         constraints.finish();
     }
 
+    @SuppressWarnings("unchecked")
     private static <T, P> T findDefaultValue(Field field, P pojo) throws FiberException {
         boolean accessible = field.isAccessible();
         field.setAccessible(true);
