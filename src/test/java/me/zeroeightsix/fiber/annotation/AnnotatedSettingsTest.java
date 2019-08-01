@@ -115,6 +115,13 @@ class AnnotatedSettingsTest {
         assertFalse(((ConfigValue<Integer>) node.lookup("a")).setValue(0));
     }
 
+    @Test
+    @DisplayName("No force final setting")
+    void testNoForceFinal() {
+        NoForceFinalPojo pojo = new NoForceFinalPojo();
+        assertDoesNotThrow(() -> AnnotatedSettings.applyToNode(node, pojo), "applyToNode successful");
+    }
+
     private static class NoFinalPojo {
         private int a = 5;
     }
@@ -169,6 +176,11 @@ class AnnotatedSettingsTest {
     private static class FinalSettingPojo {
         @Setting.Final
         private final int a = 5;
+    }
+
+    private static class NoForceFinalPojo {
+        @Setting.NoForceFinal
+        private int a = 5;
     }
 
 }

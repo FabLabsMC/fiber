@@ -69,7 +69,7 @@ public class AnnotatedSettings {
     }
 
     private static void checkViolation(Field field, boolean noForceFinals) throws FiberException {
-        if (!noForceFinals && !Modifier.isFinal(field.getModifiers())) throw new FiberException("Field '" + field.getName() + "' must be final");
+        if (!noForceFinals && !Modifier.isFinal(field.getModifiers()) && !field.isAnnotationPresent(Setting.NoForceFinal.class)) throw new FiberException("Field '" + field.getName() + "' must be final");
     }
 
     private static <T, P> TreeItem fieldToItem(Field field, P pojo, String name, List<Field> fields) throws FiberException {
