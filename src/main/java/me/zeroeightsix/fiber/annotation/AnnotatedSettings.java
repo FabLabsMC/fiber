@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 
 public class AnnotatedSettings {
 
-    public static <P> void applyToNode(ConfigNode mergeTo, P pojo) throws FiberException {
+    public static <P> void applyToNode(Node mergeTo, P pojo) throws FiberException {
         @SuppressWarnings("unchecked")
         Class<P> pojoClass = (Class<P>) pojo.getClass();
 
@@ -48,10 +48,19 @@ public class AnnotatedSettings {
         Map<String, List<Field>> listenerMap = findListeners(pojoClass);
 
         for (Field field : pojoClass.getDeclaredFields()) {
-            if (!isIncluded(field, onlyAnnotated)) continue;
+            if (field.isSynthetic() || !isIncluded(field, onlyAnnotated)) continue;
             checkViolation(field, noForceFinals);
             String name = findName(field, convention);
-            node.add(fieldToItem(field, pojo, name, listenerMap.getOrDefault(name, defaultEmpty)));
+            if (field.isAnnotationPresent(Setting.Node.class)) {
+                Node sub = node.fork(name);
+                try {
+                    AnnotatedSettings.applyToNode(sub, field.get(pojo));
+                } catch (IllegalAccessException e) {
+                    throw new FiberException("Couldn't fork and apply sub-node", e);
+                }
+            } else {
+                node.add(fieldToItem(field, pojo, name, listenerMap.getOrDefault(name, defaultEmpty)));
+            }
         }
 
         return node;
@@ -175,13 +184,12 @@ public class AnnotatedSettings {
     }
 
     private static String findName(Field field, SettingNamingConvention convention) {
-        if (field.isAnnotationPresent(Setting.class)) {
-            String name;
-            Setting settingAnnotation = field.getAnnotation(Setting.class);
-            if (!(name = settingAnnotation.name()).isEmpty()) return name; // If @Setting is present and name is set, return it
-        }
-
-        return convention.name(field.getName());
+        return Optional.ofNullable(
+                field.isAnnotationPresent(Setting.Node.class) ?
+                        field.getAnnotation(Setting.Node.class).name() :
+                        getSettingAnnotation(field).map(Setting::name).orElse(null))
+                .filter(s -> !s.isEmpty())
+                .orElse(convention.name(field.getName()));
     }
 
     private static SettingNamingConvention createConvention(Class<? extends SettingNamingConvention> namingConvention) throws FiberException {

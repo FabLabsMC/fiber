@@ -1,10 +1,7 @@
 package me.zeroeightsix.fiber.annotation;
 
 import me.zeroeightsix.fiber.exception.FiberException;
-import me.zeroeightsix.fiber.tree.ConfigNode;
-import me.zeroeightsix.fiber.tree.ConfigValue;
-import me.zeroeightsix.fiber.tree.Property;
-import me.zeroeightsix.fiber.tree.TreeItem;
+import me.zeroeightsix.fiber.tree.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -124,6 +121,17 @@ class AnnotatedSettingsTest {
     }
 
     @Test
+    @DisplayName("Subnodes")
+    void testSubNodes() throws FiberException {
+        SubNodePojo pojo = new SubNodePojo();
+        AnnotatedSettings.applyToNode(node, pojo);
+        assertEquals(1, node.getItems().size(), "Node has one item");
+        Node subnode = (Node) node.lookup("a");
+        assertNotNull(subnode, "Subnode exists");
+        assertEquals(1, subnode.getItems().size(), "Subnode has one item");
+    }
+
+    @Test
     @DisplayName("Commented setting")
     @SuppressWarnings("unchecked")
     void testComment() throws FiberException {
@@ -196,6 +204,15 @@ class AnnotatedSettingsTest {
     private static class CommentPojo {
         @Setting(comment = "comment")
         private final int a = 5;
+    }
+
+    private static class SubNodePojo {
+        @Setting.Node(name = "a")
+        public final SubNode node = new SubNode();
+
+        class SubNode {
+            private final int b = 5;
+        }
     }
 
 }
