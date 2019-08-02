@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import javax.xml.stream.events.Comment;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
@@ -122,6 +123,15 @@ class AnnotatedSettingsTest {
         assertDoesNotThrow(() -> AnnotatedSettings.applyToNode(node, pojo), "applyToNode successful");
     }
 
+    @Test
+    @DisplayName("Commented setting")
+    @SuppressWarnings("unchecked")
+    void testComment() throws FiberException {
+        CommentPojo pojo = new CommentPojo();
+        AnnotatedSettings.applyToNode(node, pojo);
+        assertEquals("comment", ((ConfigValue<Integer>) node.lookup("a")).getComment(), "Comment exists and is correct");
+    }
+
     private static class NoFinalPojo {
         private int a = 5;
     }
@@ -131,7 +141,7 @@ class AnnotatedSettingsTest {
     }
 
     private static class ListenerPojo {
-        @Setting.Ignored
+        @Setting(noForceFinal = true)
         private boolean listened = false;
 
         private final int a = 5;
@@ -155,8 +165,8 @@ class AnnotatedSettingsTest {
     }
 
     private static class NumericalConstraintsPojo {
-        @Constrain.Min(0)
-        @Constrain.Max(10)
+        @Setting.Constrain.Min(0)
+        @Setting.Constrain.Max(10)
         private final int a = 5;
     }
 
@@ -174,13 +184,18 @@ class AnnotatedSettingsTest {
     }
 
     private static class FinalSettingPojo {
-        @Setting.Final
+        @Setting(constant = true)
         private final int a = 5;
     }
 
     private static class NoForceFinalPojo {
-        @Setting.NoForceFinal
+        @Setting(noForceFinal = true)
         private int a = 5;
+    }
+
+    private static class CommentPojo {
+        @Setting(comment = "comment")
+        private final int a = 5;
     }
 
 }

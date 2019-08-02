@@ -64,12 +64,16 @@ public class AnnotatedSettings {
     }
 
     private static boolean isIncluded(Field field, boolean onlyAnnotated) {
-        if (field.isAnnotationPresent(Setting.Ignored.class)) return false;
+        if (getSettingAnnotation(field).map(Setting::ignore).orElse(false)) return false;
         return !onlyAnnotated || field.isAnnotationPresent(Setting.class);
     }
 
     private static void checkViolation(Field field, boolean noForceFinals) throws FiberException {
-        if (!noForceFinals && !Modifier.isFinal(field.getModifiers()) && !field.isAnnotationPresent(Setting.NoForceFinal.class)) throw new FiberException("Field '" + field.getName() + "' must be final");
+        if (!noForceFinals && !Modifier.isFinal(field.getModifiers()) && !getSettingAnnotation(field).map(Setting::noForceFinal).orElse(false)) throw new FiberException("Field '" + field.getName() + "' must be final");
+    }
+
+    private static Optional<Setting> getSettingAnnotation(Field field) {
+        return field.isAnnotationPresent(Setting.class) ? Optional.of(field.getAnnotation(Setting.class)) : Optional.empty();
     }
 
     private static <T, P> TreeItem fieldToItem(Field field, P pojo, String name, List<Field> fields) throws FiberException {
@@ -79,7 +83,7 @@ public class AnnotatedSettings {
                 .withName(name)
                 .withComment(findComment(field))
                 .withDefaultValue(findDefaultValue(field, pojo))
-                .setFinal(field.isAnnotationPresent(Setting.Final.class));
+                .setFinal(getSettingAnnotation(field).map(Setting::constant).orElse(false));
 
         constrain(builder.constraints(), field);
 
@@ -94,8 +98,8 @@ public class AnnotatedSettings {
 
     @SuppressWarnings("unchecked")
     private static <T> void constrain(ConstraintsBuilder<T> constraints, Field field) {
-        if (field.isAnnotationPresent(Constrain.Min.class)) constraints.minNumerical((T) Double.valueOf(field.getAnnotation(Constrain.Min.class).value()));
-        if (field.isAnnotationPresent(Constrain.Max.class)) constraints.maxNumerical((T) Double.valueOf(field.getAnnotation(Constrain.Max.class).value()));
+        if (field.isAnnotationPresent(Setting.Constrain.Min.class)) constraints.minNumerical((T) Double.valueOf(field.getAnnotation(Setting.Constrain.Min.class).value()));
+        if (field.isAnnotationPresent(Setting.Constrain.Max.class)) constraints.maxNumerical((T) Double.valueOf(field.getAnnotation(Setting.Constrain.Max.class).value()));
         constraints.finish();
     }
 
@@ -167,8 +171,7 @@ public class AnnotatedSettings {
     }
 
     private static String findComment(Field field) {
-        if (field.isAnnotationPresent(Comment.class)) return field.getAnnotation(Comment.class).value();
-        return null;
+        return getSettingAnnotation(field).map(Setting::comment).filter(s -> !s.isEmpty()).orElse(null);
     }
 
     private static String findName(Field field, SettingNamingConvention convention) {
