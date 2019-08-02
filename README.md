@@ -237,7 +237,7 @@ Creates the following IR:
 > ##### Note
 > If you, for some reason, need a field to not be final, it's possible to annotate it so the deserialiser will treat it as final:
 > ```java
-> @Setting.NoForceFinal()
+> @Setting(noForceFinal = true)
 > public int a = 5;
 > ```
 > 
@@ -252,18 +252,23 @@ Creates the following IR:
 #### Additional properties
 Adding a comment to a setting:
 ```java
-@Comment("A comment.")
+@Setting(comment = "A comment.")
 public final int a = 5;
 ```
 Adding constraints to a setting:
 ```java
-@Constrain.Min(10)
-@Constrain.Max(20)
+@Setting.Constrain.Min(10)
+@Setting.Constrain.Max(20)
 public final int a = 5;
 ```
 Setting a settings value as final (can only be modified from the source it's being deserialised from)
 ```java
-@Setting.Final()
+@Setting(constant = true)
+public final int a = 5;
+```
+Giving a setting a custom name:
+```java
+@Setting(name = "my_name_is")
 public final int a = 5;
 ```
 
