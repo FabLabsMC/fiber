@@ -269,14 +269,26 @@ public final int a = 5;
 Giving a setting a custom name:
 ```java
 @Setting(name = "my_name_is")
-public final int a = 5;
+public final int what = 5;
+```
+Ignoring fields:
+```java
+@Setting(ignored = true)
+private final int a = 5;
+// or
+private transient final int a = 5;
 ```
 
 #### Listeners
-Listeners are defined as a `BiConsumer`, annotated using `@Listener(<settingName>)`
+Listeners are annotated using `@Listener(<settingName>)`
 ```java
 public final int a = 5;
 
+@Listener("a")
+private void aListener(Integer oldValue, Integer newValue) {
+    // I listen!
+}
+// is equivalent to
 @Listener("a")
 private final BiConsumer<Integer, Integer> aListener = (then, now) -> {
         System.out.println("Changed value from " + then + " to " + now);
