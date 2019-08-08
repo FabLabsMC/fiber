@@ -73,8 +73,12 @@ public class AnnotatedSettings {
     }
 
     private static boolean isIncluded(Field field, boolean onlyAnnotated) {
-        if (getSettingAnnotation(field).map(Setting::ignore).orElse(false)) return false;
+        if (isIgnored(field)) return false;
         return !onlyAnnotated || field.isAnnotationPresent(Setting.class);
+    }
+
+    private static boolean isIgnored(Field field) {
+        return getSettingAnnotation(field).map(Setting::ignore).orElse(false) || Modifier.isTransient(field.getModifiers());
     }
 
     private static void checkViolation(Field field, boolean noForceFinals) throws FiberException {

@@ -140,6 +140,14 @@ class AnnotatedSettingsTest {
         assertEquals("comment", ((ConfigValue<Integer>) node.lookup("a")).getComment(), "Comment exists and is correct");
     }
 
+    @Test
+    @DisplayName("Ignored settings")
+    void testIgnore() throws FiberException {
+        IgnoredPojo pojo = new IgnoredPojo();
+        AnnotatedSettings.applyToNode(node, pojo);
+        assertEquals(0, node.getItems().size(), "Node is empty");
+    }
+
     private static class NoFinalPojo {
         private int a = 5;
     }
@@ -204,6 +212,13 @@ class AnnotatedSettingsTest {
     private static class CommentPojo {
         @Setting(comment = "comment")
         private final int a = 5;
+    }
+
+    private static class IgnoredPojo {
+        @Setting(ignore = true)
+        private final int a = 5;
+
+        private transient final int b = 5;
     }
 
     private static class SubNodePojo {
