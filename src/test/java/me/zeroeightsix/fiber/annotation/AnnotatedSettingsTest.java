@@ -54,12 +54,19 @@ class AnnotatedSettingsTest {
         AnnotatedSettings.applyToNode(node, pojo);
 
         TreeItem treeItem = node.lookup("a");
-        assertNotNull(treeItem, "Setting exists");
-        assertTrue(treeItem instanceof Property<?>, "Setting is a property");
+        assertNotNull(treeItem, "Setting A exists");
+        assertTrue(treeItem instanceof Property<?>, "Setting A is a property");
         @SuppressWarnings("unchecked")
         Property<Integer> property = (Property<Integer>) treeItem;
         property.setValue(10);
-        assertEquals(true, pojo.listened, "Listener was triggered");
+        assertTrue(pojo.listenedA, "Listener for A was triggered");
+
+        treeItem = node.lookup("b");
+        assertNotNull(treeItem, "Setting B exists");
+        assertTrue(treeItem instanceof Property<?>, "Setting B is a property");
+        property = (Property<Integer>) treeItem;
+        property.setValue(10);
+        assertTrue(pojo.listenedB, "Listener for B was triggered");
     }
 
     @Test
@@ -157,13 +164,19 @@ class AnnotatedSettingsTest {
     }
 
     private static class ListenerPojo {
-        @Setting(noForceFinal = true)
-        private boolean listened = false;
+        private transient boolean listenedA = false;
+        private transient boolean listenedB = false;
 
         private final int a = 5;
+        private final int b = 5;
 
         @Listener("a")
-        private final BiConsumer<Integer, Integer> aListener = (now, then) -> listened = true;
+        private final BiConsumer<Integer, Integer> aListener = (now, then) -> listenedA = true;
+
+        @Listener("b")
+        private void bListener(Integer oldValue, Integer newValue) {
+            listenedB = true;
+        }
     }
 
     private static class NonMatchingListenerPojo {

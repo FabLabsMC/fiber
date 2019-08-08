@@ -11,12 +11,11 @@ import me.zeroeightsix.fiber.tree.ConfigNode;
 import me.zeroeightsix.fiber.tree.Node;
 import me.zeroeightsix.fiber.tree.TreeItem;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class AnnotatedSettings {
 
@@ -44,8 +43,8 @@ public class AnnotatedSettings {
     private static <P> Node constructNode(Class<P> pojoClass, P pojo, boolean noForceFinals, boolean onlyAnnotated, SettingNamingConvention convention) throws FiberException {
         ConfigNode node = new ConfigNode();
 
-        List<Field> defaultEmpty = new ArrayList<>();
-        Map<String, List<Field>> listenerMap = findListeners(pojoClass);
+        List<Member> defaultEmpty = new ArrayList<>();
+        Map<String, List<Member>> listenerMap = findListeners(pojoClass);
 
         for (Field field : pojoClass.getDeclaredFields()) {
             if (field.isSynthetic() || !isIncluded(field, onlyAnnotated)) continue;
@@ -66,10 +65,10 @@ public class AnnotatedSettings {
         return node;
     }
 
-    private static Map<String, List<Field>> findListeners(Class<?> pojoClass) {
-        return Arrays.stream(pojoClass.getDeclaredFields())
-                .filter(field -> field.isAnnotationPresent(Listener.class))
-                .collect(Collectors.groupingBy(field -> field.getAnnotation(Listener.class).value()));
+    private static Map<String, List<Member>> findListeners(Class<?> pojoClass) {
+        return Stream.concat(Arrays.stream(pojoClass.getDeclaredFields()), Arrays.stream(pojoClass.getDeclaredMethods()))
+                .filter(accessibleObject -> accessibleObject.isAnnotationPresent(Listener.class))
+                .collect(Collectors.groupingBy(accessibleObject -> ((AccessibleObject) accessibleObject).getAnnotation(Listener.class).value()));
     }
 
     private static boolean isIncluded(Field field, boolean onlyAnnotated) {
@@ -89,7 +88,7 @@ public class AnnotatedSettings {
         return field.isAnnotationPresent(Setting.class) ? Optional.of(field.getAnnotation(Setting.class)) : Optional.empty();
     }
 
-    private static <T, P> TreeItem fieldToItem(Field field, P pojo, String name, List<Field> fields) throws FiberException {
+    private static <T, P> TreeItem fieldToItem(Field field, P pojo, String name, List<Member> listeners) throws FiberException {
         Class<T> type = getSettingTypeFromField(field);
 
         ConfigValueBuilder<T> builder = new ConfigValueBuilder<>(type)
@@ -100,7 +99,7 @@ public class AnnotatedSettings {
 
         constrain(builder.constraints(), field);
 
-        for (Field listener : fields) {
+        for (Member listener : listeners) {
             BiConsumer<T, T> consumer = constructListener(listener, pojo, type);
             if (consumer == null) continue;
             builder.withListener(consumer);
@@ -130,8 +129,36 @@ public class AnnotatedSettings {
         return value;
     }
 
-    private static <T, P, A> BiConsumer<T,T> constructListener(Field field, P pojo, Class<A> wantedType) throws FiberException {
-        checkListener(field, wantedType);
+    private static <T, P, A> BiConsumer<T,T> constructListener(Member listener, P pojo, Class<A> wantedType) throws FiberException {
+        if (listener instanceof Field) {
+            return constructListenerFromField((Field) listener, pojo, wantedType);
+        } else if (listener instanceof Method) {
+            return constructListenerFromMethod((Method) listener, pojo, wantedType);
+        } else {
+            throw new FiberException("Cannot create listener from " + listener + ": must be a field or method");
+        }
+    }
+
+    private static <T, P, A> BiConsumer<T,T> constructListenerFromMethod(Method method, P pojo, Class<A> wantedType) throws FiberException {
+        checkListenerMethod(method, wantedType);
+        method.setAccessible(true);
+        final boolean staticMethod = Modifier.isStatic(method.getModifiers());
+        return (oldValue, newValue) -> {
+            try {
+                method.invoke(staticMethod ? null : pojo, oldValue, newValue);
+            } catch (IllegalAccessException | InvocationTargetException e) {
+                e.printStackTrace();
+            }
+        };
+    }
+
+    private static <A> void checkListenerMethod(Method method, Class<A> wantedType) throws FiberException {
+        if (!method.getReturnType().equals(void.class)) throw new FiberException("Listener method must return void");
+        if (method.getParameterCount() != 2 || !method.getParameterTypes()[0].equals(wantedType)) throw new FiberException("Listener method must have exactly two parameters of type that it listens for");
+    }
+
+    private static <T, P, A> BiConsumer<T,T> constructListenerFromField(Field field, P pojo, Class<A> wantedType) throws FiberException {
+        checkListenerField(field, wantedType);
 
         @SuppressWarnings("unchecked")
         boolean isAccessible = field.isAccessible();
@@ -148,7 +175,7 @@ public class AnnotatedSettings {
         return consumer;
     }
 
-    private static <A> void checkListener(Field field, Class<A> wantedType) throws MalformedFieldException {
+    private static <A> void checkListenerField(Field field, Class<A> wantedType) throws MalformedFieldException {
         if (!field.getType().equals(BiConsumer.class)) {
             throw new MalformedFieldException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must be a BiConsumer");
         }
