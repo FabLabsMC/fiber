@@ -6,7 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import javax.xml.stream.events.Comment;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
@@ -41,9 +40,9 @@ class AnnotatedSettingsTest {
     }
 
     @Test
-    @DisplayName("Throw no final exception")
+    @DisplayName("Throw final exception")
     void testNoFinal() {
-        NoFinalPojo pojo = new NoFinalPojo();
+        FinalSettingPojo pojo = new FinalSettingPojo();
         assertThrows(FiberException.class, () -> AnnotatedSettings.applyToNode(node, pojo));
     }
 
@@ -113,18 +112,11 @@ class AnnotatedSettingsTest {
     }
 
     @Test
-    @DisplayName("Final setting")
-    void testFinalSetting() throws FiberException {
-        FinalSettingPojo pojo = new FinalSettingPojo();
+    @DisplayName("Constant setting")
+    void testConstantSetting() throws FiberException {
+        ConstantSettingPojo pojo = new ConstantSettingPojo();
         AnnotatedSettings.applyToNode(node, pojo);
         assertFalse(((ConfigValue<Integer>) node.lookup("a")).setValue(0));
-    }
-
-    @Test
-    @DisplayName("No force final setting")
-    void testNoForceFinal() {
-        NoForceFinalPojo pojo = new NoForceFinalPojo();
-        assertDoesNotThrow(() -> AnnotatedSettings.applyToNode(node, pojo), "applyToNode successful");
     }
 
     @Test
@@ -155,23 +147,23 @@ class AnnotatedSettingsTest {
         assertEquals(0, node.getItems().size(), "Node is empty");
     }
 
-    private static class NoFinalPojo {
-        private int a = 5;
+    private static class FinalSettingPojo {
+        private final int a = 5;
     }
 
     private static class OneFieldPojo {
-        private final int a = 5;
+        private int a = 5;
     }
 
     private static class ListenerPojo {
         private transient boolean listenedA = false;
         private transient boolean listenedB = false;
 
-        private final int a = 5;
-        private final int b = 5;
+        private int a = 5;
+        private int b = 5;
 
         @Listener("a")
-        private final BiConsumer<Integer, Integer> aListener = (now, then) -> listenedA = true;
+        private BiConsumer<Integer, Integer> aListener = (now, then) -> listenedA = true;
 
         @Listener("b")
         private void bListener(Integer oldValue, Integer newValue) {
@@ -180,66 +172,61 @@ class AnnotatedSettingsTest {
     }
 
     private static class NonMatchingListenerPojo {
-        private final int a = 5;
+        private int a = 5;
 
         @Listener("a")
-        private final BiConsumer<Double, Integer> aListener = (now, then) -> {};
+        private BiConsumer<Double, Integer> aListener = (now, then) -> {};
     }
 
     private static class WrongGenericListenerPojo {
-        private final int a = 5;
+        private int a = 5;
 
         @Listener("a")
-        private final BiConsumer<Double, Double> aListener = (now, then) -> {};
+        private BiConsumer<Double, Double> aListener = (now, then) -> {};
     }
 
     private static class NumericalConstraintsPojo {
         @Setting.Constrain.Min(0)
         @Setting.Constrain.Max(10)
-        private final int a = 5;
+        private int a = 5;
     }
 
     @Settings(onlyAnnotated = true)
     private static class OnlyAnnotatedFieldsPojo {
         @Setting
-        private final int a = 5;
+        private int a = 5;
 
-        private final int b = 6;
+        private int b = 6;
     }
 
     private static class CustomNamePojo {
         @Setting(name = "custom_name")
-        private final int a = 5;
+        private int a = 5;
     }
 
-    private static class FinalSettingPojo {
+    private static class ConstantSettingPojo {
         @Setting(constant = true)
-        private final int a = 5;
-    }
-
-    private static class NoForceFinalPojo {
-        @Setting(noForceFinal = true)
         private int a = 5;
     }
 
     private static class CommentPojo {
         @Setting(comment = "comment")
-        private final int a = 5;
+        private int a = 5;
     }
 
     private static class IgnoredPojo {
         @Setting(ignore = true)
-        private final int a = 5;
+        private int a = 5;
 
-        private transient final int b = 5;
+        private transient int b = 5;
     }
 
     private static class SubNodePojo {
         @Setting.Node(name = "a")
-        public final SubNode node = new SubNode();
+        public SubNode node = new SubNode();
 
         class SubNode {
-            private final int b = 5;
+            private int b = 5;
         }
     }
 

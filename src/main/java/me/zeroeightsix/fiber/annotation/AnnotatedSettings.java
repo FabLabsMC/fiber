@@ -23,24 +23,22 @@ public class AnnotatedSettings {
         @SuppressWarnings("unchecked")
         Class<P> pojoClass = (Class<P>) pojo.getClass();
 
-        boolean noForceFinals;
         boolean onlyAnnotated;
         SettingNamingConvention convention;
 
         if (pojoClass.isAnnotationPresent(Settings.class)) {
             Settings settingsAnnotation = pojoClass.getAnnotation(Settings.class);
-            noForceFinals = settingsAnnotation.noForceFinals();
             onlyAnnotated = settingsAnnotation.onlyAnnotated();
             convention = createConvention(settingsAnnotation.namingConvention());
         } else { // Assume defaults
-            noForceFinals = onlyAnnotated = false;
+            onlyAnnotated = false;
             convention = new NoNamingConvention();
         }
 
-        NodeOperations.mergeTo(constructNode(pojoClass, pojo, noForceFinals, onlyAnnotated, convention), mergeTo);
+        NodeOperations.mergeTo(constructNode(pojoClass, pojo, onlyAnnotated, convention), mergeTo);
     }
 
-    private static <P> Node constructNode(Class<P> pojoClass, P pojo, boolean noForceFinals, boolean onlyAnnotated, SettingNamingConvention convention) throws FiberException {
+    private static <P> Node constructNode(Class<P> pojoClass, P pojo, boolean onlyAnnotated, SettingNamingConvention convention) throws FiberException {
         ConfigNode node = new ConfigNode();
 
         List<Member> defaultEmpty = new ArrayList<>();
@@ -48,7 +46,7 @@ public class AnnotatedSettings {
 
         for (Field field : pojoClass.getDeclaredFields()) {
             if (field.isSynthetic() || !isIncluded(field, onlyAnnotated)) continue;
-            checkViolation(field, noForceFinals);
+            checkViolation(field);
             String name = findName(field, convention);
             if (field.isAnnotationPresent(Setting.Node.class)) {
                 Node sub = node.fork(name);
@@ -80,8 +78,8 @@ public class AnnotatedSettings {
         return getSettingAnnotation(field).map(Setting::ignore).orElse(false) || Modifier.isTransient(field.getModifiers());
     }
 
-    private static void checkViolation(Field field, boolean noForceFinals) throws FiberException {
-        if (!noForceFinals && !Modifier.isFinal(field.getModifiers()) && !getSettingAnnotation(field).map(Setting::noForceFinal).orElse(false)) throw new FiberException("Field '" + field.getName() + "' must be final");
+    private static void checkViolation(Field field) throws FiberException {
+        if (Modifier.isFinal(field.getModifiers())) throw new FiberException("Field '" + field.getName() + "' can not be final");
     }
 
     private static Optional<Setting> getSettingAnnotation(Field field) {
@@ -104,6 +102,17 @@ public class AnnotatedSettings {
             if (consumer == null) continue;
             builder.withListener(consumer);
         }
+
+        builder.withListener((t, newValue) -> {
+            try {
+                final boolean accessible = field.isAccessible();
+                field.setAccessible(true);
+                field.set(pojo, newValue);
+                field.setAccessible(accessible);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        });
 
         return builder.build();
     }

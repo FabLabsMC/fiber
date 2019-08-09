@@ -7,7 +7,6 @@ import java.lang.annotation.RetentionPolicy;
 public @interface Setting {
 
     boolean constant() default false;
-    boolean noForceFinal() default false;
     String name() default "";
     String comment() default "";
 

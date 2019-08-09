@@ -220,11 +220,11 @@ try {
 In your POJO class, every field, unless annotated using `@Setting.Ignored`, is considered a setting.
 
 #### Final
-These fields **must** be `final`. This is to force users to provide default values and keep them from setting the values at runtime as the configuration can't pick up fields being set directly.
+These fields aren't allowed to be `final`. This is because fiber should be allowed to modify your POJO, and modifying final fields is against the rules of `final`.
 
 ```java
 public class POJO {
-    public final int mySetting = 5;
+    public int mySetting = 5;
 }
 ```
 Creates the following IR:
@@ -234,55 +234,40 @@ Creates the following IR:
     - Default value `5`
     - Name `mySetting`
 
-> ##### Note
-> If you, for some reason, need a field to not be final, it's possible to annotate it so the deserialiser will treat it as final:
-> ```java
-> @Setting(noForceFinal = true)
-> public int a = 5;
-> ```
-> 
-> Or, for your entire POJO  class:
-> ```java
-> @Settings(noForceFinals = true)
-> public class MyPojo {
->     public int a = 5;
-> }
-> ```
-
 #### Additional properties
 Adding a comment to a setting:
 ```java
 @Setting(comment = "A comment.")
-public final int a = 5;
+public int a = 5;
 ```
 Adding constraints to a setting:
 ```java
 @Setting.Constrain.Min(10)
 @Setting.Constrain.Max(20)
-public final int a = 5;
+public int a = 5;
 ```
 Setting a settings value as final (can only be modified from the source it's being deserialised from)
 ```java
 @Setting(constant = true)
-public final int a = 5;
+public int a = 5;
 ```
 Giving a setting a custom name:
 ```java
 @Setting(name = "my_name_is")
-public final int what = 5;
+public int what = 5;
 ```
 Ignoring fields:
 ```java
 @Setting(ignored = true)
-private final int a = 5;
+private int a = 5;
 // or
-private transient final int a = 5;
+private transient int a = 5;
 ```
 
 #### Listeners
 Listeners are annotated using `@Listener(<settingName>)`
 ```java
-public final int a = 5;
+public int a = 5;
 
 @Listener("a")
 private void aListener(Integer oldValue, Integer newValue) {
