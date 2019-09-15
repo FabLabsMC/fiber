@@ -149,21 +149,36 @@ public class AnnotatedSettings {
     }
 
     private static <T, P, A> BiConsumer<T,T> constructListenerFromMethod(Method method, P pojo, Class<A> wantedType) throws FiberException {
-        checkListenerMethod(method, wantedType);
+        int i = checkListenerMethod(method, wantedType);
         method.setAccessible(true);
         final boolean staticMethod = Modifier.isStatic(method.getModifiers());
-        return (oldValue, newValue) -> {
-            try {
-                method.invoke(staticMethod ? null : pojo, oldValue, newValue);
-            } catch (IllegalAccessException | InvocationTargetException e) {
-                e.printStackTrace();
-            }
-        };
+        switch (i) {
+            case 1:
+                return (oldValue, newValue) -> {
+                    try {
+                        method.invoke(staticMethod ? null : pojo, newValue);
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        e.printStackTrace();
+                    }
+                };
+            case 2:
+                return (oldValue, newValue) -> {
+                    try {
+                        method.invoke(staticMethod ? null : pojo, oldValue, newValue);
+                    } catch (IllegalAccessException | InvocationTargetException e) {
+                        e.printStackTrace();
+                    }
+                };
+            default:
+                throw new FiberException("Listener failed due to an invalid number of arguments.");
+        }
     }
 
-    private static <A> void checkListenerMethod(Method method, Class<A> wantedType) throws FiberException {
+    private static <A> int checkListenerMethod(Method method, Class<A> wantedType) throws FiberException {
         if (!method.getReturnType().equals(void.class)) throw new FiberException("Listener method must return void");
-        if (method.getParameterCount() != 2 || !method.getParameterTypes()[0].equals(wantedType)) throw new FiberException("Listener method must have exactly two parameters of type that it listens for");
+        int paramCount = method.getParameterCount();
+        if ((paramCount != 1 && paramCount != 2) || !method.getParameterTypes()[0].equals(wantedType)) throw new FiberException("Listener method must have exactly two parameters of type that it listens for");
+        return paramCount;
     }
 
     private static <T, P, A> BiConsumer<T,T> constructListenerFromField(Field field, P pojo, Class<A> wantedType) throws FiberException {

@@ -66,6 +66,13 @@ class AnnotatedSettingsTest {
         property = (Property<Integer>) treeItem;
         property.setValue(10);
         assertTrue(pojo.listenedB, "Listener for B was triggered");
+
+        treeItem = node.lookup("c");
+        assertNotNull(treeItem, "Setting C exists");
+        assertTrue(treeItem instanceof Property<?>, "Setting C is a property");
+        property = (Property<Integer>) treeItem;
+        property.setValue(10);
+        assertTrue(pojo.listenedC, "Listener for C was triggered");
     }
 
     @Test
@@ -158,9 +165,11 @@ class AnnotatedSettingsTest {
     private static class ListenerPojo {
         private transient boolean listenedA = false;
         private transient boolean listenedB = false;
+        private transient boolean listenedC = false;
 
         private int a = 5;
         private int b = 5;
+        private int c = 5;
 
         @Listener("a")
         private BiConsumer<Integer, Integer> aListener = (now, then) -> listenedA = true;
@@ -168,6 +177,11 @@ class AnnotatedSettingsTest {
         @Listener("b")
         private void bListener(Integer oldValue, Integer newValue) {
             listenedB = true;
+        }
+
+        @Listener("c")
+        private void cListener(Integer newValue) {
+            listenedC = true;
         }
     }
 
