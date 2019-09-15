@@ -71,14 +71,17 @@ public class JanksonSettings {
 		JsonObject object = new JsonObject();
 
 		node.getItems().forEach(treeItem -> {
+			String name = null;
+
 			if (treeItem instanceof Node) {
 				Node subNode = (Node) treeItem;
-				object.put(subNode.getName(), serialize(subNode));
-				return;
+				object.put((name = subNode.getName()), serialize(subNode));
+			} else if (treeItem instanceof HasValue) {
+				object.put((name = treeItem.getName()), serialize((HasValue<?>) treeItem));
 			}
 
-			if (treeItem instanceof HasValue) {
-				object.put(treeItem.getName(), serialize((HasValue<?>) treeItem));
+			if (name != null && treeItem instanceof Commentable) {
+				object.setComment(name, ((Commentable) treeItem).getComment());
 			}
 		});
 

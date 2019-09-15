@@ -2,7 +2,7 @@ package me.zeroeightsix.fiber.tree;
 
 import javax.annotation.Nullable;
 
-public class ConfigLeaf implements TreeItem {
+public class ConfigLeaf implements TreeItem, Commentable {
 
     @Nullable
     private final String name;
