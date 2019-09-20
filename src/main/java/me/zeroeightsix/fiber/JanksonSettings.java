@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class JanksonSettings {
@@ -64,7 +65,7 @@ public class JanksonSettings {
 
 	public void serialize(Node node, OutputStream stream, boolean compress) throws IOException {
 		JsonObject object = serialize(node);
-		stream.write(object.toJson(!compress, !compress).getBytes());
+		stream.write(object.toJson(!compress, !compress).getBytes(StandardCharsets.UTF_8));
 	}
 
 	private JsonObject serialize(Node node) {
