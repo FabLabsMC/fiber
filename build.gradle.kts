@@ -34,7 +34,7 @@ repositories {
 
 configurations.api.get().extendsFrom(configurations.shadow.get())
 dependencies {
-    shadow(group = "blue.endless", name = "jankson", version = "1.1.1")
+    shadow(group = "blue.endless", name = "jankson", version = "1.2.0")
     compileOnly(group = "com.google.code.findbugs", name = "jsr305", version = "3.0.2")
     testImplementation(group = "org.junit.jupiter", name = "junit-jupiter", version = "5.4.1")
 }

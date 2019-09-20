@@ -4,7 +4,7 @@ import blue.endless.jankson.JsonArray;
 import blue.endless.jankson.JsonElement;
 import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.JsonPrimitive;
-import blue.endless.jankson.impl.Marshaller;
+import blue.endless.jankson.impl.MarshallerImpl;
 import me.zeroeightsix.fiber.Identifier;
 import me.zeroeightsix.fiber.builder.constraint.CompositeConstraintBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
@@ -65,7 +65,7 @@ public class SchemaGenerator {
 		}
 		if (item.getDefaultValue() != null) {
 			Object o = item.getDefaultValue();
-			object.put("defaultValue", Optional.ofNullable(marshaller != null ? marshaller.marshall(o) : null).orElse(Marshaller.getFallback().serialize(o)));
+			object.put("defaultValue", Optional.ofNullable(marshaller != null ? marshaller.marshall(o) : null).orElse(MarshallerImpl.getFallback().serialize(o)));
 		}
 		if (!item.getConstraints().isEmpty()) {
 			object.put("constraints", createSchema(item.getConstraints()));
