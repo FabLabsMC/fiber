@@ -1,7 +1,7 @@
 package me.zeroeightsix.fiber;
 
 import blue.endless.jankson.*;
-import blue.endless.jankson.impl.SyntaxError;
+import blue.endless.jankson.api.SyntaxError;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.tree.*;
 
@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class JanksonSettings {
@@ -64,7 +65,7 @@ public class JanksonSettings {
 
 	public void serialize(Node node, OutputStream stream, boolean compress) throws IOException {
 		JsonObject object = serialize(node);
-		stream.write(object.toJson(!compress, !compress).getBytes());
+		stream.write(object.toJson(!compress, !compress).getBytes(StandardCharsets.UTF_8));
 	}
 
 	private JsonObject serialize(Node node) {
@@ -91,7 +92,7 @@ public class JanksonSettings {
 	private JsonElement serialize(HasValue<?> hasValue) {
 		JsonElement element = marshaller != null ? marshaller.marshall(hasValue.getValue()) : null;
 		if (element != null) return element;
-		return blue.endless.jankson.impl.Marshaller.getFallback().serialize(hasValue.getValue());
+		return blue.endless.jankson.impl.MarshallerImpl.getFallback().serialize(hasValue.getValue());
 	}
 
 	private class JanksonTransparentNode implements Transparent {
@@ -123,7 +124,7 @@ public class JanksonSettings {
 	private <A> A marshall(Class<A> type, JsonElement value) {
 		A object = marshaller != null ? marshaller.marshallReverse(type, value) : null;
 		if (object != null) return object;
-		return blue.endless.jankson.impl.Marshaller.getFallback().marshall(type, value);
+		return blue.endless.jankson.impl.MarshallerImpl.getFallback().marshall(type, value);
 	}
 
 }
