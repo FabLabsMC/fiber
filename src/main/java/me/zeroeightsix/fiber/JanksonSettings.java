@@ -45,7 +45,7 @@ public class JanksonSettings {
 			TreeItem item = node.lookup(key);
 			if (item != null) {
 				if (item instanceof Property) {
-					setPopertyValue((Property<?>) item, child);
+					setPropertyValue((Property<?>) item, child);
 				} else if (item instanceof Node && child instanceof JsonObject) {
 					deserialize((Node) item, (JsonObject) child);
 				} else {
@@ -58,7 +58,7 @@ public class JanksonSettings {
 		}
 	}
 
-	private <T> void setPopertyValue(Property<T> property, JsonElement child) {
+	private <T> void setPropertyValue(Property<T> property, JsonElement child) {
 		Class<T> type = property.getType();
 		property.setValue(marshall(type, child));
 	}
@@ -71,12 +71,14 @@ public class JanksonSettings {
 	private JsonObject serialize(Node node) {
 		JsonObject object = new JsonObject();
 
-		node.getItems().forEach(treeItem -> {
+		for (TreeItem treeItem : node.getItems()) {
 			String name = null;
 
 			if (treeItem instanceof Node) {
 				Node subNode = (Node) treeItem;
-				object.put((name = subNode.getName()), serialize(subNode));
+				if (!subNode.isSerializedSeparately()) {
+					object.put((name = subNode.getName()), serialize(subNode));
+				}
 			} else if (treeItem instanceof HasValue) {
 				object.put((name = treeItem.getName()), serialize((HasValue<?>) treeItem));
 			}
@@ -84,7 +86,7 @@ public class JanksonSettings {
 			if (name != null && treeItem instanceof Commentable) {
 				object.setComment(name, ((Commentable) treeItem).getComment());
 			}
-		});
+		}
 
 		return object;
 	}
