@@ -12,6 +12,18 @@ public interface Node extends TreeItem {
     @Nonnull
     Set<TreeItem> getItems();
 
+    /**
+     * Returns {@code true} if this node should be serialized separately to its parent.
+     *
+     * <p> If a node is serialized separately, it should not appear in the serialized representation of
+     * its parent. This setting has no effect if this node is a root.
+     *
+     * @return {@code true} if this node should be serialized separately, and {@code false} otherwise
+     */
+    default boolean isSerializedSeparately() {
+        return false;
+    }
+
     @Nullable
     default TreeItem lookup(String name) {
         return getItems()
@@ -51,8 +63,28 @@ public interface Node extends TreeItem {
         return item;
     }
 
+    /**
+     * Forks this node, creating a subtree which parent is this node.
+     *
+     * @param name the name of the new {@code Node}
+     * @return the created node
+     * @throws FiberException if the new node cannot be added as a child to this node
+     */
     default Node fork(String name) throws FiberException {
-        return (Node) add(new ConfigNode(name, null));
+        return fork(name, false);
+    }
+
+    /**
+     * Forks this node, creating a subtree which parent is this node.
+     *
+     * @param name the name of the new {@code Node}
+     * @param serializeSeparately if {@code true}, the subtree will not appear in the
+     *                            serialized representation of this {@code Node}
+     * @return the created node
+     * @throws FiberException if the new node cannot be added as a child to this node
+     */
+    default Node fork(String name, boolean serializeSeparately) throws FiberException {
+        return (Node) add(new ConfigNode(name, null, serializeSeparately));
     }
 
 }
