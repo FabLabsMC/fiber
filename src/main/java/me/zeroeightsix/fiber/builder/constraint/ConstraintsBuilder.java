@@ -9,7 +9,7 @@ import javax.annotation.RegEx;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public final class ConstraintsBuilder<T> extends AbstractConstraintsBuilder<T> {
+public final class ConstraintsBuilder<T> extends AbstractConstraintsBuilder<T, ConstraintsBuilder<T>> {
 
 	final ConfigValueBuilder<T> source;
 
@@ -20,31 +20,6 @@ public final class ConstraintsBuilder<T> extends AbstractConstraintsBuilder<T> {
 
 	public CompositeConstraintBuilder<T> composite(CompositeType type) {
 		return new CompositeConstraintBuilder<>(type, sourceConstraints, this.type, this);
-	}
-
-	public ConstraintsBuilder<T> minNumerical(T min) throws RuntimeFiberException {
-		addNumericalLowerBound(min);
-		return this;
-	}
-
-	public ConstraintsBuilder<T> maxNumerical(T min) throws RuntimeFiberException {
-		addNumericalUpperBound(min);
-		return this;
-	}
-
-	public ConstraintsBuilder<T> minStringLength(int min) {
-		addStringLengthLowerBound(min);
-		return this;
-	}
-
-	public ConstraintsBuilder<T> maxStringLength(int min) {
-		addStringLengthUpperBound(min);
-		return this;
-	}
-
-	public ConstraintsBuilder<T> regex(@RegEx String regexPattern) {
-		addStringPattern(Pattern.compile(regexPattern));
-		return this;
 	}
 
 	public ConfigValueBuilder<T> finish() {
