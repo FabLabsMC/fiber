@@ -7,7 +7,7 @@ import me.zeroeightsix.fiber.constraint.Constraint;
 
 import java.util.List;
 
-public class ConstraintsBuilder<T> extends AbstractConstraintsBuilder<T> {
+public final class ConstraintsBuilder<T> extends AbstractConstraintsBuilder<T> {
 
 	final ConfigValueBuilder<T> source;
 

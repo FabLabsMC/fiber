@@ -59,7 +59,7 @@ public final class CompositeConstraintBuilder<T> extends AbstractConstraintsBuil
 
 	}
 
-	private static class AndCompositeConstraint<T> extends AbstractCompositeConstraint<T> {
+	private static final class AndCompositeConstraint<T> extends AbstractCompositeConstraint<T> {
 
 		public AndCompositeConstraint(List<Constraint<? super T>> constraints) {
 			super(CompositeType.AND, constraints);
@@ -72,7 +72,7 @@ public final class CompositeConstraintBuilder<T> extends AbstractConstraintsBuil
 
 	}
 
-	private static class OrCompositeConstraint<T> extends AbstractCompositeConstraint<T> {
+	private static final class OrCompositeConstraint<T> extends AbstractCompositeConstraint<T> {
 
 		public OrCompositeConstraint(List<Constraint<? super T>> constraints) {
 			super(CompositeType.OR, constraints);
@@ -85,7 +85,7 @@ public final class CompositeConstraintBuilder<T> extends AbstractConstraintsBuil
 
 	}
 
-	private static class InvertCompositeConstraint<T> extends AbstractCompositeConstraint<T> {
+	private static final class InvertCompositeConstraint<T> extends AbstractCompositeConstraint<T> {
 
 		public InvertCompositeConstraint(List<Constraint<? super T>> constraints) {
 			super(CompositeType.INVERT, constraints);
@@ -93,7 +93,7 @@ public final class CompositeConstraintBuilder<T> extends AbstractConstraintsBuil
 
 		@Override
 		public boolean test(T value) {
-			return !constraints.stream().anyMatch(constraint -> constraint.test(value));
+			return constraints.stream().noneMatch(constraint -> constraint.test(value));
 		}
 
 	}

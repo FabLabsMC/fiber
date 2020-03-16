@@ -8,7 +8,7 @@ import me.zeroeightsix.fiber.constraint.NumberConstraint;
 import java.util.ArrayList;
 import java.util.List;
 
-abstract class AbstractConstraintsBuilder<T> {
+public abstract class AbstractConstraintsBuilder<T> {
 
 	final List<Constraint<? super T>> sourceConstraints;
 	protected final Class<T> type;
