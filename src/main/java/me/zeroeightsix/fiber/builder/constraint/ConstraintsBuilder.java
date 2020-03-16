@@ -1,13 +1,15 @@
 package me.zeroeightsix.fiber.builder.constraint;
 
 import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
-import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.constraint.CompositeType;
 import me.zeroeightsix.fiber.constraint.Constraint;
+import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 
+import javax.annotation.RegEx;
 import java.util.List;
+import java.util.regex.Pattern;
 
-public final class ConstraintsBuilder<T> extends AbstractConstraintsBuilder<T> {
+public final class ConstraintsBuilder<T> extends AbstractConstraintsBuilder<T, ConstraintsBuilder<T>> {
 
 	final ConfigValueBuilder<T> source;
 
@@ -20,19 +22,8 @@ public final class ConstraintsBuilder<T> extends AbstractConstraintsBuilder<T> {
 		return new CompositeConstraintBuilder<>(type, sourceConstraints, this.type, this);
 	}
 
-	public ConstraintsBuilder<T> minNumerical(T min) throws RuntimeFiberException {
-		addNumericalLowerBound(min);
-		return this;
-	}
-
-	public ConstraintsBuilder<T> maxNumerical(T min) throws RuntimeFiberException {
-		addNumericalUpperBound(min);
-		return this;
-	}
-
 	public ConfigValueBuilder<T> finish() {
 		super.addConstraints();
 		return source;
 	}
-
 }

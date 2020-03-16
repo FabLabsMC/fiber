@@ -5,9 +5,10 @@ import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.Constraints;
 import me.zeroeightsix.fiber.constraint.ValuedConstraint;
 
+import javax.annotation.RegEx;
 import java.util.List;
 
-public final class CompositeConstraintBuilder<T> extends AbstractConstraintsBuilder<T> {
+public final class CompositeConstraintBuilder<T> extends AbstractConstraintsBuilder<T, CompositeConstraintBuilder<T>> {
 
 	private final ConstraintsBuilder<T> source;
 	private final CompositeType compositeType;
@@ -16,16 +17,6 @@ public final class CompositeConstraintBuilder<T> extends AbstractConstraintsBuil
 		super(sourceConstraints, type);
 		this.source = source;
 		this.compositeType = compositeType;
-	}
-
-	public CompositeConstraintBuilder<T> minNumerical(T min) {
-		addNumericalLowerBound(min);
-		return this;
-	}
-
-	public CompositeConstraintBuilder<T> maxNumerical(T min) {
-		addNumericalUpperBound(min);
-		return this;
 	}
 
 	public ConstraintsBuilder<T> finishComposite() {
