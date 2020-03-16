@@ -18,10 +18,10 @@ class ConstraintsBuilderTest {
     public void testNumericalConstraints() {
         List<Constraint<? super Integer>> constraintList = new ArrayList<>();
         ConstraintsBuilder<Integer> constraintsBuilder = new ConstraintsBuilder<>(constraintList, Integer.class, null);
-        constraintsBuilder.minNumerical(5)
+        constraintsBuilder.biggerThan(5)
                 .composite(CompositeType.OR)
-                .minNumerical(20)
-                .maxNumerical(10)
+                .biggerThan(20)
+                .smallerThan(10)
                 .finishComposite()
                 .finish();
 

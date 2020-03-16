@@ -214,8 +214,8 @@ class AnnotatedSettingsTest {
     }
 
     private static class NumericalConstraintsPojo {
-        @Setting.Constrain.Min(0)
-        @Setting.Constrain.Max(10)
+        @Setting.Constrain.BiggerThan(0)
+        @Setting.Constrain.SmallerThan(10)
         private int a = 5;
     }
 

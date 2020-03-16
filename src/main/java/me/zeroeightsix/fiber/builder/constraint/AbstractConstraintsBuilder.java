@@ -20,19 +20,31 @@ public abstract class AbstractConstraintsBuilder<T, B extends AbstractConstraint
         this.type = type;
     }
 
+    /**
+     * Implies that any value must be bigger than <b>or equal</b> to <code>min</code>
+     * @param min The minimum value
+     * @return The builder
+     * @throws RuntimeFiberException
+     */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public B minNumerical(T min) throws RuntimeFiberException {
+    public B biggerThan(T min) throws RuntimeFiberException {
         checkNumerical();
         checkNumerical(min);
         newConstraints.add(new NumberConstraint(Constraints.NUMERICAL_LOWER_BOUND, (Number) min));
         return (B) this;
     }
 
+    /**
+     * Implies that any value must be smaller than <b>or equal</b> to <code>max</code>
+     * @param max The maximum value
+     * @return The builder
+     * @throws RuntimeFiberException
+     */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public B maxNumerical(T min) throws RuntimeFiberException {
+    public B smallerThan(T max) throws RuntimeFiberException {
         checkNumerical();
-        checkNumerical(min);
-        newConstraints.add(new NumberConstraint(Constraints.NUMERICAL_UPPER_BOUND, (Number) min));
+        checkNumerical(max);
+        newConstraints.add(new NumberConstraint(Constraints.NUMERICAL_UPPER_BOUND, (Number) max));
         return (B) this;
     }
 

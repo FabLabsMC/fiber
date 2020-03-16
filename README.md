@@ -84,23 +84,23 @@ ConfigValue<Integer> mySetting = ConfigValue.builder(Integer.class)
         .withName("MySettingName")
         .constraints()
         .composite(CompositeType.INVERT)
-        .minNumerical(10)
-        .maxNumerical(20)
+        .biggerThan(10)
+        .smallerThan(20)
         .finishComposite()
-        .minNumerical(0)
+        .biggerThan(0)
         .finish()
         .build();
 ```
 Let's take a deeper look. The constraint is built from two parts:
 ```java
         .composite(CompositeType.INVERT)
-        .minNumerical(10)
-        .maxNumerical(20)
+        .biggerThan(10)
+        .smallerThan(20)
         .finishComposite()
 ```
 and
 ```java
-        .minNumerical(0)
+        .biggerThan(0)
         .finish()
 ```
 In the first one, we're assembling a composite. This is a constraint, made up of several other constraints, and will composite the return values of the constraints.

@@ -27,13 +27,13 @@ public @interface Setting {
 
         @Target(ElementType.FIELD)
         @Retention(RetentionPolicy.RUNTIME)
-        @interface Min {
+        @interface BiggerThan {
             double value();
         }
 
         @Target(ElementType.FIELD)
         @Retention(RetentionPolicy.RUNTIME)
-        @interface Max {
+        @interface SmallerThan {
             double value();
         }
 

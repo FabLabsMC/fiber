@@ -14,7 +14,6 @@ import me.zeroeightsix.fiber.tree.TreeItem;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.BiConsumer;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -120,8 +119,8 @@ public class AnnotatedSettings {
 
     @SuppressWarnings("unchecked")
     private static <T> void constrain(ConstraintsBuilder<T> constraints, Field field) {
-        if (field.isAnnotationPresent(Setting.Constrain.Min.class)) constraints.minNumerical((T) Double.valueOf(field.getAnnotation(Setting.Constrain.Min.class).value()));
-        if (field.isAnnotationPresent(Setting.Constrain.Max.class)) constraints.maxNumerical((T) Double.valueOf(field.getAnnotation(Setting.Constrain.Max.class).value()));
+        if (field.isAnnotationPresent(Setting.Constrain.BiggerThan.class)) constraints.biggerThan((T) Double.valueOf(field.getAnnotation(Setting.Constrain.BiggerThan.class).value()));
+        if (field.isAnnotationPresent(Setting.Constrain.SmallerThan.class)) constraints.smallerThan((T) Double.valueOf(field.getAnnotation(Setting.Constrain.SmallerThan.class).value()));
         if (field.isAnnotationPresent(Setting.Constrain.MinStringLength.class)) constraints.minStringLength(field.getAnnotation(Setting.Constrain.MinStringLength.class).value());
         if (field.isAnnotationPresent(Setting.Constrain.MaxStringLength.class)) constraints.maxStringLength(field.getAnnotation(Setting.Constrain.MaxStringLength.class).value());
         if (field.isAnnotationPresent(Setting.Constrain.Regex.class)) constraints.regex(field.getAnnotation(Setting.Constrain.Regex.class).value());
