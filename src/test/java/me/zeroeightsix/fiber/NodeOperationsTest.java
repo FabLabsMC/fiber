@@ -57,12 +57,12 @@ class NodeOperationsTest {
         testItemFor(Integer.class, 10, valueTwo);
     }
 
-    private <T> void testNodeFor(Node node, String name, Class<T> type, T value) {
+    static <T> void testNodeFor(Node node, String name, Class<T> type, T value) {
         TreeItem item = node.lookup(name);
         testItemFor(type, value, item);
     }
 
-    private <T> void testItemFor(Class<T> type, T value, TreeItem item) {
+    static <T> void testItemFor(Class<T> type, T value, TreeItem item) {
         assertTrue(item != null, "Setting exists");
         assertTrue(item instanceof Property<?>, "Setting is a property");
         Property<?> property = (Property<?>) item;

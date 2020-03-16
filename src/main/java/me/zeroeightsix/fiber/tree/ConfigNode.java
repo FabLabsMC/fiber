@@ -9,9 +9,15 @@ public class ConfigNode extends ConfigLeaf implements Node, Commentable {
 
     @Nonnull
     private Set<TreeItem> items = new HashSet<>();
+    private boolean serializeSeparately;
+
+    public ConfigNode(@Nullable String name, @Nullable String comment, boolean serializeSeparately) {
+        super(name, comment);
+        this.serializeSeparately = serializeSeparately;
+    }
 
     public ConfigNode(@Nullable String name, @Nullable String comment) {
-        super(name, comment);
+        this(name, comment, false);
     }
 
     public ConfigNode() {
@@ -24,4 +30,8 @@ public class ConfigNode extends ConfigLeaf implements Node, Commentable {
         return items;
     }
 
+    @Override
+    public boolean isSerializedSeparately() {
+        return serializeSeparately;
+    }
 }
