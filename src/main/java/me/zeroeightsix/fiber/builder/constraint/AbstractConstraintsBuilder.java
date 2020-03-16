@@ -20,44 +20,44 @@ public abstract class AbstractConstraintsBuilder<T, B extends AbstractConstraint
         this.type = type;
     }
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public B minNumerical(T min) throws RuntimeFiberException {
-		checkNumerical();
-		checkNumerical(min);
-		newConstraints.add(new NumberConstraint(Constraints.NUMERICAL_LOWER_BOUND, (Number) min));
-		return (B) this;
+        checkNumerical();
+        checkNumerical(min);
+        newConstraints.add(new NumberConstraint(Constraints.NUMERICAL_LOWER_BOUND, (Number) min));
+        return (B) this;
     }
 
-	@SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public B maxNumerical(T min) throws RuntimeFiberException {
-		checkNumerical();
-		checkNumerical(min);
-		newConstraints.add(new NumberConstraint(Constraints.NUMERICAL_UPPER_BOUND, (Number) min));
-		return (B) this;
+        checkNumerical();
+        checkNumerical(min);
+        newConstraints.add(new NumberConstraint(Constraints.NUMERICAL_UPPER_BOUND, (Number) min));
+        return (B) this;
     }
 
     @SuppressWarnings("unchecked")
-	public B minStringLength(int min) {
-		checkCharSequence();
-		newConstraints.add((Constraint<? super T>) new StringLengthConstraint(Constraints.STRING_MINIMUM_LENGTH, min));
-		return (B) this;
+    public B minStringLength(int min) {
+        checkCharSequence();
+        newConstraints.add((Constraint<? super T>) new StringLengthConstraint(Constraints.STRING_MINIMUM_LENGTH, min));
+        return (B) this;
     }
 
-	@SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
     public B maxStringLength(int min) {
-		checkCharSequence();
-		newConstraints.add((Constraint<? super T>) new StringLengthConstraint(Constraints.STRING_MAXIMUM_LENGTH, min));
-		return (B) this;
+        checkCharSequence();
+        newConstraints.add((Constraint<? super T>) new StringLengthConstraint(Constraints.STRING_MAXIMUM_LENGTH, min));
+        return (B) this;
     }
 
-	@SuppressWarnings("unchecked")
+    @SuppressWarnings("unchecked")
     public B regex(@RegEx String regexPattern) {
-		checkCharSequence();
-		newConstraints.add((Constraint<? super T>) new RegexConstraint(Pattern.compile(regexPattern)));
-		return (B) this;
+        checkCharSequence();
+        newConstraints.add((Constraint<? super T>) new RegexConstraint(Pattern.compile(regexPattern)));
+        return (B) this;
     }
 
-	private void checkNumerical() {
+    private void checkNumerical() {
         if (!Number.class.isAssignableFrom(this.type))
             throw new UnsupportedOperationException("Can't apply numerical constraint to non-numerical setting");
     }
