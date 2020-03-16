@@ -21,13 +21,13 @@ public abstract class AbstractConstraintsBuilder<T> {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	void addNumericalLowerBound(T bound) throws RuntimeFiberException {
+	public void addNumericalLowerBound(T bound) throws RuntimeFiberException {
 		checkNumerical(bound);
 		newConstraints.add(new NumberConstraint(Constraints.NUMERICAL_LOWER_BOUND, (Number) bound));
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	void addNumericalUpperBound(T bound) throws RuntimeFiberException {
+	public void addNumericalUpperBound(T bound) throws RuntimeFiberException {
 		checkNumerical(bound);
 		newConstraints.add(new NumberConstraint(Constraints.NUMERICAL_UPPER_BOUND, (Number) bound));
 	}
