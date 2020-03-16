@@ -103,6 +103,20 @@ class AnnotatedSettingsTest {
     }
 
     @Test
+    @DisplayName("String constraints")
+    void testStringConstraints() throws FiberException {
+        StringConstraintsPojo pojo = new StringConstraintsPojo();
+        AnnotatedSettings.applyToNode(node, pojo);
+        @SuppressWarnings("unchecked")
+        Property<String> value = (Property<String>) node.lookup("a");
+        assertNotNull(value, "Setting exists");
+        assertFalse(value.setValue("BAD STRING::"));
+        assertTrue(value.setValue("good:string"));
+        assertFalse(value.setValue("b:s"), "Too short");
+        assertFalse(value.setValue("bad_string:because_it_is_way_too_long"), "Too long");
+    }
+
+    @Test
     @DisplayName("Only annotated fields")
     void testOnlyAnnotatedFields() throws FiberException {
         OnlyAnnotatedFieldsPojo pojo = new OnlyAnnotatedFieldsPojo();
@@ -203,6 +217,13 @@ class AnnotatedSettingsTest {
         @Setting.Constrain.Min(0)
         @Setting.Constrain.Max(10)
         private int a = 5;
+    }
+
+    private static class StringConstraintsPojo {
+        @Setting.Constrain.MinStringLength(5)
+        @Setting.Constrain.MaxStringLength(20)
+        @Setting.Constrain.Regex("[a-z0-9_.-]{2,}:[a-z0-9_./-]+?")
+        private String a = "fabric:test";
     }
 
     @Settings(onlyAnnotated = true)

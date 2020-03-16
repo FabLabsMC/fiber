@@ -1,11 +1,13 @@
 package me.zeroeightsix.fiber.builder.constraint;
 
 import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
-import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.constraint.CompositeType;
 import me.zeroeightsix.fiber.constraint.Constraint;
+import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 
+import javax.annotation.RegEx;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public final class ConstraintsBuilder<T> extends AbstractConstraintsBuilder<T> {
 
@@ -30,9 +32,23 @@ public final class ConstraintsBuilder<T> extends AbstractConstraintsBuilder<T> {
 		return this;
 	}
 
+	public ConstraintsBuilder<T> minStringLength(int min) {
+		addStringLengthLowerBound(min);
+		return this;
+	}
+
+	public ConstraintsBuilder<T> maxStringLength(int min) {
+		addStringLengthUpperBound(min);
+		return this;
+	}
+
+	public ConstraintsBuilder<T> regex(@RegEx String regexPattern) {
+		addStringPattern(Pattern.compile(regexPattern));
+		return this;
+	}
+
 	public ConfigValueBuilder<T> finish() {
 		super.addConstraints();
 		return source;
 	}
-
 }

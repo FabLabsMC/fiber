@@ -7,8 +7,7 @@ public enum Constraints {
 	NUMERICAL_UPPER_BOUND(true, identifier("max")),
 	STRING_MINIMUM_LENGTH(true, identifier("min_length")),
 	STRING_MAXIMUM_LENGTH(true, identifier("max_length")),
-	STRING_STARTING_WITH(false, identifier("starts_with")),
-	STRING_ENDING_WITH(false, identifier("ends_with")),
+	STRING_MATCHING(false, identifier("regex")),
 	FINAL(false, identifier("final")),
 	COMPOSITE(false, identifier("composite"));
 
