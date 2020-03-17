@@ -2,9 +2,11 @@ package me.zeroeightsix.fiber;
 
 import blue.endless.jankson.*;
 import blue.endless.jankson.api.SyntaxError;
+import blue.endless.jankson.impl.MarshallerImpl;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.tree.*;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,15 +16,15 @@ import java.util.Map;
 
 public class JanksonSettings {
 
-	@Nullable
-	private Marshaller<JsonElement> marshaller;
+	@Nonnull
+	private final Marshaller<JsonElement> marshaller;
 
-	public JanksonSettings(@Nullable Marshaller<JsonElement> marshaller) {
+	public JanksonSettings(@Nonnull Marshaller<JsonElement> marshaller) {
 		this.marshaller = marshaller;
 	}
 
 	public JanksonSettings() {
-		this(null);
+		this(JanksonFallbackMarshaller.INSTANCE);
 	}
 
 	public void deserialize(Node node, InputStream stream) throws IOException, FiberException {
@@ -37,8 +39,7 @@ public class JanksonSettings {
 	}
 
 	private void deserialize(Node node, JsonObject element) throws FiberException {
-		JsonObject object = element;
-		for (Map.Entry<String, JsonElement> entry : object.entrySet()) {
+		for (Map.Entry<String, JsonElement> entry : element.entrySet()) {
 			String key = entry.getKey();
 			JsonElement child = entry.getValue();
 
@@ -92,9 +93,11 @@ public class JanksonSettings {
 	}
 
 	private JsonElement serialize(HasValue<?> hasValue) {
-		JsonElement element = marshaller != null ? marshaller.marshall(hasValue.getValue()) : null;
-		if (element != null) return element;
-		return blue.endless.jankson.impl.MarshallerImpl.getFallback().serialize(hasValue.getValue());
+		return marshaller.marshall(hasValue.getValue());
+	}
+
+	private <A> A marshall(Class<A> type, JsonElement value) {
+		return marshaller.marshallReverse(type, value);
 	}
 
 	private class JanksonTransparentNode implements Transparent {
@@ -123,10 +126,20 @@ public class JanksonSettings {
 		}
 	}
 
-	private <A> A marshall(Class<A> type, JsonElement value) {
-		A object = marshaller != null ? marshaller.marshallReverse(type, value) : null;
-		if (object != null) return object;
-		return blue.endless.jankson.impl.MarshallerImpl.getFallback().marshall(type, value);
+	private static class JanksonFallbackMarshaller implements Marshaller<JsonElement> {
+		private static JanksonFallbackMarshaller INSTANCE = new JanksonFallbackMarshaller();
+
+		private JanksonFallbackMarshaller() {}
+
+		@Override
+		public JsonElement marshall(Object value) {
+			return MarshallerImpl.getFallback().serialize(value);
+		}
+
+		@Override
+		public <A> A marshallReverse(Class<A> type, JsonElement value) {
+			return MarshallerImpl.getFallback().marshall(type, value);
+		}
 	}
 
 }
