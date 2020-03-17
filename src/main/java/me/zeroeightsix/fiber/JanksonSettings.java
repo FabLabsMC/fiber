@@ -129,16 +129,18 @@ public class JanksonSettings {
 	private static class JanksonFallbackMarshaller implements Marshaller<JsonElement> {
 		private static JanksonFallbackMarshaller INSTANCE = new JanksonFallbackMarshaller();
 
+		private final blue.endless.jankson.api.Marshaller marshaller = Jankson.builder().build().getMarshaller();
+
 		private JanksonFallbackMarshaller() {}
 
 		@Override
 		public JsonElement marshall(Object value) {
-			return MarshallerImpl.getFallback().serialize(value);
+			return marshaller.serialize(value);
 		}
 
 		@Override
 		public <A> A marshallReverse(Class<A> type, JsonElement value) {
-			return MarshallerImpl.getFallback().marshall(type, value);
+			return marshaller.marshall(type, value);
 		}
 	}
 
