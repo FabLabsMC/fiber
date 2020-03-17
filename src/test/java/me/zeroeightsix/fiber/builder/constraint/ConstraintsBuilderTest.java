@@ -1,7 +1,9 @@
 package me.zeroeightsix.fiber.builder.constraint;
 
+import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
 import me.zeroeightsix.fiber.constraint.CompositeType;
 import me.zeroeightsix.fiber.constraint.Constraint;
+import me.zeroeightsix.fiber.tree.ConfigValue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -17,7 +19,7 @@ class ConstraintsBuilderTest {
     @Test
     public void testNumericalConstraints() {
         List<Constraint<? super Integer>> constraintList = new ArrayList<>();
-        ConstraintsBuilder<Integer> constraintsBuilder = new ConstraintsBuilder<>(constraintList, Integer.class, null);
+        ConstraintsBuilder<Void, Integer> constraintsBuilder = new ConstraintsBuilder<>(null, constraintList, Integer.class);
         constraintsBuilder.biggerThan(5)
                 .composite(CompositeType.OR)
                 .biggerThan(20)
@@ -36,6 +38,21 @@ class ConstraintsBuilderTest {
 
         assertTrue(finalConstraint.test(7), "Input can be between 5 and 10");
         assertTrue(finalConstraint.test(25), "Input can be above 20");
+    }
+
+    @DisplayName("Test component constraints")
+    @Test
+    public void testComponentConstraints() {
+        ConfigValue<Integer[]> config = ConfigValueBuilder.aggregate(Integer[].class)
+                .constraints().component()
+                .biggerThan(3).smallerThan(10)
+                .finishComponent().finish()
+                .build();
+
+        assertTrue(config.setValue(new Integer[0]));
+        assertTrue(config.setValue(new Integer[]{4, 5, 6}));
+        assertFalse(config.setValue(new Integer[]{1}));
+        assertFalse(config.setValue(new Integer[]{9, 10, 11}));
     }
 
 }

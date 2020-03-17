@@ -18,13 +18,13 @@ public class AggregateConstraintsBuilder<S, A, T> extends AbstractConstraintsBui
         return new CompositeConstraintBuilder<>(this, type, sourceConstraints, this.type);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public ComponentConstraintsBuilder<AggregateConstraintsBuilder<S, A, T>, A, T> component() {
-        if (this.componentType.isArray()) {
-            List<Constraint<? super T[]>> sourceConstraints = (List<Constraint<? super T[]>>) this.sourceConstraints;
+        if (this.type.isArray()) {
+            List<Constraint<? super T[]>> sourceConstraints = (List) this.sourceConstraints;
             return (ComponentConstraintsBuilder<AggregateConstraintsBuilder<S, A, T>, A, T>) ComponentConstraintsBuilder.array(this, sourceConstraints, this.componentType);
         } else {
-            List<Constraint<? super Collection<T>>> sourceConstraints = (List<Constraint<? super Collection<T>>>) this.sourceConstraints;
+            List<Constraint<? super Collection<T>>> sourceConstraints = (List) this.sourceConstraints;
             return (ComponentConstraintsBuilder<AggregateConstraintsBuilder<S, A, T>, A, T>) ComponentConstraintsBuilder.collection(this, sourceConstraints, this.componentType);
         }
     }

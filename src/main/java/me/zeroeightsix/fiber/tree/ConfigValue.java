@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.tree;
 
-import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
+import me.zeroeightsix.fiber.builder.ConfigScalarBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
 
 import javax.annotation.Nonnull;
@@ -45,6 +45,7 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
         return value;
     }
 
+    @Nonnull
     @Override
     public Class<T> getType() {
         return type;
@@ -74,8 +75,8 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
         return constraintList;
     }
 
-    public static <T> ConfigValueBuilder<T> builder(Class<T> type) {
-        return new ConfigValueBuilder<>(type);
+    public static <T> ConfigScalarBuilder<T> builder(Class<T> type) {
+        return new ConfigScalarBuilder<>(type);
     }
 
 }
