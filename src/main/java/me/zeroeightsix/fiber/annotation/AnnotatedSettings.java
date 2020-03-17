@@ -4,6 +4,7 @@ import me.zeroeightsix.fiber.NodeOperations;
 import me.zeroeightsix.fiber.annotation.convention.NoNamingConvention;
 import me.zeroeightsix.fiber.annotation.convention.SettingNamingConvention;
 import me.zeroeightsix.fiber.annotation.exception.MalformedFieldException;
+import me.zeroeightsix.fiber.builder.ConfigScalarBuilder;
 import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
 import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
 import me.zeroeightsix.fiber.exception.FiberException;
@@ -89,7 +90,7 @@ public class AnnotatedSettings {
     private static <T, P> TreeItem fieldToItem(Field field, P pojo, String name, List<Member> listeners) throws FiberException {
         Class<T> type = getSettingTypeFromField(field);
 
-        ConfigValueBuilder<T> builder = new ConfigValueBuilder<>(type)
+        ConfigScalarBuilder<T> builder = ConfigValueBuilder.scalar(type)
                 .withName(name)
                 .withComment(findComment(field))
                 .withDefaultValue(findDefaultValue(field, pojo))
@@ -118,7 +119,7 @@ public class AnnotatedSettings {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> void constrain(ConstraintsBuilder<T> constraints, Field field) {
+    private static <T> void constrain(ConstraintsBuilder<?, T> constraints, Field field) {
         if (field.isAnnotationPresent(Setting.Constrain.BiggerThan.class)) constraints.biggerThan((T) Double.valueOf(field.getAnnotation(Setting.Constrain.BiggerThan.class).value()));
         if (field.isAnnotationPresent(Setting.Constrain.SmallerThan.class)) constraints.smallerThan((T) Double.valueOf(field.getAnnotation(Setting.Constrain.SmallerThan.class).value()));
         if (field.isAnnotationPresent(Setting.Constrain.MinStringLength.class)) constraints.minStringLength(field.getAnnotation(Setting.Constrain.MinStringLength.class).value());
@@ -187,7 +188,6 @@ public class AnnotatedSettings {
     private static <T, P, A> BiConsumer<T,T> constructListenerFromField(Field field, P pojo, Class<A> wantedType) throws FiberException {
         checkListenerField(field, wantedType);
 
-        @SuppressWarnings("unchecked")
         boolean isAccessible = field.isAccessible();
         field.setAccessible(true);
         BiConsumer<T, T> consumer;

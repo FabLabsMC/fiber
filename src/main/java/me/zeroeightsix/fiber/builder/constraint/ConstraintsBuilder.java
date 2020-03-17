@@ -1,29 +1,27 @@
 package me.zeroeightsix.fiber.builder.constraint;
 
-import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
 import me.zeroeightsix.fiber.constraint.CompositeType;
 import me.zeroeightsix.fiber.constraint.Constraint;
-import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 
-import javax.annotation.RegEx;
 import java.util.List;
-import java.util.regex.Pattern;
 
-public final class ConstraintsBuilder<T> extends AbstractConstraintsBuilder<T, ConstraintsBuilder<T>> {
+/**
+ *
+ * @param <S> the type of this builder's source object (eg. {@code ConfigValueBuilder} or {@code ConstraintsBuilder}
+ * @param <T> the type of {@link Constraint} this builder should output
+ */
+public final class ConstraintsBuilder<S, T> extends AbstractConstraintsBuilder<S, T, T, ConstraintsBuilder<S, T>> {
 
-	final ConfigValueBuilder<T> source;
-
-	public ConstraintsBuilder(List<Constraint<? super T>> sourceConstraints, Class<T> type, ConfigValueBuilder<T> source) {
-		super(sourceConstraints, type);
-		this.source = source;
+	public ConstraintsBuilder(S source, List<Constraint<? super T>> sourceConstraints, Class<T> type) {
+		super(source, sourceConstraints, type);
 	}
 
-	public CompositeConstraintBuilder<T> composite(CompositeType type) {
-		return new CompositeConstraintBuilder<>(type, sourceConstraints, this.type, this);
+	public CompositeConstraintBuilder<ConstraintsBuilder<S, T>, T> composite(CompositeType type) {
+		return new CompositeConstraintBuilder<>(this, type, sourceConstraints, this.type);
 	}
 
-	public ConfigValueBuilder<T> finish() {
-		super.addConstraints();
+	public S finish() {
+		sourceConstraints.addAll(newConstraints);
 		return source;
 	}
 }
