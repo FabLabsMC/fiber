@@ -1,17 +1,18 @@
 package me.zeroeightsix.fiber.annotation;
 
+import blue.endless.jankson.magic.TypeMagic;
 import me.zeroeightsix.fiber.NodeOperations;
 import me.zeroeightsix.fiber.annotation.convention.NoNamingConvention;
 import me.zeroeightsix.fiber.annotation.convention.SettingNamingConvention;
 import me.zeroeightsix.fiber.annotation.exception.MalformedFieldException;
-import me.zeroeightsix.fiber.builder.ConfigScalarBuilder;
 import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
-import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
+import me.zeroeightsix.fiber.builder.constraint.AbstractConstraintsBuilder;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.tree.ConfigNode;
 import me.zeroeightsix.fiber.tree.Node;
 import me.zeroeightsix.fiber.tree.TreeItem;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -90,13 +91,13 @@ public class AnnotatedSettings {
     private static <T, P> TreeItem fieldToItem(Field field, P pojo, String name, List<Member> listeners) throws FiberException {
         Class<T> type = getSettingTypeFromField(field);
 
-        ConfigScalarBuilder<T> builder = ConfigValueBuilder.scalar(type)
+        ConfigValueBuilder<T, ?> builder = createConfigValueBuilder(type, field)
                 .withName(name)
                 .withComment(findComment(field))
                 .withDefaultValue(findDefaultValue(field, pojo))
                 .setFinal(getSettingAnnotation(field).map(Setting::constant).orElse(false));
 
-        constrain(builder.constraints(), field);
+        constrain(builder.constraints(), field).finish();
 
         for (Member listener : listeners) {
             BiConsumer<T, T> consumer = constructListener(listener, pojo, type);
@@ -118,14 +119,50 @@ public class AnnotatedSettings {
         return builder.build();
     }
 
+    @SuppressWarnings({"unchecked"})
+    @Nonnull
+    private static <T, E> ConfigValueBuilder<T, ?> createConfigValueBuilder(Class<T> type, Field field) {
+        AnnotatedType annotatedType = field.getAnnotatedType();
+        if (ConfigValueBuilder.isAggregate(type)) {
+            if (Collection.class.isAssignableFrom(type)) {
+                if (annotatedType instanceof AnnotatedParameterizedType) {
+                    AnnotatedType[] typeArgs = ((AnnotatedParameterizedType) annotatedType).getAnnotatedActualTypeArguments();
+                    if (typeArgs.length == 1) {
+                        AnnotatedType typeArg = typeArgs[0];
+                        Class<E> componentType = (Class<E>) TypeMagic.classForType(typeArg.getType());
+                        if (componentType != null) {
+                            // coerce to a collection class and configure as such
+                            Class<Collection<E>> collectionType = (Class<Collection<E>>) type;
+                            ConfigValueBuilder.Aggregate<T, E> aggregate = (ConfigValueBuilder.Aggregate<T, E>) ConfigValueBuilder.aggregate(collectionType, componentType);
+                            // element constraints are on the type argument (eg. List<@Regex String>), so we setup constraints from it
+                            // note that annotatedType contains the same annotation data as the field here
+                            constrain(aggregate.constraints().component(), typeArg).finishComponent().finish();
+                            return aggregate;
+                        }
+                    }
+                }
+            } else {
+                assert type.isArray();
+                // coerce to an array class
+                Class<E[]> arrayType = (Class<E[]>) type;
+                ConfigValueBuilder.Aggregate<T, E> aggregate = (ConfigValueBuilder.Aggregate<T, E>) ConfigValueBuilder.aggregate(arrayType);
+                // arrays do not have actual type arguments, so the element constraints are on the annotatedType
+                // and somehow, annotatedType does not contain the field's annotation data because ???
+                constrain(aggregate.constraints().component(), annotatedType).finishComponent().finish();
+                return aggregate;
+            }
+        }
+        return ConfigValueBuilder.scalar(type);
+    }
+
     @SuppressWarnings("unchecked")
-    private static <T> void constrain(ConstraintsBuilder<?, T> constraints, Field field) {
+    private static <T, B extends AbstractConstraintsBuilder<?, ?, T, ?>> B constrain(B constraints, AnnotatedElement field) {
         if (field.isAnnotationPresent(Setting.Constrain.BiggerThan.class)) constraints.biggerThan((T) Double.valueOf(field.getAnnotation(Setting.Constrain.BiggerThan.class).value()));
         if (field.isAnnotationPresent(Setting.Constrain.SmallerThan.class)) constraints.smallerThan((T) Double.valueOf(field.getAnnotation(Setting.Constrain.SmallerThan.class).value()));
         if (field.isAnnotationPresent(Setting.Constrain.MinLength.class)) constraints.minLength(field.getAnnotation(Setting.Constrain.MinLength.class).value());
         if (field.isAnnotationPresent(Setting.Constrain.MaxLength.class)) constraints.maxLength(field.getAnnotation(Setting.Constrain.MaxLength.class).value());
         if (field.isAnnotationPresent(Setting.Constrain.Regex.class)) constraints.regex(field.getAnnotation(Setting.Constrain.Regex.class).value());
-        constraints.finish();
+        return constraints;
     }
 
     @SuppressWarnings("unchecked")

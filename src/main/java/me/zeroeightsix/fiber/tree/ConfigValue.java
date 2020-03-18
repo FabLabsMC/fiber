@@ -85,12 +85,12 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
         return ConfigValueBuilder.scalar(type).withDefaultValue(defaultValue);
     }
 
-    public static <E> ConfigValueBuilder.Aggregate<E, E[]> builder(@Nonnull E[] defaultValue) {
+    public static <E> ConfigValueBuilder.Aggregate<E[], E> builder(@Nonnull E[] defaultValue) {
         @SuppressWarnings("unchecked") Class<E[]> type = (Class<E[]>) defaultValue.getClass();
         return ConfigValueBuilder.aggregate(type).withDefaultValue(defaultValue);
     }
 
-    public static <E, C extends Collection<E>> ConfigValueBuilder.Aggregate<E, C> builder(@Nonnull C defaultValue, Class<E> elementType) {
+    public static <C extends Collection<E>, E> ConfigValueBuilder.Aggregate<C, E> builder(@Nonnull C defaultValue, Class<E> elementType) {
         @SuppressWarnings("unchecked") Class<C> type = (Class<C>) defaultValue.getClass();
         return ConfigValueBuilder.aggregate(type, elementType).withDefaultValue(defaultValue);
     }

@@ -37,19 +37,19 @@ public @interface Setting {
             double value();
         }
 
-        @Target(ElementType.FIELD)
+        @Target({ElementType.FIELD, ElementType.TYPE_USE})
         @Retention(RetentionPolicy.RUNTIME)
         @interface MinLength {
             int value();
         }
 
-        @Target(ElementType.FIELD)
+        @Target({ElementType.FIELD, ElementType.TYPE_USE})
         @Retention(RetentionPolicy.RUNTIME)
         @interface MaxLength {
             int value();
         }
 
-        @Target(ElementType.FIELD)
+        @Target({ElementType.FIELD, ElementType.TYPE_USE})
         @Retention(RetentionPolicy.RUNTIME)
         @interface Regex {
             @RegEx String value();

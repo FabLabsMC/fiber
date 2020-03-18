@@ -15,13 +15,25 @@ import java.util.function.BiConsumer;
 
 public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> {
 
+    /**
+     * Determines if a {@code Class} object represents an aggregate type,
+     * ie. if it is an {@linkplain Class#isArray() Array} or a {@linkplain Collection}.
+     *
+     * @param type the type to check
+     * @return {@code true} if {@code type} is an aggregate type;
+     * {@code false} otherwise
+     */
+    public static boolean isAggregate(Class<?> type) {
+        return type.isArray() || Collection.class.isAssignableFrom(type);
+    }
+
     @SuppressWarnings("unchecked")
-    public static <E> Aggregate<E, E[]> aggregate(@Nonnull Class<E[]> arrayType) {
+    public static <E> Aggregate<E[], E> aggregate(@Nonnull Class<E[]> arrayType) {
         if (!arrayType.isArray()) throw new IllegalArgumentException(arrayType + " is not a valid array type");
         return new Aggregate<>(arrayType, (Class<E>) arrayType.getComponentType());
     }
 
-    public static <E, C extends Collection<E>> Aggregate<E, C> aggregate(@Nonnull Class<C> collectionType, @Nonnull Class<E> componentType) {
+    public static <C extends Collection<E>, E> Aggregate<C, E> aggregate(@Nonnull Class<C> collectionType, @Nonnull Class<E> componentType) {
         if (!Collection.class.isAssignableFrom(collectionType)) throw new IllegalArgumentException(collectionType + " is not a valid Collection type");
         return new Aggregate<>(collectionType, componentType);
     }
@@ -91,20 +103,21 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
 
     /**
      * Sets the node that the built {@link ConfigValue} will be registered to.
-     * @param node  The node this {@link ConfigValue} will be registered to.
-     * @return      The builder
+     *
+     * @param node The node this {@link ConfigValue} will be registered to.
+     * @return The builder
      */
     public B withParent(Node node) {
         parentNode = node;
         return self();
     }
-    
+
     @SuppressWarnings("unchecked")
     protected final B self() {
         return (B) this;
     }
 
-    public abstract ConstraintsBuilder<B, T, ?,  ?> constraints();
+    public abstract ConstraintsBuilder<B, T, ?, ?> constraints();
 
     public ConfigValue<T> build() {
         ConfigValue<T> built = new ConfigValue<>(name, comment, defaultValue, defaultValue, consumer, constraintList, type, isFinal);
@@ -124,7 +137,7 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
     }
 
     public static class Scalar<T> extends ConfigValueBuilder<T, Scalar<T>> {
-        public Scalar(@Nonnull Class<T> type) {
+        Scalar(@Nonnull Class<T> type) {
             super(type);
         }
 
@@ -134,17 +147,17 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
         }
     }
 
-    public static final class Aggregate<E, T> extends ConfigValueBuilder<T, Aggregate<E, T>> {
+    public static final class Aggregate<A, E> extends ConfigValueBuilder<A, Aggregate<A, E>> {
         @Nonnull
         private final Class<E> componentType;
 
-        Aggregate(@Nonnull Class<T> type, @Nonnull Class<E> componentType) {
+        Aggregate(@Nonnull Class<A> type, @Nonnull Class<E> componentType) {
             super(type);
             this.componentType = componentType;
         }
 
         @Override
-        public ConstraintsBuilder.Aggregate<Aggregate<E, T>, T, E> constraints() {
+        public ConstraintsBuilder.Aggregate<Aggregate<A, E>, A, E> constraints() {
             return ConstraintsBuilder.aggregate(this, constraintList, type, componentType);
         }
 

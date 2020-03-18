@@ -6,6 +6,13 @@ import me.zeroeightsix.fiber.constraint.Constraint;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ *
+ * @param <A> the type of {@link Constraint} this builder should output
+ * @param <S> the type of this builder's source object (eg. {@code ConfigValueBuilder} or {@code ConstraintsBuilder}
+ * @param <T> the type of intermediary objects this builder's constraints should process. May be identical to {@code A}.
+ * @param <B> the type of {@code this}, for chaining
+ */
 public abstract class ConstraintsBuilder<S, A, T, B extends ConstraintsBuilder<S, A, T, B>> extends AbstractConstraintsBuilder<S, A, T, B> {
     public static <S, T> Scalar<S, T> scalar(S source, List<Constraint<? super T>> constraints, Class<T> type) {
         return new Scalar<>(source, constraints, type);
@@ -15,7 +22,7 @@ public abstract class ConstraintsBuilder<S, A, T, B extends ConstraintsBuilder<S
         return new Aggregate<>(source, constraints, aggregateType, componentType);
     }
 
-    public ConstraintsBuilder(S source, List<Constraint<? super A>> sourceConstraints, Class<T> type) {
+    ConstraintsBuilder(S source, List<Constraint<? super A>> sourceConstraints, Class<T> type) {
         super(source, sourceConstraints, type);
     }
 
