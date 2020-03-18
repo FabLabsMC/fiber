@@ -25,13 +25,13 @@ public @interface Setting {
     @Target({})
     @interface Constrain {
 
-        @Target(ElementType.FIELD)
+        @Target({ElementType.FIELD, ElementType.TYPE_USE})
         @Retention(RetentionPolicy.RUNTIME)
         @interface BiggerThan {
             double value();
         }
 
-        @Target(ElementType.FIELD)
+        @Target({ElementType.FIELD, ElementType.TYPE_USE})
         @Retention(RetentionPolicy.RUNTIME)
         @interface SmallerThan {
             double value();
