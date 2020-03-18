@@ -19,7 +19,7 @@ class ConstraintsBuilderTest {
     @Test
     public void testNumericalConstraints() {
         List<Constraint<? super Integer>> constraintList = new ArrayList<>();
-        ConstraintsBuilder<Void, Integer> constraintsBuilder = new ConstraintsBuilder<>(null, constraintList, Integer.class);
+        ConstraintsBuilder.Scalar<Void, Integer> constraintsBuilder = ConstraintsBuilder.scalar(null, constraintList, Integer.class);
         constraintsBuilder.biggerThan(5)
                 .composite(CompositeType.OR)
                 .biggerThan(20)

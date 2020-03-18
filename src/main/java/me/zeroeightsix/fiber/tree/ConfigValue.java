@@ -1,7 +1,5 @@
 package me.zeroeightsix.fiber.tree;
 
-import me.zeroeightsix.fiber.builder.ConfigAggregateBuilder;
-import me.zeroeightsix.fiber.builder.ConfigScalarBuilder;
 import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
 
@@ -78,21 +76,21 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
         return constraintList;
     }
 
-    public static <T> ConfigScalarBuilder<T> builder(@Nonnull Class<T> type) {
+    public static <T> ConfigValueBuilder.Scalar<T> builder(@Nonnull Class<T> type) {
         return ConfigValueBuilder.scalar(type);
     }
 
-    public static <T> ConfigScalarBuilder<T> builder(@Nonnull T defaultValue) {
+    public static <T> ConfigValueBuilder.Scalar<T> builder(@Nonnull T defaultValue) {
         @SuppressWarnings("unchecked") Class<T> type = (Class<T>) defaultValue.getClass();
         return ConfigValueBuilder.scalar(type).withDefaultValue(defaultValue);
     }
 
-    public static <E> ConfigAggregateBuilder<E, E[]> builder(@Nonnull E[] defaultValue) {
+    public static <E> ConfigValueBuilder.Aggregate<E, E[]> builder(@Nonnull E[] defaultValue) {
         @SuppressWarnings("unchecked") Class<E[]> type = (Class<E[]>) defaultValue.getClass();
         return ConfigValueBuilder.aggregate(type).withDefaultValue(defaultValue);
     }
 
-    public static <E, C extends Collection<E>> ConfigAggregateBuilder<E, C> builder(@Nonnull C defaultValue, Class<E> elementType) {
+    public static <E, C extends Collection<E>> ConfigValueBuilder.Aggregate<E, C> builder(@Nonnull C defaultValue, Class<E> elementType) {
         @SuppressWarnings("unchecked") Class<C> type = (Class<C>) defaultValue.getClass();
         return ConfigValueBuilder.aggregate(type, elementType).withDefaultValue(defaultValue);
     }
