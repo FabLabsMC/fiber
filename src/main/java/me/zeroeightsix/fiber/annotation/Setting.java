@@ -39,13 +39,13 @@ public @interface Setting {
 
         @Target(ElementType.FIELD)
         @Retention(RetentionPolicy.RUNTIME)
-        @interface MinStringLength {
+        @interface MinLength {
             int value();
         }
 
         @Target(ElementType.FIELD)
         @Retention(RetentionPolicy.RUNTIME)
-        @interface MaxStringLength {
+        @interface MaxLength {
             int value();
         }
 

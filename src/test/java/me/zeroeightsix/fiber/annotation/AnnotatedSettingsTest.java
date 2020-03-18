@@ -220,8 +220,8 @@ class AnnotatedSettingsTest {
     }
 
     private static class StringConstraintsPojo {
-        @Setting.Constrain.MinStringLength(5)
-        @Setting.Constrain.MaxStringLength(20)
+        @Setting.Constrain.MinLength(5)
+        @Setting.Constrain.MaxLength(20)
         @Setting.Constrain.Regex("[a-z0-9_.-]{2,}:[a-z0-9_./-]+?")
         private String a = "fabric:test";
     }

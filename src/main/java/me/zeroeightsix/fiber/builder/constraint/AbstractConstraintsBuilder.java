@@ -57,17 +57,15 @@ public abstract class AbstractConstraintsBuilder<S, A, T, B extends AbstractCons
         return self();
     }
 
-    @SuppressWarnings("unchecked")
-    public B minStringLength(int min) {
-        checkCharSequence();
-        newConstraints.add((Constraint<? super T>) new StringLengthConstraint(Constraints.STRING_MINIMUM_LENGTH, min));
+    public B minLength(int min) {
+        if (min < 0) throw new IllegalArgumentException(min + " is not a valid length");
+        newConstraints.add(LengthConstraint.min(type, min));
         return self();
     }
 
-    @SuppressWarnings("unchecked")
-    public B maxStringLength(int min) {
-        checkCharSequence();
-        newConstraints.add((Constraint<? super T>) new StringLengthConstraint(Constraints.STRING_MAXIMUM_LENGTH, min));
+    public B maxLength(int max) {
+        if (max < 0) throw new IllegalArgumentException(max + " is not a valid length");
+        newConstraints.add(LengthConstraint.max(type, max));
         return self();
     }
 
@@ -94,7 +92,7 @@ public abstract class AbstractConstraintsBuilder<S, A, T, B extends AbstractCons
     }
 
     @SuppressWarnings("unchecked")
-    private B self() {
+    protected B self() {
         return (B) this;
     }
 }

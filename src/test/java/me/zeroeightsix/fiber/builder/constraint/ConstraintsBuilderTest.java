@@ -40,18 +40,21 @@ class ConstraintsBuilderTest {
         assertTrue(finalConstraint.test(25), "Input can be above 20");
     }
 
-    @DisplayName("Test component constraints")
+    @DisplayName("Test aggregate constraints")
     @Test
     public void testComponentConstraints() {
         ConfigValue<Integer[]> config = ConfigValueBuilder.aggregate(Integer[].class)
                 .constraints().component()
                 .biggerThan(3).smallerThan(10)
-                .finishComponent().finish()
+                .finishComponent()
+                .maxLength(3)
+                .finish()
                 .build();
 
         assertTrue(config.setValue(new Integer[0]));
         assertTrue(config.setValue(new Integer[]{4, 5, 6}));
-        assertFalse(config.setValue(new Integer[]{1}));
+        assertFalse(config.setValue(new Integer[]{1, 2}));
+        assertFalse(config.setValue(new Integer[]{5, 6, 7, 8}));
         assertFalse(config.setValue(new Integer[]{9, 10, 11}));
     }
 

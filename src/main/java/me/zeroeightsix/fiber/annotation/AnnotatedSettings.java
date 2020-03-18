@@ -122,8 +122,8 @@ public class AnnotatedSettings {
     private static <T> void constrain(ConstraintsBuilder<?, T> constraints, Field field) {
         if (field.isAnnotationPresent(Setting.Constrain.BiggerThan.class)) constraints.biggerThan((T) Double.valueOf(field.getAnnotation(Setting.Constrain.BiggerThan.class).value()));
         if (field.isAnnotationPresent(Setting.Constrain.SmallerThan.class)) constraints.smallerThan((T) Double.valueOf(field.getAnnotation(Setting.Constrain.SmallerThan.class).value()));
-        if (field.isAnnotationPresent(Setting.Constrain.MinStringLength.class)) constraints.minStringLength(field.getAnnotation(Setting.Constrain.MinStringLength.class).value());
-        if (field.isAnnotationPresent(Setting.Constrain.MaxStringLength.class)) constraints.maxStringLength(field.getAnnotation(Setting.Constrain.MaxStringLength.class).value());
+        if (field.isAnnotationPresent(Setting.Constrain.MinLength.class)) constraints.minLength(field.getAnnotation(Setting.Constrain.MinLength.class).value());
+        if (field.isAnnotationPresent(Setting.Constrain.MaxLength.class)) constraints.maxLength(field.getAnnotation(Setting.Constrain.MaxLength.class).value());
         if (field.isAnnotationPresent(Setting.Constrain.Regex.class)) constraints.regex(field.getAnnotation(Setting.Constrain.Regex.class).value());
         constraints.finish();
     }
