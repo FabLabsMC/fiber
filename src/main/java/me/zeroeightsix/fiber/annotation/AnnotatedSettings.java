@@ -257,12 +257,11 @@ public class AnnotatedSettings {
     private static <T> Class<T> getSettingTypeFromField(Field field) {
         @SuppressWarnings("unchecked")
         Class<T> type = (Class<T>) field.getType();
-        if (type.isPrimitive()) return wrapPrimitive(type);
-        return type;
+        return wrapPrimitive(type);
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> Class<T> wrapPrimitive(Class<T> type) {
+    public static <T> Class<T> wrapPrimitive(Class<T> type) {
         if (type.equals(boolean.class)) return (Class<T>) Boolean.class;
         if (type.equals(byte.class)) return (Class<T>) Byte.class;
         if (type.equals(char.class)) return (Class<T>) Character.class;
@@ -271,7 +270,7 @@ public class AnnotatedSettings {
         if (type.equals(double.class)) return (Class<T>) Double.class;
         if (type.equals(float.class)) return (Class<T>) Float.class;
         if (type.equals(long.class)) return (Class<T>) Long.class;
-        return null;
+        return type;
     }
 
     private static String findComment(Field field) {

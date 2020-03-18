@@ -131,12 +131,20 @@ class AnnotatedSettingsTest {
         assertFalse(value1.setValue(new String[0]), "Empty array");
         assertFalse(value1.setValue(new String[]{"aaaaaaaaaaaa"}), "Strings too long");
         @SuppressWarnings("unchecked")
-        Property<List<String>> value2 = (Property<List<String>>) node.lookup("shortArrayIdStrings");
+        Property<int[]> value2 = (Property<int[]>) node.lookup("numbers");
         assertNotNull(value2, "Setting exists");
-        assertTrue(value2.setValue(Arrays.asList("a:b", "fabric:test")));
-        assertTrue(value2.setValue(Collections.emptyList()));
-        assertFalse(value2.setValue(Arrays.asList("a:b", "b:c", "c:d", "d:e")), "Too many elements");
-        assertFalse(value2.setValue(Collections.singletonList("aaaaaaaaaaaa")), "Bad regex");
+        assertTrue(value2.setValue(new int[]{3, 4, 5}));
+        assertTrue(value2.setValue(new int[0]));
+        assertFalse(value2.setValue(new int[]{1, 2, 3, 4, 5, 6, 7}), "Too many elements");
+        assertFalse(value2.setValue(new int[]{-1, 0, 1}), "Negative number not allowed");
+        assertFalse(value2.setValue(new int[]{9, 10, 11}), "Numbers above 10 not allowed");
+        @SuppressWarnings("unchecked")
+        Property<List<String>> value3 = (Property<List<String>>) node.lookup("shortArrayIdStrings");
+        assertNotNull(value3, "Setting exists");
+        assertTrue(value3.setValue(Arrays.asList("a:b", "fabric:test")));
+        assertTrue(value3.setValue(Collections.emptyList()));
+        assertFalse(value3.setValue(Arrays.asList("a:b", "b:c", "c:d", "d:e")), "Too many elements");
+        assertFalse(value3.setValue(Collections.singletonList("aaaaaaaaaaaa")), "Bad regex");
     }
 
     @Test
@@ -252,6 +260,11 @@ class AnnotatedSettingsTest {
     private static class ArrayConstraintsPojo {
         @Setting.Constrain.MinLength(1)
         private String @Setting.Constrain.MaxLength(2)[] nonEmptyArrayShortStrings = {""};
+
+        @Setting.Constrain.MinLength(0)
+        @Setting.Constrain.MaxLength(3)
+        private int @Setting.Constrain.BiggerThan(0) @Setting.Constrain.SmallerThan(10)[] numbers = {};
+
         @Setting.Constrain.MaxLength(3)
         private List<@Setting.Constrain.Regex("\\w+:\\w+") String> shortArrayIdStrings = Collections.singletonList("fabric:test");
     }

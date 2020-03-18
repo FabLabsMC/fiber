@@ -1,5 +1,6 @@
 package me.zeroeightsix.fiber.builder;
 
+import me.zeroeightsix.fiber.annotation.AnnotatedSettings;
 import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
@@ -30,7 +31,7 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
     @SuppressWarnings("unchecked")
     public static <E> Aggregate<E[], E> aggregate(@Nonnull Class<E[]> arrayType) {
         if (!arrayType.isArray()) throw new IllegalArgumentException(arrayType + " is not a valid array type");
-        return new Aggregate<>(arrayType, (Class<E>) arrayType.getComponentType());
+        return new Aggregate<>(arrayType, (Class<E>) AnnotatedSettings.wrapPrimitive(arrayType.getComponentType()));
     }
 
     public static <C extends Collection<E>, E> Aggregate<C, E> aggregate(@Nonnull Class<C> collectionType, @Nonnull Class<E> componentType) {
