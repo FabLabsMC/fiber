@@ -1,7 +1,7 @@
 package me.zeroeightsix.fiber.annotation.convention;
 
 /**
- * A {@link SettingNamingConvention naming convention} that does not modify any names.
+ * A naming convention that does not modify any names.
  */
 public class NoNamingConvention implements SettingNamingConvention {
 
