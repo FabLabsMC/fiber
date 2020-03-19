@@ -1,10 +1,10 @@
 package me.zeroeightsix.fiber.annotation;
 
-import blue.endless.jankson.magic.TypeMagic;
 import me.zeroeightsix.fiber.NodeOperations;
 import me.zeroeightsix.fiber.annotation.convention.NoNamingConvention;
 import me.zeroeightsix.fiber.annotation.convention.SettingNamingConvention;
 import me.zeroeightsix.fiber.annotation.exception.MalformedFieldException;
+import me.zeroeightsix.fiber.annotation.magic.TypeMagic;
 import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
 import me.zeroeightsix.fiber.builder.constraint.AbstractConstraintsBuilder;
 import me.zeroeightsix.fiber.exception.FiberException;
