@@ -64,7 +64,7 @@ public final class ComponentConstraintsBuilder<S, A, T> extends AbstractConstrai
         @SuppressWarnings("unchecked")
         @Override
         protected boolean allMatch(Constraint<? super T> constraint, A value) {
-            // Because arrays are reified and may contain primitives, we cannot use generics.
+            // Because arrays are reified and may contain primitives, we cannot use generics, and no iterator either.
             for (int i = 0; i < Array.getLength(value); i++) {
                 T t = (T) Array.get(value, i);
                 if (!constraint.test(t)) {
@@ -82,7 +82,7 @@ public final class ComponentConstraintsBuilder<S, A, T> extends AbstractConstrai
 
         @Override
         protected boolean allMatch(Constraint<? super T> constraint, Iterable<T> value) {
-            for (T t : value) { // compiles to an iterator for
+            for (T t : value) {
                 if (!constraint.test(t)) {
                     return false;
                 }

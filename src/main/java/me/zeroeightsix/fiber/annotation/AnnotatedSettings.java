@@ -135,7 +135,6 @@ public class AnnotatedSettings {
                             Class<Collection<E>> collectionType = (Class<Collection<E>>) type;
                             ConfigValueBuilder.Aggregate<T, E> aggregate = (ConfigValueBuilder.Aggregate<T, E>) ConfigValueBuilder.aggregate(collectionType, componentType);
                             // element constraints are on the type argument (eg. List<@Regex String>), so we setup constraints from it
-                            // note that annotatedType contains the same annotation data as the field here
                             constrain(aggregate.constraints().component(), typeArg).finishComponent().finish();
                             return aggregate;
                         }
@@ -147,8 +146,7 @@ public class AnnotatedSettings {
                     // coerce to an array class
                     Class<E[]> arrayType = (Class<E[]>) type;
                     ConfigValueBuilder.Aggregate<T, E> aggregate = (ConfigValueBuilder.Aggregate<T, E>) ConfigValueBuilder.aggregate(arrayType);
-                    // arrays do not have actual type arguments, so the element constraints are on the annotatedType
-                    // and somehow, annotatedType does not contain the field's annotation data because ???
+                    // take the component constraint information from the special annotated type
                     constrain(aggregate.constraints().component(), ((AnnotatedArrayType) annotatedType).getAnnotatedGenericComponentType()).finishComponent().finish();
                     return aggregate;
                 }
