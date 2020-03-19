@@ -90,7 +90,7 @@ public class SchemaGenerator {
 	}
 
 	private Identifier identifier(String name) {
-		return new Identifier("fabric", name);
+		return new Identifier("fiber", name);
 	}
 
 }
