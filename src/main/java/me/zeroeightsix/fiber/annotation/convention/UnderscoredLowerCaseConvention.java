@@ -1,5 +1,10 @@
 package me.zeroeightsix.fiber.annotation.convention;
 
+/**
+ * A naming convention that converts java-styled {@code lowerCamelCase} names and {@code Proper case} names to {@code snake_case}
+ *
+ * @see UnderscoredLowerCaseConvention#name(String)
+ */
 public class UnderscoredLowerCaseConvention implements SettingNamingConvention {
 
     /**
@@ -12,4 +17,5 @@ public class UnderscoredLowerCaseConvention implements SettingNamingConvention {
     public String name(String name) {
         return name.replaceAll("(?!^)[ _]*([A-Z])", "_$1").toLowerCase().replace(' ', '_');
     }
+
 }
