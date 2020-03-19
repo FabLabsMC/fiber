@@ -8,6 +8,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -40,9 +42,9 @@ class ConstraintsBuilderTest {
         assertTrue(finalConstraint.test(25), "Input can be above 20");
     }
 
-    @DisplayName("Test aggregate constraints")
+    @DisplayName("Test array aggregate constraints")
     @Test
-    public void testComponentConstraints() {
+    public void testArrayConstraints() {
         ConfigValue<Integer[]> config = ConfigValueBuilder.aggregate(Integer[].class)
                 .constraints().component()
                 .biggerThan(3).smallerThan(10)
@@ -56,6 +58,24 @@ class ConstraintsBuilderTest {
         assertFalse(config.setValue(new Integer[]{1, 2}));
         assertFalse(config.setValue(new Integer[]{5, 6, 7, 8}));
         assertFalse(config.setValue(new Integer[]{9, 10, 11}));
+    }
+
+    @DisplayName("Test collection aggregate constraints")
+    @Test
+    public void testCollectionConstraints() {
+        ConfigValue<List<Integer>> config = ConfigValueBuilder.<List<Integer>, Integer>aggregate(List.class, Integer.class)
+                .constraints().component()
+                .biggerThan(3).smallerThan(10)
+                .finishComponent()
+                .maxLength(3)
+                .finish()
+                .build();
+
+        assertTrue(config.setValue(Collections.emptyList()));
+        assertTrue(config.setValue(Arrays.asList(4, 5, 6)));
+        assertFalse(config.setValue(Arrays.asList(1, 2)));
+        assertFalse(config.setValue(Arrays.asList(5, 6, 7, 8)));
+        assertFalse(config.setValue(Arrays.asList(9, 10, 11)));
     }
 
 }

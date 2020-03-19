@@ -34,9 +34,10 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
         return new Aggregate<>(arrayType, (Class<E>) AnnotatedSettings.wrapPrimitive(arrayType.getComponentType()));
     }
 
-    public static <C extends Collection<E>, E> Aggregate<C, E> aggregate(@Nonnull Class<C> collectionType, @Nonnull Class<E> componentType) {
+    @SuppressWarnings("unchecked")
+    public static <C extends Collection<E>, E> Aggregate<C, E> aggregate(@Nonnull Class<? super C> collectionType, @Nonnull Class<E> componentType) {
         if (!Collection.class.isAssignableFrom(collectionType)) throw new IllegalArgumentException(collectionType + " is not a valid Collection type");
-        return new Aggregate<>(collectionType, componentType);
+        return new Aggregate<>((Class<C>) collectionType, componentType);
     }
 
     public static <T> Scalar<T> scalar(Class<T> type) {
