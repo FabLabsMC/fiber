@@ -97,7 +97,7 @@ public class AnnotatedSettings {
                 .withDefaultValue(findDefaultValue(field, pojo))
                 .setFinal(getSettingAnnotation(field).map(Setting::constant).orElse(false));
 
-        constrain(builder.constraints(), field).finish();
+        constrain(builder.constraints(), field.getAnnotatedType()).finish();
 
         for (Member listener : listeners) {
             BiConsumer<T, T> consumer = constructListener(listener, pojo, type);
@@ -143,13 +143,15 @@ public class AnnotatedSettings {
                 }
             } else {
                 assert type.isArray();
-                // coerce to an array class
-                Class<E[]> arrayType = (Class<E[]>) type;
-                ConfigValueBuilder.Aggregate<T, E> aggregate = (ConfigValueBuilder.Aggregate<T, E>) ConfigValueBuilder.aggregate(arrayType);
-                // arrays do not have actual type arguments, so the element constraints are on the annotatedType
-                // and somehow, annotatedType does not contain the field's annotation data because ???
-                constrain(aggregate.constraints().component(), annotatedType).finishComponent().finish();
-                return aggregate;
+                if (annotatedType instanceof AnnotatedArrayType) {
+                    // coerce to an array class
+                    Class<E[]> arrayType = (Class<E[]>) type;
+                    ConfigValueBuilder.Aggregate<T, E> aggregate = (ConfigValueBuilder.Aggregate<T, E>) ConfigValueBuilder.aggregate(arrayType);
+                    // arrays do not have actual type arguments, so the element constraints are on the annotatedType
+                    // and somehow, annotatedType does not contain the field's annotation data because ???
+                    constrain(aggregate.constraints().component(), ((AnnotatedArrayType) annotatedType).getAnnotatedGenericComponentType()).finishComponent().finish();
+                    return aggregate;
+                }
             }
         }
         return ConfigValueBuilder.scalar(type);

@@ -258,15 +258,16 @@ class AnnotatedSettingsTest {
     }
 
     private static class ArrayConstraintsPojo {
-        @Setting.Constrain.MinLength(1)
-        private String @Setting.Constrain.MaxLength(2)[] nonEmptyArrayShortStrings = {""};
 
-        @Setting.Constrain.MinLength(0)
-        @Setting.Constrain.MaxLength(3)
-        private int @Setting.Constrain.BiggerThan(0) @Setting.Constrain.SmallerThan(10)[] numbers = {};
+        private
+        @Setting.Constrain.MaxLength(2) String
+        @Setting.Constrain.MinLength(1) [] nonEmptyArrayShortStrings = {""};
 
-        @Setting.Constrain.MaxLength(3)
-        private List<@Setting.Constrain.Regex("\\w+:\\w+") String> shortArrayIdStrings = Collections.singletonList("fabric:test");
+        private
+        @Setting.Constrain.BiggerThan(0) @Setting.Constrain.SmallerThan(10) int
+        @Setting.Constrain.MinLength(0) @Setting.Constrain.MaxLength(3)[] numbers = {};
+
+        private @Setting.Constrain.MaxLength(3) List<@Setting.Constrain.Regex("\\w+:\\w+") String> shortArrayIdStrings = Collections.singletonList("fabric:test");
     }
 
     @Settings(onlyAnnotated = true)

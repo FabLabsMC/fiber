@@ -25,31 +25,31 @@ public @interface Setting {
     @Target({})
     @interface Constrain {
 
-        @Target({ElementType.FIELD, ElementType.TYPE_USE})
+        @Target({ElementType.TYPE_USE})
         @Retention(RetentionPolicy.RUNTIME)
         @interface BiggerThan {
             double value();
         }
 
-        @Target({ElementType.FIELD, ElementType.TYPE_USE})
+        @Target({ElementType.TYPE_USE})
         @Retention(RetentionPolicy.RUNTIME)
         @interface SmallerThan {
             double value();
         }
 
-        @Target({ElementType.FIELD, ElementType.TYPE_USE})
+        @Target({ElementType.TYPE_USE})
         @Retention(RetentionPolicy.RUNTIME)
         @interface MinLength {
             int value();
         }
 
-        @Target({ElementType.FIELD, ElementType.TYPE_USE})
+        @Target({ElementType.TYPE_USE})
         @Retention(RetentionPolicy.RUNTIME)
         @interface MaxLength {
             int value();
         }
 
-        @Target({ElementType.FIELD, ElementType.TYPE_USE})
+        @Target({ElementType.TYPE_USE})
         @Retention(RetentionPolicy.RUNTIME)
         @interface Regex {
             @RegEx String value();
