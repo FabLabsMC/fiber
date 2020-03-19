@@ -8,14 +8,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public abstract class AbstractConstraintsBuilder<T, B extends AbstractConstraintsBuilder<T, B>> {
+/**
+ *
+ * @param <A> the type of {@link Constraint} this builder should output
+ * @param <S> the type of this builder's source object (eg. {@code ConfigValueBuilder} or {@code ConstraintsBuilder}
+ * @param <T> the type of intermediary objects this builder's constraints should process. May be identical to {@code A}.
+ * @param <B> the type of {@code this}, for chaining
+ */
+public abstract class AbstractConstraintsBuilder<S, A, T, B extends AbstractConstraintsBuilder<S, A, T, B>> {
 
-    final List<Constraint<? super T>> sourceConstraints;
+    protected final S source;
+    protected final List<Constraint<? super A>> sourceConstraints;
     protected final Class<T> type;
 
     final List<Constraint<? super T>> newConstraints = new ArrayList<>();
 
-    AbstractConstraintsBuilder(List<Constraint<? super T>> sourceConstraints, Class<T> type) {
+    AbstractConstraintsBuilder(S source, List<Constraint<? super A>> sourceConstraints, Class<T> type) {
+        this.source = source;
         this.sourceConstraints = sourceConstraints;
         this.type = type;
     }
@@ -31,7 +40,7 @@ public abstract class AbstractConstraintsBuilder<T, B extends AbstractConstraint
         checkNumerical();
         checkNumerical(min);
         newConstraints.add(new NumberConstraint(Constraints.NUMERICAL_LOWER_BOUND, (Number) min));
-        return (B) this;
+        return self();
     }
 
     /**
@@ -45,28 +54,26 @@ public abstract class AbstractConstraintsBuilder<T, B extends AbstractConstraint
         checkNumerical();
         checkNumerical(max);
         newConstraints.add(new NumberConstraint(Constraints.NUMERICAL_UPPER_BOUND, (Number) max));
-        return (B) this;
+        return self();
     }
 
-    @SuppressWarnings("unchecked")
-    public B minStringLength(int min) {
-        checkCharSequence();
-        newConstraints.add((Constraint<? super T>) new StringLengthConstraint(Constraints.STRING_MINIMUM_LENGTH, min));
-        return (B) this;
+    public B minLength(int min) {
+        if (min < 0) throw new IllegalArgumentException(min + " is not a valid length");
+        newConstraints.add(LengthConstraint.min(type, min));
+        return self();
     }
 
-    @SuppressWarnings("unchecked")
-    public B maxStringLength(int min) {
-        checkCharSequence();
-        newConstraints.add((Constraint<? super T>) new StringLengthConstraint(Constraints.STRING_MAXIMUM_LENGTH, min));
-        return (B) this;
+    public B maxLength(int max) {
+        if (max < 0) throw new IllegalArgumentException(max + " is not a valid length");
+        newConstraints.add(LengthConstraint.max(type, max));
+        return self();
     }
 
     @SuppressWarnings("unchecked")
     public B regex(@RegEx String regexPattern) {
         checkCharSequence();
         newConstraints.add((Constraint<? super T>) new RegexConstraint(Pattern.compile(regexPattern)));
-        return (B) this;
+        return self();
     }
 
     private void checkNumerical() {
@@ -84,7 +91,8 @@ public abstract class AbstractConstraintsBuilder<T, B extends AbstractConstraint
             throw new UnsupportedOperationException("Can only apply regex pattern constraint to character sequences");
     }
 
-    void addConstraints() {
-        sourceConstraints.addAll(newConstraints);
+    @SuppressWarnings("unchecked")
+    protected B self() {
+        return (B) this;
     }
 }

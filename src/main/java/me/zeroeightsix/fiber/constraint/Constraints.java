@@ -5,10 +5,11 @@ import me.zeroeightsix.fiber.Identifier;
 public enum Constraints {
 	NUMERICAL_LOWER_BOUND(true, identifier("min")),
 	NUMERICAL_UPPER_BOUND(true, identifier("max")),
-	STRING_MINIMUM_LENGTH(true, identifier("min_length")),
-	STRING_MAXIMUM_LENGTH(true, identifier("max_length")),
+	MINIMUM_LENGTH(true, identifier("min_length")),
+	MAXIMUM_LENGTH(true, identifier("max_length")),
 	STRING_MATCHING(false, identifier("regex")),
 	FINAL(false, identifier("final")),
+	COMPONENTS_MATCH(false, identifier("component")),
 	COMPOSITE(false, identifier("composite"));
 
 	private final boolean numerical;

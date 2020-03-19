@@ -6,6 +6,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
@@ -117,6 +120,34 @@ class AnnotatedSettingsTest {
     }
 
     @Test
+    @DisplayName("Array constraints")
+    void testArrayConstraints() throws FiberException {
+        ArrayConstraintsPojo pojo = new ArrayConstraintsPojo();
+        AnnotatedSettings.applyToNode(node, pojo);
+        @SuppressWarnings("unchecked")
+        Property<String[]> value1 = (Property<String[]>) node.lookup("nonEmptyArrayShortStrings");
+        assertNotNull(value1, "Setting exists");
+        assertTrue(value1.setValue(new String[]{"ab", "", "ba", ""}));
+        assertFalse(value1.setValue(new String[0]), "Empty array");
+        assertFalse(value1.setValue(new String[]{"aaaaaaaaaaaa"}), "Strings too long");
+        @SuppressWarnings("unchecked")
+        Property<int[]> value2 = (Property<int[]>) node.lookup("numbers");
+        assertNotNull(value2, "Setting exists");
+        assertTrue(value2.setValue(new int[]{3, 4, 5}));
+        assertTrue(value2.setValue(new int[0]));
+        assertFalse(value2.setValue(new int[]{1, 2, 3, 4, 5, 6, 7}), "Too many elements");
+        assertFalse(value2.setValue(new int[]{-1, 0, 1}), "Negative number not allowed");
+        assertFalse(value2.setValue(new int[]{9, 10, 11}), "Numbers above 10 not allowed");
+        @SuppressWarnings("unchecked")
+        Property<List<String>> value3 = (Property<List<String>>) node.lookup("shortArrayIdStrings");
+        assertNotNull(value3, "Setting exists");
+        assertTrue(value3.setValue(Arrays.asList("a:b", "fabric:test")));
+        assertTrue(value3.setValue(Collections.emptyList()));
+        assertFalse(value3.setValue(Arrays.asList("a:b", "b:c", "c:d", "d:e")), "Too many elements");
+        assertFalse(value3.setValue(Collections.singletonList("aaaaaaaaaaaa")), "Bad regex");
+    }
+
+    @Test
     @DisplayName("Only annotated fields")
     void testOnlyAnnotatedFields() throws FiberException {
         OnlyAnnotatedFieldsPojo pojo = new OnlyAnnotatedFieldsPojo();
@@ -220,10 +251,23 @@ class AnnotatedSettingsTest {
     }
 
     private static class StringConstraintsPojo {
-        @Setting.Constrain.MinStringLength(5)
-        @Setting.Constrain.MaxStringLength(20)
+        @Setting.Constrain.MinLength(5)
+        @Setting.Constrain.MaxLength(20)
         @Setting.Constrain.Regex("[a-z0-9_.-]{2,}:[a-z0-9_./-]+?")
         private String a = "fabric:test";
+    }
+
+    private static class ArrayConstraintsPojo {
+
+        private
+        @Setting.Constrain.MaxLength(2) String
+        @Setting.Constrain.MinLength(1) [] nonEmptyArrayShortStrings = {""};
+
+        private
+        @Setting.Constrain.BiggerThan(0) @Setting.Constrain.SmallerThan(10) int
+        @Setting.Constrain.MinLength(0) @Setting.Constrain.MaxLength(3)[] numbers = {};
+
+        private @Setting.Constrain.MaxLength(3) List<@Setting.Constrain.Regex("\\w+:\\w+") String> shortArrayIdStrings = Collections.singletonList("fabric:test");
     }
 
     @Settings(onlyAnnotated = true)

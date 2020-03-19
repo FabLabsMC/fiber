@@ -5,37 +5,32 @@ import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.Constraints;
 import me.zeroeightsix.fiber.constraint.ValuedConstraint;
 
-import javax.annotation.RegEx;
 import java.util.List;
 
-public final class CompositeConstraintBuilder<T> extends AbstractConstraintsBuilder<T, CompositeConstraintBuilder<T>> {
+public final class CompositeConstraintBuilder<S, T> extends AbstractConstraintsBuilder<S, T, T, CompositeConstraintBuilder<S, T>> {
 
-	private final ConstraintsBuilder<T> source;
 	private final CompositeType compositeType;
 
-	public CompositeConstraintBuilder(CompositeType compositeType, List<Constraint<? super T>> sourceConstraints, Class<T> type, ConstraintsBuilder<T> source) {
-		super(sourceConstraints, type);
-		this.source = source;
+	public CompositeConstraintBuilder(S source, CompositeType compositeType, List<Constraint<? super T>> sourceConstraints, Class<T> type) {
+		super(source, sourceConstraints, type);
 		this.compositeType = compositeType;
 	}
 
-	public ConstraintsBuilder<T> finishComposite() {
-		addConstraints();
+	public S finishComposite() {
+		this.sourceConstraints.add(createConstraint(newConstraints));
 		return source;
 	}
 
-	@Override
-	void addConstraints() {
+	private AbstractCompositeConstraint<T> createConstraint(List<Constraint<? super T>> constraints) {
 		switch (compositeType) {
 			case OR:
-				sourceConstraints.add(new OrCompositeConstraint<>(newConstraints));
-				break;
+				return new OrCompositeConstraint<>(constraints);
 			case AND:
-				sourceConstraints.add(new AndCompositeConstraint<>(newConstraints));
-				break;
+				return new AndCompositeConstraint<>(constraints);
 			case INVERT:
-				sourceConstraints.add(new InvertCompositeConstraint<>(newConstraints));
-				break;
+				return new InvertCompositeConstraint<>(constraints);
+			default:
+				throw new AssertionError();
 		}
 	}
 

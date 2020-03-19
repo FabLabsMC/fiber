@@ -4,13 +4,15 @@ import me.zeroeightsix.fiber.NodeOperations;
 import me.zeroeightsix.fiber.annotation.convention.NoNamingConvention;
 import me.zeroeightsix.fiber.annotation.convention.SettingNamingConvention;
 import me.zeroeightsix.fiber.annotation.exception.MalformedFieldException;
+import me.zeroeightsix.fiber.annotation.magic.TypeMagic;
 import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
-import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
+import me.zeroeightsix.fiber.builder.constraint.AbstractConstraintsBuilder;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.tree.ConfigNode;
 import me.zeroeightsix.fiber.tree.Node;
 import me.zeroeightsix.fiber.tree.TreeItem;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.*;
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -89,13 +91,13 @@ public class AnnotatedSettings {
     private static <T, P> TreeItem fieldToItem(Field field, P pojo, String name, List<Member> listeners) throws FiberException {
         Class<T> type = getSettingTypeFromField(field);
 
-        ConfigValueBuilder<T> builder = new ConfigValueBuilder<>(type)
+        ConfigValueBuilder<T, ?> builder = createConfigValueBuilder(type, field)
                 .withName(name)
                 .withComment(findComment(field))
                 .withDefaultValue(findDefaultValue(field, pojo))
                 .setFinal(getSettingAnnotation(field).map(Setting::constant).orElse(false));
 
-        constrain(builder.constraints(), field);
+        constrain(builder.constraints(), field.getAnnotatedType()).finish();
 
         for (Member listener : listeners) {
             BiConsumer<T, T> consumer = constructListener(listener, pojo, type);
@@ -117,14 +119,50 @@ public class AnnotatedSettings {
         return builder.build();
     }
 
+    @SuppressWarnings({"unchecked"})
+    @Nonnull
+    private static <T, E> ConfigValueBuilder<T, ?> createConfigValueBuilder(Class<T> type, Field field) {
+        AnnotatedType annotatedType = field.getAnnotatedType();
+        if (ConfigValueBuilder.isAggregate(type)) {
+            if (Collection.class.isAssignableFrom(type)) {
+                if (annotatedType instanceof AnnotatedParameterizedType) {
+                    AnnotatedType[] typeArgs = ((AnnotatedParameterizedType) annotatedType).getAnnotatedActualTypeArguments();
+                    if (typeArgs.length == 1) {
+                        AnnotatedType typeArg = typeArgs[0];
+                        Class<E> componentType = (Class<E>) TypeMagic.classForType(typeArg.getType());
+                        if (componentType != null) {
+                            // coerce to a collection class and configure as such
+                            Class<Collection<E>> collectionType = (Class<Collection<E>>) type;
+                            ConfigValueBuilder.Aggregate<T, E> aggregate = (ConfigValueBuilder.Aggregate<T, E>) ConfigValueBuilder.aggregate(collectionType, componentType);
+                            // element constraints are on the type argument (eg. List<@Regex String>), so we setup constraints from it
+                            constrain(aggregate.constraints().component(), typeArg).finishComponent().finish();
+                            return aggregate;
+                        }
+                    }
+                }
+            } else {
+                assert type.isArray();
+                if (annotatedType instanceof AnnotatedArrayType) {
+                    // coerce to an array class
+                    Class<E[]> arrayType = (Class<E[]>) type;
+                    ConfigValueBuilder.Aggregate<T, E> aggregate = (ConfigValueBuilder.Aggregate<T, E>) ConfigValueBuilder.aggregate(arrayType);
+                    // take the component constraint information from the special annotated type
+                    constrain(aggregate.constraints().component(), ((AnnotatedArrayType) annotatedType).getAnnotatedGenericComponentType()).finishComponent().finish();
+                    return aggregate;
+                }
+            }
+        }
+        return ConfigValueBuilder.scalar(type);
+    }
+
     @SuppressWarnings("unchecked")
-    private static <T> void constrain(ConstraintsBuilder<T> constraints, Field field) {
+    private static <T, B extends AbstractConstraintsBuilder<?, ?, T, ?>> B constrain(B constraints, AnnotatedElement field) {
         if (field.isAnnotationPresent(Setting.Constrain.BiggerThan.class)) constraints.biggerThan((T) Double.valueOf(field.getAnnotation(Setting.Constrain.BiggerThan.class).value()));
         if (field.isAnnotationPresent(Setting.Constrain.SmallerThan.class)) constraints.smallerThan((T) Double.valueOf(field.getAnnotation(Setting.Constrain.SmallerThan.class).value()));
-        if (field.isAnnotationPresent(Setting.Constrain.MinStringLength.class)) constraints.minStringLength(field.getAnnotation(Setting.Constrain.MinStringLength.class).value());
-        if (field.isAnnotationPresent(Setting.Constrain.MaxStringLength.class)) constraints.maxStringLength(field.getAnnotation(Setting.Constrain.MaxStringLength.class).value());
+        if (field.isAnnotationPresent(Setting.Constrain.MinLength.class)) constraints.minLength(field.getAnnotation(Setting.Constrain.MinLength.class).value());
+        if (field.isAnnotationPresent(Setting.Constrain.MaxLength.class)) constraints.maxLength(field.getAnnotation(Setting.Constrain.MaxLength.class).value());
         if (field.isAnnotationPresent(Setting.Constrain.Regex.class)) constraints.regex(field.getAnnotation(Setting.Constrain.Regex.class).value());
-        constraints.finish();
+        return constraints;
     }
 
     @SuppressWarnings("unchecked")
@@ -187,7 +225,6 @@ public class AnnotatedSettings {
     private static <T, P, A> BiConsumer<T,T> constructListenerFromField(Field field, P pojo, Class<A> wantedType) throws FiberException {
         checkListenerField(field, wantedType);
 
-        @SuppressWarnings("unchecked")
         boolean isAccessible = field.isAccessible();
         field.setAccessible(true);
         BiConsumer<T, T> consumer;
@@ -220,12 +257,11 @@ public class AnnotatedSettings {
     private static <T> Class<T> getSettingTypeFromField(Field field) {
         @SuppressWarnings("unchecked")
         Class<T> type = (Class<T>) field.getType();
-        if (type.isPrimitive()) return wrapPrimitive(type);
-        return type;
+        return wrapPrimitive(type);
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> Class<T> wrapPrimitive(Class<T> type) {
+    public static <T> Class<T> wrapPrimitive(Class<T> type) {
         if (type.equals(boolean.class)) return (Class<T>) Boolean.class;
         if (type.equals(byte.class)) return (Class<T>) Byte.class;
         if (type.equals(char.class)) return (Class<T>) Character.class;
@@ -234,7 +270,7 @@ public class AnnotatedSettings {
         if (type.equals(double.class)) return (Class<T>) Double.class;
         if (type.equals(float.class)) return (Class<T>) Float.class;
         if (type.equals(long.class)) return (Class<T>) Long.class;
-        return null;
+        return type;
     }
 
     private static String findComment(Field field) {
