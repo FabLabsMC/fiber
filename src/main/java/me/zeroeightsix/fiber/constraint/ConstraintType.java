@@ -2,7 +2,7 @@ package me.zeroeightsix.fiber.constraint;
 
 import me.zeroeightsix.fiber.Identifier;
 
-public enum Constraints {
+public enum ConstraintType {
 	NUMERICAL_LOWER_BOUND(true, identifier("min")),
 	NUMERICAL_UPPER_BOUND(true, identifier("max")),
 	MINIMUM_LENGTH(true, identifier("min_length")),
@@ -15,7 +15,7 @@ public enum Constraints {
 	private final boolean numerical;
 	private final Identifier identifier;
 
-	Constraints(boolean numerical, Identifier identifier) {
+	ConstraintType(boolean numerical, Identifier identifier) {
 		this.numerical = numerical;
 		this.identifier = identifier;
 	}

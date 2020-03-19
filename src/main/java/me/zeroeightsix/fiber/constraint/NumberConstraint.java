@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 
 public class NumberConstraint<T extends Number> extends ValuedConstraint<T, T> {
 
-	public NumberConstraint(Constraints type, T value) throws RuntimeFiberException {
+	public NumberConstraint(ConstraintType type, T value) throws RuntimeFiberException {
 		super(type, value);
 		if (!type.isNumerical()) {
 			throw new RuntimeFiberException("Couldn't create numerical constraint: type must be numerical");

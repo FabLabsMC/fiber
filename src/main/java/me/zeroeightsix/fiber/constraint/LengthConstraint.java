@@ -10,11 +10,11 @@ public class LengthConstraint<T> extends ValuedConstraint<Integer, T> {
     private final ToIntFunction<T> lengthGetter;
 
     public static <T> LengthConstraint<T> min(Class<T> type, int min) {
-        return new LengthConstraint<>(Constraints.MINIMUM_LENGTH, getLengthFunction(type), min);
+        return new LengthConstraint<>(ConstraintType.MINIMUM_LENGTH, getLengthFunction(type), min);
     }
 
     public static <T> LengthConstraint<T> max(Class<T> type, int min) {
-        return new LengthConstraint<>(Constraints.MAXIMUM_LENGTH, getLengthFunction(type), min);
+        return new LengthConstraint<>(ConstraintType.MAXIMUM_LENGTH, getLengthFunction(type), min);
     }
 
     @Nonnull
@@ -34,7 +34,7 @@ public class LengthConstraint<T> extends ValuedConstraint<Integer, T> {
         return length;
     }
 
-    private LengthConstraint(Constraints type, ToIntFunction<T> lengthGetter, Integer value) {
+    private LengthConstraint(ConstraintType type, ToIntFunction<T> lengthGetter, Integer value) {
         super(type, value);
         this.lengthGetter = lengthGetter;
     }
@@ -47,7 +47,7 @@ public class LengthConstraint<T> extends ValuedConstraint<Integer, T> {
             case MAXIMUM_LENGTH:
                 return lengthGetter.applyAsInt(value) <= this.getValue();
             default:
-                throw new IllegalStateException("A StringLengthConstraint must be of type " + Constraints.MINIMUM_LENGTH + " or " + Constraints.MAXIMUM_LENGTH);
+                throw new IllegalStateException("A StringLengthConstraint must be of type " + ConstraintType.MINIMUM_LENGTH + " or " + ConstraintType.MAXIMUM_LENGTH);
         }
     }
 }

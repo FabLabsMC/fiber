@@ -39,7 +39,7 @@ public abstract class AbstractConstraintsBuilder<S, A, T, B extends AbstractCons
     public B biggerThan(T min) throws RuntimeFiberException {
         checkNumerical();
         checkNumerical(min);
-        newConstraints.add(new NumberConstraint(Constraints.NUMERICAL_LOWER_BOUND, (Number) min));
+        newConstraints.add(new NumberConstraint(ConstraintType.NUMERICAL_LOWER_BOUND, (Number) min));
         return self();
     }
 
@@ -53,7 +53,7 @@ public abstract class AbstractConstraintsBuilder<S, A, T, B extends AbstractCons
     public B smallerThan(T max) throws RuntimeFiberException {
         checkNumerical();
         checkNumerical(max);
-        newConstraints.add(new NumberConstraint(Constraints.NUMERICAL_UPPER_BOUND, (Number) max));
+        newConstraints.add(new NumberConstraint(ConstraintType.NUMERICAL_UPPER_BOUND, (Number) max));
         return self();
     }
 

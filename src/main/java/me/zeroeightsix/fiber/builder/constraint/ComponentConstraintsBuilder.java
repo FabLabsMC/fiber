@@ -1,7 +1,7 @@
 package me.zeroeightsix.fiber.builder.constraint;
 
 import me.zeroeightsix.fiber.constraint.Constraint;
-import me.zeroeightsix.fiber.constraint.Constraints;
+import me.zeroeightsix.fiber.constraint.ConstraintType;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
@@ -39,7 +39,7 @@ public final class ComponentConstraintsBuilder<S, A, T> extends AbstractConstrai
         private final List<Constraint<? super T>> constraints;
 
         ComponentConstraint(List<Constraint<? super T>> constraints) {
-            super(Constraints.COMPONENTS_MATCH);
+            super(ConstraintType.COMPONENTS_MATCH);
             this.constraints = constraints;
         }
 
