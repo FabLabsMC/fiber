@@ -27,13 +27,13 @@ public @interface Setting {
 
         @Target({ElementType.TYPE_USE})
         @Retention(RetentionPolicy.RUNTIME)
-        @interface BiggerThan {
+        @interface AtLeast {
             double value();
         }
 
         @Target({ElementType.TYPE_USE})
         @Retention(RetentionPolicy.RUNTIME)
-        @interface SmallerThan {
+        @interface AtMost {
             double value();
         }
 

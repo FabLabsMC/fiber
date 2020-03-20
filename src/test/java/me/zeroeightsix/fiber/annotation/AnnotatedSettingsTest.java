@@ -245,8 +245,8 @@ class AnnotatedSettingsTest {
     }
 
     private static class NumericalConstraintsPojo {
-        @Setting.Constrain.BiggerThan(0)
-        @Setting.Constrain.SmallerThan(10)
+        @Setting.Constrain.AtLeast(0)
+        @Setting.Constrain.AtMost(10)
         private int a = 5;
     }
 
@@ -264,7 +264,7 @@ class AnnotatedSettingsTest {
         @Setting.Constrain.MinLength(1) [] nonEmptyArrayShortStrings = {""};
 
         private
-        @Setting.Constrain.BiggerThan(0) @Setting.Constrain.SmallerThan(10) int
+        @Setting.Constrain.AtLeast(0) @Setting.Constrain.AtMost(10) int
         @Setting.Constrain.MinLength(0) @Setting.Constrain.MaxLength(3)[] numbers = {};
 
         private @Setting.Constrain.MaxLength(3) List<@Setting.Constrain.Regex("\\w+:\\w+") String> shortArrayIdStrings = Collections.singletonList("fabric:test");

@@ -22,10 +22,10 @@ class ConstraintsBuilderTest {
     public void testNumericalConstraints() {
         List<Constraint<? super Integer>> constraintList = new ArrayList<>();
         ConstraintsBuilder.Scalar<Void, Integer> constraintsBuilder = ConstraintsBuilder.scalar(null, constraintList, Integer.class);
-        constraintsBuilder.biggerThan(5)
+        constraintsBuilder.atLeast(5)
                 .composite(CompositeType.OR)
-                .biggerThan(20)
-                .smallerThan(10)
+                .atLeast(20)
+                .atMost(10)
                 .finishComposite()
                 .finish();
 
@@ -47,7 +47,7 @@ class ConstraintsBuilderTest {
     public void testArrayConstraints() {
         ConfigValue<Integer[]> config = ConfigValueBuilder.aggregate(Integer[].class)
                 .constraints().component()
-                .biggerThan(3).smallerThan(10)
+                .range(3, 10)
                 .finishComponent()
                 .maxLength(3)
                 .finish()
@@ -65,7 +65,7 @@ class ConstraintsBuilderTest {
     public void testCollectionConstraints() {
         ConfigValue<List<Integer>> config = ConfigValueBuilder.<List<Integer>, Integer>aggregate(List.class, Integer.class)
                 .constraints().component()
-                .biggerThan(3).smallerThan(10)
+                .atLeast(3).atMost(10)
                 .finishComponent()
                 .maxLength(3)
                 .finish()
