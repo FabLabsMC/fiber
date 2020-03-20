@@ -2,6 +2,11 @@ package me.zeroeightsix.fiber.constraint;
 
 import java.util.regex.Pattern;
 
+/**
+ * An implementation of the {@code STRING_MATCHING} constraint type.
+ *
+ * @see ConstraintType#STRING_MATCHING
+ */
 public class RegexConstraint extends ValuedConstraint<Pattern, CharSequence> {
     public RegexConstraint(Pattern value) {
         super(ConstraintType.STRING_MATCHING, value);

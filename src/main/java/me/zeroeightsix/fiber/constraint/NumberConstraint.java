@@ -4,6 +4,13 @@ import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 
 import java.math.BigDecimal;
 
+/**
+ * An implementation of the {@code NUMERICAL_LOWER_BOUND} and {@code NUMERICAL_UPPER_BOUND} constraint types.
+ *
+ * @param <T> the type of numerical value this constraint checks
+ * @see ConstraintType#NUMERICAL_LOWER_BOUND
+ * @see ConstraintType#NUMERICAL_UPPER_BOUND
+ */
 public class NumberConstraint<T extends Number> extends ValuedConstraint<T, T> {
 
 	public NumberConstraint(ConstraintType type, T value) throws RuntimeFiberException {

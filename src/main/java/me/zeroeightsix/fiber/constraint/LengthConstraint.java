@@ -6,6 +6,13 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.function.ToIntFunction;
 
+/**
+ * An implementation of the {@code MINIMUM_LENGTH} and {@code MAXIMUM_LENGTH} constraint types.
+ *
+ * @param <T> the type of numerical value this constraint checks
+ * @see ConstraintType#MINIMUM_LENGTH
+ * @see ConstraintType#MAXIMUM_LENGTH
+ */
 public class LengthConstraint<T> extends ValuedConstraint<Integer, T> {
     private final ToIntFunction<T> lengthGetter;
 
