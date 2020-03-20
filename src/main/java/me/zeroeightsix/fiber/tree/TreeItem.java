@@ -7,6 +7,7 @@ public interface TreeItem {
 
     /**
      * Returns this item's name.
+     *
      * @return this item's name
      */
     String getName();

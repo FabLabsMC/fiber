@@ -8,8 +8,9 @@ import java.util.stream.Collectors;
 public class NodeOperations {
 
     /**
-     * Merges two {@link ConfigNode} objects
-     * @param from  The ConfigNode that will be read from, but not mutated.
+     * Merges two {@code ConfigNode} objects.
+     *
+     * @param from  The {@code ConfigNode} that will be read from, but not mutated.
      * @param to    The mutated {@link ConfigNode} that will inherit <code>from</code>'s values and nodes.
      */
     public static void mergeTo(Node from, Node to) {
@@ -23,7 +24,8 @@ public class NodeOperations {
     }
 
     /**
-     * Merges a leaf node ({@link ConfigValue}) into a {@link ConfigNode}
+     * Merges a leaf node ({@code ConfigValue}) into a {@code ConfigNode}.
+     *
      * @param value The leaf node to be inherited
      * @param to    The mutated {@link ConfigNode} that will inherit <code>value</code>
      */

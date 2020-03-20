@@ -1,7 +1,7 @@
 package me.zeroeightsix.fiber.tree;
 
 /**
- * Capable of being marked with a comment
+ * Capable of being marked with a comment.
  */
 public interface Commentable {
 

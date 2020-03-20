@@ -3,7 +3,7 @@ package me.zeroeightsix.fiber.tree;
 import javax.annotation.Nullable;
 
 /**
- * A commentable tree item
+ * A commentable tree item.
  */
 public class ConfigLeaf implements TreeItem, Commentable {
 
@@ -13,9 +13,11 @@ public class ConfigLeaf implements TreeItem, Commentable {
     private final String comment;
 
     /**
-     * Creates a new {@link ConfigLeaf}
+     * Creates a new {@code ConfigLeaf}.
+     *
      * @param name the name for this leaf
      * @param comment the comment for this leaf
+     * @see ConfigLeaf
      */
     public ConfigLeaf(@Nullable String name, @Nullable String comment) {
         this.name = name;

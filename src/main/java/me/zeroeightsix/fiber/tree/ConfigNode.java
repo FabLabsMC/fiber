@@ -6,7 +6,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * A {@link ConfigLeaf} with children
+ * A {@code ConfigLeaf} with children
  */
 public class ConfigNode extends ConfigLeaf implements Node {
 
@@ -15,10 +15,12 @@ public class ConfigNode extends ConfigLeaf implements Node {
     private boolean serializeSeparately;
 
     /**
-     * Creates a new {@link ConfigNode}
+     * Creates a new {@code ConfigNode}.
+     *
      * @param name the name for this {@link ConfigNode}
      * @param comment the comment for this {@link ConfigNode}
      * @param serializeSeparately whether or not this node should be serialised separately. If {@code true}, it will be ignored during serialisation.
+     * @see ConfigNode
      */
     public ConfigNode(@Nullable String name, @Nullable String comment, boolean serializeSeparately) {
         super(name, comment);
@@ -26,16 +28,21 @@ public class ConfigNode extends ConfigLeaf implements Node {
     }
 
     /**
-     * Creates a new {@link ConfigNode} with the provided {@code name} and {@code comment}. This node will not be serialised separately.
+     * Creates a new {@code ConfigNode} with the provided {@code name} and {@code comment}.
+     * <br> This node will not be serialised separately.
+     *
      * @param name the name for this {@link ConfigNode}
      * @param comment the comment for this {@link ConfigNode}
+     * @see ConfigNode
      */
     public ConfigNode(@Nullable String name, @Nullable String comment) {
         this(name, comment, false);
     }
 
     /**
-     * Creates a new {@link ConfigNode} without a name or comment
+     * Creates a new {@code ConfigNode} without a name or comment.
+     *
+     * @see ConfigNode
      */
     public ConfigNode() {
         this(null, null);
@@ -48,7 +55,8 @@ public class ConfigNode extends ConfigLeaf implements Node {
     }
 
     /**
-     * Returns if this node should be serialised separately. If {@code true}, it should be ignored during serialisation.
+     * Returns if this node should be serialised separately.
+     * <br> If {@code true}, it should be ignored during serialisation.
      * @return whether or not it is serialised separately
      */
     @Override

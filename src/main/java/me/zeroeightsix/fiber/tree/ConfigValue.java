@@ -11,8 +11,10 @@ import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
 /**
- * A {@link ConfigLeaf} with some value of type {@code T}
+ * A {@code ConfigLeaf} with some value of type {@code T}.
+ *
  * @param <T> The type of value this class holds
+ * @see ConfigLeaf
  */
 public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
 
@@ -29,7 +31,7 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
     private final Predicate<T> restriction;
 
     /**
-     * Creates a {@link ConfigValue}
+     * Creates a {@code ConfigValue}.
      *
      * @param name the name for this item
      * @param comment the comment for this item
@@ -78,8 +80,7 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
 
     /**
      * Returns the listener for this item.
-     * <p>
-     * When this item's value changes, the consumer will be called with the old value as first argument and the new value as second argument.
+     * <br> When this item's value changes, the consumer will be called with the old value as first argument and the new value as second argument.
      *
      * @return the listener
      */
@@ -100,8 +101,7 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
 
     /**
      * Returns the list of constraints for this item.
-     * <p>
-     * For a call to {@link #setValue} to pass (and such, return {@code true}), the value must satisfy all constraints in this list.
+     * <br> For a call to {@link #setValue} to pass (and such, return {@code true}), the value must satisfy all constraints in this list.
      *
      * @return the list of constraints
      */
@@ -111,20 +111,19 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
     }
 
     /**
-     * Creates a scalar config value builder.
+     * Creates a scalar {@code ConfigValueBuilder}.
      *
      * @param type the class of the type of value the {@link ConfigValue} produced by the builder holds
      * @param <T> the type {@code type} represents
      * @return the newly created builder
      * @see me.zeroeightsix.fiber.builder.ConfigValueBuilder.Scalar Scalar
      */
-    // the <T> parameter was ignored in the javadoc as it matches the same description as 'type' does
     public static <T> ConfigValueBuilder.Scalar<T> builder(@Nonnull Class<T> type) {
         return ConfigValueBuilder.scalar(type);
     }
 
     /**
-     * Creates a scalar config value builder.
+     * Creates a scalar {@code ConfigValueBuilder}.
      *
      * @param defaultValue the default value of the {@link ConfigValue} that will be produced by the created builder.
      * @param <T> the type of value the {@link ConfigValue} produced by the builder holds
@@ -137,7 +136,7 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
     }
 
     /**
-     * Creates an aggregate config value builder.
+     * Creates an aggregate {@code ConfigValueBuilder}.
      *
      * @param defaultValue the default array of values the {@link ConfigValue} will hold.
      * @param <E> the type of elements {@code defaultValue} holds
@@ -150,7 +149,7 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
     }
 
     /**
-     * Creates an aggregate config value builder.
+     * Creates an aggregate {@code ConfigValueBuilder}.
      *
      * @param defaultValue the default collection of values the {@link ConfigValue} will hold.
      * @param elementType the class of the type of elements {@code defaultValue} holds
