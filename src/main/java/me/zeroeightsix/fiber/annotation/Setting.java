@@ -65,37 +65,55 @@ public @interface Setting {
     @interface Constrain {
 
         /**
-         * Indicates that this value is limited to being equal to or bigger than a number.
+         * Indicates that this value is limited to a range of numerical values.
          *
-         * @see SmallerThan SmallerThan
+         * @see BigRange
          */
         @Target({ElementType.TYPE_USE})
         @Retention(RetentionPolicy.RUNTIME)
-        @interface BiggerThan {
+        @interface Range {
             /**
-             * The minimum value allowed.
-             * <br> Settings being constrained using this annotation must be equal to or bigger than this {@code value}.
+             * The minimum value allowed (inclusive).
+             *
+             * <p> Settings being constrained using this annotation must be equal to or bigger than this value.
              *
              * @return the minimum value
              */
-            double value();
-        }
+            double min() default Double.NEGATIVE_INFINITY;
 
-        /**
-         * Indicates that this value is limited to being equal to or smaller than a number.
-         *
-         * @see BiggerThan BiggerThan
-         */
-        @Target({ElementType.TYPE_USE})
-        @Retention(RetentionPolicy.RUNTIME)
-        @interface SmallerThan {
             /**
              * The maximum value allowed.
-             * <br> Settings being constrained using this annotation must be equal to or smaller than this {@code value}.
+             *
+             * <p> Settings being constrained using this annotation must be equal to or
+             * smaller than this {@code value}.
              *
              * @return the maximum value
              */
-            double value();
+            double max() default Double.POSITIVE_INFINITY;
+        }
+
+        /**
+         * Indicates that this value is limited to a range of numerical values with unbounded precision.
+         *
+         * @see Range
+         * @see java.math.BigDecimal
+         */
+        @Target({ElementType.TYPE_USE})
+        @Retention(RetentionPolicy.RUNTIME)
+        @interface BigRange {
+            /**
+             * The minimum value for this field (inclusive). If left empty, there will be no minimum.
+             *
+             * @return the minimum value
+             */
+            String min() default "";
+
+            /**
+             * The maximum value for this field (inclusive). If left empty, there will be no maximum.
+             *
+             * @return the maximum value
+             */
+            String max() default "";
         }
 
         /**

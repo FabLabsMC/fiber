@@ -14,6 +14,7 @@ import me.zeroeightsix.fiber.tree.TreeItem;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.*;
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -157,8 +158,24 @@ public class AnnotatedSettings {
 
     @SuppressWarnings("unchecked")
     private static <T, B extends AbstractConstraintsBuilder<?, ?, T, ?>> B constrain(B constraints, AnnotatedElement field) {
-        if (field.isAnnotationPresent(Setting.Constrain.BiggerThan.class)) constraints.biggerThan((T) Double.valueOf(field.getAnnotation(Setting.Constrain.BiggerThan.class).value()));
-        if (field.isAnnotationPresent(Setting.Constrain.SmallerThan.class)) constraints.smallerThan((T) Double.valueOf(field.getAnnotation(Setting.Constrain.SmallerThan.class).value()));
+        if (field.isAnnotationPresent(Setting.Constrain.Range.class)) {
+            Setting.Constrain.Range annotation = field.getAnnotation(Setting.Constrain.Range.class);
+            if (annotation.min() > Double.NEGATIVE_INFINITY) {
+                constraints.atLeast((T) Double.valueOf(annotation.min()));
+            }
+            if (annotation.max() < Double.POSITIVE_INFINITY) {
+                constraints.atMost((T) Double.valueOf(annotation.max()));
+            }
+        }
+        if (field.isAnnotationPresent(Setting.Constrain.BigRange.class)) {
+            Setting.Constrain.BigRange annotation = field.getAnnotation(Setting.Constrain.BigRange.class);
+            if (!annotation.min().isEmpty()) {
+                constraints.atLeast((T) new BigDecimal(annotation.min()));
+            }
+            if (!annotation.max().isEmpty()) {
+                constraints.atMost((T) new BigDecimal(annotation.max()));
+            }
+        }
         if (field.isAnnotationPresent(Setting.Constrain.MinLength.class)) constraints.minLength(field.getAnnotation(Setting.Constrain.MinLength.class).value());
         if (field.isAnnotationPresent(Setting.Constrain.MaxLength.class)) constraints.maxLength(field.getAnnotation(Setting.Constrain.MaxLength.class).value());
         if (field.isAnnotationPresent(Setting.Constrain.Regex.class)) constraints.regex(field.getAnnotation(Setting.Constrain.Regex.class).value());

@@ -31,12 +31,13 @@ public abstract class AbstractConstraintsBuilder<S, A, T, B extends AbstractCons
 
     /**
      * Implies that any value must be bigger than <b>or equal</b> to <code>min</code>
+     *
      * @param min The minimum value
      * @return The builder
-     * @throws RuntimeFiberException
+     * @throws IllegalArgumentException if {@code min} is not a {@link Number}
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public B biggerThan(T min) throws RuntimeFiberException {
+    public B atLeast(T min) throws RuntimeFiberException {
         checkNumerical();
         checkNumerical(min);
         newConstraints.add(new NumberConstraint(ConstraintType.NUMERICAL_LOWER_BOUND, (Number) min));
@@ -45,15 +46,34 @@ public abstract class AbstractConstraintsBuilder<S, A, T, B extends AbstractCons
 
     /**
      * Implies that any value must be smaller than <b>or equal</b> to <code>max</code>
+     *
      * @param max The maximum value
      * @return The builder
-     * @throws RuntimeFiberException
+     * @throws UnsupportedOperationException if this builder is not for a numerical value
+     * @throws IllegalArgumentException      if {@code max} is not a {@link Number}
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public B smallerThan(T max) throws RuntimeFiberException {
+    public B atMost(T max) {
         checkNumerical();
         checkNumerical(max);
         newConstraints.add(new NumberConstraint(ConstraintType.NUMERICAL_UPPER_BOUND, (Number) max));
+        return self();
+    }
+
+    /**
+     * Convenience method to specify a range of valid values a number can take.
+     *
+     * <p> This method behaves as if: {@code this.atLeast(min).atMost(max)}
+     *
+     * @param min The minimum value
+     * @param max The maximum value
+     * @return This builder
+     * @throws UnsupportedOperationException if this builder is not for a numerical value
+     * @throws IllegalArgumentException      if {@code min} or {@code max} is not a {@link Number}
+     */
+    public B range(T min, T max) {
+        atLeast(min);
+        atMost(max);
         return self();
     }
 

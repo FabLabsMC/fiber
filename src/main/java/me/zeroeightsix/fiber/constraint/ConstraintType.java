@@ -76,7 +76,7 @@ public enum ConstraintType {
 	}
 
 	private static Identifier identifier(String name) {
-		return new Identifier("fabric", name);
+		return new Identifier("fiber", name);
 	}
 
 	/**
