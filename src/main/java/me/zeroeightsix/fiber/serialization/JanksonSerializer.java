@@ -1,8 +1,8 @@
-package me.zeroeightsix.fiber;
+package me.zeroeightsix.fiber.serialization;
 
 import blue.endless.jankson.*;
 import blue.endless.jankson.api.SyntaxError;
-import blue.endless.jankson.impl.MarshallerImpl;
+import me.zeroeightsix.fiber.Identifier;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.tree.*;
 
@@ -14,17 +14,21 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-public class JanksonSettings {
+public class JanksonSerializer implements Serializer {
 
+	private static final Identifier IDENTIFIER = new Identifier("fiber", "jankson");
+
+	private final boolean compress;
 	@Nonnull
 	private final Marshaller<JsonElement> marshaller;
 
-	public JanksonSettings(@Nonnull Marshaller<JsonElement> marshaller) {
-		this.marshaller = marshaller;
+	public JanksonSerializer() {
+		this(JanksonFallbackMarshaller.INSTANCE, false);
 	}
 
-	public JanksonSettings() {
-		this(JanksonFallbackMarshaller.INSTANCE);
+	public JanksonSerializer(@Nonnull Marshaller<JsonElement> marshaller, boolean compress) {
+		this.compress = compress;
+		this.marshaller = marshaller;
 	}
 
 	public void deserialize(Node node, InputStream stream) throws IOException, FiberException {
@@ -59,12 +63,11 @@ public class JanksonSettings {
 		}
 	}
 
-	private <T> void setPropertyValue(Property<T> property, JsonElement child) {
-		Class<T> type = property.getType();
-		property.setValue(marshall(type, child));
+	private JsonElement serialize(HasValue<?> hasValue) {
+		return marshaller.marshall(hasValue.getValue());
 	}
 
-	public void serialize(Node node, OutputStream stream, boolean compress) throws IOException {
+	public void serialize(Node node, OutputStream stream) throws IOException {
 		JsonObject object = serialize(node);
 		stream.write(object.toJson(!compress, !compress).getBytes(StandardCharsets.UTF_8));
 	}
@@ -92,12 +95,18 @@ public class JanksonSettings {
 		return object;
 	}
 
-	private JsonElement serialize(HasValue<?> hasValue) {
-		return marshaller.marshall(hasValue.getValue());
-	}
-
 	private <A> A marshall(Class<A> type, JsonElement value) {
 		return marshaller.marshallReverse(type, value);
+	}
+
+	private <T> void setPropertyValue(Property<T> property, JsonElement child) {
+		Class<T> type = property.getType();
+		property.setValue(marshall(type, child));
+	}
+
+	@Override
+	public Identifier getIdentifier() {
+		return IDENTIFIER;
 	}
 
 	private class JanksonTransparentNode implements Transparent {
@@ -112,7 +121,7 @@ public class JanksonSettings {
 		@Nullable
 		@Override
 		public <A> A marshall(Class<A> type) {
-			return JanksonSettings.this.marshall(type, this.value);
+			return JanksonSerializer.this.marshall(type, this.value);
 		}
 
 		@Override
