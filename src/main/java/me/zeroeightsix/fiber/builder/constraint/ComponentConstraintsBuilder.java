@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
+ * A builder for component constraints.
+ * <br> Component constraints are satisfied only if all elements in the aggregate type satisfy the constraint.
  *
  * @param <A> the type of the array or collection to create a constraint for
  * @param <S> the type of this builder's source
@@ -35,6 +37,12 @@ public final class ComponentConstraintsBuilder<S, A, T> extends AbstractConstrai
         return source;
     }
 
+    /**
+     * A component constraints is satisfied only if all elements in the aggregate type it checks satisfy the constraint.
+     *
+     * @param <A> the type of aggregate this constraint checks
+     * @param <T> the type of elements {@code <A>} holds
+     */
     public static abstract class ComponentConstraint<A, T> extends Constraint<A> {
         private final List<Constraint<? super T>> constraints;
 

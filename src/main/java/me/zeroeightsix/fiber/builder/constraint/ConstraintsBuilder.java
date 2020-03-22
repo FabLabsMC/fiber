@@ -52,6 +52,14 @@ public abstract class ConstraintsBuilder<S, A, T, B extends ConstraintsBuilder<S
         super(source, sourceConstraints, type);
     }
 
+    /**
+     * Creates a new {@code CompositeConstraintBuilder} from this {@code ConstraintsBuilder}.
+     * <br> Composite constraints are constraints that have 0 or more child constraints.
+     * <br> Whether or not a value satisfies a composite constraint is specified by the composite's {@link CompositeType}.
+     *
+     * @param type the type of composite to create
+     * @return the newly created builder
+     */
     public abstract CompositeConstraintBuilder<B, A> composite(CompositeType type);
 
     /**
@@ -110,6 +118,12 @@ public abstract class ConstraintsBuilder<S, A, T, B extends ConstraintsBuilder<S
             return new CompositeConstraintBuilder<>(this, type, sourceConstraints, this.type);
         }
 
+        /**
+         * Creates a new {@code ComponentConstraintsBuilder}.
+         * <br> Component constraints are constraints that test each value in an aggregate type. By default, all tested elements must satisfy the constraint in order for the entire constraint to be satisfied.
+         *
+         * @return the newly created builder
+         */
         @SuppressWarnings({"unchecked", "rawtypes"})
         public ComponentConstraintsBuilder<Aggregate<S, A, T>, A, T> component() {
             if (this.type.isArray()) {
