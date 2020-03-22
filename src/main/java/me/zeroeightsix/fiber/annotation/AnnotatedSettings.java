@@ -17,10 +17,21 @@ import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class AnnotatedSettings {
+
+    public static <P> ConfigNode asNode(P pojo) throws FiberException {
+        return asNode(pojo, ConfigNode::new);
+    }
+
+    public static <N extends Node, P> N asNode(P pojo, Supplier<N> nodeSupplier) throws FiberException {
+        N node = nodeSupplier.get();
+        applyToNode(node, pojo);
+        return node;
+    }
 
     public static <P> void applyToNode(Node mergeTo, P pojo) throws FiberException {
         @SuppressWarnings("unchecked")
