@@ -1,7 +1,8 @@
 package me.zeroeightsix.fiber.constraint;
 
 /**
- *
+ * A constraint that has a value attached to it.
+ * <br> For example, a {@link NumberConstraint} can have as value a minimum or maximum.
  *
  * @param <T>
  * @param <A>

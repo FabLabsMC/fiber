@@ -106,7 +106,7 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
     }
 
     /**
-     * Sets the name.
+     * Sets the {@code ConfigValue}'s name.
      * <br> If {@code null}, or if this method is never called, the {@code ConfigValue} won't have a name. Thus, it might be ignored during (de)serialisation. It also won't be able to be found by name in its parent node.
      *
      * @param name the name
@@ -119,7 +119,7 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
     }
 
     /**
-     * Sets the comment.
+     * Sets the {@code ConfigValue}'s comment.
      * <br> If {@code null}, or if this method is never called, the {@code ConfigValue} won't have a comment. An empty comment (non null, but only consisting of whitespace) will be serialised.
      *
      * @param comment the comment
@@ -131,7 +131,7 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
     }
 
     /**
-     * Sets the listener.
+     * Adds a listener to the {@code ConfigValue}.
      * <br> Listeners are called when the value of a {@code ConfigValue} is changed. They are of type {@link BiConsumer}: the first argument being the old value, and the second argument being the new value.
      * <br> Listeners set with this method are chained: if there was already one specified, a new listener is created that calls the old one first, and then the new one.
      *

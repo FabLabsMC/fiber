@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that a field is a setting, and must be serialised as such.
+ * Indicates that a field is a setting.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

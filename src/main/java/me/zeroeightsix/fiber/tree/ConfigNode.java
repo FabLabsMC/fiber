@@ -41,6 +41,7 @@ public class ConfigNode extends ConfigLeaf implements Node {
 
     /**
      * Creates a new {@code ConfigNode} without a name or comment.
+     * <br> This node will not be serialised separately.
      *
      * @see ConfigNode
      */

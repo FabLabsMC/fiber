@@ -37,7 +37,7 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
      * @param comment the comment for this item
      * @param value the current value
      * @param defaultValue the default value for this item
-     *                     <br> Preferably, if this item's value has constraints, the default value must satisfy those constraints.
+     *                     <br> Preferably, if this item's value has constraints, the default value should satisfy those constraints.
      * @param consumer the consumer or listener for this item. When this item's value changes, the consumer will be called with the old value as first argument and the new value as second argument.
      * @param constraintList the list of constraints for this item. For a value to be accepted, all constraints must be satisfied.
      * @param type the type of value this item holds
