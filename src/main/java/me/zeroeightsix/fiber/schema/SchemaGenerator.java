@@ -9,6 +9,7 @@ import me.zeroeightsix.fiber.Identifier;
 import me.zeroeightsix.fiber.builder.constraint.CompositeConstraintBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.ValuedConstraint;
+import me.zeroeightsix.fiber.serialization.Marshaller;
 import me.zeroeightsix.fiber.tree.*;
 
 import javax.annotation.Nullable;
@@ -21,9 +22,9 @@ public class SchemaGenerator {
 	private HashMap<Class<?>, Identifier> classIdentifierHashMap = new HashMap<>();
 
 	@Nullable
-	private me.zeroeightsix.fiber.Marshaller<JsonElement> marshaller;
+	private Marshaller<JsonElement> marshaller;
 
-	public SchemaGenerator(@Nullable me.zeroeightsix.fiber.Marshaller<JsonElement> marshaller) {
+	public SchemaGenerator(@Nullable Marshaller<JsonElement> marshaller) {
 		this.marshaller = marshaller;
 
 		classIdentifierHashMap.put(Boolean.class, identifier("boolean"));

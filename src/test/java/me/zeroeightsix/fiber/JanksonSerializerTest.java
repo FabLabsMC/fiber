@@ -1,6 +1,7 @@
 package me.zeroeightsix.fiber;
 
 import me.zeroeightsix.fiber.exception.FiberException;
+import me.zeroeightsix.fiber.serialization.JanksonSerializer;
 import me.zeroeightsix.fiber.tree.ConfigNode;
 import me.zeroeightsix.fiber.tree.ConfigValue;
 import me.zeroeightsix.fiber.tree.Node;
@@ -11,13 +12,13 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-class JanksonSettingsTest {
+class JanksonSerializerTest {
 
     @Test
     @DisplayName("Node -> Node")
     void nodeSerialization() throws IOException, FiberException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        JanksonSettings jk = new JanksonSettings();
+        JanksonSerializer jk = new JanksonSerializer();
         Node nodeOne = new ConfigNode();
         Node nodeTwo = new ConfigNode();
 
@@ -33,7 +34,7 @@ class JanksonSettingsTest {
                 .withParent(nodeTwo)
                 .build();
 
-        jk.serialize(nodeOne, bos, false);
+        jk.serialize(nodeOne, bos);
         jk.deserialize(nodeTwo, new ByteArrayInputStream(bos.toByteArray()));
         NodeOperationsTest.testNodeFor(nodeTwo, "A", Integer.class, 10);
     }
@@ -42,7 +43,7 @@ class JanksonSettingsTest {
     @DisplayName("SubNode -> SubNode")
     void nodeSerialization1() throws IOException, FiberException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        JanksonSettings jk = new JanksonSettings();
+        JanksonSerializer jk = new JanksonSerializer();
         Node parentOne = new ConfigNode();
         Node parentTwo = new ConfigNode();
         Node childOne = parentOne.fork("child");
@@ -60,7 +61,7 @@ class JanksonSettingsTest {
                 .withParent(childTwo)
                 .build();
 
-        jk.serialize(parentOne, bos, false);
+        jk.serialize(parentOne, bos);
         jk.deserialize(parentTwo, new ByteArrayInputStream(bos.toByteArray()));
         NodeOperationsTest.testNodeFor(childTwo, "A", Integer.class, 10);
     }
@@ -69,7 +70,7 @@ class JanksonSettingsTest {
     @DisplayName("Ignore SubNode")
     void nodeSerialization2() throws IOException, FiberException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        JanksonSettings jk = new JanksonSettings();
+        JanksonSerializer jk = new JanksonSerializer();
         Node parentOne = new ConfigNode();
         Node parentTwo = new ConfigNode();
         Node childOne = parentOne.fork("child", true);
@@ -87,7 +88,7 @@ class JanksonSettingsTest {
                 .withParent(childTwo)
                 .build();
 
-        jk.serialize(parentOne, bos, false);
+        jk.serialize(parentOne, bos);
         jk.deserialize(parentTwo, new ByteArrayInputStream(bos.toByteArray()));
         // the child data should not have been saved -> default value
         NodeOperationsTest.testNodeFor(childTwo, "A", Integer.class, 20);
