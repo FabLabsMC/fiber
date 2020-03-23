@@ -12,8 +12,9 @@ public interface Transparent extends TreeItem {
     /**
      * Attempts to convert the value of this transparent setting.
      *
-     * @param <A>   The type to convert to.
-     * @return      The converted value
+     * @param <A> the type to convert to.
+     * @param type class of {@code <A>}
+     * @return the converted value
      */
     @Nullable
     <A> A marshall(Class<A> type);

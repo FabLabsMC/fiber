@@ -3,7 +3,7 @@ package me.zeroeightsix.fiber.constraint;
 /**
  * Specifies a condition values must satisfy before being set to a {@code ConfigValue}.
  *
- * @param <A>
+ * @param <A> the type of values this constraint checks
  * @see me.zeroeightsix.fiber.tree.ConfigValue
  */
 public abstract class Constraint<A> { // A is the type of values we're gonna check

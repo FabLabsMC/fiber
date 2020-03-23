@@ -39,6 +39,9 @@ public final class TypeMagic {
      * ways of uncovering its (un-reified) class.
      *
      * <p>Generally it's much safer to use this for the type from a *field* than a blind type from an argument.
+     *
+     * @param t the type to check
+     * @return the class of {@code t}
      */
     @Nullable
     public static Class<?> classForType(Type t) {

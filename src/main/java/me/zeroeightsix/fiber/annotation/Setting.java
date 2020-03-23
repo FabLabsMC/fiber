@@ -131,8 +131,9 @@ public @interface Setting {
         @Retention(RetentionPolicy.RUNTIME)
         @interface MinLength {
             /**
-             * The minimum length allowed.
+             * Returns the minimum length allowed.
              *
+             * @return the minimum length allowed
              * @see MinLength MinLength
              */
             int value();

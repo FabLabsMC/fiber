@@ -19,16 +19,14 @@ public @interface Listener {
      *
      * <p> For example, if you are using {@code snake_case}:
      * <pre>
-     * {@code
-     * @Settings(namingConvention = UnderscoredLowerCaseConvention.class)
+     * &#64;Settings(namingConvention = UnderscoredLowerCaseConvention.class)
      * class MySettings {
      *     private int fooBar = 5;
      *
-     *     @Listener("foo_bar") // foo_bar not fooBar
+     *     &#64;Listener("foo_bar") // foo_bar not fooBar
      *     public void fooBarListener(int newValue) {
      *         System.out.println("Changed to " + newValue);
      *     }
-     * }
      * }
      * </pre>
      * @return the name of the setting this listener listens for

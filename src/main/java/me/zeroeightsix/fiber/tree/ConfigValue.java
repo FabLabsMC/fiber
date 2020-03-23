@@ -157,7 +157,7 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
      * @param elementType the class of the type of elements {@code defaultValue} holds
      * @param <C> the type of collection {@code defaultValue} is
      * @param <E> the type {@code elementType} represents
-     * @return
+     * @return the newly created builder
      */
     public static <C extends Collection<E>, E> ConfigValueBuilder.Aggregate<C, E> builder(@Nonnull C defaultValue, Class<E> elementType) {
         @SuppressWarnings("unchecked") Class<C> type = (Class<C>) defaultValue.getClass();

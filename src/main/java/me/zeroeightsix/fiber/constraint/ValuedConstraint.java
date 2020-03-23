@@ -5,8 +5,8 @@ package me.zeroeightsix.fiber.constraint;
  *
  * <p> For example, a {@link NumberConstraint} can have as value a minimum or maximum.
  *
- * @param <T>
- * @param <A>
+ * @param <T> the value of this constraint
+ * @param <A> the type of values this constraint checks
  */
 public abstract class ValuedConstraint<T, A> extends Constraint<A> { // A is the type of values we're gonna check
 
