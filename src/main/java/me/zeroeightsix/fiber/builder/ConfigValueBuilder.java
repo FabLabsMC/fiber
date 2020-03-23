@@ -48,7 +48,7 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
      */
     @SuppressWarnings("unchecked")
     public static <E> Aggregate<E[], E> aggregate(@Nonnull Class<E[]> arrayType) {
-        if (!arrayType.isArray()) throw new IllegalArgumentException(arrayType + " is not a valid array type");
+        if (!arrayType.isArray()) throw new RuntimeFiberException(arrayType + " is not a valid array type");
         return new Aggregate<>(arrayType, (Class<E>) AnnotatedSettings.wrapPrimitive(arrayType.getComponentType()));
     }
 
@@ -63,7 +63,7 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
      */
     @SuppressWarnings("unchecked")
     public static <C extends Collection<E>, E> Aggregate<C, E> aggregate(@Nonnull Class<? super C> collectionType, @Nonnull Class<E> componentType) {
-        if (!Collection.class.isAssignableFrom(collectionType)) throw new IllegalArgumentException(collectionType + " is not a valid Collection type");
+        if (!Collection.class.isAssignableFrom(collectionType)) throw new RuntimeFiberException(collectionType + " is not a valid Collection type");
         return new Aggregate<>((Class<C>) collectionType, componentType);
     }
 

@@ -1,5 +1,7 @@
 package me.zeroeightsix.fiber.constraint;
 
+import me.zeroeightsix.fiber.exception.RuntimeFiberException;
+
 import javax.annotation.Nonnull;
 import java.lang.reflect.Array;
 import java.util.Collection;
@@ -36,7 +38,7 @@ public class LengthConstraint<T> extends ValuedConstraint<Integer, T> {
         } else if (Map.class.isAssignableFrom(type)) {
             length = t -> ((Map<?, ?>) t).size();
         } else {
-            throw new IllegalArgumentException("Instances of " + type + " do not have a known length or size");
+            throw new RuntimeFiberException("Instances of " + type + " do not have a known length or size");
         }
         return length;
     }
@@ -54,7 +56,7 @@ public class LengthConstraint<T> extends ValuedConstraint<Integer, T> {
             case MAXIMUM_LENGTH:
                 return lengthGetter.applyAsInt(value) <= this.getValue();
             default:
-                throw new IllegalStateException("A StringLengthConstraint must be of type " + ConstraintType.MINIMUM_LENGTH + " or " + ConstraintType.MAXIMUM_LENGTH);
+                throw new RuntimeFiberException("A StringLengthConstraint must be of type " + ConstraintType.MINIMUM_LENGTH + " or " + ConstraintType.MAXIMUM_LENGTH);
         }
     }
 }

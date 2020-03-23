@@ -78,13 +78,13 @@ public abstract class AbstractConstraintsBuilder<S, A, T, B extends AbstractCons
     }
 
     public B minLength(int min) {
-        if (min < 0) throw new IllegalArgumentException(min + " is not a valid length");
+        if (min < 0) throw new RuntimeFiberException(min + " is not a valid length");
         newConstraints.add(LengthConstraint.min(type, min));
         return self();
     }
 
     public B maxLength(int max) {
-        if (max < 0) throw new IllegalArgumentException(max + " is not a valid length");
+        if (max < 0) throw new RuntimeFiberException(max + " is not a valid length");
         newConstraints.add(LengthConstraint.max(type, max));
         return self();
     }
@@ -98,17 +98,17 @@ public abstract class AbstractConstraintsBuilder<S, A, T, B extends AbstractCons
 
     private void checkNumerical() {
         if (!Number.class.isAssignableFrom(this.type))
-            throw new UnsupportedOperationException("Can't apply numerical constraint to non-numerical setting");
+            throw new RuntimeFiberException("Can't apply numerical constraint to non-numerical setting");
     }
 
     private void checkNumerical(T value) {
         if (!Number.class.isAssignableFrom(value.getClass()))
-            throw new IllegalArgumentException("'" + value + "' is not a number");
+            throw new RuntimeFiberException("'" + value + "' is not a number");
     }
 
     private void checkCharSequence() {
         if (!CharSequence.class.isAssignableFrom(this.type))
-            throw new UnsupportedOperationException("Can only apply regex pattern constraint to character sequences");
+            throw new RuntimeFiberException("Can only apply regex pattern constraint to character sequences");
     }
 
     @SuppressWarnings("unchecked")

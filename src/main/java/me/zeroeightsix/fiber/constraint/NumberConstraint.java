@@ -30,7 +30,7 @@ public class NumberConstraint<T extends Number> extends ValuedConstraint<T, T> {
 			case NUMERICAL_UPPER_BOUND:
 				return compared >= 0;
 			default:
-				throw new IllegalStateException("A NumberConstraint must be of type NUMERICAL_LOWER_BOUND or NUMERICAL_UPPER_BOUND");
+				throw new RuntimeFiberException("A NumberConstraint must be of type NUMERICAL_LOWER_BOUND or NUMERICAL_UPPER_BOUND");
 		}
 	}
 
