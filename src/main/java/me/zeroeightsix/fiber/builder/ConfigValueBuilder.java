@@ -215,13 +215,13 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
      * @return the created builder
      * @see ConstraintsBuilder
      */
-    public abstract ConstraintsBuilder<B, T, ?, ?> constraints();
+    public abstract ConstraintsBuilder<B, T, ?> constraints();
 
     /**
      * Builds the {@code ConfigValue}.
      *
      * <p> If a parent was specified using {@link #withParent}, the {@code ConfigValue} will also be registered to its parent node.
-     * 
+     *
      * @return the {@code ConfigValue}
      */
     public ConfigValue<T> build() {
