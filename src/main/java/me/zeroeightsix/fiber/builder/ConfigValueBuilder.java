@@ -16,7 +16,8 @@ import java.util.function.BiConsumer;
 
 /**
  * A builder for {@code ConfigValue}s.
- * <br> This is the abstract base class for all builders of this type. Builders implementing this class include
+ *
+ * <p> This is the abstract base class for all builders of this type. Builders implementing this class include
  * {@link Scalar Scalar} and {@link Aggregate Aggregate} for scalar (one-value) and aggregate (collection/array) values, respectively.
  *
  * @param <T> the type of value the produced {@code ConfigValue} will hold
@@ -39,7 +40,8 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
 
     /**
      * Creates and returns an aggregate {@code ConfigValueBuilder}.
-     * <br> Aggregates are types that have multiple elements of the same type: such as an array or collection.
+     *
+     * <p> Aggregates are types that have multiple elements of the same type: such as an array or collection.
      *
      * @param arrayType the class of the array used for this aggregate builder
      * @param <E> the type of values held by {@code arrayType}
@@ -54,7 +56,8 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
 
     /**
      * Creates and returns an aggregate {@code ConfigValue} builder.
-     * <br> Aggregates are types that have multiple elements of the same type: such as an array or collection.
+     *
+     * <p> Aggregates are types that have multiple elements of the same type: such as an array or collection.
      *
      * @param collectionType the class of the collection used for this aggregate builder
      * @param componentType the class of the type of elements {@code collectionType} holds
@@ -107,7 +110,8 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
 
     /**
      * Sets the {@code ConfigValue}'s name.
-     * <br> If {@code null}, or if this method is never called, the {@code ConfigValue} won't have a name. Thus, it might be ignored during (de)serialisation. It also won't be able to be found by name in its parent node.
+     *
+     * <p> If {@code null}, or if this method is never called, the {@code ConfigValue} won't have a name. Thus, it might be ignored during (de)serialisation. It also won't be able to be found by name in its parent node.
      *
      * @param name the name
      * @return {@code this} builder
@@ -120,7 +124,8 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
 
     /**
      * Sets the {@code ConfigValue}'s comment.
-     * <br> If {@code null}, or if this method is never called, the {@code ConfigValue} won't have a comment. An empty comment (non null, but only consisting of whitespace) will be serialised.
+     *
+     * <p> If {@code null}, or if this method is never called, the {@code ConfigValue} won't have a comment. An empty comment (non null, but only consisting of whitespace) will be serialised.
      *
      * @param comment the comment
      * @return {@code this} builder
@@ -132,8 +137,10 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
 
     /**
      * Adds a listener to the {@code ConfigValue}.
-     * <br> Listeners are called when the value of a {@code ConfigValue} is changed. They are of type {@link BiConsumer}: the first argument being the old value, and the second argument being the new value.
-     * <br> Listeners set with this method are chained: if there was already one specified, a new listener is created that calls the old one first, and then the new one.
+     *
+     * <p> Listeners are called when the value of a {@code ConfigValue} is changed. They are of type {@link BiConsumer}: the first argument being the old value, and the second argument being the new value.
+     *
+     * <p> Listeners set with this method are chained: if there was already one specified, a new listener is created that calls the old one first, and then the new one.
      *
      * @param consumer the listener
      * @return {@code this} builder
@@ -149,7 +156,8 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
 
     /**
      * Sets the default value.
-     * <br> If {@code null}, or if this method is never called, the {@code ConfigValue} will have no default value.
+     *
+     * <p> If {@code null}, or if this method is never called, the {@code ConfigValue} will have no default value.
      *
      * @param defaultValue the default value
      * @return {@code this} builder
@@ -161,7 +169,8 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
 
     /**
      * Sets the finality to {@code true}
-     * <br> As a result of this method, the {@code ConfigValue} will have a value that can not be changed.
+     *
+     * <p> As a result of this method, the {@code ConfigValue} will have a value that can not be changed.
      *
      * @return {@code this} builder
      * @see #setFinal(boolean)
@@ -173,7 +182,8 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
 
     /**
      * Sets the finality.
-     * <br> If {@code true}, the produced setting can not be changed. It will be initialised with its default value, if there is one. Afterwards, it can not be changed again.
+     *
+     * <p> If {@code true}, the produced setting can not be changed. It will be initialised with its default value, if there is one. Afterwards, it can not be changed again.
      *
      * @param isFinal the finality
      * @return {@code this} builder
@@ -209,7 +219,8 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
 
     /**
      * Builds the {@code ConfigValue}.
-     * <br> If a parent was specified using {@link #withParent}, the {@code ConfigValue} will also be registered to its parent node.
+     *
+     * <p> If a parent was specified using {@link #withParent}, the {@code ConfigValue} will also be registered to its parent node.
      * 
      * @return the {@code ConfigValue}
      */

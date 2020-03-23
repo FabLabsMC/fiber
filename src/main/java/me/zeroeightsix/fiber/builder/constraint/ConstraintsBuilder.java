@@ -8,7 +8,8 @@ import java.util.List;
 
 /**
  * A builder for {@code Constraint}s.
- * <br> This is the abstract base class for all builders of this type. Builders implementing this class include {@link Scalar} and {@link Aggregate}.
+ *
+ * <p> This is the abstract base class for all builders of this type. Builders implementing this class include {@link Scalar} and {@link Aggregate}.
  *
  * @param <A> the type of {@link Constraint} this builder should output
  * @param <S> the type of this builder's source object (eg. {@code ConfigValueBuilder} or {@code ConstraintsBuilder}
@@ -54,8 +55,10 @@ public abstract class ConstraintsBuilder<S, A, T, B extends ConstraintsBuilder<S
 
     /**
      * Creates a new {@code CompositeConstraintBuilder} from this {@code ConstraintsBuilder}.
-     * <br> Composite constraints are constraints that have 0 or more child constraints.
-     * <br> Whether or not a value satisfies a composite constraint is specified by the composite's {@link CompositeType}.
+     *
+     * <p> Composite constraints are constraints that have 0 or more child constraints.
+     *
+     * <p> Whether or not a value satisfies a composite constraint is specified by the composite's {@link CompositeType}.
      *
      * @param type the type of composite to create
      * @return the newly created builder
@@ -64,7 +67,8 @@ public abstract class ConstraintsBuilder<S, A, T, B extends ConstraintsBuilder<S
 
     /**
      * Finishes building constraints.
-     * <br> As a result of this call, the built constraints will be added to the source {@code ConfigValue} builder.
+     *
+     * <p> As a result of this call, the built constraints will be added to the source {@code ConfigValue} builder.
      *
      * @return the source builder
      */
@@ -120,7 +124,8 @@ public abstract class ConstraintsBuilder<S, A, T, B extends ConstraintsBuilder<S
 
         /**
          * Creates a new {@code ComponentConstraintsBuilder}.
-         * <br> Component constraints are constraints that test each value in an aggregate type. By default, all tested elements must satisfy the constraint in order for the entire constraint to be satisfied.
+         *
+         * <p> Component constraints are constraints that test each value in an aggregate type. By default, all tested elements must satisfy the constraint in order for the entire constraint to be satisfied.
          *
          * @return the newly created builder
          */

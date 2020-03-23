@@ -80,7 +80,8 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
 
     /**
      * Returns the listener for this item.
-     * <br> When this item's value changes, the consumer will be called with the old value as first argument and the new value as second argument.
+     *
+     * <p> When this item's value changes, the consumer will be called with the old value as first argument and the new value as second argument.
      *
      * @return the listener
      */
@@ -101,7 +102,8 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
 
     /**
      * Returns the list of constraints for this item.
-     * <br> For a call to {@link #setValue} to pass (and such, return {@code true}), the value must satisfy all constraints in this list.
+     *
+     * <p> For a call to {@link #setValue} to pass (and such, return {@code true}), the value must satisfy all constraints in this list.
      *
      * @return the list of constraints
      */

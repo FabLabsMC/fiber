@@ -15,14 +15,16 @@ public @interface Setting {
 
     /**
      * Marks a setting as constant or final.
-     * <br> Constant settings can not have their value changed after being initialised.
+     *
+     * <p> Constant settings can not have their value changed after being initialised.
      * @return whether or not this setting is constant
      */
     boolean constant() default false;
 
     /**
      * Sets the name that will be used for this setting.
-     * <br> Custom names have a higher authority than {@link me.zeroeightsix.fiber.annotation.convention.SettingNamingConvention naming conventions}, and will not be affected by them.
+     *
+     * <p> Custom names have a higher authority than {@link me.zeroeightsix.fiber.annotation.convention.SettingNamingConvention naming conventions}, and will not be affected by them.
      * If the name is empty, the name of the field being annotated will be used and the naming convention will be applied to that name.
      *
      * @return An empty string ({@code ""}) if no custom name was set, or the custom name if one was set.
@@ -31,7 +33,8 @@ public @interface Setting {
 
     /**
      * Sets the comment that will be used for this setting.
-     * <br> If empty, no comment will be set.
+     *
+     * <p> If empty, no comment will be set.
      * @return An empty string ({@code ""}) if no comment was set, or the comment if one was set.
      */
     String comment() default "";
@@ -53,7 +56,8 @@ public @interface Setting {
     @interface Node {
         /**
          * Sets the name that will be used for this node.
-         * <br> Custom names have a higher authority than {@link me.zeroeightsix.fiber.annotation.convention.SettingNamingConvention naming conventions}, and will not be affected by them.
+         *
+         * <p> Custom names have a higher authority than {@link me.zeroeightsix.fiber.annotation.convention.SettingNamingConvention naming conventions}, and will not be affected by them.
          * If the name is empty, the name of the field being annotated will be used and the naming convention will be applied to that name.
          *
          * @return An empty string ({@code ""}) if no custom name was set, or the custom name if one was set.
@@ -118,7 +122,8 @@ public @interface Setting {
 
         /**
          * Indicates that this value's length or size is limited to being equal to or larger than a number.
-         * <br> For example, a string annotated with {@code MinLength(5)} must be 5 or more characters long. {@code "ABCD"} would not be allowed, but {@code "ABCDE"} would be.
+         *
+         * <p> For example, a string annotated with {@code MinLength(5)} must be 5 or more characters long. {@code "ABCD"} would not be allowed, but {@code "ABCDE"} would be.
          *
          * @see MaxLength MaxLength
          */
@@ -135,7 +140,8 @@ public @interface Setting {
 
         /**
          * Indicates that this value's length or size is limited to being equal to or smaller than a number.
-         * <br> For example, a string annotated with {@code MaxLength(5)} must be 5 or less characters long. {@code "ABCDE"} would be allowed, but {@code "ABCDEF"} would not be.
+         *
+         * <p> For example, a string annotated with {@code MaxLength(5)} must be 5 or less characters long. {@code "ABCDE"} would be allowed, but {@code "ABCDEF"} would not be.
          *
          * @see MinLength MinLength
          */

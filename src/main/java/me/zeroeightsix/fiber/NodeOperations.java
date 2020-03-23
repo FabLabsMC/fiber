@@ -9,8 +9,10 @@ public class NodeOperations {
 
     /**
      * Merges two {@code ConfigNode} objects.
-     * <br> The first parameter {@code from} remains unchanged, but {@code to} will be mutated and receive all of {@code from}'s children.
-     * <br> If both nodes have one or more children with the same name, the child from {@code from} takes priority.
+     *
+     * <p> The first parameter {@code from} remains unchanged, but {@code to} will be mutated and receive all of {@code from}'s children.
+     *
+     * <p> If both nodes have one or more children with the same name, the child from {@code from} takes priority.
      *
      * @param from  The {@code ConfigNode} that will be read from, but not mutated.
      * @param to    The mutated {@link ConfigNode} that will inherit <code>from</code>'s values and nodes.

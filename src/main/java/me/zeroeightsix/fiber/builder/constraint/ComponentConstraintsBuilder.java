@@ -10,7 +10,8 @@ import java.util.function.Function;
 
 /**
  * A builder for component constraints.
- * <br> Component constraints are satisfied only if all elements in the aggregate type satisfy the constraint.
+ *
+ * <p> Component constraints are satisfied only if all elements in the aggregate type satisfy the constraint.
  *
  * @param <A> the type of the array or collection to create a constraint for
  * @param <S> the type of this builder's source

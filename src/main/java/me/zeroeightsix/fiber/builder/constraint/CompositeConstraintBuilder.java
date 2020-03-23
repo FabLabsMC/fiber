@@ -9,8 +9,10 @@ import java.util.List;
 
 /**
  * A composite constraint builder.
- * <br> Composite constraints are constraints that have 0 or more child constraints.
- * <br> Whether or not a value satisfies a composite constraint is specified by the composite's {@link CompositeType}.
+ *
+ * <p> Composite constraints are constraints that have 0 or more child constraints.
+ *
+ * <p> Whether or not a value satisfies a composite constraint is specified by the composite's {@link CompositeType}.
  *
  * @param <S> the type of this builder's source object
  * @param <T> the type of aggregate type this builder will check

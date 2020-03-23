@@ -9,7 +9,8 @@ public class UnderscoredLowerCaseConvention implements SettingNamingConvention {
 
     /**
      * Attempts to convert java-styled names or spaced names to underscored, lowercase names (C style).
-     * <br> For example, "helloWorld" or "Hello world" become "hello_world"
+     *
+     * <p> For example, "helloWorld" or "Hello world" become "hello_world"
      *
      * @param name  The name to convert to underscored lower case
      * @return      The converted name

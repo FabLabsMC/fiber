@@ -29,7 +29,8 @@ public class ConfigNode extends ConfigLeaf implements Node {
 
     /**
      * Creates a new {@code ConfigNode} with the provided {@code name} and {@code comment}.
-     * <br> This node will not be serialised separately.
+     *
+     * <p> This node will not be serialised separately.
      *
      * @param name the name for this {@link ConfigNode}
      * @param comment the comment for this {@link ConfigNode}
@@ -41,7 +42,8 @@ public class ConfigNode extends ConfigLeaf implements Node {
 
     /**
      * Creates a new {@code ConfigNode} without a name or comment.
-     * <br> This node will not be serialised separately.
+     *
+     * <p> This node will not be serialised separately.
      *
      * @see ConfigNode
      */
@@ -57,7 +59,8 @@ public class ConfigNode extends ConfigLeaf implements Node {
 
     /**
      * Returns if this node should be serialised separately.
-     * <br> If {@code true}, it should be ignored during serialisation.
+     *
+     * <p> If {@code true}, it should be ignored during serialisation.
      * @return whether or not it is serialised separately
      */
     @Override

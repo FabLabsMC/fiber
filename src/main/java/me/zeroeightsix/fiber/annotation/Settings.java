@@ -10,7 +10,8 @@ import java.lang.annotation.Target;
 
 /**
  * Indicates a type represents a structure in a configuration file.
- * <br> While it not necessary to use this annotation to serialise a POJO into a {@link me.zeroeightsix.fiber.annotation.Setting.Node Node}, it can be used to specify other metadata.
+ *
+ * <p> While it not necessary to use this annotation to serialise a POJO into a {@link me.zeroeightsix.fiber.annotation.Setting.Node Node}, it can be used to specify other metadata.
  *
  * @see Settings#onlyAnnotated()
  * @see Settings#namingConvention()
@@ -21,7 +22,8 @@ public @interface Settings {
 
     /**
      * Specifies whether or not all fields in this class should be serialised, or only those annotated with {@link Setting}.
-     * <br> Note that if you want to exclude one field without having to mark all others with the {@link Setting} annotation, the field can be marked as {@code transient} instead.
+     *
+     * <p> Note that if you want to exclude one field without having to mark all others with the {@link Setting} annotation, the field can be marked as {@code transient} instead.
      * All transient fields are ignored by default.
      *
      * @return whether or not only annotated fields should be serialised

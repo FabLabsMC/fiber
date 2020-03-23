@@ -10,7 +10,8 @@ public interface Property<T> extends HasValue<T> {
 
     /**
      * Sets the value of this property.
-     * <br> This can fail and return {@code false} if, for example, the value did not satisfy the constraints of the property.
+     *
+     * <p> This can fail and return {@code false} if, for example, the value did not satisfy the constraints of the property.
      *
      * @param value the new value this property should receive
      * @return {@code true} if this property changed as a result of the call

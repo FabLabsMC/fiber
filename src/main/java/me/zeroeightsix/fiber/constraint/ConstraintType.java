@@ -9,20 +9,24 @@ public enum ConstraintType {
 
 	/**
 	 * Specifies a numerical lower bound.
-	 * <br> Values must be equal to or greater than the constraint's value to satisfy the constraint.
+	 *
+	 * <p> Values must be equal to or greater than the constraint's value to satisfy the constraint.
 	 */
 	NUMERICAL_LOWER_BOUND(true, identifier("min")),
 
 	/**
 	 * Specifies a numerical upper bound.
-	 * <br> Values must be equal to or lesser than the constraint's value to satisfy the constraint.
+	 *
+	 * <p> Values must be equal to or lesser than the constraint's value to satisfy the constraint.
 	 */
 	NUMERICAL_UPPER_BOUND(true, identifier("max")),
 
 	/**
 	 * Specifies a minimum length.
-	 * <br> Values must be of equal or longer length than the constraint's value to satisfy the constraint.
-	 * <br> For example: a constraint that is checking strings has this constraint type and value 3.
+	 *
+	 * <p> Values must be of equal or longer length than the constraint's value to satisfy the constraint.
+	 *
+	 * <p> For example: a constraint that is checking strings has this constraint type and value 3.
 	 * <ul>
 	 *     <li>
 	 *         {@code "AB"} would not satisfy the constraint
@@ -39,8 +43,10 @@ public enum ConstraintType {
 
 	/**
 	 * Specifies a maximum length.
-	 * <br> Values must be of equal or shorter length than the constraint's value to satisfy the constraint.
-	 * <br> For example: a constraint that is checking strings has this constraint type and value 3.
+	 *
+	 * <p> Values must be of equal or shorter length than the constraint's value to satisfy the constraint.
+	 *
+	 * <p> For example: a constraint that is checking strings has this constraint type and value 3.
 	 * <ul>
 	 *     <li>
 	 *         {@code "AB"} and {@code "ABC"} would satisfy the constraint
@@ -57,7 +63,8 @@ public enum ConstraintType {
 
 	/**
 	 * Specifies a pattern that must match.
-	 * <br> Values must match the constraint's value, which is a regular expression (regex).
+	 *
+	 * <p> Values must match the constraint's value, which is a regular expression (regex).
 	 */
 	STRING_MATCHING(false, identifier("regex")),
 
@@ -71,7 +78,8 @@ public enum ConstraintType {
 
 	/**
 	 * Specifies that a constraint is a composite constraint.
-	 * <br> Whether or not a value satisfies a composite constraint is specified by the composite's {@link CompositeType}.
+	 *
+	 * <p> Whether or not a value satisfies a composite constraint is specified by the composite's {@link CompositeType}.
 	 */
 	COMPOSITE(false, identifier("composite"));
 
