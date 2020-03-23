@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that a field is a setting.
+ * Marks a field as a setting. This annotation is optional unless the class has been annotated with {@code @Settings(onlyAnnotated = true)}
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
