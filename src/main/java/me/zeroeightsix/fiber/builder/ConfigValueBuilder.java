@@ -119,7 +119,7 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
         return (B) this;
     }
 
-    public abstract ConstraintsBuilder<B, T, ?, ?> constraints();
+    public abstract ConstraintsBuilder<B, T, ?> constraints();
 
     public ConfigValue<T> build() {
         ConfigValue<T> built = new ConfigValue<>(name, comment, defaultValue, defaultValue, consumer, constraintList, type, isFinal);
