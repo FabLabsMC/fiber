@@ -7,8 +7,17 @@ import javax.annotation.Nullable;
 import java.util.Optional;
 import java.util.Set;
 
+/**
+ * A member of a tree that can hold any amount of children
+ *
+ * @see ConfigNode
+ */
 public interface Node extends TreeItem {
 
+    /**
+     * Returns a set of this node's children.
+     * @return the set of children
+     */
     @Nonnull
     Set<TreeItem> getItems();
 
@@ -24,6 +33,12 @@ public interface Node extends TreeItem {
         return false;
     }
 
+    /**
+     * Tries to find a child in this node by name. If a child is found, it will be returned.
+     *
+     * @param name The name of the child to look for
+     * @return the child if found, otherwise {@code null}
+     */
     @Nullable
     default TreeItem lookup(String name) {
         return getItems()
@@ -33,6 +48,15 @@ public interface Node extends TreeItem {
                 .orElse(null);
     }
 
+    /**
+     * Attempts to introduce a new child to this node.
+     *
+     * @param item The child to add
+     * @return the child
+     * @throws FiberException if there was already a non-transparent child by the same name or if {@code item} was a non-property item with the same name as a transparent item.
+     * @see Transparent
+     * @see Property
+     */
     default TreeItem add(@Nonnull TreeItem item) throws FiberException {
         TreeItem existing = lookup(item.getName());
         if (existing == null) {
@@ -55,6 +79,12 @@ public interface Node extends TreeItem {
         return item;
     }
 
+    /**
+     * Attempts to remove an item from this node by name.
+     *
+     * @param name the name of the child that should be removed
+     * @return the child if removed, otherwise {@code null}
+     */
     default TreeItem remove(String name) {
         Optional<TreeItem> itemOptional = getItems().stream().filter(item -> item.getName().equals(name)).findAny();
         if (!itemOptional.isPresent()) return null;
@@ -64,7 +94,7 @@ public interface Node extends TreeItem {
     }
 
     /**
-     * Forks this node, creating a subtree which parent is this node.
+     * Forks this node, creating a subtree whose parent is this node.
      *
      * @param name the name of the new {@code Node}
      * @return the created node
@@ -75,7 +105,7 @@ public interface Node extends TreeItem {
     }
 
     /**
-     * Forks this node, creating a subtree which parent is this node.
+     * Forks this node, creating a subtree whose parent is this node.
      *
      * @param name the name of the new {@code Node}
      * @param serializeSeparately if {@code true}, the subtree will not appear in the

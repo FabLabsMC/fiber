@@ -7,6 +7,16 @@ import me.zeroeightsix.fiber.constraint.ValuedConstraint;
 
 import java.util.List;
 
+/**
+ * A composite constraint builder.
+ *
+ * <p> Composite constraints are constraints that have 0 or more child constraints.
+ *
+ * <p> Whether or not a value satisfies a composite constraint is specified by the composite's {@link CompositeType}.
+ *
+ * @param <S> the type of this builder's source object
+ * @param <T> the type of aggregate type this builder will check
+ */
 public final class CompositeConstraintBuilder<S, T> extends AbstractConstraintsBuilder<S, T, T, CompositeConstraintBuilder<S, T>> {
 
 	private final CompositeType compositeType;
