@@ -2,6 +2,8 @@ package me.zeroeightsix.fiber.constraint;
 
 import me.zeroeightsix.fiber.Identifier;
 
+import java.util.Collection;
+
 /**
  * A set of constraint types Fiber supports.
  */
@@ -22,11 +24,10 @@ public enum ConstraintType {
 	NUMERICAL_UPPER_BOUND(true, identifier("max")),
 
 	/**
-	 * Specifies a minimum length.
+	 * Specifies a minimum length. This constraint applies to {@link CharSequence}s, {@link Collection}s and arrays.
 	 *
 	 * <p> Values must be of equal or longer length than the constraint's value to satisfy the constraint.
-	 *
-	 * <p> For example: a constraint that is checking strings has this constraint type and value 3.
+	 * For example: a constraint that is checking strings has this constraint type and value 3.
 	 * <ul>
 	 *     <li>
 	 *         {@code "AB"} would not satisfy the constraint
@@ -35,18 +36,16 @@ public enum ConstraintType {
 	 *         {@code "ABC"} and {@code "ABCD"} would satisfy the constraint
 	 *     </li>
 	 * </ul>
-	 * Of course, this doesn't apply only to strings. Collections and arrays are also applicable.
 	 *
 	 * @see #MAXIMUM_LENGTH
 	 */
 	MINIMUM_LENGTH(true, identifier("min_length")),
 
 	/**
-	 * Specifies a maximum length.
+	 * Specifies a maximum length. This constraint applies to {@link CharSequence}s, {@link Collection}s and arrays.
 	 *
 	 * <p> Values must be of equal or shorter length than the constraint's value to satisfy the constraint.
-	 *
-	 * <p> For example: a constraint that is checking strings has this constraint type and value 3.
+	 * For example: a constraint that is checking strings has this constraint type and value 3.
 	 * <ul>
 	 *     <li>
 	 *         {@code "AB"} and {@code "ABC"} would satisfy the constraint
@@ -55,7 +54,6 @@ public enum ConstraintType {
 	 *         {@code "ABCD"} would not satisfy the constraint
 	 *     </li>
 	 * </ul>
-	 * Of course, this doesn't apply only to strings. Collections and arrays are also applicable.
 	 *
 	 * @see #MINIMUM_LENGTH
 	 */

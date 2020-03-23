@@ -164,9 +164,10 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
     }
 
     /**
-     * Sets the finality to {@code true}
+     * Marks a setting as final.
      *
-     * <p> As a result of this method, the {@code ConfigValue} will have a value that can not be changed.
+     * <p> As a result of this method, any attempt to update the value of the resulting setting will fail.
+     * This method behaves as if: {@code this.setFinal(true)}.
      *
      * @return {@code this} builder
      * @see #setFinal(boolean)
