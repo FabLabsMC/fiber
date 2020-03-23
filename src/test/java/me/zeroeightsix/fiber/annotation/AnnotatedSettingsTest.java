@@ -1,6 +1,7 @@
 package me.zeroeightsix.fiber.annotation;
 
 import me.zeroeightsix.fiber.exception.FiberException;
+import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.tree.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,7 +28,7 @@ class AnnotatedSettingsTest {
     @DisplayName("Convert POJO to IR")
     void testPojoIR() throws FiberException {
         OneFieldPojo pojo = new OneFieldPojo();
-        AnnotatedSettings.applyToNode(node, pojo);
+        new AnnotatedSettings().applyToNode(node, pojo);
 
         Set<TreeItem> items = node.getItems();
         assertEquals(1, items.size(), "Setting map is 1 entry large");
@@ -46,14 +47,14 @@ class AnnotatedSettingsTest {
     @DisplayName("Throw final exception")
     void testNoFinal() {
         FinalSettingPojo pojo = new FinalSettingPojo();
-        assertThrows(FiberException.class, () -> AnnotatedSettings.applyToNode(node, pojo));
+        assertThrows(FiberException.class, () -> new AnnotatedSettings().applyToNode(node, pojo));
     }
 
     @Test
     @DisplayName("Listener")
     void testListener() throws FiberException {
         ListenerPojo pojo = new ListenerPojo();
-        AnnotatedSettings.applyToNode(node, pojo);
+        new AnnotatedSettings().applyToNode(node, pojo);
 
         TreeItem treeItem = node.lookup("a");
         assertNotNull(treeItem, "Setting A exists");
@@ -82,21 +83,21 @@ class AnnotatedSettingsTest {
     @DisplayName("Listener with different generics")
     void testTwoGenerics() {
         NonMatchingListenerPojo pojo = new NonMatchingListenerPojo();
-        assertThrows(FiberException.class, () -> AnnotatedSettings.applyToNode(node, pojo));
+        assertThrows(FiberException.class, () -> new AnnotatedSettings().applyToNode(node, pojo));
     }
 
     @Test
     @DisplayName("Listener with wrong generic type")
     void testWrongGenerics() {
         WrongGenericListenerPojo pojo = new WrongGenericListenerPojo();
-        assertThrows(FiberException.class, () -> AnnotatedSettings.applyToNode(node, pojo));
+        assertThrows(FiberException.class, () -> new AnnotatedSettings().applyToNode(node, pojo));
     }
 
     @Test
     @DisplayName("Numerical constraints")
     void testNumericalConstraints() throws FiberException {
         NumericalConstraintsPojo pojo = new NumericalConstraintsPojo();
-        AnnotatedSettings.applyToNode(node, pojo);
+        new AnnotatedSettings().applyToNode(node, pojo);
         @SuppressWarnings("unchecked")
         Property<Integer> value = (Property<Integer>) node.lookup("a");
         assertNotNull(value, "Setting exists");
@@ -109,7 +110,7 @@ class AnnotatedSettingsTest {
     @DisplayName("String constraints")
     void testStringConstraints() throws FiberException {
         StringConstraintsPojo pojo = new StringConstraintsPojo();
-        AnnotatedSettings.applyToNode(node, pojo);
+        new AnnotatedSettings().applyToNode(node, pojo);
         @SuppressWarnings("unchecked")
         Property<String> value = (Property<String>) node.lookup("a");
         assertNotNull(value, "Setting exists");
@@ -123,7 +124,7 @@ class AnnotatedSettingsTest {
     @DisplayName("Array constraints")
     void testArrayConstraints() throws FiberException {
         ArrayConstraintsPojo pojo = new ArrayConstraintsPojo();
-        AnnotatedSettings.applyToNode(node, pojo);
+        new AnnotatedSettings().applyToNode(node, pojo);
         @SuppressWarnings("unchecked")
         Property<String[]> value1 = (Property<String[]>) node.lookup("nonEmptyArrayShortStrings");
         assertNotNull(value1, "Setting exists");
@@ -148,10 +149,16 @@ class AnnotatedSettingsTest {
     }
 
     @Test
+    @DisplayName("Invalid constraints")
+    void testInvalidConstraints() {
+        assertThrows(RuntimeFiberException.class, () -> new AnnotatedSettings().asNode(new InvalidConstraintPojo()));
+    }
+
+    @Test
     @DisplayName("Only annotated fields")
     void testOnlyAnnotatedFields() throws FiberException {
         OnlyAnnotatedFieldsPojo pojo = new OnlyAnnotatedFieldsPojo();
-        AnnotatedSettings.applyToNode(node, pojo);
+        new AnnotatedSettings().applyToNode(node, pojo);
         assertEquals(1, node.getItems().size(), "Node has one item");
     }
 
@@ -159,7 +166,7 @@ class AnnotatedSettingsTest {
     @DisplayName("Custom named setting")
     void testCustomNames() throws FiberException {
         CustomNamePojo pojo = new CustomNamePojo();
-        AnnotatedSettings.applyToNode(node, pojo);
+        new AnnotatedSettings().applyToNode(node, pojo);
         assertNotNull(node.lookup("custom_name"), "Custom named setting exists");
     }
 
@@ -167,7 +174,7 @@ class AnnotatedSettingsTest {
     @DisplayName("Constant setting")
     void testConstantSetting() throws FiberException {
         ConstantSettingPojo pojo = new ConstantSettingPojo();
-        AnnotatedSettings.applyToNode(node, pojo);
+        new AnnotatedSettings().applyToNode(node, pojo);
         assertFalse(((ConfigValue<Integer>) node.lookup("a")).setValue(0));
     }
 
@@ -175,7 +182,7 @@ class AnnotatedSettingsTest {
     @DisplayName("Subnodes")
     void testSubNodes() throws FiberException {
         SubNodePojo pojo = new SubNodePojo();
-        AnnotatedSettings.applyToNode(node, pojo);
+        new AnnotatedSettings().applyToNode(node, pojo);
         assertEquals(1, node.getItems().size(), "Node has one item");
         Node subnode = (Node) node.lookup("a");
         assertNotNull(subnode, "Subnode exists");
@@ -187,7 +194,7 @@ class AnnotatedSettingsTest {
     @SuppressWarnings("unchecked")
     void testComment() throws FiberException {
         CommentPojo pojo = new CommentPojo();
-        AnnotatedSettings.applyToNode(node, pojo);
+        new AnnotatedSettings().applyToNode(node, pojo);
         assertEquals("comment", ((ConfigValue<Integer>) node.lookup("a")).getComment(), "Comment exists and is correct");
     }
 
@@ -195,7 +202,7 @@ class AnnotatedSettingsTest {
     @DisplayName("Ignored settings")
     void testIgnore() throws FiberException {
         IgnoredPojo pojo = new IgnoredPojo();
-        AnnotatedSettings.applyToNode(node, pojo);
+        new AnnotatedSettings().applyToNode(node, pojo);
         assertEquals(0, node.getItems().size(), "Node is empty");
     }
 
@@ -267,6 +274,10 @@ class AnnotatedSettingsTest {
         @Setting.Constrain.MinLength(0) @Setting.Constrain.MaxLength(3)[] numbers = {};
 
         private @Setting.Constrain.MaxLength(3) List<@Setting.Constrain.Regex("\\w+:\\w+") String> shortArrayIdStrings = Collections.singletonList("fabric:test");
+    }
+
+    private static class InvalidConstraintPojo {
+        private @Setting.Constrain.Regex("\\d") int i;
     }
 
     @Settings(onlyAnnotated = true)
