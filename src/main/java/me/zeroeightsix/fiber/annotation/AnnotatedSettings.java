@@ -25,9 +25,12 @@ import java.util.stream.Stream;
 
 public class AnnotatedSettings {
 
+    private final Map<Class<? extends Annotation>, SettingAnnotationProcessor.Value<?>> settingProcessors = new HashMap<>();
+    private final Map<Class<? extends Annotation>, SettingAnnotationProcessor.Node<?>> nodeSettingProcessors = new HashMap<>();
     private final Map<Class<? extends Annotation>, ConstraintProcessorEntry> constraintProcessors = new HashMap<>();
 
     {
+        registerNodeSettingProcessor(Setting.Node.class, (annotation, field, pojo, node) -> {});
         registerConstraintProcessor(Setting.Constrain.Range.class, Number.class, (annotation, annotated, pojo, constraints) -> {
             if (annotation.min() > Double.NEGATIVE_INFINITY) {
                 constraints.atLeast(annotation.min());
@@ -53,7 +56,39 @@ public class AnnotatedSettings {
     }
 
     /**
-     * Registers a constraint annotation processor
+     * Registers a setting annotation processor, tasked with processing annotations on config fields.
+     *
+     * @param annotationType a class representing the type of annotation to process
+     * @param processor      a processor for this annotation
+     * @param <A>            the type of annotation to process
+     * @return {@code this}, for chaining
+     */
+    public <A extends Annotation> AnnotatedSettings registerSettingProcessor(Class<A> annotationType, SettingAnnotationProcessor.Value<A> processor) {
+        if (settingProcessors.containsKey(annotationType)) {
+            throw new IllegalStateException("Cannot register multiple setting processors for the same annotation (" + annotationType + ")");
+        }
+        settingProcessors.put(annotationType, processor);
+        return this;
+    }
+
+    /**
+     * Registers a node annotation processor, tasked with processing annotations on node fields (config fields annotated with {@link Setting.Node}.
+     *
+     * @param annotationType a class representing the type of annotation to process
+     * @param processor      a processor for this annotation
+     * @param <A>            the type of annotation to process
+     * @return {@code this}, for chaining
+     */
+    public <A extends Annotation> AnnotatedSettings registerNodeSettingProcessor(Class<A> annotationType, SettingAnnotationProcessor.Node<A> processor) {
+        if (nodeSettingProcessors.containsKey(annotationType)) {
+            throw new IllegalStateException("Cannot register multiple node processors for the same annotation (" + annotationType + ")");
+        }
+        nodeSettingProcessors.put(annotationType, processor);
+        return this;
+    }
+
+    /**
+     * Registers a constraint annotation processor, tasked with processing annotations on config types.
      *
      * @param annotationType a class representing the type of annotation to process
      * @param valueType      a class representing the type of values to process
@@ -62,9 +97,9 @@ public class AnnotatedSettings {
      * @param <T>            the type of values to process
      * @return {@code this}, for chaining
      */
-    public <A extends Annotation, T> AnnotatedSettings registerConstraintProcessor(Class<A> annotationType, Class<T> valueType, SettingConstraintProcessor<A, ? super T> processor) {
+    public <A extends Annotation, T> AnnotatedSettings registerConstraintProcessor(Class<A> annotationType, Class<T> valueType, ConstraintAnnotationProcessor<A, ? super T> processor) {
         if (constraintProcessors.containsKey(annotationType)) {
-            throw new IllegalStateException("Cannot register multiple processors for the same annotation and value types (" + annotationType + ", " + valueType + ")");
+            throw new IllegalStateException("Cannot register multiple processors for the same annotation (" + annotationType + ")");
         }
         constraintProcessors.put(annotationType, new ConstraintProcessorEntry(processor, valueType));
         return this;
@@ -110,15 +145,7 @@ public class AnnotatedSettings {
             checkViolation(field);
             String name = findName(field, convention);
             if (field.isAnnotationPresent(Setting.Node.class)) {
-                Node sub = node.fork(name);
-                try {
-                    boolean accesssible = field.isAccessible();
-                    field.setAccessible(true);
-                    applyToNode(sub, field.get(pojo));
-                    field.setAccessible(accesssible);
-                } catch (IllegalAccessException e) {
-                    throw new FiberException("Couldn't fork and apply sub-node", e);
-                }
+                fieldToNode(pojo, node, field, name);
             } else {
                 node.add(fieldToItem(field, pojo, name, listenerMap.getOrDefault(name, defaultEmpty)));
             }
@@ -150,6 +177,17 @@ public class AnnotatedSettings {
         return field.isAnnotationPresent(Setting.class) ? Optional.of(field.getAnnotation(Setting.class)) : Optional.empty();
     }
 
+    private <P> void fieldToNode(P pojo, Node node, Field field, String name) throws FiberException {
+        Node sub = node.fork(name);
+        try {
+            field.setAccessible(true);
+            applyToNode(sub, field.get(pojo));
+            applyAnnotationProcessors(pojo, field, sub, this.nodeSettingProcessors);
+        } catch (IllegalAccessException e) {
+            throw new FiberException("Couldn't fork and apply sub-node", e);
+        }
+    }
+
     private <T> TreeItem fieldToItem(Field field, Object pojo, String name, List<Member> listeners) throws FiberException {
         Class<T> type = getSettingTypeFromField(field);
 
@@ -169,16 +207,25 @@ public class AnnotatedSettings {
 
         builder.withListener((t, newValue) -> {
             try {
-                final boolean accessible = field.isAccessible();
                 field.setAccessible(true);
                 field.set(pojo, newValue);
-                field.setAccessible(accessible);
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
         });
 
+        applyAnnotationProcessors(pojo, field, builder, this.settingProcessors);
+
         return builder.build();
+    }
+
+    private <C> void applyAnnotationProcessors(Object pojo, Field field, C sub, Map<Class<? extends Annotation>, ? extends SettingAnnotationProcessor<?, C>> settingProcessors) {
+        for (Annotation annotation : field.getAnnotations()) {
+            @SuppressWarnings("unchecked") SettingAnnotationProcessor<Annotation, C> processor = (SettingAnnotationProcessor<Annotation, C>) settingProcessors.get(annotation.annotationType());
+            if (processor != null) {
+                processor.apply(annotation, field, pojo, sub);
+            }
+        }
     }
 
     @SuppressWarnings({"unchecked"})
@@ -366,10 +413,10 @@ public class AnnotatedSettings {
 
     private static class ConstraintProcessorEntry {
         @SuppressWarnings("rawtypes")
-        private final SettingConstraintProcessor processor;
+        private final ConstraintAnnotationProcessor processor;
         private final Class<?> acceptedType;
 
-        ConstraintProcessorEntry(SettingConstraintProcessor<?, ?> processor, Class<?> acceptedType) {
+        ConstraintProcessorEntry(ConstraintAnnotationProcessor<?, ?> processor, Class<?> acceptedType) {
             this.processor = processor;
             this.acceptedType = acceptedType;
         }
