@@ -39,9 +39,7 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
     }
 
     /**
-     * Creates and returns an aggregate {@code ConfigValueBuilder}.
-     *
-     * <p> Aggregates are types that have multiple elements of the same type: such as an array or collection.
+     * Creates and returns an {@link ConfigValueBuilder.Aggregate aggregate builder} for an array type.
      *
      * @param arrayType the class of the array used for this aggregate builder
      * @param <E> the type of values held by {@code arrayType}
@@ -55,14 +53,12 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
     }
 
     /**
-     * Creates and returns an aggregate {@code ConfigValue} builder.
-     *
-     * <p> Aggregates are types that have multiple elements of the same type: such as an array or collection.
+     * Creates and returns an {@link ConfigValueBuilder.Aggregate aggregate builder} for a collection type.
      *
      * @param collectionType the class of the collection used for this aggregate builder
      * @param componentType the class of the type of elements {@code collectionType} holds
-     * @param <C> the type {@code collectionType} represents. ie. {@code List}
-     * @param <E> the type {@code componentType} represents. ie. {@code Integer}
+     * @param <C> the type {@code collectionType} represents. eg. {@code List}
+     * @param <E> the type {@code componentType} represents. eg. {@code Integer}
      * @return the newly created builder
      */
     @SuppressWarnings("unchecked")
@@ -243,8 +239,9 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
 
     /**
      * A {@code ConfigValueBuilder} that produces scalar {@code ConfigValue}s.
-     * <br>Scalar types are those with only one value, such as {@code Integer} or {@code String}.
-     * <br>The other, aggregate types, such as {@code List}s or arrays, are created using {@link Aggregate}
+     *
+     * <p>Scalar types are those with only one value, such as {@code Integer} or {@code String}.
+     * Settings with aggregate types, such as {@code List}s or arrays, are created using {@link Aggregate}
      *
      * @param <T> the type of scalar value
      * @see #scalar
@@ -261,9 +258,10 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
     }
 
     /**
-     * A {@code ConfigValueBuilder} that produces aggregate {@code ConfigValue}s
-     * <br>Aggregate types are those that hold multiple values, such as {@code List} or arrays.
-     * <br>The other, scalar types, such as {@code Integer} or {@code String}, are created using {@link Scalar}
+     * A {@code ConfigValueBuilder} that produces aggregate {@code ConfigValue}s.
+     *
+     * <p>Aggregate types are those that hold multiple values, such as {@code List} or arrays.
+     * Settings with scalar types, such as {@code Integer} or {@code String}, are created using {@link Scalar}.
      *
      * @param <A> the type of aggregate value
      * @param <E> the type of values held by {@code <A>}
