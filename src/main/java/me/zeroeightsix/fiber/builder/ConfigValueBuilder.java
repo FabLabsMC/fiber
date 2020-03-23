@@ -104,6 +104,11 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
         this.type = type;
     }
 
+    @Nonnull
+    public Class<T> getType() {
+        return type;
+    }
+
     /**
      * Sets the {@code ConfigValue}'s name.
      *

@@ -29,6 +29,10 @@ public abstract class AbstractConstraintsBuilder<S, A, T, B extends AbstractCons
         this.type = type;
     }
 
+    public final Class<T> getType() {
+        return type;
+    }
+
     /**
      * Implies that any value must be bigger than <b>or equal</b> to <code>min</code>
      *
