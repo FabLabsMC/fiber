@@ -9,7 +9,6 @@ import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.tree.*;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -46,7 +45,8 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 	}
 
 	@Override
-	public void deserialize(Node node, JsonObject element) throws FiberException {
+	public JsonObject deserialize(Node node, JsonObject element) throws FiberException {
+		JsonObject leftovers = new JsonObject();
 		for (Map.Entry<String, JsonElement> entry : element.entrySet()) {
 			String key = entry.getKey();
 			JsonElement child = entry.getValue();
@@ -61,10 +61,10 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 					throw new FiberException("Value read for non-property node: " + item.getName());
 				}
 			} else {
-				JanksonTransparentNode transparentNode = new JanksonTransparentNode(key, child);
-				node.add(transparentNode);
+				leftovers.put(key, child);
 			}
 		}
+		return leftovers;
 	}
 
 	private JsonElement serialize(HasValue<?> hasValue) {
@@ -113,32 +113,6 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 	@Override
 	public Identifier getIdentifier() {
 		return IDENTIFIER;
-	}
-
-	private class JanksonTransparentNode implements Transparent {
-		private final String name;
-		private final JsonElement value;
-
-		public JanksonTransparentNode(String name, JsonElement value) {
-			this.name = name;
-			this.value = value;
-		}
-
-		@Nullable
-		@Override
-		public <A> A marshall(Class<A> type) {
-			return JanksonSerializer.this.marshall(type, this.value);
-		}
-
-		@Override
-		public String getName() {
-			return name;
-		}
-
-		@Override
-		public String toString() {
-			return getClass().getSimpleName() + "[name=" + getName() + "]";
-		}
 	}
 
 	private static class JanksonFallbackMarshaller implements Marshaller<JsonElement> {
