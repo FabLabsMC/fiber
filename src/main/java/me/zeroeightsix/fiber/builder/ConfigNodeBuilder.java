@@ -1,9 +1,11 @@
 package me.zeroeightsix.fiber.builder;
 
-import me.zeroeightsix.fiber.NodeOperations;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.tree.*;
+import me.zeroeightsix.fiber.tree.ConfigNode;
+import me.zeroeightsix.fiber.tree.NodeLike;
+import me.zeroeightsix.fiber.tree.Property;
+import me.zeroeightsix.fiber.tree.TreeItem;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -14,9 +16,9 @@ import java.util.Map;
 public class ConfigNodeBuilder implements NodeLike {
     private final Map<String, TreeItem> items = new HashMap<>();
     @Nullable
-    private final ConfigNodeBuilder parent;
+    private ConfigNodeBuilder parent;
     @Nullable
-    private final String name;
+    private String name;
     @Nullable
     private String comment;
     private boolean serializeSeparately;
@@ -24,17 +26,6 @@ public class ConfigNodeBuilder implements NodeLike {
     public ConfigNodeBuilder() {
         this.parent = null;
         this.name = null;
-    }
-
-    public ConfigNodeBuilder(Node node) {
-        this.parent = null;
-        this.name = node.getName();
-        NodeOperations.mergeTo(node, this);
-    }
-
-    private ConfigNodeBuilder(@Nonnull ConfigNodeBuilder parent, @Nonnull String name) {
-        this.parent = parent;
-        this.name = name;
     }
 
     /**
@@ -61,6 +52,23 @@ public class ConfigNodeBuilder implements NodeLike {
     @Nullable
     public TreeItem lookup(String name) {
         return items.get(name);
+    }
+
+    public ConfigNodeBuilder parent(ConfigNodeBuilder parent) {
+        if (name == null && parent != null) throw new IllegalStateException("A child node needs a name");
+        this.parent = parent;
+        return this;
+    }
+
+    public ConfigNodeBuilder name(String name) {
+        if (name == null && parent != null) throw new IllegalStateException("Cannot remove the name from a child node");
+        this.name = name;
+        return this;
+    }
+
+    public ConfigNodeBuilder comment(@Nullable String comment) {
+        this.comment = comment;
+        return this;
     }
 
     /**
@@ -125,7 +133,7 @@ public class ConfigNodeBuilder implements NodeLike {
      * @return the created node builder
      */
     public ConfigNodeBuilder fork(String name) {
-        return new ConfigNodeBuilder(this, name);
+        return new ConfigNodeBuilder().parent(this).name(name);
     }
 
     public ConfigNode build() {
