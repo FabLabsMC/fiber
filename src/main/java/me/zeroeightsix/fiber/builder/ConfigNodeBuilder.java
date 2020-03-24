@@ -86,13 +86,24 @@ public class ConfigNodeBuilder implements NodeLike {
      * Attempts to introduce a new child to this node.
      *
      * @param item The child to add
-     * @throws FiberException if there was already a non-transparent child by the same name or if {@code item} was a non-property item with the same name as a transparent item.
+     * @throws FiberException if there was already a child by the same name
      * @see Property
      */
     public void add(@Nonnull TreeItem item) throws FiberException {
-        TreeItem existing = lookup(item.getName());
-        if (existing != null) {
-            throw new FiberException("Attempt to replace non-transparent node " + existing.getName());
+        add(item, false);
+    }
+
+    /**
+     * Attempts to introduce a new child to this node.
+     *
+     * @param item The child to add
+     * @param overwrite whether existing items should be overwritten
+     * @throws FiberException if there was already a child by the same name
+     * @see Property
+     */
+    public void add(@Nonnull TreeItem item, boolean overwrite) throws FiberException {
+        if (!overwrite && items.containsKey(item.getName())) {
+            throw new FiberException("Attempt to replace node " + item.getName());
         }
         items.put(item.getName(), item);
     }

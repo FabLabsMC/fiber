@@ -60,10 +60,9 @@ public class AnnotatedSettings {
             if (field.isAnnotationPresent(Setting.Node.class)) {
                 ConfigNodeBuilder sub = node.fork(name);
                 try {
-                    boolean accesssible = field.isAccessible();
                     field.setAccessible(true);
                     AnnotatedSettings.applyToNode(sub, field.get(pojo));
-                    field.setAccessible(accesssible);
+                    sub.build();
                 } catch (IllegalAccessException e) {
                     throw new FiberException("Couldn't fork and apply sub-node", e);
                 }

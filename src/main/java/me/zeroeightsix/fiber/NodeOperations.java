@@ -1,11 +1,9 @@
 package me.zeroeightsix.fiber;
 
 import me.zeroeightsix.fiber.builder.ConfigNodeBuilder;
+import me.zeroeightsix.fiber.exception.FiberException;
+import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.tree.*;
-
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class NodeOperations {
 
@@ -20,12 +18,13 @@ public class NodeOperations {
      * @param to    The mutated {@link ConfigNode} that will inherit <code>from</code>'s values and nodes.
      */
     public static void mergeTo(NodeLike from, ConfigNodeBuilder to) {
-        Map<String, TreeItem> map = Stream.concat(
-                to.getItems().stream(),
-                from.getItems().stream()
-        ).collect(Collectors.toMap(TreeItem::getName, item -> item, (t1, t2) -> t1));
-        to.getItems().clear();
-        to.getItems().addAll(map.values());
+        try {
+            for (TreeItem item : from.getItems()) {
+                to.add(item, true);
+            }
+        } catch (FiberException e) {
+            throw new RuntimeFiberException("Failed to merge nodes", e);
+        }
     }
 
     /**
@@ -35,8 +34,11 @@ public class NodeOperations {
      * @param to    The mutated {@link ConfigNode} that will inherit <code>value</code>
      */
     public static void mergeTo(ConfigValue<?> value, ConfigNodeBuilder to) {
-        to.remove(value.getName());
-        to.getItems().add(value);
+        try {
+            to.add(value, true);
+        } catch (FiberException e) {
+            throw new RuntimeFiberException("Failed to merge value", e);
+        }
     }
 
     public static <T> void mergeTo(Property<T> from, Property<T> to) {
