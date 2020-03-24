@@ -60,6 +60,9 @@ class JanksonSerializerTest {
                 .withParent(childTwo)
                 .build();
 
+        childOne.build();
+        childTwo.build();
+
         jk.serialize(parentOne.build(), bos);
         jk.deserialize(parentTwo.build(), new ByteArrayInputStream(bos.toByteArray()));
         NodeOperationsTest.testNodeFor(childTwo, "A", Integer.class, 10);

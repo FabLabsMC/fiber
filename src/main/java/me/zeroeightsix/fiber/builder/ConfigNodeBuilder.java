@@ -133,7 +133,7 @@ public class ConfigNodeBuilder implements NodeLike {
      * @return the created node builder
      */
     public ConfigNodeBuilder fork(String name) {
-        return new ConfigNodeBuilder().parent(this).name(name);
+        return new ConfigNodeBuilder().name(name).parent(this);
     }
 
     public ConfigNode build() {
