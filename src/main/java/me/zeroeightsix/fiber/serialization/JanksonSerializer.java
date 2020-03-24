@@ -1,6 +1,8 @@
 package me.zeroeightsix.fiber.serialization;
 
-import blue.endless.jankson.*;
+import blue.endless.jankson.Jankson;
+import blue.endless.jankson.JsonElement;
+import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.api.SyntaxError;
 import me.zeroeightsix.fiber.Identifier;
 import me.zeroeightsix.fiber.exception.FiberException;
@@ -14,7 +16,7 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-public class JanksonSerializer implements Serializer {
+public class JanksonSerializer implements Serializer<JsonObject> {
 
 	private static final Identifier IDENTIFIER = new Identifier("fiber", "jankson");
 
@@ -31,6 +33,7 @@ public class JanksonSerializer implements Serializer {
 		this.marshaller = marshaller;
 	}
 
+	@Override
 	public void deserialize(Node node, InputStream stream) throws IOException, FiberException {
 		Jankson jankson = Jankson.builder().build();
 		JsonObject object;
@@ -42,7 +45,8 @@ public class JanksonSerializer implements Serializer {
 		deserialize(node, object);
 	}
 
-	private void deserialize(Node node, JsonObject element) throws FiberException {
+	@Override
+	public void deserialize(Node node, JsonObject element) throws FiberException {
 		for (Map.Entry<String, JsonElement> entry : element.entrySet()) {
 			String key = entry.getKey();
 			JsonElement child = entry.getValue();
@@ -67,12 +71,14 @@ public class JanksonSerializer implements Serializer {
 		return marshaller.marshall(hasValue.getValue());
 	}
 
+	@Override
 	public void serialize(Node node, OutputStream stream) throws IOException {
 		JsonObject object = serialize(node);
 		stream.write(object.toJson(!compress, !compress).getBytes(StandardCharsets.UTF_8));
 	}
 
-	private JsonObject serialize(Node node) {
+	@Override
+	public JsonObject serialize(Node node) {
 		JsonObject object = new JsonObject();
 
 		for (TreeItem treeItem : node.getItems()) {
@@ -136,7 +142,7 @@ public class JanksonSerializer implements Serializer {
 	}
 
 	private static class JanksonFallbackMarshaller implements Marshaller<JsonElement> {
-		private static JanksonFallbackMarshaller INSTANCE = new JanksonFallbackMarshaller();
+		private static final JanksonFallbackMarshaller INSTANCE = new JanksonFallbackMarshaller();
 
 		private final blue.endless.jankson.api.Marshaller marshaller = Jankson.builder().build().getMarshaller();
 
