@@ -53,7 +53,7 @@ public interface Node extends TreeItem {
      *
      * @param item The child to add
      * @return the child
-     * @throws FiberException if there was already a non-transparent child by the same name or if {@code item} was a non-property item with the same name as a transparent item.
+     * @throws FiberException if there was already a child by the same name
      * @see Property
      */
     default TreeItem add(@Nonnull TreeItem item) throws FiberException {
@@ -61,7 +61,7 @@ public interface Node extends TreeItem {
         if (existing == null) {
             getItems().add(item);
         } else {
-            throw new FiberException("Attempt to replace non-transparent node " + existing.getName());
+            throw new FiberException("Attempt to replace node " + existing.getName());
         }
         return item;
     }
