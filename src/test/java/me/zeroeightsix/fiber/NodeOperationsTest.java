@@ -1,18 +1,23 @@
 package me.zeroeightsix.fiber;
 
-import me.zeroeightsix.fiber.tree.*;
+import me.zeroeightsix.fiber.builder.ConfigNodeBuilder;
+import me.zeroeightsix.fiber.tree.ConfigValue;
+import me.zeroeightsix.fiber.tree.NodeLike;
+import me.zeroeightsix.fiber.tree.Property;
+import me.zeroeightsix.fiber.tree.TreeItem;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class NodeOperationsTest {
 
     @Test
     @DisplayName("Node -> Node")
     void mergeTo() {
-        Node nodeOne = new ConfigNode();
-        Node nodeTwo = new ConfigNode();
+        ConfigNodeBuilder nodeOne = new ConfigNodeBuilder();
+        ConfigNodeBuilder nodeTwo = new ConfigNodeBuilder();
 
         ConfigValue.builder(Integer.class)
                 .withName("A")
@@ -28,7 +33,7 @@ class NodeOperationsTest {
     @Test
     @DisplayName("Value -> Node")
     void mergeTo1() {
-        ConfigNode node = new ConfigNode();
+        ConfigNodeBuilder node = new ConfigNodeBuilder();
         ConfigValue<Integer> value = ConfigValue.builder(Integer.class)
                 .withName("A")
                 .withDefaultValue(10)
@@ -57,7 +62,7 @@ class NodeOperationsTest {
         testItemFor(Integer.class, 10, valueTwo);
     }
 
-    static <T> void testNodeFor(Node node, String name, Class<T> type, T value) {
+    static <T> void testNodeFor(NodeLike node, String name, Class<T> type, T value) {
         TreeItem item = node.lookup(name);
         testItemFor(type, value, item);
     }

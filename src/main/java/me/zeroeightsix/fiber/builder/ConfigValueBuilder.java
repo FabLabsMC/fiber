@@ -3,6 +3,7 @@ package me.zeroeightsix.fiber.builder;
 import me.zeroeightsix.fiber.annotation.AnnotatedSettings;
 import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
+import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.tree.ConfigValue;
 import me.zeroeightsix.fiber.tree.Node;
@@ -93,7 +94,7 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
 
     // Special snowflake that doesn't really belong in a builder.
     // Used to easily register nodes to another node.
-    private Node parentNode = null;
+    private ConfigNodeBuilder parentNode = null;
 
     /**
      * @see #aggregate(Class)
@@ -196,7 +197,7 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
      * @param node The node the {@link ConfigValue} will be registered to.
      * @return The builder
      */
-    public B withParent(Node node) {
+    public B withParent(ConfigNodeBuilder node) {
         parentNode = node;
         return self();
     }
@@ -230,7 +231,7 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
             // Let's tread with caution.
             try {
                 parentNode.add(built);
-            } catch (Exception e) {
+            } catch (FiberException e) {
                 throw new RuntimeFiberException("Failed to register leaf to node", e);
             }
         }

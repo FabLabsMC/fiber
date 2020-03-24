@@ -2,28 +2,38 @@ package me.zeroeightsix.fiber.tree;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 /**
  * A {@code ConfigLeaf} with children
  */
 public class ConfigNode extends ConfigLeaf implements Node {
 
-    @Nonnull
-    private Set<TreeItem> items = new HashSet<>();
-    private boolean serializeSeparately;
+    private final SortedMap<String, TreeItem> indexedItems;
+    private final SortedSet<TreeItem> items;
+    private final boolean serializeSeparately;
 
     /**
      * Creates a new {@code ConfigNode}.
      *
      * @param name the name for this {@link ConfigNode}
      * @param comment the comment for this {@link ConfigNode}
+     * @param items the node's items
      * @param serializeSeparately whether or not this node should be serialised separately. If {@code true}, it will be ignored during serialisation.
-     * @see ConfigNode
      */
-    public ConfigNode(@Nullable String name, @Nullable String comment, boolean serializeSeparately) {
+    public ConfigNode(@Nullable String name, @Nullable String comment, @Nonnull Collection<TreeItem> items, boolean serializeSeparately) {
         super(name, comment);
+        SortedSet<TreeItem> copy = new TreeSet<>(Comparator.comparing(TreeItem::getName));
+        SortedMap<String, TreeItem> indexedItems = new TreeMap<>();
+        for (TreeItem item : items) {
+            indexedItems.put(item.getName(), item);
+            boolean added = copy.add(item);
+            if (!added) {
+                throw new IllegalArgumentException(items + " has multiple items with the same name (" + item.getName() + ")");
+            }
+        }
+        this.items = Collections.unmodifiableSortedSet(copy);
+        this.indexedItems = Collections.unmodifiableSortedMap(indexedItems);
         this.serializeSeparately = serializeSeparately;
     }
 
@@ -37,7 +47,7 @@ public class ConfigNode extends ConfigLeaf implements Node {
      * @see ConfigNode
      */
     public ConfigNode(@Nullable String name, @Nullable String comment) {
-        this(name, comment, false);
+        this(name, comment, new HashSet<>(), false);
     }
 
     /**
@@ -55,6 +65,12 @@ public class ConfigNode extends ConfigLeaf implements Node {
     @Override
     public Set<TreeItem> getItems() {
         return items;
+    }
+
+    @Nullable
+    @Override
+    public TreeItem lookup(String name) {
+        return indexedItems.get(name);
     }
 
     /**
