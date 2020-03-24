@@ -9,6 +9,7 @@ import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.tree.*;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -33,7 +34,7 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 	}
 
 	@Override
-	public void deserialize(Node node, InputStream stream) throws IOException, FiberException {
+	public JsonObject deserialize(Node node, InputStream stream) throws IOException, FiberException {
 		Jankson jankson = Jankson.builder().build();
 		JsonObject object;
 		try {
@@ -41,7 +42,7 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 		} catch (SyntaxError syntaxError) {
 			throw new FiberException("Configuration file was malformed", syntaxError);
 		}
-		deserialize(node, object);
+		return deserialize(node, object);
 	}
 
 	@Override
@@ -72,9 +73,12 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 	}
 
 	@Override
-	public void serialize(Node node, OutputStream stream) throws IOException {
+	public void serialize(Node node, @Nullable JsonObject additionalData, OutputStream out) throws IOException {
 		JsonObject object = serialize(node);
-		stream.write(object.toJson(!compress, !compress).getBytes(StandardCharsets.UTF_8));
+		if (additionalData != null) {
+			object.putAll(additionalData);
+		}
+		out.write(object.toJson(!compress, !compress).getBytes(StandardCharsets.UTF_8));
 	}
 
 	@Override
