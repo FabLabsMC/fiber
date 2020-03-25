@@ -53,8 +53,7 @@ public interface Node extends TreeItem {
      *
      * @param item The child to add
      * @return the child
-     * @throws FiberException if there was already a non-transparent child by the same name or if {@code item} was a non-property item with the same name as a transparent item.
-     * @see Transparent
+     * @throws FiberException if there was already a child by the same name
      * @see Property
      */
     default TreeItem add(@Nonnull TreeItem item) throws FiberException {
@@ -62,19 +61,7 @@ public interface Node extends TreeItem {
         if (existing == null) {
             getItems().add(item);
         } else {
-            if (existing instanceof Transparent) {
-                if (item instanceof Property<?>) {
-                    Class<?> type = ((Property<?>) item).getType();
-                    // cannot add private helper methods to interfaces
-                    ((Property) item).setValue(((Transparent) existing).marshall(type));
-                    getItems().remove(existing);
-                    getItems().add(item);
-                } else {
-                    throw new FiberException("Attempt to replace transparent node by non-property node " + item.getName());
-                }
-            } else {
-                throw new FiberException("Attempt to replace non-transparent node " + existing.getName());
-            }
+            throw new FiberException("Attempt to replace node " + existing.getName());
         }
         return item;
     }

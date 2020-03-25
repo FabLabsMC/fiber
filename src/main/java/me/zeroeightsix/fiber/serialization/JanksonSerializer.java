@@ -1,6 +1,8 @@
 package me.zeroeightsix.fiber.serialization;
 
-import blue.endless.jankson.*;
+import blue.endless.jankson.Jankson;
+import blue.endless.jankson.JsonElement;
+import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.api.SyntaxError;
 import me.zeroeightsix.fiber.Identifier;
 import me.zeroeightsix.fiber.exception.FiberException;
@@ -14,7 +16,7 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
-public class JanksonSerializer implements Serializer {
+public class JanksonSerializer implements Serializer<JsonObject> {
 
 	private static final Identifier IDENTIFIER = new Identifier("fiber", "jankson");
 
@@ -31,7 +33,8 @@ public class JanksonSerializer implements Serializer {
 		this.marshaller = marshaller;
 	}
 
-	public void deserialize(Node node, InputStream stream) throws IOException, FiberException {
+	@Override
+	public JsonObject deserialize(Node node, InputStream stream) throws IOException, FiberException {
 		Jankson jankson = Jankson.builder().build();
 		JsonObject object;
 		try {
@@ -39,10 +42,12 @@ public class JanksonSerializer implements Serializer {
 		} catch (SyntaxError syntaxError) {
 			throw new FiberException("Configuration file was malformed", syntaxError);
 		}
-		deserialize(node, object);
+		return deserialize(node, object);
 	}
 
-	private void deserialize(Node node, JsonObject element) throws FiberException {
+	@Override
+	public JsonObject deserialize(Node node, JsonObject element) throws FiberException {
+		JsonObject leftovers = new JsonObject();
 		for (Map.Entry<String, JsonElement> entry : element.entrySet()) {
 			String key = entry.getKey();
 			JsonElement child = entry.getValue();
@@ -57,22 +62,27 @@ public class JanksonSerializer implements Serializer {
 					throw new FiberException("Value read for non-property node: " + item.getName());
 				}
 			} else {
-				JanksonTransparentNode transparentNode = new JanksonTransparentNode(key, child);
-				node.add(transparentNode);
+				leftovers.put(key, child);
 			}
 		}
+		return leftovers;
 	}
 
 	private JsonElement serialize(HasValue<?> hasValue) {
 		return marshaller.marshall(hasValue.getValue());
 	}
 
-	public void serialize(Node node, OutputStream stream) throws IOException {
+	@Override
+	public void serialize(Node node, @Nullable JsonObject additionalData, OutputStream out) throws IOException {
 		JsonObject object = serialize(node);
-		stream.write(object.toJson(!compress, !compress).getBytes(StandardCharsets.UTF_8));
+		if (additionalData != null) {
+			object.putAll(additionalData);
+		}
+		out.write(object.toJson(!compress, !compress).getBytes(StandardCharsets.UTF_8));
 	}
 
-	private JsonObject serialize(Node node) {
+	@Override
+	public JsonObject serialize(Node node) {
 		JsonObject object = new JsonObject();
 
 		for (TreeItem treeItem : node.getItems()) {
@@ -109,34 +119,8 @@ public class JanksonSerializer implements Serializer {
 		return IDENTIFIER;
 	}
 
-	private class JanksonTransparentNode implements Transparent {
-		private final String name;
-		private final JsonElement value;
-
-		public JanksonTransparentNode(String name, JsonElement value) {
-			this.name = name;
-			this.value = value;
-		}
-
-		@Nullable
-		@Override
-		public <A> A marshall(Class<A> type) {
-			return JanksonSerializer.this.marshall(type, this.value);
-		}
-
-		@Override
-		public String getName() {
-			return name;
-		}
-
-		@Override
-		public String toString() {
-			return getClass().getSimpleName() + "[name=" + getName() + "]";
-		}
-	}
-
 	private static class JanksonFallbackMarshaller implements Marshaller<JsonElement> {
-		private static JanksonFallbackMarshaller INSTANCE = new JanksonFallbackMarshaller();
+		private static final JanksonFallbackMarshaller INSTANCE = new JanksonFallbackMarshaller();
 
 		private final blue.endless.jankson.api.Marshaller marshaller = Jankson.builder().build().getMarshaller();
 
