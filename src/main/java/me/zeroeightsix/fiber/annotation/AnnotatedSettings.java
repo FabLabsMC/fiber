@@ -5,6 +5,7 @@ import me.zeroeightsix.fiber.annotation.convention.NoNamingConvention;
 import me.zeroeightsix.fiber.annotation.convention.SettingNamingConvention;
 import me.zeroeightsix.fiber.annotation.exception.MalformedFieldException;
 import me.zeroeightsix.fiber.annotation.magic.TypeMagic;
+import me.zeroeightsix.fiber.builder.ConfigAggregateBuilder;
 import me.zeroeightsix.fiber.builder.ConfigNodeBuilder;
 import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
 import me.zeroeightsix.fiber.builder.constraint.AbstractConstraintsBuilder;
@@ -100,7 +101,7 @@ public class AnnotatedSettings {
     private static <T, P> TreeItem fieldToItem(Field field, P pojo, String name, List<Member> listeners) throws FiberException {
         Class<T> type = getSettingTypeFromField(field);
 
-        ConfigValueBuilder<T, ?> builder = createConfigValueBuilder(type, field)
+        ConfigValueBuilder<T> builder = createConfigValueBuilder(type, field)
                 .withName(name)
                 .withComment(findComment(field))
                 .withDefaultValue(findDefaultValue(field, pojo))
@@ -128,11 +129,11 @@ public class AnnotatedSettings {
         return builder.build();
     }
 
-    @SuppressWarnings({"unchecked"})
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Nonnull
-    private static <T, E> ConfigValueBuilder<T, ?> createConfigValueBuilder(Class<T> type, Field field) {
+    private static <T, E> ConfigValueBuilder<T> createConfigValueBuilder(Class<T> type, Field field) {
         AnnotatedType annotatedType = field.getAnnotatedType();
-        if (ConfigValueBuilder.isAggregate(type)) {
+        if (ConfigAggregateBuilder.isAggregate(type)) {
             if (Collection.class.isAssignableFrom(type)) {
                 if (annotatedType instanceof AnnotatedParameterizedType) {
                     AnnotatedType[] typeArgs = ((AnnotatedParameterizedType) annotatedType).getAnnotatedActualTypeArguments();
@@ -141,8 +142,7 @@ public class AnnotatedSettings {
                         Class<E> componentType = (Class<E>) TypeMagic.classForType(typeArg.getType());
                         if (componentType != null) {
                             // coerce to a collection class and configure as such
-                            Class<Collection<E>> collectionType = (Class<Collection<E>>) type;
-                            ConfigValueBuilder.Aggregate<T, E> aggregate = (ConfigValueBuilder.Aggregate<T, E>) ConfigValueBuilder.aggregate(collectionType, componentType);
+                            ConfigAggregateBuilder<T, E> aggregate = ConfigAggregateBuilder.create((Class) type, componentType);
                             // element constraints are on the type argument (eg. List<@Regex String>), so we setup constraints from it
                             constrain(aggregate.constraints().component(), typeArg).finishComponent().finish();
                             return aggregate;
@@ -154,18 +154,18 @@ public class AnnotatedSettings {
                 if (annotatedType instanceof AnnotatedArrayType) {
                     // coerce to an array class
                     Class<E[]> arrayType = (Class<E[]>) type;
-                    ConfigValueBuilder.Aggregate<T, E> aggregate = (ConfigValueBuilder.Aggregate<T, E>) ConfigValueBuilder.aggregate(arrayType);
+                    ConfigAggregateBuilder<T, E> aggregate = (ConfigAggregateBuilder<T, E>) ConfigAggregateBuilder.create(arrayType);
                     // take the component constraint information from the special annotated type
                     constrain(aggregate.constraints().component(), ((AnnotatedArrayType) annotatedType).getAnnotatedGenericComponentType()).finishComponent().finish();
                     return aggregate;
                 }
             }
         }
-        return ConfigValueBuilder.scalar(type);
+        return new ConfigValueBuilder<>(type);
     }
 
     @SuppressWarnings("unchecked")
-    private static <T, B extends AbstractConstraintsBuilder<?, ?, T, ?>> B constrain(B constraints, AnnotatedElement field) {
+    private static <T, B extends AbstractConstraintsBuilder<?, ?, T>> B constrain(B constraints, AnnotatedElement field) {
         if (field.isAnnotationPresent(Setting.Constrain.Range.class)) {
             Setting.Constrain.Range annotation = field.getAnnotation(Setting.Constrain.Range.class);
             if (annotation.min() > Double.NEGATIVE_INFINITY) {

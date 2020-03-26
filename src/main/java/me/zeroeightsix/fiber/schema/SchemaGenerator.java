@@ -6,11 +6,12 @@ import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.JsonPrimitive;
 import blue.endless.jankson.impl.MarshallerImpl;
 import me.zeroeightsix.fiber.Identifier;
-import me.zeroeightsix.fiber.builder.constraint.CompositeConstraintBuilder;
+import me.zeroeightsix.fiber.builder.constraint.CompositeConstraintsBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.ValuedConstraint;
 import me.zeroeightsix.fiber.serialization.Marshaller;
-import me.zeroeightsix.fiber.tree.*;
+import me.zeroeightsix.fiber.tree.ConfigValue;
+import me.zeroeightsix.fiber.tree.Node;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -82,8 +83,8 @@ public class SchemaGenerator {
 			if (constraint instanceof ValuedConstraint) {
 				object.put("value", new JsonPrimitive(((ValuedConstraint<?, ?>) constraint).getValue()));
 			}
-			if (constraint instanceof CompositeConstraintBuilder.AbstractCompositeConstraint<?>) {
-				object.put("constraints", createSchema(((CompositeConstraintBuilder.AbstractCompositeConstraint<?>) constraint).constraints));
+			if (constraint instanceof CompositeConstraintsBuilder.AbstractCompositeConstraint<?>) {
+				object.put("constraints", createSchema(((CompositeConstraintsBuilder.AbstractCompositeConstraint<?>) constraint).constraints));
 			}
 			array.add(object);
 		}

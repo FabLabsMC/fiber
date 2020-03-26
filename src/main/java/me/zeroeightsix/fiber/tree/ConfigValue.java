@@ -1,5 +1,6 @@
 package me.zeroeightsix.fiber.tree;
 
+import me.zeroeightsix.fiber.builder.ConfigAggregateBuilder;
 import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
 
@@ -118,10 +119,10 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
      * @param type the class of the type of value the {@link ConfigValue} produced by the builder holds
      * @param <T> the type {@code type} represents
      * @return the newly created builder
-     * @see me.zeroeightsix.fiber.builder.ConfigValueBuilder.Scalar Scalar
+     * @see me.zeroeightsix.fiber.builder.ConfigValueBuilder ConfigValueBuilder
      */
-    public static <T> ConfigValueBuilder.Scalar<T> builder(@Nonnull Class<T> type) {
-        return ConfigValueBuilder.scalar(type);
+    public static <T> ConfigValueBuilder<T> builder(@Nonnull Class<T> type) {
+        return new ConfigValueBuilder<>(type);
     }
 
     /**
@@ -130,11 +131,11 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
      * @param defaultValue the default value of the {@link ConfigValue} that will be produced by the created builder.
      * @param <T> the type of value the {@link ConfigValue} produced by the builder holds
      * @return the newly created builder
-     * @see me.zeroeightsix.fiber.builder.ConfigValueBuilder.Scalar Scalar
+     * @see me.zeroeightsix.fiber.builder.ConfigValueBuilder ConfigValueBuilder
      */
-    public static <T> ConfigValueBuilder.Scalar<T> builder(@Nonnull T defaultValue) {
+    public static <T> ConfigValueBuilder<T> builder(@Nonnull T defaultValue) {
         @SuppressWarnings("unchecked") Class<T> type = (Class<T>) defaultValue.getClass();
-        return ConfigValueBuilder.scalar(type).withDefaultValue(defaultValue);
+        return new ConfigValueBuilder<>(type).withDefaultValue(defaultValue);
     }
 
     /**
@@ -143,11 +144,11 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
      * @param defaultValue the default array of values the {@link ConfigValue} will hold.
      * @param <E> the type of elements {@code defaultValue} holds
      * @return the newly created builder
-     * @see me.zeroeightsix.fiber.builder.ConfigValueBuilder.Aggregate Aggregate
+     * @see ConfigAggregateBuilder Aggregate
      */
-    public static <E> ConfigValueBuilder.Aggregate<E[], E> builder(@Nonnull E[] defaultValue) {
+    public static <E> ConfigAggregateBuilder<E[], E> builder(@Nonnull E[] defaultValue) {
         @SuppressWarnings("unchecked") Class<E[]> type = (Class<E[]>) defaultValue.getClass();
-        return ConfigValueBuilder.aggregate(type).withDefaultValue(defaultValue);
+        return ConfigAggregateBuilder.create(type).withDefaultValue(defaultValue);
     }
 
     /**
@@ -159,9 +160,9 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
      * @param <E> the type {@code elementType} represents
      * @return the newly created builder
      */
-    public static <C extends Collection<E>, E> ConfigValueBuilder.Aggregate<C, E> builder(@Nonnull C defaultValue, Class<E> elementType) {
+    public static <C extends Collection<E>, E> ConfigAggregateBuilder<C, E> builder(@Nonnull C defaultValue, Class<E> elementType) {
         @SuppressWarnings("unchecked") Class<C> type = (Class<C>) defaultValue.getClass();
-        return ConfigValueBuilder.aggregate(type, elementType).withDefaultValue(defaultValue);
+        return ConfigAggregateBuilder.create(type, elementType).withDefaultValue(defaultValue);
     }
 
 }
