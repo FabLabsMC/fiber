@@ -14,12 +14,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
+/**
+ * <p><strong>This builder should not be reused!</strong>
+ * Multiple calls to {@link #build()} will result in duplicated references.
+ */
 public class ConfigNodeBuilder implements NodeLike {
     private final Map<String, TreeItem> items = new HashMap<>();
     @Nullable
-    private ConfigNodeBuilder parent;
+    protected ConfigNodeBuilder parent;
     @Nullable
-    private String name;
+    protected String name;
     @Nullable
     private String comment;
     private boolean serializeSeparately;
@@ -159,53 +163,53 @@ public class ConfigNodeBuilder implements NodeLike {
             if (name == null) throw new NullPointerException();
 
             this.source = parent;
-            this.name(name);
-            this.parent(parent);
+            this.parent = parent;
+            this.name = name;
         }
 
         @Override
-        public ConfigNodeBuilder parent(ConfigNodeBuilder parent) {
+        public Forked<S> parent(ConfigNodeBuilder parent) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public ConfigNodeBuilder name(String name) {
+        public Forked<S> name(String name) {
             super.name(name);
             return this;
         }
 
         @Override
-        public ConfigNodeBuilder comment(@Nullable String comment) {
+        public Forked<S> comment(@Nullable String comment) {
             super.comment(comment);
             return this;
         }
 
         @Override
-        public ConfigNodeBuilder serializeSeparately() {
+        public Forked<S> serializeSeparately() {
             super.serializeSeparately();
             return this;
         }
 
         @Override
-        public ConfigNodeBuilder serializeSeparately(boolean serializeSeparately) {
+        public Forked<S> serializeSeparately(boolean serializeSeparately) {
             super.serializeSeparately(serializeSeparately);
             return this;
         }
 
         @Override
-        public ConfigNodeBuilder add(@Nonnull TreeItem item) throws FiberException {
+        public Forked<S> add(@Nonnull TreeItem item) throws FiberException {
             super.add(item);
             return this;
         }
 
         @Override
-        public ConfigNodeBuilder add(@Nonnull TreeItem item, boolean overwrite) throws FiberException {
+        public Forked<S> add(@Nonnull TreeItem item, boolean overwrite) throws FiberException {
             super.add(item, overwrite);
             return this;
         }
 
         @Override
-        public Forked<ConfigNodeBuilder.Forked<S>> fork(String name) {
+        public Forked<Forked<S>> fork(String name) {
             return new ConfigNodeBuilder.Forked<>(this, name);
         }
 

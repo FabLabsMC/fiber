@@ -21,6 +21,9 @@ import java.util.function.BiConsumer;
  * <p> This is the abstract base class for all builders of this type. Builders implementing this class include
  * {@link Scalar Scalar} and {@link Aggregate Aggregate} for scalar (one-value) and aggregate (collection/array) values, respectively.
  *
+ * <p><strong>This builder should not be reused if the default values are intended to be mutated!</strong>
+ * Multiple calls to {@link #build()} will result in duplicated references.
+ *
  * @param <T> the type of value the produced {@code ConfigValue} will hold
  * @param <B> the type of {@code this}
  * @see ConfigValue
