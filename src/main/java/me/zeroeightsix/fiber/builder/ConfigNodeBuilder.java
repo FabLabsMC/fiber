@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class ConfigNodeBuilder implements NodeLike {
     private final Map<String, TreeItem> items = new HashMap<>();
@@ -72,7 +73,7 @@ public class ConfigNodeBuilder implements NodeLike {
     }
 
     /**
-     *  Marks the built node as being serialized separately
+     * Marks the built node as being serialized separately
      */
     public ConfigNodeBuilder serializeSeparately() {
         serializeSeparately(true);
@@ -80,7 +81,6 @@ public class ConfigNodeBuilder implements NodeLike {
     }
 
     /**
-     *
      * @param serializeSeparately if {@code true}, the subtree will not appear in the
      *                            serialized representation of the built {@code Node}
      * @return {@code this}, for chaining
@@ -97,23 +97,25 @@ public class ConfigNodeBuilder implements NodeLike {
      * @throws FiberException if there was already a child by the same name
      * @see Property
      */
-    public void add(@Nonnull TreeItem item) throws FiberException {
+    public ConfigNodeBuilder add(@Nonnull TreeItem item) throws FiberException {
         add(item, false);
+        return this;
     }
 
     /**
      * Attempts to introduce a new child to this node.
      *
-     * @param item The child to add
+     * @param item      The child to add
      * @param overwrite whether existing items should be overwritten
      * @throws FiberException if there was already a child by the same name
      * @see Property
      */
-    public void add(@Nonnull TreeItem item, boolean overwrite) throws FiberException {
+    public ConfigNodeBuilder add(@Nonnull TreeItem item, boolean overwrite) throws FiberException {
         if (!overwrite && items.containsKey(item.getName())) {
             throw new FiberException("Attempt to replace node " + item.getName());
         }
         items.put(item.getName(), item);
+        return this;
     }
 
     /**
@@ -132,8 +134,8 @@ public class ConfigNodeBuilder implements NodeLike {
      * @param name the name of the new {@code Node}
      * @return the created node builder
      */
-    public ConfigNodeBuilder fork(String name) {
-        return new ConfigNodeBuilder().name(name).parent(this);
+    public ConfigNodeBuilder.Forked<? extends ConfigNodeBuilder> fork(String name) {
+        return new ConfigNodeBuilder.Forked<>(this, name);
     }
 
     public ConfigNode build() {
@@ -147,6 +149,74 @@ public class ConfigNodeBuilder implements NodeLike {
             }
         }
         return built;
+    }
+
+    public static class Forked<S extends ConfigNodeBuilder> extends ConfigNodeBuilder {
+        private final S source;
+
+        public Forked(S parent, String name) {
+            if (parent == null) throw new NullPointerException();
+            if (name == null) throw new NullPointerException();
+
+            this.source = parent;
+            this.name(name);
+            this.parent(parent);
+        }
+
+        @Override
+        public ConfigNodeBuilder parent(ConfigNodeBuilder parent) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public ConfigNodeBuilder name(String name) {
+            super.name(name);
+            return this;
+        }
+
+        @Override
+        public ConfigNodeBuilder comment(@Nullable String comment) {
+            super.comment(comment);
+            return this;
+        }
+
+        @Override
+        public ConfigNodeBuilder serializeSeparately() {
+            super.serializeSeparately();
+            return this;
+        }
+
+        @Override
+        public ConfigNodeBuilder serializeSeparately(boolean serializeSeparately) {
+            super.serializeSeparately(serializeSeparately);
+            return this;
+        }
+
+        @Override
+        public ConfigNodeBuilder add(@Nonnull TreeItem item) throws FiberException {
+            super.add(item);
+            return this;
+        }
+
+        @Override
+        public ConfigNodeBuilder add(@Nonnull TreeItem item, boolean overwrite) throws FiberException {
+            super.add(item, overwrite);
+            return this;
+        }
+
+        @Override
+        public Forked<ConfigNodeBuilder.Forked<S>> fork(String name) {
+            return new ConfigNodeBuilder.Forked<>(this, name);
+        }
+
+        public S finishNode() {
+            return finishNode(n -> {});
+        }
+
+        public S finishNode(Consumer<ConfigNode> action) {
+            action.accept(build());
+            return source;
+        }
     }
 
 }
