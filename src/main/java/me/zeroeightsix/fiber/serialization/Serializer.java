@@ -62,7 +62,7 @@ public interface Serializer<T> {
      * (eg. map representation with conflicting keys), the conflicting data from the
      * serialized tree gets overwritten.
      *
-     * @apiNote the {@code additionalData} may be used with the leftovers from
+     * <p> The {@code additionalData} may be used with the leftovers from
      * {@link #deserialize(Node, InputStream)} to inject back unrecognized nodes.
      *
      * @param node the node to serialize
