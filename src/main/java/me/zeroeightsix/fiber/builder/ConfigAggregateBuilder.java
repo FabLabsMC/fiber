@@ -1,7 +1,7 @@
 package me.zeroeightsix.fiber.builder;
 
 import me.zeroeightsix.fiber.annotation.AnnotatedSettings;
-import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
+import me.zeroeightsix.fiber.builder.constraint.AggregateConstraintsBuilder;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.tree.Node;
 
@@ -113,8 +113,8 @@ public final class ConfigAggregateBuilder<A, E> extends ConfigValueBuilder<A> {
     }
 
     @Override
-    public ConstraintsBuilder.Aggregate<ConfigAggregateBuilder<A, E>, A, E> constraints() {
-        return ConstraintsBuilder.aggregate(this, constraintList, type, componentType);
+    public AggregateConstraintsBuilder<ConfigAggregateBuilder<A, E>, A, E> constraints() {
+        return new AggregateConstraintsBuilder<>(this, constraintList, type, componentType);
     }
 
 }

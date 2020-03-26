@@ -21,7 +21,7 @@ class ConstraintsBuilderTest {
     @Test
     public void testNumericalConstraints() {
         List<Constraint<? super Integer>> constraintList = new ArrayList<>();
-        ConstraintsBuilder.Scalar<Void, Integer> constraintsBuilder = ConstraintsBuilder.scalar(null, constraintList, Integer.class);
+        ConstraintsBuilder<Void, Integer> constraintsBuilder = new ConstraintsBuilder<>(null, constraintList, Integer.class);
         constraintsBuilder.atLeast(5)
                 .composite(CompositeType.OR)
                 .atLeast(20)

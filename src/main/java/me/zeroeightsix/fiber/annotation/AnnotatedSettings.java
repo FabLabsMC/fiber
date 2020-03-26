@@ -171,7 +171,7 @@ public class AnnotatedSettings {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T, B extends AbstractConstraintsBuilder<?, ?, T, ?>> B constrain(B constraints, AnnotatedElement field) {
+    private static <T, B extends AbstractConstraintsBuilder<?, ?, T>> B constrain(B constraints, AnnotatedElement field) {
         if (field.isAnnotationPresent(Setting.Constrain.Range.class)) {
             Setting.Constrain.Range annotation = field.getAnnotation(Setting.Constrain.Range.class);
             if (annotation.min() > Double.NEGATIVE_INFINITY) {

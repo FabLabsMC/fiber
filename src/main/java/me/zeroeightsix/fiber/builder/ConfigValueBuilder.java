@@ -151,8 +151,8 @@ public class ConfigValueBuilder<T> {
      * @return the created builder
      * @see ConstraintsBuilder
      */
-    public ConstraintsBuilder<? extends ConfigValueBuilder<T>, T, ?> constraints() {
-        return ConstraintsBuilder.scalar(this, constraintList, type);
+    public ConstraintsBuilder<? extends ConfigValueBuilder<T>, T> constraints() {
+        return new ConstraintsBuilder<>(this, constraintList, type);
     }
 
     /**
