@@ -4,7 +4,8 @@ import me.zeroeightsix.fiber.constraint.CompositeType;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 
-import java.util.Collection;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 
 /**
@@ -19,6 +20,7 @@ import java.util.List;
  * @see ConstraintsBuilder
  */
 public class AggregateConstraintsBuilder<S, T, C> extends ConstraintsBuilder<S, T> {
+    @Nullable
     private final Class<C> componentType;
 
     /**
@@ -29,7 +31,7 @@ public class AggregateConstraintsBuilder<S, T, C> extends ConstraintsBuilder<S, 
      * @param aggregateType the type of collection or array {@code source} holds
      * @param componentType the type of all elements in {@code aggregateType}
      */
-    public AggregateConstraintsBuilder(S source, List<Constraint<? super T>> constraints, Class<T> aggregateType, Class<C> componentType) {
+    public AggregateConstraintsBuilder(S source, List<Constraint<? super T>> constraints, @Nonnull Class<T> aggregateType, @Nullable Class<C> componentType) {
         super(source, constraints, aggregateType);
         this.componentType = componentType;
     }
@@ -82,14 +84,7 @@ public class AggregateConstraintsBuilder<S, T, C> extends ConstraintsBuilder<S, 
      *
      * @return the newly created builder
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
     public ComponentConstraintsBuilder<AggregateConstraintsBuilder<S, T, C>, T, C> component() {
-        if (this.type.isArray()) {
-            List<Constraint<? super C[]>> sourceConstraints = (List) this.sourceConstraints;
-            return (ComponentConstraintsBuilder<AggregateConstraintsBuilder<S, T, C>, T, C>) ComponentConstraintsBuilder.array(this, sourceConstraints, this.componentType);
-        } else {
-            List<Constraint<? super Collection<C>>> sourceConstraints = (List) this.sourceConstraints;
-            return (ComponentConstraintsBuilder<AggregateConstraintsBuilder<S, T, C>, T, C>) ComponentConstraintsBuilder.collection(this, sourceConstraints, this.componentType);
-        }
+        return new ComponentConstraintsBuilder<>(this, sourceConstraints, this.type, this.componentType);
     }
 }

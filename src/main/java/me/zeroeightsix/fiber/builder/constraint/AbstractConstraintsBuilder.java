@@ -3,6 +3,7 @@ package me.zeroeightsix.fiber.builder.constraint;
 import me.zeroeightsix.fiber.constraint.*;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 
+import javax.annotation.Nullable;
 import javax.annotation.RegEx;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,11 +19,11 @@ public abstract class AbstractConstraintsBuilder<S, A, T> {
 
     protected final S source;
     protected final List<Constraint<? super A>> sourceConstraints;
-    protected final Class<T> type;
+    @Nullable protected final Class<T> type;
 
     final List<Constraint<? super T>> newConstraints = new ArrayList<>();
 
-    AbstractConstraintsBuilder(S source, List<Constraint<? super A>> sourceConstraints, Class<T> type) {
+    AbstractConstraintsBuilder(S source, List<Constraint<? super A>> sourceConstraints, @Nullable Class<T> type) {
         this.source = source;
         this.sourceConstraints = sourceConstraints;
         this.type = type;
@@ -96,17 +97,17 @@ public abstract class AbstractConstraintsBuilder<S, A, T> {
     }
 
     private void checkNumerical() {
-        if (!Number.class.isAssignableFrom(this.type))
+        if (this.type != null && !Number.class.isAssignableFrom(this.type))
             throw new RuntimeFiberException("Can't apply numerical constraint to non-numerical setting");
     }
 
     private void checkNumerical(T value) {
-        if (!Number.class.isAssignableFrom(value.getClass()))
+        if (this.type != null && !Number.class.isAssignableFrom(value.getClass()))
             throw new RuntimeFiberException("'" + value + "' is not a number");
     }
 
     private void checkCharSequence() {
-        if (!CharSequence.class.isAssignableFrom(this.type))
+        if (this.type != null && !CharSequence.class.isAssignableFrom(this.type))
             throw new RuntimeFiberException("Can only apply regex pattern constraint to character sequences");
     }
 

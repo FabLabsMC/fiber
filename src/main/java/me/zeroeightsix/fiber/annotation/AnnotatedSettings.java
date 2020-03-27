@@ -145,6 +145,7 @@ public class AnnotatedSettings {
                             return aggregate;
                         }
                     }
+                    return ConfigAggregateBuilder.create(parent, (Class) type, null);
                 }
             } else {
                 assert type.isArray();

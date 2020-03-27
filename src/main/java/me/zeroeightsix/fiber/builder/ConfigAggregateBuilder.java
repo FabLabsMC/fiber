@@ -5,6 +5,7 @@ import me.zeroeightsix.fiber.builder.constraint.AggregateConstraintsBuilder;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.function.BiConsumer;
 
@@ -55,16 +56,16 @@ public final class ConfigAggregateBuilder<S extends ConfigNodeBuilder, A, E> ext
      * @return the newly created builder
      */
     @SuppressWarnings("unchecked")
-    public static <S extends ConfigNodeBuilder, C extends Collection<E>, E> ConfigAggregateBuilder<S, C, E> create(S source, @Nonnull Class<? super C> collectionType, @Nonnull Class<E> componentType) {
+    public static <S extends ConfigNodeBuilder, C extends Collection<E>, E> ConfigAggregateBuilder<S, C, E> create(S source, @Nonnull Class<? super C> collectionType, @Nullable Class<E> componentType) {
         if (!Collection.class.isAssignableFrom(collectionType))
             throw new RuntimeFiberException(collectionType + " is not a valid Collection type");
         return new ConfigAggregateBuilder<>(source, (Class<C>) collectionType, componentType);
     }
 
-    @Nonnull
+    @Nullable
     private final Class<E> componentType;
 
-    private ConfigAggregateBuilder(S source, @Nonnull Class<A> type, @Nonnull Class<E> componentType) {
+    private ConfigAggregateBuilder(S source, @Nonnull Class<A> type, @Nullable Class<E> componentType) {
         super(source, type);
         this.componentType = componentType;
     }

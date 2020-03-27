@@ -64,7 +64,8 @@ class ConstraintsBuilderTest {
     @DisplayName("Test collection aggregate constraints")
     @Test
     public void testCollectionConstraints() {
-        ConfigValue<List<Integer>> config = ConfigAggregateBuilder.<ConfigNodeBuilder, List<Integer>, Integer>create(null, List.class, Integer.class)
+        ConfigNodeBuilder builder = new ConfigNodeBuilder();
+        ConfigValue<List<Integer>> config = builder.aggregateValue(Collections.emptyList(), Integer.class)
                 .constraints().component()
                 .atLeast(3).atMost(10)
                 .finishComponent()
