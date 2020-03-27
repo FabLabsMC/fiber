@@ -42,10 +42,11 @@ class JanksonSerializerTest {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         JanksonSerializer jk = new JanksonSerializer();
         ConfigNode nodeOne = new ConfigNodeBuilder()
-                .fork("child").value(Integer.class)
+                .fork("child")
+                .value(10)
                 .name("A")
-                .defaultValue(10)
                 .finishValue()
+                .finishNode()
                 .build();
 
         ConfigNodeBuilder builderTwo = new ConfigNodeBuilder();
