@@ -4,7 +4,6 @@ import me.zeroeightsix.fiber.builder.ConfigNodeBuilder;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.serialization.JanksonSerializer;
 import me.zeroeightsix.fiber.tree.ConfigNode;
-import me.zeroeightsix.fiber.tree.ConfigValue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -19,23 +18,21 @@ class JanksonSerializerTest {
     void nodeSerialization() throws IOException, FiberException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         JanksonSerializer jk = new JanksonSerializer();
-        ConfigNodeBuilder nodeOne = new ConfigNodeBuilder();
-        ConfigNodeBuilder nodeTwo = new ConfigNodeBuilder();
-
-        ConfigValue.builder(Integer.class)
-                .withName("A")
-                .withDefaultValue(10)
-                .withParent(nodeOne)
+        ConfigNode nodeOne = new ConfigNodeBuilder()
+                .value(Integer.class)
+                .name("A")
+                .defaultValue(10)
+                .finishValue()
                 .build();
 
-        ConfigValue.builder(Integer.class)
-                .withName("A")
-                .withDefaultValue(20)
-                .withParent(nodeTwo)
+        ConfigNode nodeTwo = new ConfigNodeBuilder().value(Integer.class)
+                .name("A")
+                .defaultValue(20)
+                .finishValue()
                 .build();
 
-        jk.serialize(nodeOne.build(), bos);
-        jk.deserialize(nodeTwo.build(), new ByteArrayInputStream(bos.toByteArray()));
+        jk.serialize(nodeOne, bos);
+        jk.deserialize(nodeTwo, new ByteArrayInputStream(bos.toByteArray()));
         NodeOperationsTest.testNodeFor(nodeTwo, "A", Integer.class, 10);
     }
 
@@ -44,28 +41,23 @@ class JanksonSerializerTest {
     void nodeSerialization1() throws IOException, FiberException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         JanksonSerializer jk = new JanksonSerializer();
-        ConfigNodeBuilder builderOne = new ConfigNodeBuilder();
+        ConfigNode nodeOne = new ConfigNodeBuilder()
+                .fork("child").value(Integer.class)
+                .name("A")
+                .defaultValue(10)
+                .finishValue()
+                .build();
+
         ConfigNodeBuilder builderTwo = new ConfigNodeBuilder();
-        ConfigNodeBuilder childBuilderOne = builderOne.fork("child");
-        ConfigNodeBuilder childBuilderTwo = builderTwo.fork("child");
-
-        ConfigValue.builder(Integer.class)
-                .withName("A")
-                .withDefaultValue(10)
-                .withParent(childBuilderOne)
+        ConfigNode childTwo = builderTwo.fork("child").value(Integer.class)
+                .name("A")
+                .defaultValue(20)
+                .finishValue()
                 .build();
+        ConfigNode nodeTwo = builderTwo.build();
 
-        ConfigValue.builder(Integer.class)
-                .withName("A")
-                .withDefaultValue(20)
-                .withParent(childBuilderTwo)
-                .build();
-
-        childBuilderOne.build();
-        ConfigNode childTwo = childBuilderTwo.build();
-
-        jk.serialize(builderOne.build(), bos);
-        jk.deserialize(builderTwo.build(), new ByteArrayInputStream(bos.toByteArray()));
+        jk.serialize(nodeOne, bos);
+        jk.deserialize(nodeTwo, new ByteArrayInputStream(bos.toByteArray()));
         NodeOperationsTest.testNodeFor(childTwo, "A", Integer.class, 10);
     }
 
@@ -74,28 +66,24 @@ class JanksonSerializerTest {
     void nodeSerialization2() throws IOException, FiberException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         JanksonSerializer jk = new JanksonSerializer();
-        ConfigNodeBuilder parentOne = new ConfigNodeBuilder();
-        ConfigNodeBuilder parentTwo = new ConfigNodeBuilder();
-        ConfigNodeBuilder.Forked<?> childBuilderOne = parentOne.fork("child").serializeSeparately();
-        ConfigNodeBuilder.Forked<?> childBuilderTwo = parentTwo.fork("child").serializeSeparately();
-
-        ConfigValue.builder(Integer.class)
-                .withName("A")
-                .withDefaultValue(10)
-                .withParent(childBuilderOne)
+        ConfigNode parentOne = new ConfigNodeBuilder()
+                .fork("child").serializeSeparately()
+                .value(Integer.class)
+                .name("A")
+                .defaultValue(10)
+                .finishValue()
                 .build();
-
-        ConfigValue.builder(Integer.class)
-                .withName("A")
-                .withDefaultValue(20)
-                .withParent(childBuilderTwo)
+        ConfigNodeBuilder builderTwo = new ConfigNodeBuilder();
+        ConfigNode childTwo = builderTwo.fork("child").serializeSeparately()
+                .value(Integer.class)
+                .name("A")
+                .defaultValue(20)
+                .finishValue()
                 .build();
+        ConfigNode parentTwo = builderTwo.build();
 
-        childBuilderOne.build();
-        ConfigNode childTwo = childBuilderTwo.build();
-
-        jk.serialize(parentOne.build(), bos);
-        jk.deserialize(parentTwo.build(), new ByteArrayInputStream(bos.toByteArray()));
+        jk.serialize(parentOne, bos);
+        jk.deserialize(parentTwo, new ByteArrayInputStream(bos.toByteArray()));
         // the child data should not have been saved -> default value
         NodeOperationsTest.testNodeFor(childTwo, "A", Integer.class, 20);
     }

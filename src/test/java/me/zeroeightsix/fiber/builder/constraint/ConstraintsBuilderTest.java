@@ -1,6 +1,7 @@
 package me.zeroeightsix.fiber.builder.constraint;
 
 import me.zeroeightsix.fiber.builder.ConfigAggregateBuilder;
+import me.zeroeightsix.fiber.builder.ConfigNodeBuilder;
 import me.zeroeightsix.fiber.constraint.CompositeType;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.tree.ConfigValue;
@@ -45,7 +46,7 @@ class ConstraintsBuilderTest {
     @DisplayName("Test array aggregate constraints")
     @Test
     public void testArrayConstraints() {
-        ConfigValue<Integer[]> config = ConfigAggregateBuilder.create(Integer[].class)
+        ConfigValue<Integer[]> config = ConfigAggregateBuilder.create(null, Integer[].class)
                 .constraints().component()
                 .range(3, 10)
                 .finishComponent()
@@ -63,7 +64,7 @@ class ConstraintsBuilderTest {
     @DisplayName("Test collection aggregate constraints")
     @Test
     public void testCollectionConstraints() {
-        ConfigValue<List<Integer>> config = ConfigAggregateBuilder.<List<Integer>, Integer>create(List.class, Integer.class)
+        ConfigValue<List<Integer>> config = ConfigAggregateBuilder.<ConfigNodeBuilder, List<Integer>, Integer>create(null, List.class, Integer.class)
                 .constraints().component()
                 .atLeast(3).atMost(10)
                 .finishComponent()

@@ -11,7 +11,6 @@ import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
 import me.zeroeightsix.fiber.builder.constraint.AbstractConstraintsBuilder;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.tree.ConfigNode;
-import me.zeroeightsix.fiber.tree.TreeItem;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.*;
@@ -68,7 +67,7 @@ public class AnnotatedSettings {
                     throw new FiberException("Couldn't fork and apply sub-node", e);
                 }
             } else {
-                node.add(fieldToItem(field, pojo, name, listenerMap.getOrDefault(name, defaultEmpty)));
+                fieldToItem(node, field, pojo, name, listenerMap.getOrDefault(name, defaultEmpty));
             }
         }
 
@@ -98,40 +97,38 @@ public class AnnotatedSettings {
         return field.isAnnotationPresent(Setting.class) ? Optional.of(field.getAnnotation(Setting.class)) : Optional.empty();
     }
 
-    private static <T, P> TreeItem fieldToItem(Field field, P pojo, String name, List<Member> listeners) throws FiberException {
+    private static <T> void fieldToItem(ConfigNodeBuilder node, Field field, Object pojo, String name, List<Member> listeners) throws FiberException {
         Class<T> type = getSettingTypeFromField(field);
 
-        ConfigValueBuilder<T> builder = createConfigValueBuilder(type, field)
-                .withName(name)
-                .withComment(findComment(field))
-                .withDefaultValue(findDefaultValue(field, pojo))
-                .setFinal(getSettingAnnotation(field).map(Setting::constant).orElse(false));
+        ConfigValueBuilder<ConfigNodeBuilder, T> builder = createConfigValueBuilder(node, type, field)
+                .name(name)
+                .comment(findComment(field))
+                .defaultValue(findDefaultValue(field, pojo))
+                .finalValue(getSettingAnnotation(field).map(Setting::constant).orElse(false));
 
         constrain(builder.constraints(), field.getAnnotatedType()).finish();
 
         for (Member listener : listeners) {
             BiConsumer<T, T> consumer = constructListener(listener, pojo, type);
             if (consumer == null) continue;
-            builder.withListener(consumer);
+            builder.listener(consumer);
         }
 
-        builder.withListener((t, newValue) -> {
+        builder.listener((t, newValue) -> {
             try {
-                final boolean accessible = field.isAccessible();
                 field.setAccessible(true);
                 field.set(pojo, newValue);
-                field.setAccessible(accessible);
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             }
         });
 
-        return builder.build();
+        builder.build();
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Nonnull
-    private static <T, E> ConfigValueBuilder<T> createConfigValueBuilder(Class<T> type, Field field) {
+    private static <N extends ConfigNodeBuilder, T, E> ConfigValueBuilder<N, T> createConfigValueBuilder(N parent, Class<T> type, Field field) {
         AnnotatedType annotatedType = field.getAnnotatedType();
         if (ConfigAggregateBuilder.isAggregate(type)) {
             if (Collection.class.isAssignableFrom(type)) {
@@ -142,7 +139,7 @@ public class AnnotatedSettings {
                         Class<E> componentType = (Class<E>) TypeMagic.classForType(typeArg.getType());
                         if (componentType != null) {
                             // coerce to a collection class and configure as such
-                            ConfigAggregateBuilder<T, E> aggregate = ConfigAggregateBuilder.create((Class) type, componentType);
+                            ConfigAggregateBuilder<N, T, E> aggregate = ConfigAggregateBuilder.create(parent, (Class) type, componentType);
                             // element constraints are on the type argument (eg. List<@Regex String>), so we setup constraints from it
                             constrain(aggregate.constraints().component(), typeArg).finishComponent().finish();
                             return aggregate;
@@ -154,14 +151,14 @@ public class AnnotatedSettings {
                 if (annotatedType instanceof AnnotatedArrayType) {
                     // coerce to an array class
                     Class<E[]> arrayType = (Class<E[]>) type;
-                    ConfigAggregateBuilder<T, E> aggregate = (ConfigAggregateBuilder<T, E>) ConfigAggregateBuilder.create(arrayType);
+                    ConfigAggregateBuilder<N, T, E> aggregate = (ConfigAggregateBuilder<N, T, E>) ConfigAggregateBuilder.create(parent, arrayType);
                     // take the component constraint information from the special annotated type
                     constrain(aggregate.constraints().component(), ((AnnotatedArrayType) annotatedType).getAnnotatedGenericComponentType()).finishComponent().finish();
                     return aggregate;
                 }
             }
         }
-        return new ConfigValueBuilder<>(type);
+        return new ConfigValueBuilder<>(parent, type);
     }
 
     @SuppressWarnings("unchecked")

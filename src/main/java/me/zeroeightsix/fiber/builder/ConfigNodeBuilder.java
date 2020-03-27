@@ -2,10 +2,7 @@ package me.zeroeightsix.fiber.builder;
 
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.tree.ConfigNode;
-import me.zeroeightsix.fiber.tree.NodeLike;
-import me.zeroeightsix.fiber.tree.Property;
-import me.zeroeightsix.fiber.tree.TreeItem;
+import me.zeroeightsix.fiber.tree.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -92,6 +89,58 @@ public class ConfigNodeBuilder implements NodeLike {
     public ConfigNodeBuilder serializeSeparately(boolean serializeSeparately) {
         this.serializeSeparately = serializeSeparately;
         return this;
+    }
+
+    /**
+     * Creates a scalar {@code ConfigValueBuilder}.
+     *
+     * @param type the class of the type of value the {@link ConfigValue} produced by the builder holds
+     * @param <T> the type {@code type} represents
+     * @return the newly created builder
+     * @see me.zeroeightsix.fiber.builder.ConfigValueBuilder ConfigValueBuilder
+     */
+    public <T> ConfigValueBuilder<? extends ConfigNodeBuilder, T> value(@Nonnull Class<T> type) {
+        return new ConfigValueBuilder<>(this, type);
+    }
+
+    /**
+     * Creates a scalar {@code ConfigValueBuilder}.
+     *
+     * @param defaultValue the default value of the {@link ConfigValue} that will be produced by the created builder.
+     * @param <T> the type of value the {@link ConfigValue} produced by the builder holds
+     * @return the newly created builder
+     * @see me.zeroeightsix.fiber.builder.ConfigValueBuilder ConfigValueBuilder
+     */
+    public <T> ConfigValueBuilder<? extends ConfigNodeBuilder, T> value(@Nonnull T defaultValue) {
+        @SuppressWarnings("unchecked") Class<T> type = (Class<T>) defaultValue.getClass();
+        return new ConfigValueBuilder<>(this, type).defaultValue(defaultValue);
+    }
+
+    /**
+     * Creates an aggregate {@code ConfigValueBuilder}.
+     *
+     * @param defaultValue the default array of values the {@link ConfigValue} will hold.
+     * @param <E> the type of elements {@code defaultValue} holds
+     * @return the newly created builder
+     * @see ConfigAggregateBuilder Aggregate
+     */
+    public <E> ConfigAggregateBuilder<? extends ConfigNodeBuilder, E[], E> aggregateValue(@Nonnull E[] defaultValue) {
+        @SuppressWarnings("unchecked") Class<E[]> type = (Class<E[]>) defaultValue.getClass();
+        return ConfigAggregateBuilder.create(this, type).defaultValue(defaultValue);
+    }
+
+    /**
+     * Creates an aggregate {@code ConfigValueBuilder}.
+     *
+     * @param defaultValue the default collection of values the {@link ConfigValue} will hold.
+     * @param elementType the class of the type of elements {@code defaultValue} holds
+     * @param <C> the type of collection {@code defaultValue} is
+     * @param <E> the type {@code elementType} represents
+     * @return the newly created builder
+     */
+    public <C extends Collection<E>, E> ConfigAggregateBuilder<? extends ConfigNodeBuilder, C, E> aggregateValue(@Nonnull C defaultValue, Class<E> elementType) {
+        @SuppressWarnings("unchecked") Class<C> type = (Class<C>) defaultValue.getClass();
+        return ConfigAggregateBuilder.create(this, type, elementType).defaultValue(defaultValue);
     }
 
     /**
@@ -194,6 +243,29 @@ public class ConfigNodeBuilder implements NodeLike {
         public Forked<S> serializeSeparately(boolean serializeSeparately) {
             super.serializeSeparately(serializeSeparately);
             return this;
+        }
+
+        @Override
+        public <T> ConfigValueBuilder<Forked<S>, T> value(@Nonnull Class<T> type) {
+            return new ConfigValueBuilder<>(this, type);
+        }
+
+        @Override
+        public <T> ConfigValueBuilder<Forked<S>, T> value(@Nonnull T defaultValue) {
+            @SuppressWarnings("unchecked") Class<T> type = (Class<T>) defaultValue.getClass();
+            return new ConfigValueBuilder<>(this, type).defaultValue(defaultValue);
+        }
+
+        @Override
+        public <E> ConfigAggregateBuilder<Forked<S>, E[], E> aggregateValue(@Nonnull E[] defaultValue) {
+            @SuppressWarnings("unchecked") Class<E[]> type = (Class<E[]>) defaultValue.getClass();
+            return ConfigAggregateBuilder.create(this, type).defaultValue(defaultValue);
+        }
+
+        @Override
+        public <C extends Collection<E>, E> ConfigAggregateBuilder<Forked<S>, C, E> aggregateValue(@Nonnull C defaultValue, Class<E> elementType) {
+            @SuppressWarnings("unchecked") Class<C> type = (Class<C>) defaultValue.getClass();
+            return ConfigAggregateBuilder.create(this, type, elementType).defaultValue(defaultValue);
         }
 
         @Override

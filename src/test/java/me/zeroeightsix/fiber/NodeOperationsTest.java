@@ -1,10 +1,8 @@
 package me.zeroeightsix.fiber;
 
 import me.zeroeightsix.fiber.builder.ConfigNodeBuilder;
-import me.zeroeightsix.fiber.tree.ConfigValue;
-import me.zeroeightsix.fiber.tree.NodeLike;
-import me.zeroeightsix.fiber.tree.Property;
-import me.zeroeightsix.fiber.tree.TreeItem;
+import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
+import me.zeroeightsix.fiber.tree.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -16,14 +14,14 @@ class NodeOperationsTest {
     @Test
     @DisplayName("Node -> Node")
     void mergeTo() {
-        ConfigNodeBuilder nodeOne = new ConfigNodeBuilder();
-        ConfigNodeBuilder nodeTwo = new ConfigNodeBuilder();
-
-        ConfigValue.builder(Integer.class)
-                .withName("A")
-                .withDefaultValue(10)
-                .withParent(nodeOne)
+        Node nodeOne = new ConfigNodeBuilder()
+                .value(Integer.class)
+                .name("A")
+                .defaultValue(10)
+                .finishValue()
                 .build();
+
+        ConfigNodeBuilder nodeTwo = new ConfigNodeBuilder();
 
         NodeOperations.mergeTo(nodeOne, nodeTwo);
 
@@ -34,10 +32,9 @@ class NodeOperationsTest {
     @DisplayName("Value -> Node")
     void mergeTo1() {
         ConfigNodeBuilder node = new ConfigNodeBuilder();
-        ConfigValue<Integer> value = ConfigValue.builder(Integer.class)
-                .withName("A")
-                .withDefaultValue(10)
-                .withParent(node)
+        ConfigValue<Integer> value = node.value(Integer.class)
+                .name("A")
+                .defaultValue(10)
                 .build();
 
         NodeOperations.mergeTo(value, node);
@@ -48,14 +45,13 @@ class NodeOperationsTest {
     @Test
     @DisplayName("Value -> Value")
     void mergeTo2() {
-        ConfigValue<Integer> valueOne = ConfigValue.builder(Integer.class)
-                .withName("A")
-                .withDefaultValue(10)
+        ConfigValue<Integer> valueOne = new ConfigValueBuilder<>(null, Integer.class)
+                .name("A")
+                .defaultValue(10)
                 .build();
-
-        ConfigValue<Integer> valueTwo = ConfigValue.builder(Integer.class)
-                .withName("A")
-                .withDefaultValue(20)
+        ConfigValue<Integer> valueTwo = new ConfigValueBuilder<>(null, Integer.class)
+                .name("A")
+                .defaultValue(20)
                 .build();
 
         NodeOperations.mergeTo(valueOne, valueTwo);

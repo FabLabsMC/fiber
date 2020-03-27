@@ -18,7 +18,7 @@ import java.util.function.BiConsumer;
  * @param <E> the type of values held by {@code <A>}
  * @see #create
  */
-public final class ConfigAggregateBuilder<A, E> extends ConfigValueBuilder<A> {
+public final class ConfigAggregateBuilder<S extends ConfigNodeBuilder, A, E> extends ConfigValueBuilder<S, A> {
     /**
      * Determines if a {@code Class} object represents an aggregate type,
      * ie. if it is an {@linkplain Class#isArray() Array} or a {@linkplain Collection}.
@@ -40,9 +40,9 @@ public final class ConfigAggregateBuilder<A, E> extends ConfigValueBuilder<A> {
      * @see #isAggregate
      */
     @SuppressWarnings("unchecked")
-    public static <E> ConfigAggregateBuilder<E[], E> create(@Nonnull Class<E[]> arrayType) {
+    public static <S extends ConfigNodeBuilder, E> ConfigAggregateBuilder<S, E[], E> create(S source, @Nonnull Class<E[]> arrayType) {
         if (!arrayType.isArray()) throw new RuntimeFiberException(arrayType + " is not a valid array type");
-        return new ConfigAggregateBuilder<>(arrayType, (Class<E>) AnnotatedSettings.wrapPrimitive(arrayType.getComponentType()));
+        return new ConfigAggregateBuilder<>(source, arrayType, (Class<E>) AnnotatedSettings.wrapPrimitive(arrayType.getComponentType()));
     }
 
     /**
@@ -55,64 +55,58 @@ public final class ConfigAggregateBuilder<A, E> extends ConfigValueBuilder<A> {
      * @return the newly created builder
      */
     @SuppressWarnings("unchecked")
-    public static <C extends Collection<E>, E> ConfigAggregateBuilder<C, E> create(@Nonnull Class<? super C> collectionType, @Nonnull Class<E> componentType) {
+    public static <S extends ConfigNodeBuilder, C extends Collection<E>, E> ConfigAggregateBuilder<S, C, E> create(S source, @Nonnull Class<? super C> collectionType, @Nonnull Class<E> componentType) {
         if (!Collection.class.isAssignableFrom(collectionType))
             throw new RuntimeFiberException(collectionType + " is not a valid Collection type");
-        return new ConfigAggregateBuilder<>((Class<C>) collectionType, componentType);
+        return new ConfigAggregateBuilder<>(source, (Class<C>) collectionType, componentType);
     }
 
     @Nonnull
     private final Class<E> componentType;
 
-    private ConfigAggregateBuilder(@Nonnull Class<A> type, @Nonnull Class<E> componentType) {
-        super(type);
+    private ConfigAggregateBuilder(S source, @Nonnull Class<A> type, @Nonnull Class<E> componentType) {
+        super(source, type);
         this.componentType = componentType;
     }
 
     @Override
-    public ConfigAggregateBuilder<A, E> withName(String name) {
-        super.withName(name);
+    public ConfigAggregateBuilder<S, A, E> name(String name) {
+        super.name(name);
         return this;
     }
 
     @Override
-    public ConfigAggregateBuilder<A, E> withComment(String comment) {
-        super.withComment(comment);
+    public ConfigAggregateBuilder<S, A, E> comment(String comment) {
+        super.comment(comment);
         return this;
     }
 
     @Override
-    public ConfigAggregateBuilder<A, E> withListener(BiConsumer<A, A> consumer) {
-        super.withListener(consumer);
+    public ConfigAggregateBuilder<S, A, E> listener(BiConsumer<A, A> consumer) {
+        super.listener(consumer);
         return this;
     }
 
     @Override
-    public ConfigAggregateBuilder<A, E> withDefaultValue(A defaultValue) {
-        super.withDefaultValue(defaultValue);
+    public ConfigAggregateBuilder<S, A, E> defaultValue(A defaultValue) {
+        super.defaultValue(defaultValue);
         return this;
     }
 
     @Override
-    public ConfigAggregateBuilder<A, E> setFinal() {
-        super.setFinal();
+    public ConfigAggregateBuilder<S, A, E> finalValue() {
+        super.finalValue();
         return this;
     }
 
     @Override
-    public ConfigAggregateBuilder<A, E> setFinal(boolean isFinal) {
-        super.setFinal(isFinal);
+    public ConfigAggregateBuilder<S, A, E> finalValue(boolean isFinal) {
+        super.finalValue(isFinal);
         return this;
     }
 
     @Override
-    public ConfigAggregateBuilder<A, E> withParent(ConfigNodeBuilder node) {
-        super.withParent(node);
-        return this;
-    }
-
-    @Override
-    public AggregateConstraintsBuilder<ConfigAggregateBuilder<A, E>, A, E> constraints() {
+    public AggregateConstraintsBuilder<ConfigAggregateBuilder<S, A, E>, A, E> constraints() {
         return new AggregateConstraintsBuilder<>(this, constraintList, type, componentType);
     }
 

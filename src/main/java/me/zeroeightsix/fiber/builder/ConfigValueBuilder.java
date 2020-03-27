@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * A builder for scalar {@code ConfigValue}s.
@@ -23,10 +24,12 @@ import java.util.function.BiConsumer;
  * Multiple calls to {@link #build()} will result in duplicated references.
  *
  * @param <T> the type of value the produced {@code ConfigValue} will hold
+ * @param <S> the type of this builder's source object
  * @see ConfigValue
  */
-public class ConfigValueBuilder<T> {
+public class ConfigValueBuilder<S extends ConfigNodeBuilder, T> {
 
+    private final S parentNode;
     @Nonnull
     protected final Class<T> type;
     @Nullable
@@ -39,16 +42,14 @@ public class ConfigValueBuilder<T> {
     private BiConsumer<T, T> consumer = (t, t2) -> { };
     protected List<Constraint<? super T>> constraintList = new ArrayList<>();
 
-    // Special snowflake that doesn't really belong in a builder.
-    // Used to easily register nodes to another node.
-    private ConfigNodeBuilder parentNode = null;
-
     /**
      * Creates a new scalar {@code ConfigValueBuilder}.
      *
-     * @param type the class object representing the type of values this builder will create settings for
+     * @param parentNode the {@code ConfigNodeBuilder} this builder originates from
+     * @param type       the class object representing the type of values this builder will create settings for
      */
-    public ConfigValueBuilder(@Nonnull Class<T> type) {
+    public ConfigValueBuilder(S parentNode, @Nonnull Class<T> type) {
+        this.parentNode = parentNode;
         this.type = type;
     }
 
@@ -61,7 +62,7 @@ public class ConfigValueBuilder<T> {
      * @return {@code this} builder
      * @see Node#lookup
      */
-    public ConfigValueBuilder<T> withName(String name) {
+    public ConfigValueBuilder<S, T> name(String name) {
         this.name = name;
         return this;
     }
@@ -74,7 +75,7 @@ public class ConfigValueBuilder<T> {
      * @param comment the comment
      * @return {@code this} builder
      */
-    public ConfigValueBuilder<T> withComment(String comment) {
+    public ConfigValueBuilder<S, T> comment(String comment) {
         this.comment = comment;
         return this;
     }
@@ -89,7 +90,7 @@ public class ConfigValueBuilder<T> {
      * @param consumer the listener
      * @return {@code this} builder
      */
-    public ConfigValueBuilder<T> withListener(BiConsumer<T, T> consumer) {
+    public ConfigValueBuilder<S, T> listener(BiConsumer<T, T> consumer) {
         final BiConsumer<T, T> prevConsumer = this.consumer; // to avoid confusion
         this.consumer = (t, t2) -> {
             prevConsumer.accept(t, t2);
@@ -106,7 +107,7 @@ public class ConfigValueBuilder<T> {
      * @param defaultValue the default value
      * @return {@code this} builder
      */
-    public ConfigValueBuilder<T> withDefaultValue(T defaultValue) {
+    public ConfigValueBuilder<S, T> defaultValue(T defaultValue) {
         this.defaultValue = defaultValue;
         return this;
     }
@@ -118,9 +119,9 @@ public class ConfigValueBuilder<T> {
      * This method behaves as if: {@code this.setFinal(true)}.
      *
      * @return {@code this} builder
-     * @see #setFinal(boolean)
+     * @see #finalValue(boolean)
      */
-    public ConfigValueBuilder<T> setFinal() {
+    public ConfigValueBuilder<S, T> finalValue() {
         this.isFinal = true;
         return this;
     }
@@ -133,19 +134,8 @@ public class ConfigValueBuilder<T> {
      * @param isFinal the finality
      * @return {@code this} builder
      */
-    public ConfigValueBuilder<T> setFinal(boolean isFinal) {
+    public ConfigValueBuilder<S, T> finalValue(boolean isFinal) {
         this.isFinal = isFinal;
-        return this;
-    }
-
-    /**
-     * Sets the node that the {@code ConfigValue} will be registered to.
-     *
-     * @param node The node the {@link ConfigValue} will be registered to.
-     * @return The builder
-     */
-    public ConfigValueBuilder<T> withParent(ConfigNodeBuilder node) {
-        parentNode = node;
         return this;
     }
 
@@ -155,14 +145,14 @@ public class ConfigValueBuilder<T> {
      * @return the created builder
      * @see ConstraintsBuilder
      */
-    public ConstraintsBuilder<? extends ConfigValueBuilder<T>, T> constraints() {
+    public ConstraintsBuilder<? extends ConfigValueBuilder<S, T>, T> constraints() {
         return new ConstraintsBuilder<>(this, constraintList, type);
     }
 
     /**
      * Builds the {@code ConfigValue}.
      *
-     * <p> If a parent was specified using {@link #withParent}, the {@code ConfigValue} will also be registered to its parent node.
+     * <p> If a parent was specified in the constructor, the {@code ConfigValue} will also be registered to its parent node.
      *
      * @return the {@code ConfigValue}
      */
@@ -183,4 +173,12 @@ public class ConfigValueBuilder<T> {
         return built;
     }
 
+    public S finishValue() {
+        return finishValue(n -> {});
+    }
+
+    public S finishValue(Consumer<ConfigValue<T>> action) {
+        action.accept(build());
+        return parentNode;
+    }
 }
