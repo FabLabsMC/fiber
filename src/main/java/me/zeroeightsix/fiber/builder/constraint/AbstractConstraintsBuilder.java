@@ -13,9 +13,8 @@ import java.util.regex.Pattern;
  * @param <A> the type of {@link Constraint} this builder should output
  * @param <S> the type of this builder's source object (eg. {@code ConfigValueBuilder} or {@code ConstraintsBuilder}
  * @param <T> the type of intermediary objects this builder's constraints should process. May be identical to {@code A}.
- * @param <B> the type of {@code this}, for chaining
  */
-public abstract class AbstractConstraintsBuilder<S, A, T, B extends AbstractConstraintsBuilder<S, A, T, B>> {
+public abstract class AbstractConstraintsBuilder<S, A, T> {
 
     protected final S source;
     protected final List<Constraint<? super A>> sourceConstraints;
@@ -37,11 +36,11 @@ public abstract class AbstractConstraintsBuilder<S, A, T, B extends AbstractCons
      * @throws IllegalArgumentException if {@code min} is not a {@link Number}
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public B atLeast(T min) throws RuntimeFiberException {
+    public AbstractConstraintsBuilder<S, A, T> atLeast(T min) throws RuntimeFiberException {
         checkNumerical();
         checkNumerical(min);
         newConstraints.add(new NumberConstraint(ConstraintType.NUMERICAL_LOWER_BOUND, (Number) min));
-        return self();
+        return this;
     }
 
     /**
@@ -53,11 +52,11 @@ public abstract class AbstractConstraintsBuilder<S, A, T, B extends AbstractCons
      * @throws IllegalArgumentException      if {@code max} is not a {@link Number}
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public B atMost(T max) {
+    public AbstractConstraintsBuilder<S, A, T> atMost(T max) {
         checkNumerical();
         checkNumerical(max);
         newConstraints.add(new NumberConstraint(ConstraintType.NUMERICAL_UPPER_BOUND, (Number) max));
-        return self();
+        return this;
     }
 
     /**
@@ -71,29 +70,29 @@ public abstract class AbstractConstraintsBuilder<S, A, T, B extends AbstractCons
      * @throws UnsupportedOperationException if this builder is not for a numerical value
      * @throws IllegalArgumentException      if {@code min} or {@code max} is not a {@link Number}
      */
-    public B range(T min, T max) {
+    public AbstractConstraintsBuilder<S, A, T> range(T min, T max) {
         atLeast(min);
         atMost(max);
-        return self();
+        return this;
     }
 
-    public B minLength(int min) {
+    public AbstractConstraintsBuilder<S, A, T> minLength(int min) {
         if (min < 0) throw new RuntimeFiberException(min + " is not a valid length");
         newConstraints.add(LengthConstraint.min(type, min));
-        return self();
+        return this;
     }
 
-    public B maxLength(int max) {
+    public AbstractConstraintsBuilder<S, A, T> maxLength(int max) {
         if (max < 0) throw new RuntimeFiberException(max + " is not a valid length");
         newConstraints.add(LengthConstraint.max(type, max));
-        return self();
+        return this;
     }
 
     @SuppressWarnings("unchecked")
-    public B regex(@RegEx String regexPattern) {
+    public AbstractConstraintsBuilder<S, A, T> regex(@RegEx String regexPattern) {
         checkCharSequence();
         newConstraints.add((Constraint<? super T>) new RegexConstraint(Pattern.compile(regexPattern)));
-        return self();
+        return this;
     }
 
     private void checkNumerical() {
@@ -111,8 +110,4 @@ public abstract class AbstractConstraintsBuilder<S, A, T, B extends AbstractCons
             throw new RuntimeFiberException("Can only apply regex pattern constraint to character sequences");
     }
 
-    @SuppressWarnings("unchecked")
-    protected B self() {
-        return (B) this;
-    }
 }

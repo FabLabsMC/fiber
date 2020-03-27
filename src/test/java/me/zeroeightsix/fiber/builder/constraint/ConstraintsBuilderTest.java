@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.builder.constraint;
 
-import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
+import me.zeroeightsix.fiber.builder.ConfigAggregateBuilder;
 import me.zeroeightsix.fiber.constraint.CompositeType;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.tree.ConfigValue;
@@ -21,7 +21,7 @@ class ConstraintsBuilderTest {
     @Test
     public void testNumericalConstraints() {
         List<Constraint<? super Integer>> constraintList = new ArrayList<>();
-        ConstraintsBuilder.Scalar<Void, Integer> constraintsBuilder = ConstraintsBuilder.scalar(null, constraintList, Integer.class);
+        ConstraintsBuilder<Void, Integer> constraintsBuilder = new ConstraintsBuilder<>(null, constraintList, Integer.class);
         constraintsBuilder.atLeast(5)
                 .composite(CompositeType.OR)
                 .atLeast(20)
@@ -45,7 +45,7 @@ class ConstraintsBuilderTest {
     @DisplayName("Test array aggregate constraints")
     @Test
     public void testArrayConstraints() {
-        ConfigValue<Integer[]> config = ConfigValueBuilder.aggregate(Integer[].class)
+        ConfigValue<Integer[]> config = ConfigAggregateBuilder.create(Integer[].class)
                 .constraints().component()
                 .range(3, 10)
                 .finishComponent()
@@ -63,7 +63,7 @@ class ConstraintsBuilderTest {
     @DisplayName("Test collection aggregate constraints")
     @Test
     public void testCollectionConstraints() {
-        ConfigValue<List<Integer>> config = ConfigValueBuilder.<List<Integer>, Integer>aggregate(List.class, Integer.class)
+        ConfigValue<List<Integer>> config = ConfigAggregateBuilder.<List<Integer>, Integer>create(List.class, Integer.class)
                 .constraints().component()
                 .atLeast(3).atMost(10)
                 .finishComponent()
