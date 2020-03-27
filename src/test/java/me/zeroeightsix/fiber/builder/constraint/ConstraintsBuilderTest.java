@@ -45,7 +45,7 @@ class ConstraintsBuilderTest {
     @DisplayName("Test array aggregate constraints")
     @Test
     public void testArrayConstraints() {
-        ConfigValue<Integer[]> config = ConfigAggregateBuilder.create(Integer[].class)
+        ConfigValue<Integer[]> config = ConfigAggregateBuilder.create("foo", Integer[].class)
                 .constraints().component()
                 .range(3, 10)
                 .finishComponent()
@@ -63,7 +63,7 @@ class ConstraintsBuilderTest {
     @DisplayName("Test collection aggregate constraints")
     @Test
     public void testCollectionConstraints() {
-        ConfigValue<List<Integer>> config = ConfigAggregateBuilder.<List<Integer>, Integer>create(List.class, Integer.class)
+        ConfigValue<List<Integer>> config = ConfigAggregateBuilder.<List<Integer>, Integer>create("foo", List.class, Integer.class)
                 .constraints().component()
                 .atLeast(3).atMost(10)
                 .finishComponent()
