@@ -22,7 +22,7 @@ public class ConfigNode extends ConfigLeaf implements Node {
      * @param serializeSeparately whether or not this node should be serialised separately. If {@code true}, it will be ignored during serialisation.
      * @see ConfigNode
      */
-    public ConfigNode(@Nullable String name, @Nullable String comment, boolean serializeSeparately) {
+    public ConfigNode(@Nonnull String name, @Nullable String comment, boolean serializeSeparately) {
         super(name, comment);
         this.serializeSeparately = serializeSeparately;
     }
@@ -36,7 +36,7 @@ public class ConfigNode extends ConfigLeaf implements Node {
      * @param comment the comment for this {@link ConfigNode}
      * @see ConfigNode
      */
-    public ConfigNode(@Nullable String name, @Nullable String comment) {
+    public ConfigNode(@Nonnull String name, @Nullable String comment) {
         this(name, comment, false);
     }
 

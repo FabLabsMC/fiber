@@ -41,9 +41,9 @@ public final class ConfigAggregateBuilder<A, E> extends ConfigValueBuilder<A> {
      * @see #isAggregate
      */
     @SuppressWarnings("unchecked")
-    public static <E> ConfigAggregateBuilder<E[], E> create(@Nonnull Class<E[]> arrayType) {
+    public static <E> ConfigAggregateBuilder<E[], E> create(@Nonnull String name, @Nonnull Class<E[]> arrayType) {
         if (!arrayType.isArray()) throw new RuntimeFiberException(arrayType + " is not a valid array type");
-        return new ConfigAggregateBuilder<>(arrayType, (Class<E>) AnnotatedSettings.wrapPrimitive(arrayType.getComponentType()));
+        return new ConfigAggregateBuilder<>(name, arrayType, (Class<E>) AnnotatedSettings.wrapPrimitive(arrayType.getComponentType()));
     }
 
     /**
@@ -56,17 +56,17 @@ public final class ConfigAggregateBuilder<A, E> extends ConfigValueBuilder<A> {
      * @return the newly created builder
      */
     @SuppressWarnings("unchecked")
-    public static <C extends Collection<E>, E> ConfigAggregateBuilder<C, E> create(@Nonnull Class<? super C> collectionType, @Nonnull Class<E> componentType) {
+    public static <C extends Collection<E>, E> ConfigAggregateBuilder<C, E> create(@Nonnull String name, @Nonnull Class<? super C> collectionType, @Nonnull Class<E> componentType) {
         if (!Collection.class.isAssignableFrom(collectionType))
             throw new RuntimeFiberException(collectionType + " is not a valid Collection type");
-        return new ConfigAggregateBuilder<>((Class<C>) collectionType, componentType);
+        return new ConfigAggregateBuilder<>(name, (Class<C>) collectionType, componentType);
     }
 
     @Nonnull
     private final Class<E> componentType;
 
-    private ConfigAggregateBuilder(@Nonnull Class<A> type, @Nonnull Class<E> componentType) {
-        super(type);
+    private ConfigAggregateBuilder(@Nonnull String name, @Nonnull Class<A> type, @Nonnull Class<E> componentType) {
+        super(name, type);
         this.componentType = componentType;
     }
 

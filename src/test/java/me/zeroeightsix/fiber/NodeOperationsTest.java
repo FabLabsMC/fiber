@@ -14,8 +14,7 @@ class NodeOperationsTest {
         Node nodeOne = new ConfigNode();
         Node nodeTwo = new ConfigNode();
 
-        ConfigValue.builder(Integer.class)
-                .withName("A")
+        ConfigValue.builder("A", Integer.class)
                 .withDefaultValue(10)
                 .withParent(nodeOne)
                 .build();
@@ -29,8 +28,7 @@ class NodeOperationsTest {
     @DisplayName("Value -> Node")
     void mergeTo1() {
         ConfigNode node = new ConfigNode();
-        ConfigValue<Integer> value = ConfigValue.builder(Integer.class)
-                .withName("A")
+        ConfigValue<Integer> value = ConfigValue.builder("A", Integer.class)
                 .withDefaultValue(10)
                 .withParent(node)
                 .build();
@@ -43,13 +41,11 @@ class NodeOperationsTest {
     @Test
     @DisplayName("Value -> Value")
     void mergeTo2() {
-        ConfigValue<Integer> valueOne = ConfigValue.builder(Integer.class)
-                .withName("A")
+        ConfigValue<Integer> valueOne = ConfigValue.builder("A", Integer.class)
                 .withDefaultValue(10)
                 .build();
 
-        ConfigValue<Integer> valueTwo = ConfigValue.builder(Integer.class)
-                .withName("A")
+        ConfigValue<Integer> valueTwo = ConfigValue.builder("A", Integer.class)
                 .withDefaultValue(20)
                 .build();
 

@@ -22,14 +22,12 @@ class JanksonSerializerTest {
         Node nodeOne = new ConfigNode();
         Node nodeTwo = new ConfigNode();
 
-        ConfigValue.builder(Integer.class)
-                .withName("A")
+        ConfigValue.builder("A", Integer.class)
                 .withDefaultValue(10)
                 .withParent(nodeOne)
                 .build();
 
-        ConfigValue.builder(Integer.class)
-                .withName("A")
+        ConfigValue.builder("A", Integer.class)
                 .withDefaultValue(20)
                 .withParent(nodeTwo)
                 .build();
@@ -49,14 +47,12 @@ class JanksonSerializerTest {
         Node childOne = parentOne.fork("child");
         Node childTwo = parentTwo.fork("child");
 
-        ConfigValue.builder(Integer.class)
-                .withName("A")
+        ConfigValue.builder("A", Integer.class)
                 .withDefaultValue(10)
                 .withParent(childOne)
                 .build();
 
-        ConfigValue.builder(Integer.class)
-                .withName("A")
+        ConfigValue.builder("A", Integer.class)
                 .withDefaultValue(20)
                 .withParent(childTwo)
                 .build();
@@ -76,14 +72,12 @@ class JanksonSerializerTest {
         Node childOne = parentOne.fork("child", true);
         Node childTwo = parentTwo.fork("child", true);
 
-        ConfigValue.builder(Integer.class)
-                .withName("A")
+        ConfigValue.builder("A", Integer.class)
                 .withDefaultValue(10)
                 .withParent(childOne)
                 .build();
 
-        ConfigValue.builder(Integer.class)
-                .withName("A")
+        ConfigValue.builder("A", Integer.class)
                 .withDefaultValue(20)
                 .withParent(childTwo)
                 .build();

@@ -44,7 +44,7 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
      * @param type the type of value this item holds
      * @param isFinal whether or not this value can be change. If {@code true}, {@link #setValue(Object)} will always return {@code false}, implying {@code this} was not mutated.
      */
-    public ConfigValue(@Nullable String name, @Nullable String comment, @Nullable T value, @Nullable T defaultValue, @Nonnull BiConsumer<T, T> consumer, @Nonnull List<Constraint<? super T>> constraintList, @Nonnull Class<T> type, final boolean isFinal) {
+    public ConfigValue(@Nonnull String name, @Nullable String comment, @Nullable T value, @Nullable T defaultValue, @Nonnull BiConsumer<T, T> consumer, @Nonnull List<Constraint<? super T>> constraintList, @Nonnull Class<T> type, final boolean isFinal) {
         super(name, comment);
         this.value = value;
         this.defaultValue = defaultValue;
@@ -121,8 +121,8 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
      * @return the newly created builder
      * @see me.zeroeightsix.fiber.builder.ConfigValueBuilder ConfigValueBuilder
      */
-    public static <T> ConfigValueBuilder<T> builder(@Nonnull Class<T> type) {
-        return new ConfigValueBuilder<>(type);
+    public static <T> ConfigValueBuilder<T> builder(@Nonnull String name, @Nonnull Class<T> type) {
+        return new ConfigValueBuilder<>(name, type);
     }
 
     /**
@@ -133,9 +133,9 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
      * @return the newly created builder
      * @see me.zeroeightsix.fiber.builder.ConfigValueBuilder ConfigValueBuilder
      */
-    public static <T> ConfigValueBuilder<T> builder(@Nonnull T defaultValue) {
+    public static <T> ConfigValueBuilder<T> builder(@Nonnull String name, @Nonnull T defaultValue) {
         @SuppressWarnings("unchecked") Class<T> type = (Class<T>) defaultValue.getClass();
-        return new ConfigValueBuilder<>(type).withDefaultValue(defaultValue);
+        return new ConfigValueBuilder<>(name, type).withDefaultValue(defaultValue);
     }
 
     /**
@@ -146,9 +146,9 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
      * @return the newly created builder
      * @see ConfigAggregateBuilder Aggregate
      */
-    public static <E> ConfigAggregateBuilder<E[], E> builder(@Nonnull E[] defaultValue) {
+    public static <E> ConfigAggregateBuilder<E[], E> builder(String name, @Nonnull E[] defaultValue) {
         @SuppressWarnings("unchecked") Class<E[]> type = (Class<E[]>) defaultValue.getClass();
-        return ConfigAggregateBuilder.create(type).withDefaultValue(defaultValue);
+        return ConfigAggregateBuilder.create(name, type).withDefaultValue(defaultValue);
     }
 
     /**
@@ -160,9 +160,9 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
      * @param <E> the type {@code elementType} represents
      * @return the newly created builder
      */
-    public static <C extends Collection<E>, E> ConfigAggregateBuilder<C, E> builder(@Nonnull C defaultValue, Class<E> elementType) {
+    public static <C extends Collection<E>, E> ConfigAggregateBuilder<C, E> builder(String name, @Nonnull C defaultValue, Class<E> elementType) {
         @SuppressWarnings("unchecked") Class<C> type = (Class<C>) defaultValue.getClass();
-        return ConfigAggregateBuilder.create(type, elementType).withDefaultValue(defaultValue);
+        return ConfigAggregateBuilder.create(name, type, elementType).withDefaultValue(defaultValue);
     }
 
 }
