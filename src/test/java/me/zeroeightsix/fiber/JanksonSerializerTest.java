@@ -19,14 +19,13 @@ class JanksonSerializerTest {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         JanksonSerializer jk = new JanksonSerializer();
         ConfigNode nodeOne = new ConfigNodeBuilder()
-                .value(Integer.class)
-                .name("A")
+                .value("A", Integer.class)
                 .defaultValue(10)
                 .finishValue()
                 .build();
 
-        ConfigNode nodeTwo = new ConfigNodeBuilder().value(Integer.class)
-                .name("A")
+        ConfigNode nodeTwo = new ConfigNodeBuilder()
+                .value("A", Integer.class)
                 .defaultValue(20)
                 .finishValue()
                 .build();
@@ -43,16 +42,14 @@ class JanksonSerializerTest {
         JanksonSerializer jk = new JanksonSerializer();
         ConfigNode nodeOne = new ConfigNodeBuilder()
                 .fork("child")
-                .value(10)
-                .name("A")
+                .value("A", 10)
                 .finishValue()
                 .finishNode()
                 .build();
 
         ConfigNodeBuilder builderTwo = new ConfigNodeBuilder();
-        ConfigNode childTwo = builderTwo.fork("child").value(Integer.class)
-                .name("A")
-                .defaultValue(20)
+        ConfigNode childTwo = builderTwo.fork("child")
+                .value("A", 20)
                 .finishValue()
                 .build();
         ConfigNode nodeTwo = builderTwo.build();
@@ -69,16 +66,12 @@ class JanksonSerializerTest {
         JanksonSerializer jk = new JanksonSerializer();
         ConfigNode parentOne = new ConfigNodeBuilder()
                 .fork("child").serializeSeparately()
-                .value(Integer.class)
-                .name("A")
-                .defaultValue(10)
+                .value("A", 10)
                 .finishValue()
                 .build();
         ConfigNodeBuilder builderTwo = new ConfigNodeBuilder();
         ConfigNode childTwo = builderTwo.fork("child").serializeSeparately()
-                .value(Integer.class)
-                .name("A")
-                .defaultValue(20)
+                .value("A", 20)
                 .finishValue()
                 .build();
         ConfigNode parentTwo = builderTwo.build();

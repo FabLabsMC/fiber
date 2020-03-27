@@ -41,9 +41,9 @@ public final class ConfigAggregateBuilder<S extends ConfigNodeBuilder, A, E> ext
      * @see #isAggregate
      */
     @SuppressWarnings("unchecked")
-    public static <S extends ConfigNodeBuilder, E> ConfigAggregateBuilder<S, E[], E> create(S source, @Nonnull Class<E[]> arrayType) {
+    public static <S extends ConfigNodeBuilder, E> ConfigAggregateBuilder<S, E[], E> create(S source, @Nonnull String name, @Nonnull Class<E[]> arrayType) {
         if (!arrayType.isArray()) throw new RuntimeFiberException(arrayType + " is not a valid array type");
-        return new ConfigAggregateBuilder<>(source, arrayType, (Class<E>) AnnotatedSettings.wrapPrimitive(arrayType.getComponentType()));
+        return new ConfigAggregateBuilder<>(source, name, arrayType, (Class<E>) AnnotatedSettings.wrapPrimitive(arrayType.getComponentType()));
     }
 
     /**
@@ -56,17 +56,17 @@ public final class ConfigAggregateBuilder<S extends ConfigNodeBuilder, A, E> ext
      * @return the newly created builder
      */
     @SuppressWarnings("unchecked")
-    public static <S extends ConfigNodeBuilder, C extends Collection<E>, E> ConfigAggregateBuilder<S, C, E> create(S source, @Nonnull Class<? super C> collectionType, @Nullable Class<E> componentType) {
+    public static <S extends ConfigNodeBuilder, C extends Collection<E>, E> ConfigAggregateBuilder<S, C, E> create(S source, @Nonnull String name, @Nonnull Class<? super C> collectionType, @Nullable Class<E> componentType) {
         if (!Collection.class.isAssignableFrom(collectionType))
             throw new RuntimeFiberException(collectionType + " is not a valid Collection type");
-        return new ConfigAggregateBuilder<>(source, (Class<C>) collectionType, componentType);
+        return new ConfigAggregateBuilder<>(source, name, (Class<C>) collectionType, componentType);
     }
 
     @Nullable
     private final Class<E> componentType;
 
-    private ConfigAggregateBuilder(S source, @Nonnull Class<A> type, @Nullable Class<E> componentType) {
-        super(source, type);
+    private ConfigAggregateBuilder(S source, @Nonnull String name, @Nonnull Class<A> type, @Nullable Class<E> componentType) {
+        super(source, name, type);
         this.componentType = componentType;
     }
 

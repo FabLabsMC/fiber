@@ -47,7 +47,7 @@ class ConstraintsBuilderTest {
     @DisplayName("Test array aggregate constraints")
     @Test
     public void testArrayConstraints() {
-        ConfigValue<Integer[]> config = ConfigAggregateBuilder.create(null, Integer[].class)
+        ConfigValue<Integer[]> config = ConfigAggregateBuilder.create(null, "foo", Integer[].class)
                 .constraints().component()
                 .range(3, 10)
                 .finishComponent()
@@ -66,7 +66,7 @@ class ConstraintsBuilderTest {
     @Test
     public void testCollectionConstraints() {
         ConfigNodeBuilder builder = new ConfigNodeBuilder();
-        ConfigAggregateBuilder<? extends ConfigNodeBuilder, List<Integer>, Integer> aggregateBuilder = builder.aggregateValue(Collections.emptyList(), Integer.class);
+        ConfigAggregateBuilder<? extends ConfigNodeBuilder, List<Integer>, Integer> aggregateBuilder = builder.aggregateValue("foo", Collections.emptyList(), Integer.class);
         assertThrows(RuntimeFiberException.class, () -> aggregateBuilder.constraints().component().regex(""), "Invalid constraint type at build time");
 
         ConfigValue<List<Integer>> config = aggregateBuilder
@@ -77,8 +77,7 @@ class ConstraintsBuilderTest {
                 .finish()
                 .build();
 
-        ConfigValue<List<Integer>> deferredConfig = builder.aggregateValue(Collections.<Integer>emptyList(), null)
-                .name("deferred")
+        ConfigValue<List<Integer>> deferredConfig = builder.aggregateValue("deferred", Collections.<Integer>emptyList(), null)
                 .constraints().component().regex("").finishComponent()
                 .finish().build();
         assertThrows(RuntimeException.class, () -> deferredConfig.setValue(Collections.singletonList(1)),

@@ -45,7 +45,7 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
      * @see me.zeroeightsix.fiber.builder.ConfigValueBuilder
      * @see me.zeroeightsix.fiber.builder.ConfigAggregateBuilder
      */
-    public ConfigValue(@Nullable String name, @Nullable String comment, @Nullable T value, @Nullable T defaultValue, @Nonnull BiConsumer<T, T> consumer, @Nonnull List<Constraint<? super T>> constraintList, @Nonnull Class<T> type, final boolean isFinal) {
+    public ConfigValue(@Nonnull String name, @Nullable String comment, @Nullable T value, @Nullable T defaultValue, @Nonnull BiConsumer<T, T> consumer, @Nonnull List<Constraint<? super T>> constraintList, @Nonnull Class<T> type, final boolean isFinal) {
         super(name, comment);
         this.value = value;
         this.defaultValue = defaultValue;

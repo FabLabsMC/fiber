@@ -100,8 +100,7 @@ public class AnnotatedSettings {
     private static <T> void fieldToItem(ConfigNodeBuilder node, Field field, Object pojo, String name, List<Member> listeners) throws FiberException {
         Class<T> type = getSettingTypeFromField(field);
 
-        ConfigValueBuilder<ConfigNodeBuilder, T> builder = createConfigValueBuilder(node, type, field)
-                .name(name)
+        ConfigValueBuilder<ConfigNodeBuilder, T> builder = createConfigValueBuilder(node, name, type, field)
                 .comment(findComment(field))
                 .defaultValue(findDefaultValue(field, pojo))
                 .finalValue(getSettingAnnotation(field).map(Setting::constant).orElse(false));
@@ -128,38 +127,38 @@ public class AnnotatedSettings {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Nonnull
-    private static <N extends ConfigNodeBuilder, T, E> ConfigValueBuilder<N, T> createConfigValueBuilder(N parent, Class<T> type, Field field) {
+    private static <N extends ConfigNodeBuilder, T, E> ConfigValueBuilder<N, T> createConfigValueBuilder(N parent, String name, Class<T> type, Field field) {
         AnnotatedType annotatedType = field.getAnnotatedType();
         if (ConfigAggregateBuilder.isAggregate(type)) {
             if (Collection.class.isAssignableFrom(type)) {
                 if (annotatedType instanceof AnnotatedParameterizedType) {
                     AnnotatedType[] typeArgs = ((AnnotatedParameterizedType) annotatedType).getAnnotatedActualTypeArguments();
-                    if (typeArgs.length == 1) {
+                    if (typeArgs.length == 1) { // assume that the only type parameter is the Collection type parameter
                         AnnotatedType typeArg = typeArgs[0];
                         Class<E> componentType = (Class<E>) TypeMagic.classForType(typeArg.getType());
                         if (componentType != null) {
                             // coerce to a collection class and configure as such
-                            ConfigAggregateBuilder<N, T, E> aggregate = ConfigAggregateBuilder.create(parent, (Class) type, componentType);
+                            ConfigAggregateBuilder<N, T, E> aggregate = ConfigAggregateBuilder.create(parent, name, (Class) type, componentType);
                             // element constraints are on the type argument (eg. List<@Regex String>), so we setup constraints from it
                             constrain(aggregate.constraints().component(), typeArg).finishComponent().finish();
                             return aggregate;
                         }
                     }
-                    return ConfigAggregateBuilder.create(parent, (Class) type, null);
+                    return ConfigAggregateBuilder.create(parent, name, (Class) type, null);
                 }
             } else {
                 assert type.isArray();
                 if (annotatedType instanceof AnnotatedArrayType) {
                     // coerce to an array class
                     Class<E[]> arrayType = (Class<E[]>) type;
-                    ConfigAggregateBuilder<N, T, E> aggregate = (ConfigAggregateBuilder<N, T, E>) ConfigAggregateBuilder.create(parent, arrayType);
+                    ConfigAggregateBuilder<N, T, E> aggregate = (ConfigAggregateBuilder<N, T, E>) ConfigAggregateBuilder.create(parent, name, arrayType);
                     // take the component constraint information from the special annotated type
                     constrain(aggregate.constraints().component(), ((AnnotatedArrayType) annotatedType).getAnnotatedGenericComponentType()).finishComponent().finish();
                     return aggregate;
                 }
             }
         }
-        return new ConfigValueBuilder<>(parent, type);
+        return new ConfigValueBuilder<>(parent, name, type);
     }
 
     @SuppressWarnings("unchecked")

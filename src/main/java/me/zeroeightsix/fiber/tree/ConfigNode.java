@@ -21,7 +21,7 @@ public class ConfigNode extends ConfigLeaf implements Node {
      * @param items the node's items
      * @param serializeSeparately whether or not this node should be serialised separately. If {@code true}, it will be ignored during serialisation.
      */
-    public ConfigNode(@Nullable String name, @Nullable String comment, @Nonnull Collection<TreeItem> items, boolean serializeSeparately) {
+    public ConfigNode(String name, @Nullable String comment, @Nonnull Collection<TreeItem> items, boolean serializeSeparately) {
         super(name, comment);
         SortedSet<TreeItem> copy = new TreeSet<>(Comparator.comparing(TreeItem::getName));
         SortedMap<String, TreeItem> indexedItems = new TreeMap<>();
@@ -46,7 +46,7 @@ public class ConfigNode extends ConfigLeaf implements Node {
      * @param comment the comment for this {@link ConfigNode}
      * @see ConfigNode
      */
-    public ConfigNode(@Nullable String name, @Nullable String comment) {
+    public ConfigNode(@Nonnull String name, @Nullable String comment) {
         this(name, comment, new HashSet<>(), false);
     }
 
@@ -58,7 +58,7 @@ public class ConfigNode extends ConfigLeaf implements Node {
      * @see ConfigNode
      */
     public ConfigNode() {
-        this(null, null);
+        this(null, null, new HashSet<>(), false);
     }
 
     @Nonnull

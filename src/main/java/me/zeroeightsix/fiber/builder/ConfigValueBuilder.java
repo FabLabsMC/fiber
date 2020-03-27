@@ -32,12 +32,14 @@ public class ConfigValueBuilder<S extends ConfigNodeBuilder, T> {
     private final S parentNode;
     @Nonnull
     protected final Class<T> type;
-    @Nullable
+    @Nonnull
     private String name;
+
     @Nullable
     private String comment = null;
     @Nullable
     private T defaultValue = null;
+
     private boolean isFinal = false;
     private BiConsumer<T, T> consumer = (t, t2) -> { };
     protected List<Constraint<? super T>> constraintList = new ArrayList<>();
@@ -46,10 +48,12 @@ public class ConfigValueBuilder<S extends ConfigNodeBuilder, T> {
      * Creates a new scalar {@code ConfigValueBuilder}.
      *
      * @param parentNode the {@code ConfigNodeBuilder} this builder originates from
+     * @param name the name of the {@code ConfigValue} produced by this builder
      * @param type       the class object representing the type of values this builder will create settings for
      */
-    public ConfigValueBuilder(S parentNode, @Nonnull Class<T> type) {
+    public ConfigValueBuilder(S parentNode, @Nonnull String name, @Nonnull Class<T> type) {
         this.parentNode = parentNode;
+        this.name = name;
         this.type = type;
     }
 
