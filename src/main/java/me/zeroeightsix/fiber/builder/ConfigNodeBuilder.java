@@ -202,7 +202,7 @@ public class ConfigNodeBuilder implements NodeLike {
     }
 
     public ConfigNode build() {
-        ConfigNode built = new ConfigNode(this.name, this.comment, this.items.values(), this.serializeSeparately);
+        ConfigNode built = new ConfigNode(this.name, this.comment, this.items, this.serializeSeparately);
         if (this.parent != null) {
             assert name != null;
             try {

@@ -2,7 +2,7 @@ package me.zeroeightsix.fiber.tree;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Set;
+import java.util.Collection;
 
 /**
  * A member of a tree that can hold any amount of children
@@ -36,15 +36,15 @@ public interface Node extends NodeLike, TreeItem {
     TreeItem lookup(String name);
 
     /**
-     * Returns a set of this node's children.
+     * Returns a collection of this node's children.
      *
-     * <p> The returned set is unmodifiable, and will not be updated in the node's lifetime.
+     * <p> The returned collection is unmodifiable, and guaranteed not to have two nodes with the same name.
      *
      * @return the set of children
      */
     @Nonnull
     @Override
-    Set<TreeItem> getItems();
+    Collection<TreeItem> getItems();
 
     /**
      * Returns {@code true} if this node should be serialized separately to its parent.
