@@ -1,11 +1,9 @@
 package me.zeroeightsix.fiber.builder;
 
+import me.zeroeightsix.fiber.annotation.AnnotatedSettings;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.tree.ConfigNode;
-import me.zeroeightsix.fiber.tree.NodeLike;
-import me.zeroeightsix.fiber.tree.Property;
-import me.zeroeightsix.fiber.tree.TreeItem;
+import me.zeroeightsix.fiber.tree.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -92,6 +90,27 @@ public class ConfigNodeBuilder implements NodeLike {
      */
     public ConfigNodeBuilder withSeparateSerialization(boolean serializeSeparately) {
         this.serializeSeparately = serializeSeparately;
+        return this;
+    }
+
+    /**
+     * Configure this builder using a POJO (Plain Old Java Object).
+     *
+     * <p> The node's structure will be based on the {@code pojo}'s fields,
+     * recursively generating settings. The generated settings can be configured
+     * in the {@code pojo}'s class declaration, using annotations such as {@link me.zeroeightsix.fiber.annotation.Setting}.
+     *
+     * <p> The generated {@link ConfigValue}s will be bound to their respective fields,
+     * setting the latter when the former's value is {@linkplain ConfigValue#setValue(Object) updated}.
+     *
+     * @param pojo an object serving as a base to reflectively generate a config tree
+     * @return {@code this}, for chaining
+     * @see me.zeroeightsix.fiber.annotation.Setting
+     * @see me.zeroeightsix.fiber.annotation.Settings
+     * @see me.zeroeightsix.fiber.annotation.AnnotatedSettings#applyToNode(ConfigNodeBuilder, Object)
+     */
+    public ConfigNodeBuilder applyFromPojo(Object pojo) throws FiberException {
+        AnnotatedSettings.applyToNode(this, pojo);
         return this;
     }
 
@@ -228,7 +247,8 @@ public class ConfigNodeBuilder implements NodeLike {
         }
 
         public S finishNode() {
-            return finishNode(n -> {});
+            return finishNode(n -> {
+            });
         }
 
         public S finishNode(Consumer<ConfigNode> action) {
