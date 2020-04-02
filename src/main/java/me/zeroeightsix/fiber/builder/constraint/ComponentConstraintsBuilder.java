@@ -3,6 +3,7 @@ package me.zeroeightsix.fiber.builder.constraint;
 import me.zeroeightsix.fiber.builder.ConfigAggregateBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.ConstraintType;
+import me.zeroeightsix.fiber.constraint.ValuedConstraint;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 
 import javax.annotation.Nonnull;
@@ -77,13 +78,11 @@ public final class ComponentConstraintsBuilder<S, A, T> extends AbstractConstrai
      * @param <A> the type of aggregate this constraint checks
      * @param <T> the type of elements {@code <A>} holds
      */
-    public static class ComponentConstraint<A, T> extends Constraint<A> {
-        private final List<Constraint<? super T>> constraints;
+    public static class ComponentConstraint<A, T> extends ValuedConstraint<List<Constraint<? super T>>, A> {
         private final BiPredicate<Constraint<? super T>, A> allMatch;
 
         public ComponentConstraint(List<Constraint<? super T>> constraints, Class<A> type) {
-            super(ConstraintType.COMPONENTS_MATCH);
-            this.constraints = constraints;
+            super(ConstraintType.COMPONENTS_MATCH, constraints);
             this.allMatch = getAggregateMatcher(type);
         }
 
@@ -123,7 +122,7 @@ public final class ComponentConstraintsBuilder<S, A, T> extends AbstractConstrai
 
         @Override
         public boolean test(A value) {
-            for (Constraint<? super T> constraint : constraints) {
+            for (Constraint<? super T> constraint : this.getValue()) {
                 if (!allMatch.test(constraint, value)) {
                     return false;
                 }
