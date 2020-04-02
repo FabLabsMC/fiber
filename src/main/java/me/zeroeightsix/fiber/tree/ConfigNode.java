@@ -1,5 +1,7 @@
 package me.zeroeightsix.fiber.tree;
 
+import me.zeroeightsix.fiber.builder.ConfigNodeBuilder;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -11,6 +13,13 @@ import java.util.TreeMap;
  * A {@code ConfigLeaf} with children
  */
 public class ConfigNode extends ConfigLeaf implements Node {
+
+    /**
+     * @return a new builder for a root config node
+     */
+    public static ConfigNodeBuilder builder() {
+        return new ConfigNodeBuilder();
+    }
 
     private final Map<String, TreeItem> items;
     private final boolean serializeSeparately;
