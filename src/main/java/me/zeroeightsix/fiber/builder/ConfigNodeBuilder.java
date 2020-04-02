@@ -1,5 +1,6 @@
 package me.zeroeightsix.fiber.builder;
 
+import me.zeroeightsix.fiber.annotation.AnnotatedSettings;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.tree.*;
@@ -12,8 +13,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 /**
- * <p><strong>This builder should not be reused!</strong>
- * Multiple calls to {@link #build()} will result in duplicated references.
+ * <p><strong>This builder cannot be reused!</strong>
+ * Multiple calls to {@link #build()} will result in an exception being thrown.
  */
 public class ConfigNodeBuilder implements NodeLike {
     private final Map<String, TreeItem> items = new HashMap<>();
@@ -24,6 +25,7 @@ public class ConfigNodeBuilder implements NodeLike {
     @Nullable
     private String comment;
     private boolean serializeSeparately;
+    private ConfigNode built;
 
     public ConfigNodeBuilder() {
         this.parent = null;
@@ -88,6 +90,27 @@ public class ConfigNodeBuilder implements NodeLike {
      */
     public ConfigNodeBuilder withSeparateSerialization(boolean serializeSeparately) {
         this.serializeSeparately = serializeSeparately;
+        return this;
+    }
+
+    /**
+     * Configure this builder using a POJO (Plain Old Java Object).
+     *
+     * <p> The node's structure will be based on the {@code pojo}'s fields,
+     * recursively generating settings. The generated settings can be configured
+     * in the {@code pojo}'s class declaration, using annotations such as {@link me.zeroeightsix.fiber.annotation.Setting}.
+     *
+     * <p> The generated {@link ConfigValue}s will be bound to their respective fields,
+     * setting the latter when the former's value is {@linkplain ConfigValue#setValue(Object) updated}.
+     *
+     * @param pojo an object serving as a base to reflectively generate a config tree
+     * @return {@code this}, for chaining
+     * @see me.zeroeightsix.fiber.annotation.Setting
+     * @see me.zeroeightsix.fiber.annotation.Settings
+     * @see me.zeroeightsix.fiber.annotation.AnnotatedSettings#applyToNode(ConfigNodeBuilder, Object)
+     */
+    public ConfigNodeBuilder applyFromPojo(Object pojo) throws FiberException {
+        AnnotatedSettings.applyToNode(this, pojo);
         return this;
     }
 
@@ -201,8 +224,21 @@ public class ConfigNodeBuilder implements NodeLike {
         return new ConfigNodeBuilder.Forked<>(this, name);
     }
 
+    /**
+     * Construct a new {@code ConfigNode} based on this builder's specifications.
+     *
+     * <p> This method cannot be called more than once.
+     * Allowing multiple nodes to be built would result in duplicated references.
+     * To guard against that, usually undesirable, behaviour, this method will throw an exception if called multiple times.
+     *
+     * @return a new {@code ConfigNode}
+     * @throws IllegalStateException if this builder already built a node
+     */
     public ConfigNode build() {
-        ConfigNode built = new ConfigNode(this.name, this.comment, this.items, this.serializeSeparately);
+        if (built != null) {
+            throw new IllegalStateException("Cannot build a node more than once");
+        }
+        built = new ConfigNode(this.name, this.comment, this.items, this.serializeSeparately);
         if (this.parent != null) {
             assert name != null;
             try {
@@ -296,7 +332,8 @@ public class ConfigNodeBuilder implements NodeLike {
         }
 
         public S finishNode() {
-            return finishNode(n -> {});
+            return finishNode(n -> {
+            });
         }
 
         public S finishNode(Consumer<ConfigNode> action) {
