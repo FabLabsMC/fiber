@@ -5,8 +5,11 @@ import javax.annotation.Nullable;
 
 /**
  * A commentable tree item.
+ *
+ * @see ConfigNode
+ * @see ConfigValue
  */
-public class ConfigLeaf implements TreeItem, Commentable {
+public abstract class ConfigLeaf implements TreeItem, Commentable {
 
     @Nonnull
     private final String name;
@@ -16,9 +19,8 @@ public class ConfigLeaf implements TreeItem, Commentable {
     /**
      * Creates a new {@code ConfigLeaf}.
      *
-     * @param name the name for this leaf
+     * @param name    the name for this leaf
      * @param comment the comment for this leaf
-     * @see ConfigLeaf
      */
     public ConfigLeaf(@Nonnull String name, @Nullable String comment) {
         this.name = name;
