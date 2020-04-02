@@ -59,19 +59,19 @@ public class ConfigNodeBuilder implements NodeLike {
         return items.get(name);
     }
 
-    public ConfigNodeBuilder parent(ConfigNodeBuilder parent) {
+    public ConfigNodeBuilder withParent(ConfigNodeBuilder parent) {
         if (name == null && parent != null) throw new IllegalStateException("A child node needs a name");
         this.parent = parent;
         return this;
     }
 
-    public ConfigNodeBuilder name(String name) {
+    public ConfigNodeBuilder withName(String name) {
         if (name == null && parent != null) throw new IllegalStateException("Cannot remove the name from a child node");
         this.name = name;
         return this;
     }
 
-    public ConfigNodeBuilder comment(@Nullable String comment) {
+    public ConfigNodeBuilder withComment(@Nullable String comment) {
         this.comment = comment;
         return this;
     }
@@ -79,8 +79,8 @@ public class ConfigNodeBuilder implements NodeLike {
     /**
      * Marks the built node as being serialized separately
      */
-    public ConfigNodeBuilder serializeSeparately() {
-        serializeSeparately(true);
+    public ConfigNodeBuilder withSeparateSerialization() {
+        withSeparateSerialization(true);
         return this;
     }
 
@@ -89,7 +89,7 @@ public class ConfigNodeBuilder implements NodeLike {
      *                            serialized representation of the built {@code Node}
      * @return {@code this}, for chaining
      */
-    public ConfigNodeBuilder serializeSeparately(boolean serializeSeparately) {
+    public ConfigNodeBuilder withSeparateSerialization(boolean serializeSeparately) {
         this.serializeSeparately = serializeSeparately;
         return this;
     }
@@ -168,31 +168,31 @@ public class ConfigNodeBuilder implements NodeLike {
         }
 
         @Override
-        public Forked<S> parent(ConfigNodeBuilder parent) {
+        public Forked<S> withParent(ConfigNodeBuilder parent) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public Forked<S> name(String name) {
-            super.name(name);
+        public Forked<S> withName(String name) {
+            super.withName(name);
             return this;
         }
 
         @Override
-        public Forked<S> comment(@Nullable String comment) {
-            super.comment(comment);
+        public Forked<S> withComment(@Nullable String comment) {
+            super.withComment(comment);
             return this;
         }
 
         @Override
-        public Forked<S> serializeSeparately() {
-            super.serializeSeparately();
+        public Forked<S> withSeparateSerialization() {
+            super.withSeparateSerialization();
             return this;
         }
 
         @Override
-        public Forked<S> serializeSeparately(boolean serializeSeparately) {
-            super.serializeSeparately(serializeSeparately);
+        public Forked<S> withSeparateSerialization(boolean serializeSeparately) {
+            super.withSeparateSerialization(serializeSeparately);
             return this;
         }
 

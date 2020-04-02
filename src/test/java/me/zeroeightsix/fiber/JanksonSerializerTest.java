@@ -72,8 +72,8 @@ class JanksonSerializerTest {
         JanksonSerializer jk = new JanksonSerializer();
         ConfigNodeBuilder parentOne = new ConfigNodeBuilder();
         ConfigNodeBuilder parentTwo = new ConfigNodeBuilder();
-        ConfigNodeBuilder.Forked<?> childBuilderOne = parentOne.fork("child").serializeSeparately();
-        ConfigNodeBuilder.Forked<?> childBuilderTwo = parentTwo.fork("child").serializeSeparately();
+        ConfigNodeBuilder.Forked<?> childBuilderOne = parentOne.fork("child").withSeparateSerialization();
+        ConfigNodeBuilder.Forked<?> childBuilderTwo = parentTwo.fork("child").withSeparateSerialization();
 
         ConfigValue.builder("A", Integer.class)
                 .withDefaultValue(10)
