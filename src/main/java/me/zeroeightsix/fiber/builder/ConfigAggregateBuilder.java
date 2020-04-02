@@ -71,43 +71,43 @@ public final class ConfigAggregateBuilder<S extends ConfigNodeBuilder, A, E> ext
     }
 
     @Override
-    public ConfigAggregateBuilder<S, A, E> name(String name) {
-        super.name(name);
+    public ConfigAggregateBuilder<S, A, E> withName(String name) {
+        super.withName(name);
         return this;
     }
 
     @Override
-    public ConfigAggregateBuilder<S, A, E> comment(String comment) {
-        super.comment(comment);
+    public ConfigAggregateBuilder<S, A, E> withComment(String comment) {
+        super.withComment(comment);
         return this;
     }
 
     @Override
-    public ConfigAggregateBuilder<S, A, E> listener(BiConsumer<A, A> consumer) {
-        super.listener(consumer);
+    public ConfigAggregateBuilder<S, A, E> withListener(BiConsumer<A, A> consumer) {
+        super.withListener(consumer);
         return this;
     }
 
     @Override
-    public ConfigAggregateBuilder<S, A, E> defaultValue(A defaultValue) {
-        super.defaultValue(defaultValue);
+    public ConfigAggregateBuilder<S, A, E> withDefaultValue(A defaultValue) {
+        super.withDefaultValue(defaultValue);
         return this;
     }
 
     @Override
-    public ConfigAggregateBuilder<S, A, E> finalValue() {
-        super.finalValue();
+    public ConfigAggregateBuilder<S, A, E> withFinality() {
+        super.withFinality();
         return this;
     }
 
     @Override
-    public ConfigAggregateBuilder<S, A, E> finalValue(boolean isFinal) {
-        super.finalValue(isFinal);
+    public ConfigAggregateBuilder<S, A, E> withFinality(boolean isFinal) {
+        super.withFinality(isFinal);
         return this;
     }
 
     @Override
-    public AggregateConstraintsBuilder<ConfigAggregateBuilder<S, A, E>, A, E> constraints() {
+    public AggregateConstraintsBuilder<ConfigAggregateBuilder<S, A, E>, A, E> withConstraints() {
         return new AggregateConstraintsBuilder<>(this, constraintList, type, componentType);
     }
 

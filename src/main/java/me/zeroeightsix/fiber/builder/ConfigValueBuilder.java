@@ -66,7 +66,7 @@ public class ConfigValueBuilder<S extends ConfigNodeBuilder, T> {
      * @return {@code this} builder
      * @see Node#lookup
      */
-    public ConfigValueBuilder<S, T> name(String name) {
+    public ConfigValueBuilder<S, T> withName(String name) {
         this.name = name;
         return this;
     }
@@ -79,7 +79,7 @@ public class ConfigValueBuilder<S extends ConfigNodeBuilder, T> {
      * @param comment the comment
      * @return {@code this} builder
      */
-    public ConfigValueBuilder<S, T> comment(String comment) {
+    public ConfigValueBuilder<S, T> withComment(String comment) {
         this.comment = comment;
         return this;
     }
@@ -94,7 +94,7 @@ public class ConfigValueBuilder<S extends ConfigNodeBuilder, T> {
      * @param consumer the listener
      * @return {@code this} builder
      */
-    public ConfigValueBuilder<S, T> listener(BiConsumer<T, T> consumer) {
+    public ConfigValueBuilder<S, T> withListener(BiConsumer<T, T> consumer) {
         final BiConsumer<T, T> prevConsumer = this.consumer; // to avoid confusion
         this.consumer = (t, t2) -> {
             prevConsumer.accept(t, t2);
@@ -111,7 +111,7 @@ public class ConfigValueBuilder<S extends ConfigNodeBuilder, T> {
      * @param defaultValue the default value
      * @return {@code this} builder
      */
-    public ConfigValueBuilder<S, T> defaultValue(T defaultValue) {
+    public ConfigValueBuilder<S, T> withDefaultValue(T defaultValue) {
         this.defaultValue = defaultValue;
         return this;
     }
@@ -123,9 +123,9 @@ public class ConfigValueBuilder<S extends ConfigNodeBuilder, T> {
      * This method behaves as if: {@code this.setFinal(true)}.
      *
      * @return {@code this} builder
-     * @see #finalValue(boolean)
+     * @see #withFinality(boolean)
      */
-    public ConfigValueBuilder<S, T> finalValue() {
+    public ConfigValueBuilder<S, T> withFinality() {
         this.isFinal = true;
         return this;
     }
@@ -138,7 +138,7 @@ public class ConfigValueBuilder<S extends ConfigNodeBuilder, T> {
      * @param isFinal the finality
      * @return {@code this} builder
      */
-    public ConfigValueBuilder<S, T> finalValue(boolean isFinal) {
+    public ConfigValueBuilder<S, T> withFinality(boolean isFinal) {
         this.isFinal = isFinal;
         return this;
     }
@@ -149,7 +149,7 @@ public class ConfigValueBuilder<S extends ConfigNodeBuilder, T> {
      * @return the created builder
      * @see ConstraintsBuilder
      */
-    public ConstraintsBuilder<? extends ConfigValueBuilder<S, T>, T> constraints() {
+    public ConstraintsBuilder<? extends ConfigValueBuilder<S, T>, T> withConstraints() {
         return new ConstraintsBuilder<>(this, constraintList, type);
     }
 

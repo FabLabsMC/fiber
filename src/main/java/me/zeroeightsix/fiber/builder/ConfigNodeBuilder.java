@@ -56,19 +56,19 @@ public class ConfigNodeBuilder implements NodeLike {
         return items.get(name);
     }
 
-    public ConfigNodeBuilder parent(ConfigNodeBuilder parent) {
+    public ConfigNodeBuilder withParent(ConfigNodeBuilder parent) {
         if (name == null && parent != null) throw new IllegalStateException("A child node needs a name");
         this.parent = parent;
         return this;
     }
 
-    public ConfigNodeBuilder name(String name) {
+    public ConfigNodeBuilder withName(String name) {
         if (name == null && parent != null) throw new IllegalStateException("Cannot remove the name from a child node");
         this.name = name;
         return this;
     }
 
-    public ConfigNodeBuilder comment(@Nullable String comment) {
+    public ConfigNodeBuilder withComment(@Nullable String comment) {
         this.comment = comment;
         return this;
     }
@@ -76,8 +76,8 @@ public class ConfigNodeBuilder implements NodeLike {
     /**
      * Marks the built node as being serialized separately
      */
-    public ConfigNodeBuilder serializeSeparately() {
-        serializeSeparately(true);
+    public ConfigNodeBuilder withSeparateSerialization() {
+        withSeparateSerialization(true);
         return this;
     }
 
@@ -86,7 +86,7 @@ public class ConfigNodeBuilder implements NodeLike {
      *                            serialized representation of the built {@code Node}
      * @return {@code this}, for chaining
      */
-    public ConfigNodeBuilder serializeSeparately(boolean serializeSeparately) {
+    public ConfigNodeBuilder withSeparateSerialization(boolean serializeSeparately) {
         this.serializeSeparately = serializeSeparately;
         return this;
     }
@@ -99,7 +99,7 @@ public class ConfigNodeBuilder implements NodeLike {
      * @return the newly created builder
      * @see ConfigValueBuilder ConfigValueBuilder
      */
-    public <T> ConfigValueBuilder<? extends ConfigNodeBuilder, T> value(@Nonnull String name, @Nonnull Class<T> type) {
+    public <T> ConfigValueBuilder<? extends ConfigNodeBuilder, T> beginValue(@Nonnull String name, @Nonnull Class<T> type) {
         return new ConfigValueBuilder<>(this, name, type);
     }
 
@@ -113,7 +113,7 @@ public class ConfigNodeBuilder implements NodeLike {
      * @see ConfigAggregateBuilder
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public <T> ConfigValueBuilder<? extends ConfigNodeBuilder, T> value(@Nonnull String name, @Nonnull T defaultValue) {
+    public <T> ConfigValueBuilder<? extends ConfigNodeBuilder, T> beginValue(@Nonnull String name, @Nonnull T defaultValue) {
         Class<T> type = (Class<T>) defaultValue.getClass();
         if (ConfigAggregateBuilder.isAggregate(type)) {
             if (type.isArray()) {
@@ -122,7 +122,7 @@ public class ConfigNodeBuilder implements NodeLike {
                 return ConfigAggregateBuilder.create(this, name, (Class) type, null);
             }
         } else {
-            return new ConfigValueBuilder<>(this, name, type).defaultValue(defaultValue);
+            return new ConfigValueBuilder<>(this, name, type).withDefaultValue(defaultValue);
         }
     }
 
@@ -134,9 +134,9 @@ public class ConfigNodeBuilder implements NodeLike {
      * @return the newly created builder
      * @see ConfigAggregateBuilder Aggregate
      */
-    public <E> ConfigAggregateBuilder<? extends ConfigNodeBuilder, E[], E> aggregateValue(@Nonnull String name, @Nonnull E[] defaultValue) {
+    public <E> ConfigAggregateBuilder<? extends ConfigNodeBuilder, E[], E> beginAggregateValue(@Nonnull String name, @Nonnull E[] defaultValue) {
         @SuppressWarnings("unchecked") Class<E[]> type = (Class<E[]>) defaultValue.getClass();
-        return ConfigAggregateBuilder.create(this, name, type).defaultValue(defaultValue);
+        return ConfigAggregateBuilder.create(this, name, type).withDefaultValue(defaultValue);
     }
 
     /**
@@ -148,9 +148,9 @@ public class ConfigNodeBuilder implements NodeLike {
      * @param <E> the type {@code elementType} represents
      * @return the newly created builder
      */
-    public <C extends Collection<E>, E> ConfigAggregateBuilder<? extends ConfigNodeBuilder, C, E> aggregateValue(@Nonnull String name, @Nonnull C defaultValue, @Nullable Class<E> elementType) {
+    public <C extends Collection<E>, E> ConfigAggregateBuilder<? extends ConfigNodeBuilder, C, E> beginAggregateValue(@Nonnull String name, @Nonnull C defaultValue, @Nullable Class<E> elementType) {
         @SuppressWarnings("unchecked") Class<C> type = (Class<C>) defaultValue.getClass();
-        return ConfigAggregateBuilder.create(this, name, type, elementType).defaultValue(defaultValue);
+        return ConfigAggregateBuilder.create(this, name, type, elementType).withDefaultValue(defaultValue);
     }
 
     /**
@@ -227,55 +227,55 @@ public class ConfigNodeBuilder implements NodeLike {
         }
 
         @Override
-        public Forked<S> parent(ConfigNodeBuilder parent) {
+        public Forked<S> withParent(ConfigNodeBuilder parent) {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public Forked<S> name(String name) {
-            super.name(name);
+        public Forked<S> withName(String name) {
+            super.withName(name);
             return this;
         }
 
         @Override
-        public Forked<S> comment(@Nullable String comment) {
-            super.comment(comment);
+        public Forked<S> withComment(@Nullable String comment) {
+            super.withComment(comment);
             return this;
         }
 
         @Override
-        public Forked<S> serializeSeparately() {
-            super.serializeSeparately();
+        public Forked<S> withSeparateSerialization() {
+            super.withSeparateSerialization();
             return this;
         }
 
         @Override
-        public Forked<S> serializeSeparately(boolean serializeSeparately) {
-            super.serializeSeparately(serializeSeparately);
+        public Forked<S> withSeparateSerialization(boolean serializeSeparately) {
+            super.withSeparateSerialization(serializeSeparately);
             return this;
         }
 
         @Override
-        public <T> ConfigValueBuilder<Forked<S>, T> value(@Nonnull String name, @Nonnull Class<T> type) {
+        public <T> ConfigValueBuilder<Forked<S>, T> beginValue(@Nonnull String name, @Nonnull Class<T> type) {
             return new ConfigValueBuilder<>(this, name, type);
         }
 
         @Override
-        public <T> ConfigValueBuilder<Forked<S>, T> value(@Nonnull String name, @Nonnull T defaultValue) {
+        public <T> ConfigValueBuilder<Forked<S>, T> beginValue(@Nonnull String name, @Nonnull T defaultValue) {
             @SuppressWarnings("unchecked") Class<T> type = (Class<T>) defaultValue.getClass();
-            return new ConfigValueBuilder<>(this, name, type).defaultValue(defaultValue);
+            return new ConfigValueBuilder<>(this, name, type).withDefaultValue(defaultValue);
         }
 
         @Override
-        public <E> ConfigAggregateBuilder<Forked<S>, E[], E> aggregateValue(@Nonnull String name, @Nonnull E[] defaultValue) {
+        public <E> ConfigAggregateBuilder<Forked<S>, E[], E> beginAggregateValue(@Nonnull String name, @Nonnull E[] defaultValue) {
             @SuppressWarnings("unchecked") Class<E[]> type = (Class<E[]>) defaultValue.getClass();
-            return ConfigAggregateBuilder.create(this, name, type).defaultValue(defaultValue);
+            return ConfigAggregateBuilder.create(this, name, type).withDefaultValue(defaultValue);
         }
 
         @Override
-        public <C extends Collection<E>, E> ConfigAggregateBuilder<Forked<S>, C, E> aggregateValue(@Nonnull String name, @Nonnull C defaultValue, @Nullable Class<E> elementType) {
+        public <C extends Collection<E>, E> ConfigAggregateBuilder<Forked<S>, C, E> beginAggregateValue(@Nonnull String name, @Nonnull C defaultValue, @Nullable Class<E> elementType) {
             @SuppressWarnings("unchecked") Class<C> type = (Class<C>) defaultValue.getClass();
-            return ConfigAggregateBuilder.create(this, name, type, elementType).defaultValue(defaultValue);
+            return ConfigAggregateBuilder.create(this, name, type, elementType).withDefaultValue(defaultValue);
         }
 
         @Override

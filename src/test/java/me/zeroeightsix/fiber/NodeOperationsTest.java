@@ -6,8 +6,7 @@ import me.zeroeightsix.fiber.tree.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class NodeOperationsTest {
 
@@ -15,8 +14,8 @@ class NodeOperationsTest {
     @DisplayName("Node -> Node")
     void mergeTo() {
         Node nodeOne = new ConfigNodeBuilder()
-                .value("A", Integer.class)
-                .defaultValue(10)
+                .beginValue("A", Integer.class)
+                .withDefaultValue(10)
                 .finishValue()
                 .build();
 
@@ -31,8 +30,8 @@ class NodeOperationsTest {
     @DisplayName("Value -> Node")
     void mergeTo1() {
         ConfigNodeBuilder node = new ConfigNodeBuilder();
-        ConfigValue<Integer> value = node.value("A", Integer.class)
-                .defaultValue(10)
+        ConfigValue<Integer> value = node.beginValue("A", Integer.class)
+                .withDefaultValue(10)
                 .build();
 
         NodeOperations.mergeTo(value, node);
@@ -44,10 +43,10 @@ class NodeOperationsTest {
     @DisplayName("Value -> Value")
     void mergeTo2() {
         ConfigValue<Integer> valueOne = new ConfigValueBuilder<>(null, "A", Integer.class)
-                .defaultValue(10)
+                .withDefaultValue(10)
                 .build();
         ConfigValue<Integer> valueTwo = new ConfigValueBuilder<>(null, "A", Integer.class)
-                .defaultValue(20)
+                .withDefaultValue(20)
                 .build();
 
         NodeOperations.mergeTo(valueOne, valueTwo);
@@ -60,7 +59,7 @@ class NodeOperationsTest {
     }
 
     static <T> void testItemFor(Class<T> type, T value, TreeItem item) {
-        assertTrue(item != null, "Setting exists");
+        assertNotNull(item, "Setting exists");
         assertTrue(item instanceof Property<?>, "Setting is a property");
         Property<?> property = (Property<?>) item;
         assertEquals(type, property.getType(), "Setting type is correct");

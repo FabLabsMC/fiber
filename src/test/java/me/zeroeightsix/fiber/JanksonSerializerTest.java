@@ -19,14 +19,14 @@ class JanksonSerializerTest {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         JanksonSerializer jk = new JanksonSerializer();
         ConfigNode nodeOne = new ConfigNodeBuilder()
-                .value("A", Integer.class)
-                .defaultValue(10)
+                .beginValue("A", Integer.class)
+                .withDefaultValue(10)
                 .finishValue()
                 .build();
 
         ConfigNode nodeTwo = new ConfigNodeBuilder()
-                .value("A", Integer.class)
-                .defaultValue(20)
+                .beginValue("A", Integer.class)
+                .withDefaultValue(20)
                 .finishValue()
                 .build();
 
@@ -42,14 +42,14 @@ class JanksonSerializerTest {
         JanksonSerializer jk = new JanksonSerializer();
         ConfigNode nodeOne = new ConfigNodeBuilder()
                 .fork("child")
-                .value("A", 10)
+                .beginValue("A", 10)
                 .finishValue()
                 .finishNode()
                 .build();
 
         ConfigNodeBuilder builderTwo = new ConfigNodeBuilder();
         ConfigNode childTwo = builderTwo.fork("child")
-                .value("A", 20)
+                .beginValue("A", 20)
                 .finishValue()
                 .build();
         ConfigNode nodeTwo = builderTwo.build();
@@ -65,13 +65,13 @@ class JanksonSerializerTest {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         JanksonSerializer jk = new JanksonSerializer();
         ConfigNode parentOne = new ConfigNodeBuilder()
-                .fork("child").serializeSeparately()
-                .value("A", 10)
+                .fork("child").withSeparateSerialization()
+                .beginValue("A", 10)
                 .finishValue()
                 .build();
         ConfigNodeBuilder builderTwo = new ConfigNodeBuilder();
-        ConfigNode childTwo = builderTwo.fork("child").serializeSeparately()
-                .value("A", 20)
+        ConfigNode childTwo = builderTwo.fork("child").withSeparateSerialization()
+                .beginValue("A", 20)
                 .finishValue()
                 .build();
         ConfigNode parentTwo = builderTwo.build();

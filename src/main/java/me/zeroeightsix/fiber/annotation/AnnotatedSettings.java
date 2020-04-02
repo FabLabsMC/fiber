@@ -101,19 +101,19 @@ public class AnnotatedSettings {
         Class<T> type = getSettingTypeFromField(field);
 
         ConfigValueBuilder<ConfigNodeBuilder, T> builder = createConfigValueBuilder(node, name, type, field)
-                .comment(findComment(field))
-                .defaultValue(findDefaultValue(field, pojo))
-                .finalValue(getSettingAnnotation(field).map(Setting::constant).orElse(false));
+                .withComment(findComment(field))
+                .withDefaultValue(findDefaultValue(field, pojo))
+                .withFinality(getSettingAnnotation(field).map(Setting::constant).orElse(false));
 
-        constrain(builder.constraints(), field.getAnnotatedType()).finish();
+        constrain(builder.withConstraints(), field.getAnnotatedType()).finish();
 
         for (Member listener : listeners) {
             BiConsumer<T, T> consumer = constructListener(listener, pojo, type);
             if (consumer == null) continue;
-            builder.listener(consumer);
+            builder.withListener(consumer);
         }
 
-        builder.listener((t, newValue) -> {
+        builder.withListener((t, newValue) -> {
             try {
                 field.setAccessible(true);
                 field.set(pojo, newValue);
@@ -140,7 +140,7 @@ public class AnnotatedSettings {
                             // coerce to a collection class and configure as such
                             ConfigAggregateBuilder<N, T, E> aggregate = ConfigAggregateBuilder.create(parent, name, (Class) type, componentType);
                             // element constraints are on the type argument (eg. List<@Regex String>), so we setup constraints from it
-                            constrain(aggregate.constraints().component(), typeArg).finishComponent().finish();
+                            constrain(aggregate.withConstraints().component(), typeArg).finishComponent().finish();
                             return aggregate;
                         }
                     }
@@ -153,7 +153,7 @@ public class AnnotatedSettings {
                     Class<E[]> arrayType = (Class<E[]>) type;
                     ConfigAggregateBuilder<N, T, E> aggregate = (ConfigAggregateBuilder<N, T, E>) ConfigAggregateBuilder.create(parent, name, arrayType);
                     // take the component constraint information from the special annotated type
-                    constrain(aggregate.constraints().component(), ((AnnotatedArrayType) annotatedType).getAnnotatedGenericComponentType()).finishComponent().finish();
+                    constrain(aggregate.withConstraints().component(), ((AnnotatedArrayType) annotatedType).getAnnotatedGenericComponentType()).finishComponent().finish();
                     return aggregate;
                 }
             }

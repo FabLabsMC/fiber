@@ -48,7 +48,7 @@ class ConstraintsBuilderTest {
     @Test
     public void testArrayConstraints() {
         ConfigValue<Integer[]> config = ConfigAggregateBuilder.create(null, "foo", Integer[].class)
-                .constraints().component()
+                .withConstraints().component()
                 .range(3, 10)
                 .finishComponent()
                 .maxLength(3)
@@ -66,19 +66,19 @@ class ConstraintsBuilderTest {
     @Test
     public void testCollectionConstraints() {
         ConfigNodeBuilder builder = new ConfigNodeBuilder();
-        ConfigAggregateBuilder<? extends ConfigNodeBuilder, List<Integer>, Integer> aggregateBuilder = builder.aggregateValue("foo", Collections.emptyList(), Integer.class);
-        assertThrows(RuntimeFiberException.class, () -> aggregateBuilder.constraints().component().regex(""), "Invalid constraint type at build time");
+        ConfigAggregateBuilder<? extends ConfigNodeBuilder, List<Integer>, Integer> aggregateBuilder = builder.beginAggregateValue("foo", Collections.emptyList(), Integer.class);
+        assertThrows(RuntimeFiberException.class, () -> aggregateBuilder.withConstraints().component().regex(""), "Invalid constraint type at build time");
 
         ConfigValue<List<Integer>> config = aggregateBuilder
-                .constraints().component()
+                .withConstraints().component()
                 .atLeast(3).atMost(10)
                 .finishComponent()
                 .maxLength(3)
                 .finish()
                 .build();
 
-        ConfigValue<List<Integer>> deferredConfig = builder.aggregateValue("deferred", Collections.<Integer>emptyList(), null)
-                .constraints().component().regex("").finishComponent()
+        ConfigValue<List<Integer>> deferredConfig = builder.beginAggregateValue("deferred", Collections.<Integer>emptyList(), null)
+                .withConstraints().component().regex("").finishComponent()
                 .finish().build();
         assertThrows(RuntimeException.class, () -> deferredConfig.setValue(Collections.singletonList(1)),
                 "Invalid constraint type (deferred check)"
