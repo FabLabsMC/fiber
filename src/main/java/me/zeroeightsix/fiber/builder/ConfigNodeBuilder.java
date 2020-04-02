@@ -15,8 +15,8 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 /**
- * <p><strong>This builder should not be reused!</strong>
- * Multiple calls to {@link #build()} will result in duplicated references.
+ * <p><strong>This builder cannot be reused!</strong>
+ * Multiple calls to {@link #build()} will result in an exception being thrown.
  */
 public class ConfigNodeBuilder implements NodeLike {
     private final Map<String, TreeItem> items = new HashMap<>();
@@ -27,6 +27,7 @@ public class ConfigNodeBuilder implements NodeLike {
     @Nullable
     private String comment;
     private boolean serializeSeparately;
+    private ConfigNode built;
 
     public ConfigNodeBuilder() {
         this.parent = null;
@@ -142,8 +143,21 @@ public class ConfigNodeBuilder implements NodeLike {
         return new ConfigNodeBuilder.Forked<>(this, name);
     }
 
+    /**
+     * Construct a new {@code ConfigNode} based on this builder's specifications.
+     *
+     * <p> This method cannot be called more than once.
+     * Allowing multiple nodes to be built would result in duplicated references.
+     * To guard against that, usually undesirable, behaviour, this method will throw an exception if called multiple times.
+     *
+     * @return a new {@code ConfigNode}
+     * @throws IllegalStateException if this builder already built a node
+     */
     public ConfigNode build() {
-        ConfigNode built = new ConfigNode(this.name, this.comment, this.items.values(), this.serializeSeparately);
+        if (built != null) {
+            throw new IllegalStateException("Cannot build a node more than once");
+        }
+        built = new ConfigNode(this.name, this.comment, this.items.values(), this.serializeSeparately);
         if (this.parent != null) {
             assert name != null;
             try {
