@@ -77,7 +77,8 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
         return true;
     }
 
-    private boolean accepts(@Nullable T value) {
+    @Override
+    public boolean accepts(@Nullable T value) {
         for (Constraint<? super T> constraint : this.constraints) {
             if (!constraint.test(value)) {
                 return false;

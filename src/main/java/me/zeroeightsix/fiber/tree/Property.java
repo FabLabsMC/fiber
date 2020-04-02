@@ -15,7 +15,16 @@ public interface Property<T> extends HasValue<T> {
      *
      * @param value the new value this property should receive
      * @return {@code true} if this property changed as a result of the call
+     * @see #accepts(Object)
      */
     boolean setValue(T value);
 
+    /**
+     * Returns {@code true} if the given value satisfies this property's constraints.
+     *
+     * @param value the value to check
+     * @return {@code true} if the given value satisfies this property's constraints, {@code false} otherwise.
+     * @see #setValue(Object)
+     */
+    boolean accepts(T value);
 }
