@@ -41,7 +41,7 @@ public final class ConfigAggregateBuilder<A, E> extends ConfigValueBuilder<A> {
      * @see #isAggregate
      */
     @SuppressWarnings("unchecked")
-    public static <S extends ConfigNodeBuilder, E> ConfigAggregateBuilder<E[], E> create(S source, @Nonnull String name, @Nonnull Class<E[]> arrayType) {
+    public static <E> ConfigAggregateBuilder<E[], E> create(ConfigNodeBuilder source, @Nonnull String name, @Nonnull Class<E[]> arrayType) {
         if (!arrayType.isArray()) throw new RuntimeFiberException(arrayType + " is not a valid array type");
         return new ConfigAggregateBuilder<>(source, name, arrayType, (Class<E>) AnnotatedSettings.wrapPrimitive(arrayType.getComponentType()));
     }
