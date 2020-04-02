@@ -122,7 +122,7 @@ public class ConfigNodeBuilder implements NodeLike {
      * @return the newly created builder
      * @see ConfigValueBuilder ConfigValueBuilder
      */
-    public <T> ConfigValueBuilder<? extends ConfigNodeBuilder, T> beginValue(@Nonnull String name, @Nonnull Class<T> type) {
+    public <T> ConfigValueBuilder<T> beginValue(@Nonnull String name, @Nonnull Class<T> type) {
         return new ConfigValueBuilder<>(this, name, type);
     }
 
@@ -136,7 +136,7 @@ public class ConfigNodeBuilder implements NodeLike {
      * @see ConfigAggregateBuilder
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public <T> ConfigValueBuilder<? extends ConfigNodeBuilder, T> beginValue(@Nonnull String name, @Nonnull T defaultValue) {
+    public <T> ConfigValueBuilder<T> beginValue(@Nonnull String name, @Nonnull T defaultValue) {
         Class<T> type = (Class<T>) defaultValue.getClass();
         if (ConfigAggregateBuilder.isAggregate(type)) {
             if (type.isArray()) {
@@ -157,7 +157,7 @@ public class ConfigNodeBuilder implements NodeLike {
      * @return the newly created builder
      * @see ConfigAggregateBuilder Aggregate
      */
-    public <E> ConfigAggregateBuilder<? extends ConfigNodeBuilder, E[], E> beginAggregateValue(@Nonnull String name, @Nonnull E[] defaultValue) {
+    public <E> ConfigAggregateBuilder<E[], E> beginAggregateValue(@Nonnull String name, @Nonnull E[] defaultValue) {
         @SuppressWarnings("unchecked") Class<E[]> type = (Class<E[]>) defaultValue.getClass();
         return ConfigAggregateBuilder.create(this, name, type).withDefaultValue(defaultValue);
     }
@@ -171,7 +171,7 @@ public class ConfigNodeBuilder implements NodeLike {
      * @param <E> the type {@code elementType} represents
      * @return the newly created builder
      */
-    public <C extends Collection<E>, E> ConfigAggregateBuilder<? extends ConfigNodeBuilder, C, E> beginAggregateValue(@Nonnull String name, @Nonnull C defaultValue, @Nullable Class<E> elementType) {
+    public <C extends Collection<E>, E> ConfigAggregateBuilder<C, E> beginAggregateValue(@Nonnull String name, @Nonnull C defaultValue, @Nullable Class<E> elementType) {
         @SuppressWarnings("unchecked") Class<C> type = (Class<C>) defaultValue.getClass();
         return ConfigAggregateBuilder.create(this, name, type, elementType).withDefaultValue(defaultValue);
     }
@@ -220,8 +220,8 @@ public class ConfigNodeBuilder implements NodeLike {
      * @param name the name of the new {@code Node}
      * @return the created node builder
      */
-    public ConfigNodeBuilder.Forked<? extends ConfigNodeBuilder> fork(String name) {
-        return new ConfigNodeBuilder.Forked<>(this, name);
+    public ConfigNodeBuilder fork(String name) {
+        return new ConfigNodeBuilder().withName(name).withParent(this);
     }
 
     /**
@@ -250,96 +250,16 @@ public class ConfigNodeBuilder implements NodeLike {
         return built;
     }
 
-    public static class Forked<S extends ConfigNodeBuilder> extends ConfigNodeBuilder {
-        private final S source;
+    public ConfigNodeBuilder finishNode() {
+        return finishNode(n -> { });
+    }
 
-        public Forked(S parent, String name) {
-            if (parent == null) throw new NullPointerException();
-            if (name == null) throw new NullPointerException();
-
-            this.source = parent;
-            this.parent = parent;
-            this.name = name;
+    public ConfigNodeBuilder finishNode(Consumer<ConfigNode> action) {
+        if (parent == null) {
+            throw new IllegalStateException("finishNode should not be called for a root node. Use build instead.");
         }
-
-        @Override
-        public Forked<S> withParent(ConfigNodeBuilder parent) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Forked<S> withName(String name) {
-            super.withName(name);
-            return this;
-        }
-
-        @Override
-        public Forked<S> withComment(@Nullable String comment) {
-            super.withComment(comment);
-            return this;
-        }
-
-        @Override
-        public Forked<S> withSeparateSerialization() {
-            super.withSeparateSerialization();
-            return this;
-        }
-
-        @Override
-        public Forked<S> withSeparateSerialization(boolean serializeSeparately) {
-            super.withSeparateSerialization(serializeSeparately);
-            return this;
-        }
-
-        @Override
-        public <T> ConfigValueBuilder<Forked<S>, T> beginValue(@Nonnull String name, @Nonnull Class<T> type) {
-            return new ConfigValueBuilder<>(this, name, type);
-        }
-
-        @Override
-        public <T> ConfigValueBuilder<Forked<S>, T> beginValue(@Nonnull String name, @Nonnull T defaultValue) {
-            @SuppressWarnings("unchecked") Class<T> type = (Class<T>) defaultValue.getClass();
-            return new ConfigValueBuilder<>(this, name, type).withDefaultValue(defaultValue);
-        }
-
-        @Override
-        public <E> ConfigAggregateBuilder<Forked<S>, E[], E> beginAggregateValue(@Nonnull String name, @Nonnull E[] defaultValue) {
-            @SuppressWarnings("unchecked") Class<E[]> type = (Class<E[]>) defaultValue.getClass();
-            return ConfigAggregateBuilder.create(this, name, type).withDefaultValue(defaultValue);
-        }
-
-        @Override
-        public <C extends Collection<E>, E> ConfigAggregateBuilder<Forked<S>, C, E> beginAggregateValue(@Nonnull String name, @Nonnull C defaultValue, @Nullable Class<E> elementType) {
-            @SuppressWarnings("unchecked") Class<C> type = (Class<C>) defaultValue.getClass();
-            return ConfigAggregateBuilder.create(this, name, type, elementType).withDefaultValue(defaultValue);
-        }
-
-        @Override
-        public Forked<S> add(@Nonnull TreeItem item) throws FiberException {
-            super.add(item);
-            return this;
-        }
-
-        @Override
-        public Forked<S> add(@Nonnull TreeItem item, boolean overwrite) throws FiberException {
-            super.add(item, overwrite);
-            return this;
-        }
-
-        @Override
-        public Forked<Forked<S>> fork(String name) {
-            return new ConfigNodeBuilder.Forked<>(this, name);
-        }
-
-        public S finishNode() {
-            return finishNode(n -> {
-            });
-        }
-
-        public S finishNode(Consumer<ConfigNode> action) {
-            action.accept(build());
-            return source;
-        }
+        action.accept(build());
+        return parent;
     }
 
 }

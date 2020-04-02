@@ -11,9 +11,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -33,7 +33,7 @@ class AnnotatedSettingsTest {
         OneFieldPojo pojo = new OneFieldPojo();
         AnnotatedSettings.applyToNode(node, pojo);
 
-        Set<TreeItem> items = node.build().getItems();
+        Collection<TreeItem> items = node.build().getItems();
         assertEquals(1, items.size(), "Setting map is 1 entry large");
         TreeItem item = node.lookup("a");
         assertNotNull(item, "Setting exists");

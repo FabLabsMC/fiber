@@ -24,12 +24,11 @@ import java.util.function.Consumer;
  * Multiple calls to {@link #build()} will result in duplicated references.
  *
  * @param <T> the type of value the produced {@code ConfigValue} will hold
- * @param <S> the type of this builder's source object
  * @see ConfigValue
  */
-public class ConfigValueBuilder<S extends ConfigNodeBuilder, T> {
+public class ConfigValueBuilder<T> {
 
-    private final S parentNode;
+    private final ConfigNodeBuilder parentNode;
     @Nonnull
     protected final Class<T> type;
     @Nonnull
@@ -51,7 +50,7 @@ public class ConfigValueBuilder<S extends ConfigNodeBuilder, T> {
      * @param name the name of the {@code ConfigValue} produced by this builder
      * @param type       the class object representing the type of values this builder will create settings for
      */
-    public ConfigValueBuilder(S parentNode, @Nonnull String name, @Nonnull Class<T> type) {
+    public ConfigValueBuilder(ConfigNodeBuilder parentNode, @Nonnull String name, @Nonnull Class<T> type) {
         this.parentNode = parentNode;
         this.name = name;
         this.type = type;
@@ -66,7 +65,7 @@ public class ConfigValueBuilder<S extends ConfigNodeBuilder, T> {
      * @return {@code this} builder
      * @see Node#lookup
      */
-    public ConfigValueBuilder<S, T> withName(String name) {
+    public ConfigValueBuilder<T> withName(String name) {
         this.name = name;
         return this;
     }
@@ -79,7 +78,7 @@ public class ConfigValueBuilder<S extends ConfigNodeBuilder, T> {
      * @param comment the comment
      * @return {@code this} builder
      */
-    public ConfigValueBuilder<S, T> withComment(String comment) {
+    public ConfigValueBuilder<T> withComment(String comment) {
         this.comment = comment;
         return this;
     }
@@ -94,7 +93,7 @@ public class ConfigValueBuilder<S extends ConfigNodeBuilder, T> {
      * @param consumer the listener
      * @return {@code this} builder
      */
-    public ConfigValueBuilder<S, T> withListener(BiConsumer<T, T> consumer) {
+    public ConfigValueBuilder<T> withListener(BiConsumer<T, T> consumer) {
         final BiConsumer<T, T> prevConsumer = this.consumer; // to avoid confusion
         this.consumer = (t, t2) -> {
             prevConsumer.accept(t, t2);
@@ -111,7 +110,7 @@ public class ConfigValueBuilder<S extends ConfigNodeBuilder, T> {
      * @param defaultValue the default value
      * @return {@code this} builder
      */
-    public ConfigValueBuilder<S, T> withDefaultValue(T defaultValue) {
+    public ConfigValueBuilder<T> withDefaultValue(T defaultValue) {
         this.defaultValue = defaultValue;
         return this;
     }
@@ -125,7 +124,7 @@ public class ConfigValueBuilder<S extends ConfigNodeBuilder, T> {
      * @return {@code this} builder
      * @see #withFinality(boolean)
      */
-    public ConfigValueBuilder<S, T> withFinality() {
+    public ConfigValueBuilder<T> withFinality() {
         this.isFinal = true;
         return this;
     }
@@ -138,7 +137,7 @@ public class ConfigValueBuilder<S extends ConfigNodeBuilder, T> {
      * @param isFinal the finality
      * @return {@code this} builder
      */
-    public ConfigValueBuilder<S, T> withFinality(boolean isFinal) {
+    public ConfigValueBuilder<T> withFinality(boolean isFinal) {
         this.isFinal = isFinal;
         return this;
     }
@@ -149,7 +148,7 @@ public class ConfigValueBuilder<S extends ConfigNodeBuilder, T> {
      * @return the created builder
      * @see ConstraintsBuilder
      */
-    public ConstraintsBuilder<? extends ConfigValueBuilder<S, T>, T> withConstraints() {
+    public ConstraintsBuilder<T> beginConstraints() {
         return new ConstraintsBuilder<>(this, constraintList, type);
     }
 
@@ -177,11 +176,11 @@ public class ConfigValueBuilder<S extends ConfigNodeBuilder, T> {
         return built;
     }
 
-    public S finishValue() {
+    public ConfigNodeBuilder finishValue() {
         return finishValue(n -> {});
     }
 
-    public S finishValue(Consumer<ConfigValue<T>> action) {
+    public ConfigNodeBuilder finishValue(Consumer<ConfigValue<T>> action) {
         action.accept(build());
         return parentNode;
     }

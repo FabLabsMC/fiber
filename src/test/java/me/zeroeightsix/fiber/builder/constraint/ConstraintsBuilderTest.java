@@ -23,13 +23,13 @@ class ConstraintsBuilderTest {
     @Test
     public void testNumericalConstraints() {
         List<Constraint<? super Integer>> constraintList = new ArrayList<>();
-        ConstraintsBuilder<Void, Integer> constraintsBuilder = new ConstraintsBuilder<>(null, constraintList, Integer.class);
+        ConstraintsBuilder<Integer> constraintsBuilder = new ConstraintsBuilder<>(null, constraintList, Integer.class);
         constraintsBuilder.atLeast(5)
                 .composite(CompositeType.OR)
                 .atLeast(20)
                 .atMost(10)
                 .finishComposite()
-                .finish();
+                .finishConstraints();
 
         Predicate<Integer> finalConstraint = integer -> constraintList.stream().allMatch(constraint -> constraint.test(integer));
 
@@ -48,11 +48,11 @@ class ConstraintsBuilderTest {
     @Test
     public void testArrayConstraints() {
         ConfigValue<Integer[]> config = ConfigAggregateBuilder.create(null, "foo", Integer[].class)
-                .withConstraints().component()
+                .beginConstraints().component()
                 .range(3, 10)
                 .finishComponent()
                 .maxLength(3)
-                .finish()
+                .finishConstraints()
                 .build();
 
         assertTrue(config.setValue(new Integer[0]));
@@ -66,20 +66,20 @@ class ConstraintsBuilderTest {
     @Test
     public void testCollectionConstraints() {
         ConfigNodeBuilder builder = new ConfigNodeBuilder();
-        ConfigAggregateBuilder<? extends ConfigNodeBuilder, List<Integer>, Integer> aggregateBuilder = builder.beginAggregateValue("foo", Collections.emptyList(), Integer.class);
-        assertThrows(RuntimeFiberException.class, () -> aggregateBuilder.withConstraints().component().regex(""), "Invalid constraint type at build time");
+        ConfigAggregateBuilder<List<Integer>, Integer> aggregateBuilder = builder.beginAggregateValue("foo", Collections.emptyList(), Integer.class);
+        assertThrows(RuntimeFiberException.class, () -> aggregateBuilder.beginConstraints().component().regex(""), "Invalid constraint type at build time");
 
         ConfigValue<List<Integer>> config = aggregateBuilder
-                .withConstraints().component()
+                .beginConstraints().component()
                 .atLeast(3).atMost(10)
                 .finishComponent()
                 .maxLength(3)
-                .finish()
+                .finishConstraints()
                 .build();
 
         ConfigValue<List<Integer>> deferredConfig = builder.beginAggregateValue("deferred", Collections.<Integer>emptyList(), null)
-                .withConstraints().component().regex("").finishComponent()
-                .finish().build();
+                .beginConstraints().component().regex("").finishComponent()
+                .finishConstraints().build();
         assertThrows(RuntimeException.class, () -> deferredConfig.setValue(Collections.singletonList(1)),
                 "Invalid constraint type (deferred check)"
         );

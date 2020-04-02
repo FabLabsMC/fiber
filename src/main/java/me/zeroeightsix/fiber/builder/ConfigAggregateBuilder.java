@@ -19,7 +19,7 @@ import java.util.function.BiConsumer;
  * @param <E> the type of values held by {@code <A>}
  * @see #create
  */
-public final class ConfigAggregateBuilder<S extends ConfigNodeBuilder, A, E> extends ConfigValueBuilder<S, A> {
+public final class ConfigAggregateBuilder<A, E> extends ConfigValueBuilder<A> {
     /**
      * Determines if a {@code Class} object represents an aggregate type,
      * ie. if it is an {@linkplain Class#isArray() Array} or a {@linkplain Collection}.
@@ -41,7 +41,7 @@ public final class ConfigAggregateBuilder<S extends ConfigNodeBuilder, A, E> ext
      * @see #isAggregate
      */
     @SuppressWarnings("unchecked")
-    public static <S extends ConfigNodeBuilder, E> ConfigAggregateBuilder<S, E[], E> create(S source, @Nonnull String name, @Nonnull Class<E[]> arrayType) {
+    public static <S extends ConfigNodeBuilder, E> ConfigAggregateBuilder<E[], E> create(S source, @Nonnull String name, @Nonnull Class<E[]> arrayType) {
         if (!arrayType.isArray()) throw new RuntimeFiberException(arrayType + " is not a valid array type");
         return new ConfigAggregateBuilder<>(source, name, arrayType, (Class<E>) AnnotatedSettings.wrapPrimitive(arrayType.getComponentType()));
     }
@@ -56,7 +56,7 @@ public final class ConfigAggregateBuilder<S extends ConfigNodeBuilder, A, E> ext
      * @return the newly created builder
      */
     @SuppressWarnings("unchecked")
-    public static <S extends ConfigNodeBuilder, C extends Collection<E>, E> ConfigAggregateBuilder<S, C, E> create(S source, @Nonnull String name, @Nonnull Class<? super C> collectionType, @Nullable Class<E> componentType) {
+    public static <S extends ConfigNodeBuilder, C extends Collection<E>, E> ConfigAggregateBuilder<C, E> create(S source, @Nonnull String name, @Nonnull Class<? super C> collectionType, @Nullable Class<E> componentType) {
         if (!Collection.class.isAssignableFrom(collectionType))
             throw new RuntimeFiberException(collectionType + " is not a valid Collection type");
         return new ConfigAggregateBuilder<>(source, name, (Class<C>) collectionType, componentType);
@@ -65,49 +65,49 @@ public final class ConfigAggregateBuilder<S extends ConfigNodeBuilder, A, E> ext
     @Nullable
     private final Class<E> componentType;
 
-    private ConfigAggregateBuilder(S source, @Nonnull String name, @Nonnull Class<A> type, @Nullable Class<E> componentType) {
+    private ConfigAggregateBuilder(ConfigNodeBuilder source, @Nonnull String name, @Nonnull Class<A> type, @Nullable Class<E> componentType) {
         super(source, name, type);
         this.componentType = componentType;
     }
 
     @Override
-    public ConfigAggregateBuilder<S, A, E> withName(String name) {
+    public ConfigAggregateBuilder<A, E> withName(String name) {
         super.withName(name);
         return this;
     }
 
     @Override
-    public ConfigAggregateBuilder<S, A, E> withComment(String comment) {
+    public ConfigAggregateBuilder<A, E> withComment(String comment) {
         super.withComment(comment);
         return this;
     }
 
     @Override
-    public ConfigAggregateBuilder<S, A, E> withListener(BiConsumer<A, A> consumer) {
+    public ConfigAggregateBuilder<A, E> withListener(BiConsumer<A, A> consumer) {
         super.withListener(consumer);
         return this;
     }
 
     @Override
-    public ConfigAggregateBuilder<S, A, E> withDefaultValue(A defaultValue) {
+    public ConfigAggregateBuilder<A, E> withDefaultValue(A defaultValue) {
         super.withDefaultValue(defaultValue);
         return this;
     }
 
     @Override
-    public ConfigAggregateBuilder<S, A, E> withFinality() {
+    public ConfigAggregateBuilder<A, E> withFinality() {
         super.withFinality();
         return this;
     }
 
     @Override
-    public ConfigAggregateBuilder<S, A, E> withFinality(boolean isFinal) {
+    public ConfigAggregateBuilder<A, E> withFinality(boolean isFinal) {
         super.withFinality(isFinal);
         return this;
     }
 
     @Override
-    public AggregateConstraintsBuilder<ConfigAggregateBuilder<S, A, E>, A, E> withConstraints() {
+    public AggregateConstraintsBuilder<A, E> beginConstraints() {
         return new AggregateConstraintsBuilder<>(this, constraintList, type, componentType);
     }
 

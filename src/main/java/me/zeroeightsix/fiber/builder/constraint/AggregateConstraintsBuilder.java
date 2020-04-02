@@ -1,5 +1,6 @@
 package me.zeroeightsix.fiber.builder.constraint;
 
+import me.zeroeightsix.fiber.builder.ConfigAggregateBuilder;
 import me.zeroeightsix.fiber.constraint.CompositeType;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
@@ -14,14 +15,14 @@ import java.util.List;
  * <p>Aggregate types are those that hold multiple values, such as {@code List} or arrays.
  * The other, scalar types, such as {@code Integer} or {@code String}, are created using {@link ConstraintsBuilder}.
  *
- * @param <S> the type of this builder's source object (eg. {@code ConfigValueBuilder} or {@code ConstraintsBuilder}
- * @param <T> the type of {@link Constraint} this builder should output
- * @param <C> the type of the components in T
+ * @param <A> the type of {@link Constraint} this builder should output
+ * @param <E> the type of the components in T
  * @see ConstraintsBuilder
  */
-public class AggregateConstraintsBuilder<S, T, C> extends ConstraintsBuilder<S, T> {
+public class AggregateConstraintsBuilder<A, E> extends ConstraintsBuilder<A> {
+
     @Nullable
-    private final Class<C> componentType;
+    private final Class<E> componentType;
 
     /**
      * Creates a new aggregate constraint builder
@@ -31,49 +32,49 @@ public class AggregateConstraintsBuilder<S, T, C> extends ConstraintsBuilder<S, 
      * @param aggregateType the type of collection or array {@code source} holds
      * @param componentType the type of all elements in {@code aggregateType}
      */
-    public AggregateConstraintsBuilder(S source, List<Constraint<? super T>> constraints, @Nonnull Class<T> aggregateType, @Nullable Class<C> componentType) {
+    public AggregateConstraintsBuilder(ConfigAggregateBuilder<A, E> source, List<Constraint<? super A>> constraints, @Nonnull Class<A> aggregateType, @Nullable Class<E> componentType) {
         super(source, constraints, aggregateType);
         this.componentType = componentType;
     }
 
     @Override
-    public AggregateConstraintsBuilder<S, T, C> atLeast(T min) throws RuntimeFiberException {
+    public AggregateConstraintsBuilder<A, E> atLeast(A min) throws RuntimeFiberException {
         super.atLeast(min);
         return this;
     }
 
     @Override
-    public AggregateConstraintsBuilder<S, T, C> atMost(T max) {
+    public AggregateConstraintsBuilder<A, E> atMost(A max) {
         super.atMost(max);
         return this;
     }
 
     @Override
-    public AggregateConstraintsBuilder<S, T, C> range(T min, T max) {
+    public AggregateConstraintsBuilder<A, E> range(A min, A max) {
         super.range(min, max);
         return this;
     }
 
     @Override
-    public AggregateConstraintsBuilder<S, T, C> minLength(int min) {
+    public AggregateConstraintsBuilder<A, E> minLength(int min) {
         super.minLength(min);
         return this;
     }
 
     @Override
-    public AggregateConstraintsBuilder<S, T, C> maxLength(int max) {
+    public AggregateConstraintsBuilder<A, E> maxLength(int max) {
         super.maxLength(max);
         return this;
     }
 
     @Override
-    public AggregateConstraintsBuilder<S, T, C> regex(String regexPattern) {
+    public AggregateConstraintsBuilder<A, E> regex(String regexPattern) {
         super.regex(regexPattern);
         return this;
     }
 
     @Override
-    public CompositeConstraintsBuilder<AggregateConstraintsBuilder<S, T, C>, T> composite(CompositeType type) {
+    public CompositeConstraintsBuilder<AggregateConstraintsBuilder<A, E>, A> composite(CompositeType type) {
         return new CompositeConstraintsBuilder<>(this, type, sourceConstraints, this.type);
     }
 
@@ -84,7 +85,12 @@ public class AggregateConstraintsBuilder<S, T, C> extends ConstraintsBuilder<S, 
      *
      * @return the newly created builder
      */
-    public ComponentConstraintsBuilder<AggregateConstraintsBuilder<S, T, C>, T, C> component() {
+    public ComponentConstraintsBuilder<AggregateConstraintsBuilder<A, E>, A, E> component() {
         return new ComponentConstraintsBuilder<>(this, sourceConstraints, this.type, this.componentType);
+    }
+
+    @Override
+    public ConfigAggregateBuilder<A, E> finishConstraints() {
+        return (ConfigAggregateBuilder<A, E>) super.finishConstraints();
     }
 }
