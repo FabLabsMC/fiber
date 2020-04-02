@@ -10,6 +10,11 @@ import java.util.Collection;
 public enum ConstraintType {
 
 	/**
+	 * Indicates that the value can never be changed after initialization
+	 */
+	FINAL(false, identifier("final")),
+
+	/**
 	 * Specifies a numerical lower bound.
 	 *
 	 * <p> Values must be equal to or greater than the constraint's value to satisfy the constraint.
@@ -65,9 +70,6 @@ public enum ConstraintType {
 	 * <p> Values must match the constraint's value, which is a regular expression (regex).
 	 */
 	STRING_MATCHING(false, identifier("regex")),
-
-	@Deprecated
-	FINAL(false, identifier("final")),
 
 	/**
 	 * Specifies that all elements of a collection or array must satisfy all of a constraint's child constraints in order to satisfy that constraint.
