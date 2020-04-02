@@ -2,6 +2,7 @@ package me.zeroeightsix.fiber.builder;
 
 import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
+import me.zeroeightsix.fiber.constraint.FinalConstraint;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.tree.ConfigValue;
@@ -132,9 +133,11 @@ public class ConfigValueBuilder<T> {
     /**
      * Sets the finality.
      *
-     * <p> If {@code true}, the produced setting can not be changed. It will be initialised with its default value, if there is one. Afterwards, it can not be changed again.
+     * <p> If {@code true}, the produced setting can not be changed.
+     * It will be initialised with its default value, if there is one. Afterwards, it can not be changed again;
+     * {@link ConfigValue#setValue(Object)} will always return {@code false}.
      *
-     * @param isFinal the finality
+     * @param isFinal whether or not the value can be changed after building
      * @return {@code this} builder
      */
     public ConfigValueBuilder<T> withFinality(boolean isFinal) {
@@ -157,10 +160,24 @@ public class ConfigValueBuilder<T> {
      *
      * <p> If a parent was specified in the constructor, the {@code ConfigValue} will also be registered to its parent node.
      *
+     * <p> <strong>This method should not be called multiple times if the default value is intended to be mutated!</strong>
+     * Multiple calls will result in duplicated references to the default value.
+     *
      * @return the {@code ConfigValue}
      */
     public ConfigValue<T> build() {
-        ConfigValue<T> built = new ConfigValue<>(name, comment, defaultValue, defaultValue, consumer, constraintList, type, isFinal);
+        if (defaultValue != null) {
+            for (Constraint<? super T> constraint : constraintList) {
+                if (!constraint.test(defaultValue)) {
+                    throw new RuntimeFiberException("Default value '" + defaultValue + "' does not satisfy constraints");
+                }
+            }
+        }
+        List<Constraint<? super T>> constraints = new ArrayList<>(this.constraintList);
+        if (isFinal) {
+            constraints.add(0, FinalConstraint.instance());  // index 0 to avoid uselessly checking everything each time
+        }
+        ConfigValue<T> built = new ConfigValue<>(name, comment, defaultValue, consumer, constraints, type);
 
         if (parentNode != null) {
             // We don't know what kind of evil collection we're about to add a node to.

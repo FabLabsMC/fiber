@@ -1,19 +1,20 @@
 package me.zeroeightsix.fiber.tree;
 
+import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
+import me.zeroeightsix.fiber.constraint.ConstraintType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.function.Predicate;
 
 /**
  * A {@code ConfigLeaf} with some value of type {@code T}.
  *
  * @param <T> The type of value this class holds
  * @see ConfigLeaf
- * @see me.zeroeightsix.fiber.builder.ConfigValueBuilder
+ * @see ConfigValueBuilder
  * @see me.zeroeightsix.fiber.builder.ConfigAggregateBuilder
  */
 public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
@@ -23,40 +24,35 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
     @Nullable
     private final T defaultValue;
     @Nonnull
-    private final BiConsumer<T, T> consumer;
+    private final BiConsumer<T, T> listener;
     @Nonnull
-    private final List<Constraint<? super T>> constraintList;
+    private final List<Constraint<? super T>> constraints;
     @Nonnull
     private final Class<T> type;
-    private final Predicate<T> restriction;
 
     /**
      * Creates a {@code ConfigValue}.
      *
-     * @param name           the name for this item
-     * @param comment        the comment for this item
-     * @param value          the current value
-     * @param defaultValue   the default value for this item
-     *                       <br> Preferably, if this item's value has constraints, the default value should satisfy those constraints.
-     * @param consumer       the consumer or listener for this item. When this item's value changes, the consumer will be called with the old value as first argument and the new value as second argument.
-     * @param constraintList the list of constraints for this item. For a value to be accepted, all constraints must be satisfied.
-     * @param type           the type of value this item holds
-     * @param isFinal        whether or not this value can be change. If {@code true}, {@link #setValue(Object)} will always return {@code false}, implying {@code this} was not mutated.
-     * @see me.zeroeightsix.fiber.builder.ConfigValueBuilder
+     * @param name         the name for this item
+     * @param comment      the comment for this item
+     * @param defaultValue the default value for this item
+     *                     <p> While the default value should generally satisfy the supplied {@code constraints},
+     *                     this is not enforced by this constructor.
+     *                     This allows constraints such as {@link ConstraintType#FINAL} to work as intended.
+     *                     If this {@code ConfigValue} is built by a {@link ConfigValueBuilder}, this criterion will always be met.
+     * @param listener     the consumer or listener for this item. When this item's value changes, the consumer will be called with the old value as first argument and the new value as second argument.
+     * @param constraints  the list of constraints for this item. For a value to be accepted, all constraints must be satisfied.
+     * @param type         the type of value this item holds
+     * @see ConfigValueBuilder
      * @see me.zeroeightsix.fiber.builder.ConfigAggregateBuilder
      */
-    public ConfigValue(@Nonnull String name, @Nullable String comment, @Nullable T value, @Nullable T defaultValue, @Nonnull BiConsumer<T, T> consumer, @Nonnull List<Constraint<? super T>> constraintList, @Nonnull Class<T> type, final boolean isFinal) {
+    public ConfigValue(@Nonnull String name, @Nullable String comment, @Nullable T defaultValue, @Nonnull BiConsumer<T, T> listener, @Nonnull List<Constraint<? super T>> constraints, @Nonnull Class<T> type) {
         super(name, comment);
-        this.value = value;
+        this.value = defaultValue;
         this.defaultValue = defaultValue;
-        this.consumer = consumer;
-        this.constraintList = constraintList;
+        this.listener = listener;
+        this.constraints = constraints;
         this.type = type;
-        if (isFinal) {
-            restriction = t -> false;
-        } else {
-            restriction = t -> constraintList.stream().allMatch(constraint -> constraint.test(t));
-        }
     }
 
     @Override
@@ -73,10 +69,20 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
 
     @Override
     public boolean setValue(@Nullable T value) {
-        if (!restriction.test(value)) return false;
+        if (!this.accepts(value)) return false;
+
         T oldValue = this.value;
         this.value = value;
-        this.consumer.accept(oldValue, value);
+        this.listener.accept(oldValue, value);
+        return true;
+    }
+
+    private boolean accepts(@Nullable T value) {
+        for (Constraint<? super T> constraint : this.constraints) {
+            if (!constraint.test(value)) {
+                return false;
+            }
+        }
         return true;
     }
 
@@ -89,7 +95,7 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
      */
     @Nonnull
     public BiConsumer<T, T> getListener() {
-        return consumer;
+        return listener;
     }
 
     /**
@@ -111,7 +117,7 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
      */
     @Nonnull
     public List<Constraint<? super T>> getConstraints() {
-        return constraintList;
+        return constraints;
     }
 
 }
