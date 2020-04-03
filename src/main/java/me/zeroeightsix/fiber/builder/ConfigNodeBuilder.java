@@ -12,10 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-/**
- * <p><strong>This builder cannot be reused!</strong>
- * Multiple calls to {@link #build()} will result in an exception being thrown.
- */
 public class ConfigNodeBuilder implements NodeLike {
     private final Map<String, TreeItem> items = new HashMap<>();
     @Nullable
@@ -227,9 +223,9 @@ public class ConfigNodeBuilder implements NodeLike {
     /**
      * Construct a new {@code ConfigNode} based on this builder's specifications.
      *
-     * <p> This method cannot be called more than once.
-     * Allowing multiple nodes to be built would result in duplicated references.
-     * To guard against that, usually undesirable, behaviour, this method will throw an exception if called multiple times.
+     * <p> This method cannot be called more than once, as allowing multiple nodes to be
+     * built would result in duplicated references.
+     * To guard against this, usually undesirable, behaviour, this method will throw an exception on successive calls.
      *
      * @return a new {@code ConfigNode}
      * @throws IllegalStateException if this builder already built a node
