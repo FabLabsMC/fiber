@@ -21,9 +21,6 @@ import java.util.function.Consumer;
  * <p> The settings created by this builder are considered atomic, and do not allow specifications at the component level.
  * Settings with aggregate types, such as arrays and collections, should be created using {@link ConfigAggregateBuilder}.
  *
- * <p><strong>This builder should not be reused if the default values are intended to be mutated!</strong>
- * Multiple calls to {@link #build()} will result in duplicated references.
- *
  * @param <T> the type of value the produced {@code ConfigValue} will hold
  * @see ConfigValue
  */
@@ -108,6 +105,9 @@ public class ConfigValueBuilder<T> {
      *
      * <p> If {@code null}, or if this method is never called, the {@code ConfigValue} will have no default value.
      *
+     * <p> Note that every {@code ConfigValue} created from this builder will share a reference
+     * to the given {@code defaultValue}. Immutability is encouraged.
+     *
      * @param defaultValue the default value
      * @return {@code this} builder
      */
@@ -160,7 +160,7 @@ public class ConfigValueBuilder<T> {
      *
      * <p> If a parent was specified in the constructor, the {@code ConfigValue} will also be registered to its parent node.
      *
-     * <p> <strong>This method should not be called multiple times if the default value is intended to be mutated!</strong>
+     * <p> This method should not be called multiple times <em>if the default value is intended to be mutated</em>.
      * Multiple calls will result in duplicated references to the default value.
      *
      * @return the {@code ConfigValue}
