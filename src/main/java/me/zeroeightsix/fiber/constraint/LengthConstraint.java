@@ -3,6 +3,7 @@ package me.zeroeightsix.fiber.constraint;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.lang.reflect.Array;
 import java.util.Collection;
 import java.util.Map;
@@ -16,20 +17,22 @@ import java.util.function.ToIntFunction;
  * @see ConstraintType#MAXIMUM_LENGTH
  */
 public class LengthConstraint<T> extends ValuedConstraint<Integer, T> {
-    private final ToIntFunction<T> lengthGetter;
-
-    public static <T> LengthConstraint<T> min(Class<T> type, int min) {
+    public static <T> LengthConstraint<T> min(@Nullable Class<T> type, int min) {
         return new LengthConstraint<>(ConstraintType.MINIMUM_LENGTH, getLengthFunction(type), min);
     }
 
-    public static <T> LengthConstraint<T> max(Class<T> type, int min) {
+    public static <T> LengthConstraint<T> max(@Nullable Class<T> type, int min) {
         return new LengthConstraint<>(ConstraintType.MAXIMUM_LENGTH, getLengthFunction(type), min);
     }
 
+    @SuppressWarnings("unchecked")
     @Nonnull
-    private static <T> ToIntFunction<T> getLengthFunction(Class<T> type) {
+    private static <T> ToIntFunction<T> getLengthFunction(@Nullable Class<T> type) {
         ToIntFunction<T> length;
-        if (type.isArray()) {
+        if (type == null) {
+            // deferred type resolution
+            length = t -> getLengthFunction((Class<T>) t.getClass()).applyAsInt(t);
+        } else if (type.isArray()) {
             length = Array::getLength;
         } else if (CharSequence.class.isAssignableFrom(type)) {
             length = t -> ((CharSequence) t).length();
@@ -43,6 +46,8 @@ public class LengthConstraint<T> extends ValuedConstraint<Integer, T> {
         return length;
     }
 
+    private final ToIntFunction<T> lengthGetter;
+
     private LengthConstraint(ConstraintType type, ToIntFunction<T> lengthGetter, Integer value) {
         super(type, value);
         this.lengthGetter = lengthGetter;
@@ -50,6 +55,8 @@ public class LengthConstraint<T> extends ValuedConstraint<Integer, T> {
 
     @Override
     public boolean test(T value) {
+        if (value == null) throw new NullPointerException("Cannot test the length of a null value");
+
         switch (getType()) {
             case MINIMUM_LENGTH:
                 return lengthGetter.applyAsInt(value) >= this.getValue();

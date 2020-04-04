@@ -2,6 +2,7 @@ package me.zeroeightsix.fiber.builder;
 
 import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
+import me.zeroeightsix.fiber.constraint.FinalConstraint;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.tree.ConfigValue;
@@ -12,6 +13,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  * A builder for scalar {@code ConfigValue}s.
@@ -19,14 +21,12 @@ import java.util.function.BiConsumer;
  * <p> The settings created by this builder are considered atomic, and do not allow specifications at the component level.
  * Settings with aggregate types, such as arrays and collections, should be created using {@link ConfigAggregateBuilder}.
  *
- * <p><strong>This builder should not be reused if the default values are intended to be mutated!</strong>
- * Multiple calls to {@link #build()} will result in duplicated references.
- *
  * @param <T> the type of value the produced {@code ConfigValue} will hold
  * @see ConfigValue
  */
 public class ConfigValueBuilder<T> {
 
+    private final ConfigNodeBuilder parentNode;
     @Nonnull
     protected final Class<T> type;
     @Nonnull
@@ -41,17 +41,15 @@ public class ConfigValueBuilder<T> {
     private BiConsumer<T, T> consumer = (t, t2) -> { };
     protected List<Constraint<? super T>> constraintList = new ArrayList<>();
 
-    // Special snowflake that doesn't really belong in a builder.
-    // Used to easily register nodes to another node.
-    private ConfigNodeBuilder parentNode = null;
-
     /**
      * Creates a new scalar {@code ConfigValueBuilder}.
      *
+     * @param parentNode the {@code ConfigNodeBuilder} this builder originates from
      * @param name the name of the {@code ConfigValue} produced by this builder
-     * @param type the class object representing the type of values this builder will create settings for
+     * @param type       the class object representing the type of values this builder will create settings for
      */
-    public ConfigValueBuilder(@Nonnull String name, @Nonnull Class<T> type) {
+    public ConfigValueBuilder(ConfigNodeBuilder parentNode, @Nonnull String name, @Nonnull Class<T> type) {
+        this.parentNode = parentNode;
         this.name = name;
         this.type = type;
     }
@@ -107,6 +105,9 @@ public class ConfigValueBuilder<T> {
      *
      * <p> If {@code null}, or if this method is never called, the {@code ConfigValue} will have no default value.
      *
+     * <p> Note that every {@code ConfigValue} created from this builder will share a reference
+     * to the given {@code defaultValue}. Immutability is encouraged.
+     *
      * @param defaultValue the default value
      * @return {@code this} builder
      */
@@ -122,9 +123,9 @@ public class ConfigValueBuilder<T> {
      * This method behaves as if: {@code this.setFinal(true)}.
      *
      * @return {@code this} builder
-     * @see #setFinal(boolean)
+     * @see #withFinality(boolean)
      */
-    public ConfigValueBuilder<T> setFinal() {
+    public ConfigValueBuilder<T> withFinality() {
         this.isFinal = true;
         return this;
     }
@@ -132,24 +133,15 @@ public class ConfigValueBuilder<T> {
     /**
      * Sets the finality.
      *
-     * <p> If {@code true}, the produced setting can not be changed. It will be initialised with its default value, if there is one. Afterwards, it can not be changed again.
+     * <p> If {@code true}, the produced setting can not be changed.
+     * It will be initialised with its default value, if there is one. Afterwards, it can not be changed again;
+     * {@link ConfigValue#setValue(Object)} will always return {@code false}.
      *
-     * @param isFinal the finality
+     * @param isFinal whether or not the value can be changed after building
      * @return {@code this} builder
      */
-    public ConfigValueBuilder<T> setFinal(boolean isFinal) {
+    public ConfigValueBuilder<T> withFinality(boolean isFinal) {
         this.isFinal = isFinal;
-        return this;
-    }
-
-    /**
-     * Sets the node that the {@code ConfigValue} will be registered to.
-     *
-     * @param node The node the {@link ConfigValue} will be registered to.
-     * @return The builder
-     */
-    public ConfigValueBuilder<T> withParent(ConfigNodeBuilder node) {
-        parentNode = node;
         return this;
     }
 
@@ -159,19 +151,33 @@ public class ConfigValueBuilder<T> {
      * @return the created builder
      * @see ConstraintsBuilder
      */
-    public ConstraintsBuilder<? extends ConfigValueBuilder<T>, T> constraints() {
+    public ConstraintsBuilder<T> beginConstraints() {
         return new ConstraintsBuilder<>(this, constraintList, type);
     }
 
     /**
      * Builds the {@code ConfigValue}.
      *
-     * <p> If a parent was specified using {@link #withParent}, the {@code ConfigValue} will also be registered to its parent node.
+     * <p> If a parent was specified in the constructor, the {@code ConfigValue} will also be registered to its parent node.
+     *
+     * <p> This method should not be called multiple times <em>if the default value is intended to be mutated</em>.
+     * Multiple calls will result in duplicated references to the default value.
      *
      * @return the {@code ConfigValue}
      */
     public ConfigValue<T> build() {
-        ConfigValue<T> built = new ConfigValue<>(name, comment, defaultValue, defaultValue, consumer, constraintList, type, isFinal);
+        if (defaultValue != null) {
+            for (Constraint<? super T> constraint : constraintList) {
+                if (!constraint.test(defaultValue)) {
+                    throw new RuntimeFiberException("Default value '" + defaultValue + "' does not satisfy constraints");
+                }
+            }
+        }
+        List<Constraint<? super T>> constraints = new ArrayList<>(this.constraintList);
+        if (isFinal) {
+            constraints.add(0, FinalConstraint.instance());  // index 0 to avoid uselessly checking everything each time
+        }
+        ConfigValue<T> built = new ConfigValue<>(name, comment, defaultValue, consumer, constraints, type);
 
         if (parentNode != null) {
             // We don't know what kind of evil collection we're about to add a node to.
@@ -187,4 +193,12 @@ public class ConfigValueBuilder<T> {
         return built;
     }
 
+    public ConfigNodeBuilder finishValue() {
+        return finishValue(n -> {});
+    }
+
+    public ConfigNodeBuilder finishValue(Consumer<ConfigValue<T>> action) {
+        action.accept(build());
+        return parentNode;
+    }
 }

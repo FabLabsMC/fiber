@@ -5,6 +5,7 @@ import me.zeroeightsix.fiber.builder.constraint.AggregateConstraintsBuilder;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.function.BiConsumer;
 
@@ -40,9 +41,9 @@ public final class ConfigAggregateBuilder<A, E> extends ConfigValueBuilder<A> {
      * @see #isAggregate
      */
     @SuppressWarnings("unchecked")
-    public static <E> ConfigAggregateBuilder<E[], E> create(@Nonnull String name, @Nonnull Class<E[]> arrayType) {
+    public static <E> ConfigAggregateBuilder<E[], E> create(ConfigNodeBuilder source, @Nonnull String name, @Nonnull Class<E[]> arrayType) {
         if (!arrayType.isArray()) throw new RuntimeFiberException(arrayType + " is not a valid array type");
-        return new ConfigAggregateBuilder<>(name, arrayType, (Class<E>) AnnotatedSettings.wrapPrimitive(arrayType.getComponentType()));
+        return new ConfigAggregateBuilder<>(source, name, arrayType, (Class<E>) AnnotatedSettings.wrapPrimitive(arrayType.getComponentType()));
     }
 
     /**
@@ -55,17 +56,17 @@ public final class ConfigAggregateBuilder<A, E> extends ConfigValueBuilder<A> {
      * @return the newly created builder
      */
     @SuppressWarnings("unchecked")
-    public static <C extends Collection<E>, E> ConfigAggregateBuilder<C, E> create(@Nonnull String name, @Nonnull Class<? super C> collectionType, @Nonnull Class<E> componentType) {
+    public static <S extends ConfigNodeBuilder, C extends Collection<E>, E> ConfigAggregateBuilder<C, E> create(S source, @Nonnull String name, @Nonnull Class<? super C> collectionType, @Nullable Class<E> componentType) {
         if (!Collection.class.isAssignableFrom(collectionType))
             throw new RuntimeFiberException(collectionType + " is not a valid Collection type");
-        return new ConfigAggregateBuilder<>(name, (Class<C>) collectionType, componentType);
+        return new ConfigAggregateBuilder<>(source, name, (Class<C>) collectionType, componentType);
     }
 
-    @Nonnull
+    @Nullable
     private final Class<E> componentType;
 
-    private ConfigAggregateBuilder(@Nonnull String name, @Nonnull Class<A> type, @Nonnull Class<E> componentType) {
-        super(name, type);
+    private ConfigAggregateBuilder(ConfigNodeBuilder source, @Nonnull String name, @Nonnull Class<A> type, @Nullable Class<E> componentType) {
+        super(source, name, type);
         this.componentType = componentType;
     }
 
@@ -94,25 +95,19 @@ public final class ConfigAggregateBuilder<A, E> extends ConfigValueBuilder<A> {
     }
 
     @Override
-    public ConfigAggregateBuilder<A, E> setFinal() {
-        super.setFinal();
+    public ConfigAggregateBuilder<A, E> withFinality() {
+        super.withFinality();
         return this;
     }
 
     @Override
-    public ConfigAggregateBuilder<A, E> setFinal(boolean isFinal) {
-        super.setFinal(isFinal);
+    public ConfigAggregateBuilder<A, E> withFinality(boolean isFinal) {
+        super.withFinality(isFinal);
         return this;
     }
 
     @Override
-    public ConfigAggregateBuilder<A, E> withParent(ConfigNodeBuilder node) {
-        super.withParent(node);
-        return this;
-    }
-
-    @Override
-    public AggregateConstraintsBuilder<ConfigAggregateBuilder<A, E>, A, E> constraints() {
+    public AggregateConstraintsBuilder<A, E> beginConstraints() {
         return new AggregateConstraintsBuilder<>(this, constraintList, type, componentType);
     }
 

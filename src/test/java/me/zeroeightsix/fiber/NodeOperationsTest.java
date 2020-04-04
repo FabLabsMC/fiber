@@ -1,28 +1,25 @@
 package me.zeroeightsix.fiber;
 
 import me.zeroeightsix.fiber.builder.ConfigNodeBuilder;
-import me.zeroeightsix.fiber.tree.ConfigValue;
-import me.zeroeightsix.fiber.tree.NodeLike;
-import me.zeroeightsix.fiber.tree.Property;
-import me.zeroeightsix.fiber.tree.TreeItem;
+import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
+import me.zeroeightsix.fiber.tree.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class NodeOperationsTest {
 
     @Test
     @DisplayName("Node -> Node")
     void mergeTo() {
-        ConfigNodeBuilder nodeOne = new ConfigNodeBuilder();
-        ConfigNodeBuilder nodeTwo = new ConfigNodeBuilder();
-
-        ConfigValue.builder("A", Integer.class)
+        Node nodeOne = new ConfigNodeBuilder()
+                .beginValue("A", Integer.class)
                 .withDefaultValue(10)
-                .withParent(nodeOne)
+                .finishValue()
                 .build();
+
+        ConfigNodeBuilder nodeTwo = new ConfigNodeBuilder();
 
         NodeOperations.mergeTo(nodeOne, nodeTwo);
 
@@ -33,9 +30,8 @@ class NodeOperationsTest {
     @DisplayName("Value -> Node")
     void mergeTo1() {
         ConfigNodeBuilder node = new ConfigNodeBuilder();
-        ConfigValue<Integer> value = ConfigValue.builder("A", Integer.class)
+        ConfigValue<Integer> value = node.beginValue("A", Integer.class)
                 .withDefaultValue(10)
-                .withParent(node)
                 .build();
 
         NodeOperations.mergeTo(value, node);
@@ -46,11 +42,10 @@ class NodeOperationsTest {
     @Test
     @DisplayName("Value -> Value")
     void mergeTo2() {
-        ConfigValue<Integer> valueOne = ConfigValue.builder("A", Integer.class)
+        ConfigValue<Integer> valueOne = new ConfigValueBuilder<>(null, "A", Integer.class)
                 .withDefaultValue(10)
                 .build();
-
-        ConfigValue<Integer> valueTwo = ConfigValue.builder("A", Integer.class)
+        ConfigValue<Integer> valueTwo = new ConfigValueBuilder<>(null, "A", Integer.class)
                 .withDefaultValue(20)
                 .build();
 
@@ -64,7 +59,7 @@ class NodeOperationsTest {
     }
 
     static <T> void testItemFor(Class<T> type, T value, TreeItem item) {
-        assertTrue(item != null, "Setting exists");
+        assertNotNull(item, "Setting exists");
         assertTrue(item instanceof Property<?>, "Setting is a property");
         Property<?> property = (Property<?>) item;
         assertEquals(type, property.getType(), "Setting type is correct");

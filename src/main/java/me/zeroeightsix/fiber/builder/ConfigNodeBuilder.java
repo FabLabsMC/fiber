@@ -111,6 +111,68 @@ public class ConfigNodeBuilder implements NodeLike {
     }
 
     /**
+     * Creates a scalar {@code ConfigValueBuilder}.
+     *
+     * @param type the class of the type of value the {@link ConfigValue} produced by the builder holds
+     * @param <T> the type {@code type} represents
+     * @return the newly created builder
+     * @see ConfigValueBuilder ConfigValueBuilder
+     */
+    public <T> ConfigValueBuilder<T> beginValue(@Nonnull String name, @Nonnull Class<T> type) {
+        return new ConfigValueBuilder<>(this, name, type);
+    }
+
+    /**
+     * Creates a {@code ConfigValueBuilder} with the given default value.
+     *
+     * @param defaultValue the default value of the {@link ConfigValue} that will be produced by the created builder.
+     * @param <T> the type of value the {@link ConfigValue} produced by the builder holds
+     * @return the newly created builder
+     * @see ConfigValueBuilder
+     * @see ConfigAggregateBuilder
+     */
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public <T> ConfigValueBuilder<T> beginValue(@Nonnull String name, @Nonnull T defaultValue) {
+        Class<T> type = (Class<T>) defaultValue.getClass();
+        if (ConfigAggregateBuilder.isAggregate(type)) {
+            if (type.isArray()) {
+                return ConfigAggregateBuilder.create(this, name, (Class) type);
+            } else {
+                return ConfigAggregateBuilder.create(this, name, (Class) type, null);
+            }
+        } else {
+            return new ConfigValueBuilder<>(this, name, type).withDefaultValue(defaultValue);
+        }
+    }
+
+    /**
+     * Creates an aggregate {@code ConfigValueBuilder}.
+     *
+     * @param defaultValue the default array of values the {@link ConfigValue} will hold.
+     * @param <E> the type of elements {@code defaultValue} holds
+     * @return the newly created builder
+     * @see ConfigAggregateBuilder Aggregate
+     */
+    public <E> ConfigAggregateBuilder<E[], E> beginAggregateValue(@Nonnull String name, @Nonnull E[] defaultValue) {
+        @SuppressWarnings("unchecked") Class<E[]> type = (Class<E[]>) defaultValue.getClass();
+        return ConfigAggregateBuilder.create(this, name, type).withDefaultValue(defaultValue);
+    }
+
+    /**
+     * Creates an aggregate {@code ConfigValueBuilder}.
+     *
+     * @param defaultValue the default collection of values the {@link ConfigValue} will hold.
+     * @param elementType the class of the type of elements {@code defaultValue} holds
+     * @param <C> the type of collection {@code defaultValue} is
+     * @param <E> the type {@code elementType} represents
+     * @return the newly created builder
+     */
+    public <C extends Collection<E>, E> ConfigAggregateBuilder<C, E> beginAggregateValue(@Nonnull String name, @Nonnull C defaultValue, @Nullable Class<E> elementType) {
+        @SuppressWarnings("unchecked") Class<C> type = (Class<C>) defaultValue.getClass();
+        return ConfigAggregateBuilder.create(this, name, type, elementType).withDefaultValue(defaultValue);
+    }
+
+    /**
      * Attempts to introduce a new child to this node.
      *
      * @param item The child to add
@@ -154,8 +216,8 @@ public class ConfigNodeBuilder implements NodeLike {
      * @param name the name of the new {@code Node}
      * @return the created node builder
      */
-    public ConfigNodeBuilder.Forked<? extends ConfigNodeBuilder> fork(String name) {
-        return new ConfigNodeBuilder.Forked<>(this, name);
+    public ConfigNodeBuilder fork(String name) {
+        return new ConfigNodeBuilder().withName(name).withParent(this);
     }
 
     /**
@@ -172,7 +234,7 @@ public class ConfigNodeBuilder implements NodeLike {
         if (built != null) {
             throw new IllegalStateException("Cannot build a node more than once");
         }
-        built = new ConfigNode(this.name, this.comment, this.items.values(), this.serializeSeparately);
+        built = new ConfigNode(this.name, this.comment, this.items, this.serializeSeparately);
         if (this.parent != null) {
             assert name != null;
             try {
@@ -184,73 +246,16 @@ public class ConfigNodeBuilder implements NodeLike {
         return built;
     }
 
-    public static class Forked<S extends ConfigNodeBuilder> extends ConfigNodeBuilder {
-        private final S source;
+    public ConfigNodeBuilder finishNode() {
+        return finishNode(n -> { });
+    }
 
-        public Forked(S parent, String name) {
-            if (parent == null) throw new NullPointerException();
-            if (name == null) throw new NullPointerException();
-
-            this.source = parent;
-            this.parent = parent;
-            this.name = name;
+    public ConfigNodeBuilder finishNode(Consumer<ConfigNode> action) {
+        if (parent == null) {
+            throw new IllegalStateException("finishNode should not be called for a root node. Use build instead.");
         }
-
-        @Override
-        public Forked<S> withParent(ConfigNodeBuilder parent) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public Forked<S> withName(String name) {
-            super.withName(name);
-            return this;
-        }
-
-        @Override
-        public Forked<S> withComment(@Nullable String comment) {
-            super.withComment(comment);
-            return this;
-        }
-
-        @Override
-        public Forked<S> withSeparateSerialization() {
-            super.withSeparateSerialization();
-            return this;
-        }
-
-        @Override
-        public Forked<S> withSeparateSerialization(boolean serializeSeparately) {
-            super.withSeparateSerialization(serializeSeparately);
-            return this;
-        }
-
-        @Override
-        public Forked<S> add(@Nonnull TreeItem item) throws FiberException {
-            super.add(item);
-            return this;
-        }
-
-        @Override
-        public Forked<S> add(@Nonnull TreeItem item, boolean overwrite) throws FiberException {
-            super.add(item, overwrite);
-            return this;
-        }
-
-        @Override
-        public Forked<Forked<S>> fork(String name) {
-            return new ConfigNodeBuilder.Forked<>(this, name);
-        }
-
-        public S finishNode() {
-            return finishNode(n -> {
-            });
-        }
-
-        public S finishNode(Consumer<ConfigNode> action) {
-            action.accept(build());
-            return source;
-        }
+        action.accept(build());
+        return parent;
     }
 
 }
