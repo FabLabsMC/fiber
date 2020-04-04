@@ -22,7 +22,7 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
     @Nullable
     private T value;
     @Nullable
-    private T defaultValue;
+    private final T defaultValue;
     @Nonnull
     private final BiConsumer<T, T> consumer;
     @Nonnull

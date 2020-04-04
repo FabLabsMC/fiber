@@ -1,7 +1,11 @@
 package me.zeroeightsix.fiber.annotation;
 
+import me.zeroeightsix.fiber.builder.ConfigNodeBuilder;
 import me.zeroeightsix.fiber.exception.FiberException;
-import me.zeroeightsix.fiber.tree.*;
+import me.zeroeightsix.fiber.tree.ConfigValue;
+import me.zeroeightsix.fiber.tree.Node;
+import me.zeroeightsix.fiber.tree.Property;
+import me.zeroeightsix.fiber.tree.TreeItem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,11 +20,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AnnotatedSettingsTest {
 
-    private ConfigNode node;
+    private ConfigNodeBuilder node;
 
     @BeforeEach
     void setup() {
-        node = new ConfigNode();
+        node = new ConfigNodeBuilder();
     }
 
     @Test
@@ -29,7 +33,7 @@ class AnnotatedSettingsTest {
         OneFieldPojo pojo = new OneFieldPojo();
         AnnotatedSettings.applyToNode(node, pojo);
 
-        Set<TreeItem> items = node.getItems();
+        Set<TreeItem> items = node.build().getItems();
         assertEquals(1, items.size(), "Setting map is 1 entry large");
         TreeItem item = node.lookup("a");
         assertNotNull(item, "Setting exists");

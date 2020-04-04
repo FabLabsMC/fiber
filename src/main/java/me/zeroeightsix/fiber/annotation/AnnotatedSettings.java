@@ -6,11 +6,11 @@ import me.zeroeightsix.fiber.annotation.convention.SettingNamingConvention;
 import me.zeroeightsix.fiber.annotation.exception.MalformedFieldException;
 import me.zeroeightsix.fiber.annotation.magic.TypeMagic;
 import me.zeroeightsix.fiber.builder.ConfigAggregateBuilder;
+import me.zeroeightsix.fiber.builder.ConfigNodeBuilder;
 import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
 import me.zeroeightsix.fiber.builder.constraint.AbstractConstraintsBuilder;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.tree.ConfigNode;
-import me.zeroeightsix.fiber.tree.Node;
 import me.zeroeightsix.fiber.tree.TreeItem;
 
 import javax.annotation.Nonnull;
@@ -18,23 +18,18 @@ import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.BiConsumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class AnnotatedSettings {
 
-    public static <P> ConfigNode asNode(P pojo) throws FiberException {
-        return asNode(pojo, ConfigNode::new);
+    public static ConfigNode asNode(Object pojo) throws FiberException {
+        ConfigNodeBuilder builder = new ConfigNodeBuilder();
+        applyToNode(builder, pojo);
+        return builder.build();
     }
 
-    public static <N extends Node, P> N asNode(P pojo, Supplier<N> nodeSupplier) throws FiberException {
-        N node = nodeSupplier.get();
-        applyToNode(node, pojo);
-        return node;
-    }
-
-    public static <P> void applyToNode(Node mergeTo, P pojo) throws FiberException {
+    public static <P> void applyToNode(ConfigNodeBuilder mergeTo, P pojo) throws FiberException {
         @SuppressWarnings("unchecked")
         Class<P> pojoClass = (Class<P>) pojo.getClass();
 
@@ -53,8 +48,8 @@ public class AnnotatedSettings {
         NodeOperations.mergeTo(constructNode(pojoClass, pojo, onlyAnnotated, convention), mergeTo);
     }
 
-    private static <P> Node constructNode(Class<P> pojoClass, P pojo, boolean onlyAnnotated, SettingNamingConvention convention) throws FiberException {
-        ConfigNode node = new ConfigNode();
+    private static <P> ConfigNodeBuilder constructNode(Class<P> pojoClass, P pojo, boolean onlyAnnotated, SettingNamingConvention convention) throws FiberException {
+        ConfigNodeBuilder node = new ConfigNodeBuilder();
 
         List<Member> defaultEmpty = new ArrayList<>();
         Map<String, List<Member>> listenerMap = findListeners(pojoClass);
@@ -64,12 +59,11 @@ public class AnnotatedSettings {
             checkViolation(field);
             String name = findName(field, convention);
             if (field.isAnnotationPresent(Setting.Node.class)) {
-                Node sub = node.fork(name);
+                ConfigNodeBuilder sub = node.fork(name);
                 try {
-                    boolean accesssible = field.isAccessible();
                     field.setAccessible(true);
                     AnnotatedSettings.applyToNode(sub, field.get(pojo));
-                    field.setAccessible(accesssible);
+                    sub.build();
                 } catch (IllegalAccessException e) {
                     throw new FiberException("Couldn't fork and apply sub-node", e);
                 }

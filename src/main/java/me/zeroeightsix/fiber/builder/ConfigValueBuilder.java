@@ -2,6 +2,7 @@ package me.zeroeightsix.fiber.builder;
 
 import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
+import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.tree.ConfigValue;
 import me.zeroeightsix.fiber.tree.Node;
@@ -17,6 +18,9 @@ import java.util.function.BiConsumer;
  *
  * <p> The settings created by this builder are considered atomic, and do not allow specifications at the component level.
  * Settings with aggregate types, such as arrays and collections, should be created using {@link ConfigAggregateBuilder}.
+ *
+ * <p><strong>This builder should not be reused if the default values are intended to be mutated!</strong>
+ * Multiple calls to {@link #build()} will result in duplicated references.
  *
  * @param <T> the type of value the produced {@code ConfigValue} will hold
  * @see ConfigValue
@@ -39,7 +43,7 @@ public class ConfigValueBuilder<T> {
 
     // Special snowflake that doesn't really belong in a builder.
     // Used to easily register nodes to another node.
-    private Node parentNode = null;
+    private ConfigNodeBuilder parentNode = null;
 
     /**
      * Creates a new scalar {@code ConfigValueBuilder}.
@@ -144,7 +148,7 @@ public class ConfigValueBuilder<T> {
      * @param node The node the {@link ConfigValue} will be registered to.
      * @return The builder
      */
-    public ConfigValueBuilder<T> withParent(Node node) {
+    public ConfigValueBuilder<T> withParent(ConfigNodeBuilder node) {
         parentNode = node;
         return this;
     }
@@ -175,7 +179,7 @@ public class ConfigValueBuilder<T> {
             // Let's tread with caution.
             try {
                 parentNode.add(built);
-            } catch (Exception e) {
+            } catch (FiberException e) {
                 throw new RuntimeFiberException("Failed to register leaf to node", e);
             }
         }

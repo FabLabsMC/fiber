@@ -1,10 +1,7 @@
 package me.zeroeightsix.fiber.tree;
 
-import me.zeroeightsix.fiber.exception.FiberException;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -12,13 +9,41 @@ import java.util.Set;
  *
  * @see ConfigNode
  */
-public interface Node extends TreeItem {
+public interface Node extends NodeLike, TreeItem {
+
+    /**
+     * Returns this node's name.
+     *
+     * <p> If this node is the root of a config tree, it may not have a name.
+     * In this case, this method returns {@code null}.
+     *
+     * @return this node's name, or {@code null} if it does not have any.
+     */
+    @Nullable
+    @Override
+    String getName();
+
+    /**
+     * Tries to find a child in this node by name. If a child is found, it will be returned.
+     *
+     * <p> The value returned for a given {@code name} is always the same.
+     *
+     * @param name The name of the child to look for
+     * @return the child if found, otherwise {@code null}
+     */
+    @Nullable
+    @Override
+    TreeItem lookup(String name);
 
     /**
      * Returns a set of this node's children.
+     *
+     * <p> The returned set is unmodifiable, and will not be updated in the node's lifetime.
+     *
      * @return the set of children
      */
     @Nonnull
+    @Override
     Set<TreeItem> getItems();
 
     /**
@@ -32,76 +57,4 @@ public interface Node extends TreeItem {
     default boolean isSerializedSeparately() {
         return false;
     }
-
-    /**
-     * Tries to find a child in this node by name. If a child is found, it will be returned.
-     *
-     * @param name The name of the child to look for
-     * @return the child if found, otherwise {@code null}
-     */
-    @Nullable
-    default TreeItem lookup(String name) {
-        return getItems()
-                .stream()
-                .filter(treeItem -> treeItem.getName().equals(name))
-                .findFirst()
-                .orElse(null);
-    }
-
-    /**
-     * Attempts to introduce a new child to this node.
-     *
-     * @param item The child to add
-     * @return the child
-     * @throws FiberException if there was already a child by the same name
-     * @see Property
-     */
-    default TreeItem add(@Nonnull TreeItem item) throws FiberException {
-        TreeItem existing = lookup(item.getName());
-        if (existing == null) {
-            getItems().add(item);
-        } else {
-            throw new FiberException("Attempt to replace node " + existing.getName());
-        }
-        return item;
-    }
-
-    /**
-     * Attempts to remove an item from this node by name.
-     *
-     * @param name the name of the child that should be removed
-     * @return the child if removed, otherwise {@code null}
-     */
-    default TreeItem remove(String name) {
-        Optional<TreeItem> itemOptional = getItems().stream().filter(item -> item.getName().equals(name)).findAny();
-        if (!itemOptional.isPresent()) return null;
-        TreeItem item = itemOptional.get();
-        getItems().remove(item);
-        return item;
-    }
-
-    /**
-     * Forks this node, creating a subtree whose parent is this node.
-     *
-     * @param name the name of the new {@code Node}
-     * @return the created node
-     * @throws FiberException if the new node cannot be added as a child to this node
-     */
-    default Node fork(String name) throws FiberException {
-        return fork(name, false);
-    }
-
-    /**
-     * Forks this node, creating a subtree whose parent is this node.
-     *
-     * @param name the name of the new {@code Node}
-     * @param serializeSeparately if {@code true}, the subtree will not appear in the
-     *                            serialized representation of this {@code Node}
-     * @return the created node
-     * @throws FiberException if the new node cannot be added as a child to this node
-     */
-    default Node fork(String name, boolean serializeSeparately) throws FiberException {
-        return (Node) add(new ConfigNode(name, null, serializeSeparately));
-    }
-
 }

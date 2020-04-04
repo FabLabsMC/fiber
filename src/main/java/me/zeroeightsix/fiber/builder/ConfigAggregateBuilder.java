@@ -3,7 +3,6 @@ package me.zeroeightsix.fiber.builder;
 import me.zeroeightsix.fiber.annotation.AnnotatedSettings;
 import me.zeroeightsix.fiber.builder.constraint.AggregateConstraintsBuilder;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.tree.Node;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
@@ -107,7 +106,7 @@ public final class ConfigAggregateBuilder<A, E> extends ConfigValueBuilder<A> {
     }
 
     @Override
-    public ConfigAggregateBuilder<A, E> withParent(Node node) {
+    public ConfigAggregateBuilder<A, E> withParent(ConfigNodeBuilder node) {
         super.withParent(node);
         return this;
     }
