@@ -8,13 +8,11 @@ package me.zeroeightsix.fiber.tree;
  * <pre>{@code
  * public final PropertyMirror<Integer> diamondsDropped = new PropertyMirror<>();
  *
- * {
- *     ConfigNode.builder()
+ * private final Node config = ConfigNode.builder()
  *     .beginValue("diamondsDropped", Integer.class)
  *      .beginConstraints().atLeast(1).finishConstraints()
  *     .finishValue(diamondsDropped::mirror)
  *     .build();
- * }
  * }</pre>
  *
  * @param <T> the type of value this property mirrors
