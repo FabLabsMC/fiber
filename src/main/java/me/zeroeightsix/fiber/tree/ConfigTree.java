@@ -1,10 +1,19 @@
 package me.zeroeightsix.fiber.tree;
 
+import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
 
 public interface ConfigTree {
+    /**
+     * @return a new builder for a root config node
+     */
+    static ConfigTreeBuilder builder() {
+        return new ConfigTreeBuilder();
+    }
+
     /**
      * Returns a collection of this node's children.
      *

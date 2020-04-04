@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber;
 
-import me.zeroeightsix.fiber.builder.ConfigNodeBuilder;
+import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.constraint.CompositeType;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.serialization.JanksonSerializer;
@@ -23,13 +23,13 @@ class JanksonSerializerTest {
     void nodeSerialization() throws IOException, FiberException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         JanksonSerializer jk = new JanksonSerializer();
-        ConfigNode nodeOne = new ConfigNodeBuilder()
+        ConfigNode nodeOne = new ConfigTreeBuilder()
                 .beginValue("A", Integer.class)
                 .withDefaultValue(10)
                 .finishValue()
                 .build();
 
-        ConfigNode nodeTwo = new ConfigNodeBuilder()
+        ConfigNode nodeTwo = new ConfigTreeBuilder()
                 .beginValue("A", Integer.class)
                 .withDefaultValue(20)
                 .finishValue()
@@ -45,14 +45,14 @@ class JanksonSerializerTest {
     void nodeSerialization1() throws IOException, FiberException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         JanksonSerializer jk = new JanksonSerializer();
-        ConfigNode nodeOne = new ConfigNodeBuilder()
+        ConfigNode nodeOne = new ConfigTreeBuilder()
                 .fork("child")
                     .beginValue("A", 10)
                     .finishValue()
                 .finishNode()
                 .build();
 
-        ConfigNodeBuilder builderTwo = new ConfigNodeBuilder();
+        ConfigTreeBuilder builderTwo = new ConfigTreeBuilder();
         ConfigNode childTwo = builderTwo
                 .fork("child")
                     .beginValue("A", 20)
@@ -71,7 +71,7 @@ class JanksonSerializerTest {
         PropertyMirror<String> versionOne = new PropertyMirror<>();
         PropertyMirror<Integer> settingOne = new PropertyMirror<>();
 
-        ConfigNode nodeOne = new ConfigNodeBuilder()
+        ConfigNode nodeOne = new ConfigTreeBuilder()
                 .beginValue("version", "0.1")
                     .withFinality()
                 .finishValue(versionOne::mirror)
@@ -84,7 +84,7 @@ class JanksonSerializerTest {
         PropertyMirror<String> versionTwo = new PropertyMirror<>();
         PropertyMirror<Integer> settingTwo = new PropertyMirror<>();
 
-        ConfigNode nodeTwo = new ConfigNodeBuilder()
+        ConfigNode nodeTwo = new ConfigTreeBuilder()
                 .beginValue("version", "1.0.0")
                 .withFinality()
                 .beginConstraints() // technically redundant with final, but checks the default value
@@ -126,12 +126,12 @@ class JanksonSerializerTest {
     void nodeSerialization2() throws IOException, FiberException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         JanksonSerializer jk = new JanksonSerializer();
-        ConfigNode parentOne = new ConfigNodeBuilder()
+        ConfigNode parentOne = new ConfigTreeBuilder()
                 .fork("child").withSeparateSerialization()
                 .beginValue("A", 10)
                 .finishValue()
                 .build();
-        ConfigNodeBuilder builderTwo = new ConfigNodeBuilder();
+        ConfigTreeBuilder builderTwo = new ConfigTreeBuilder();
         ConfigNode childTwo = builderTwo.fork("child").withSeparateSerialization()
                 .beginValue("A", 20)
                 .finishValue()

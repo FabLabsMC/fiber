@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.annotation;
 
-import me.zeroeightsix.fiber.builder.ConfigNodeBuilder;
+import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.tree.ConfigTree;
 import me.zeroeightsix.fiber.tree.ConfigValue;
@@ -20,11 +20,11 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AnnotatedSettingsTest {
 
-    private ConfigNodeBuilder node;
+    private ConfigTreeBuilder node;
 
     @BeforeEach
     void setup() {
-        node = new ConfigNodeBuilder();
+        node = new ConfigTreeBuilder();
     }
 
     @Test

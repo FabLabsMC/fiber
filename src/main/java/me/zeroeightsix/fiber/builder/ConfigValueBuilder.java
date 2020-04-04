@@ -26,7 +26,7 @@ import java.util.function.Consumer;
  */
 public class ConfigValueBuilder<T> {
 
-    private final ConfigNodeBuilder parentNode;
+    private final ConfigTreeBuilder parentNode;
     @Nonnull
     protected final Class<T> type;
     @Nonnull
@@ -48,7 +48,7 @@ public class ConfigValueBuilder<T> {
      * @param name the name of the {@code ConfigValue} produced by this builder
      * @param type       the class object representing the type of values this builder will create settings for
      */
-    public ConfigValueBuilder(ConfigNodeBuilder parentNode, @Nonnull String name, @Nonnull Class<T> type) {
+    public ConfigValueBuilder(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull Class<T> type) {
         this.parentNode = parentNode;
         this.name = name;
         this.type = type;
@@ -193,11 +193,11 @@ public class ConfigValueBuilder<T> {
         return built;
     }
 
-    public ConfigNodeBuilder finishValue() {
+    public ConfigTreeBuilder finishValue() {
         return finishValue(n -> {});
     }
 
-    public ConfigNodeBuilder finishValue(Consumer<ConfigValue<T>> action) {
+    public ConfigTreeBuilder finishValue(Consumer<ConfigValue<T>> action) {
         action.accept(build());
         return parentNode;
     }
