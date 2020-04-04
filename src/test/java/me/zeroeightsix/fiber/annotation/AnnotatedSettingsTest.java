@@ -2,8 +2,8 @@ package me.zeroeightsix.fiber.annotation;
 
 import me.zeroeightsix.fiber.builder.ConfigNodeBuilder;
 import me.zeroeightsix.fiber.exception.FiberException;
+import me.zeroeightsix.fiber.tree.ConfigTree;
 import me.zeroeightsix.fiber.tree.ConfigValue;
-import me.zeroeightsix.fiber.tree.Node;
 import me.zeroeightsix.fiber.tree.Property;
 import me.zeroeightsix.fiber.tree.TreeItem;
 import org.junit.jupiter.api.BeforeEach;
@@ -181,7 +181,7 @@ class AnnotatedSettingsTest {
         SubNodePojo pojo = new SubNodePojo();
         AnnotatedSettings.applyToNode(node, pojo);
         assertEquals(1, node.getItems().size(), "Node has one item");
-        Node subnode = (Node) node.lookup("a");
+        ConfigTree subnode = (ConfigTree) node.lookup("a");
         assertNotNull(subnode, "Subnode exists");
         assertEquals(1, subnode.getItems().size(), "Subnode has one item");
     }

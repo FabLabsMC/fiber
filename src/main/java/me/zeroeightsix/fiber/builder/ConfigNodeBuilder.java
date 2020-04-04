@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class ConfigNodeBuilder implements NodeLike {
+public class ConfigNodeBuilder implements ConfigTree {
     private final Map<String, TreeItem> items = new HashMap<>();
     @Nullable
     protected ConfigNodeBuilder parent;

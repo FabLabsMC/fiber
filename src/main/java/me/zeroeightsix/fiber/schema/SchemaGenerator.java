@@ -10,6 +10,7 @@ import me.zeroeightsix.fiber.builder.constraint.CompositeConstraintsBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.ValuedConstraint;
 import me.zeroeightsix.fiber.serialization.Marshaller;
+import me.zeroeightsix.fiber.tree.ConfigTree;
 import me.zeroeightsix.fiber.tree.ConfigValue;
 import me.zeroeightsix.fiber.tree.Node;
 
@@ -42,13 +43,13 @@ public class SchemaGenerator {
 		this(null);
 	}
 
-	public JsonObject createSchema(Node node) {
+	public JsonObject createSchema(ConfigTree tree) {
 		JsonObject object = new JsonObject();
 
-		node.getItems().forEach(item -> {
+		tree.getItems().forEach(item -> {
 			// TODO: Maybe allow for custom schema deserialisers? / generic metadata
 			if (item instanceof Node) {
-				object.put(item.getName(), createSchema((Node) item));
+				object.put(item.getName(), createSchema((ConfigTree) item));
 			} else if (item instanceof ConfigValue) {
 				object.put(item.getName(), createSchema((ConfigValue<?>) item));
 			}

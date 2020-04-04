@@ -4,7 +4,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
 
-public interface NodeLike {
+public interface ConfigTree {
     /**
      * Returns a collection of this node's children.
      *

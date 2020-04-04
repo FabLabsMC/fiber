@@ -17,7 +17,7 @@ public class NodeOperations {
      * @param from  The {@code ConfigNode} that will be read from, but not mutated.
      * @param to    The mutated {@link ConfigNode} that will inherit <code>from</code>'s values and nodes.
      */
-    public static void mergeTo(NodeLike from, ConfigNodeBuilder to) {
+    public static void mergeTo(ConfigTree from, ConfigNodeBuilder to) {
         try {
             for (TreeItem item : from.getItems()) {
                 to.add(item, true);

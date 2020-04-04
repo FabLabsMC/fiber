@@ -5,8 +5,8 @@ import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.FinalConstraint;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
+import me.zeroeightsix.fiber.tree.ConfigTree;
 import me.zeroeightsix.fiber.tree.ConfigValue;
-import me.zeroeightsix.fiber.tree.Node;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -61,7 +61,7 @@ public class ConfigValueBuilder<T> {
      *
      * @param name the name
      * @return {@code this} builder
-     * @see Node#lookup
+     * @see ConfigTree#lookup
      */
     public ConfigValueBuilder<T> withName(String name) {
         this.name = name;

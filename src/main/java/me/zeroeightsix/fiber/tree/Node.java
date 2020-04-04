@@ -9,7 +9,7 @@ import java.util.Collection;
  *
  * @see ConfigNode
  */
-public interface Node extends NodeLike, TreeItem {
+public interface Node extends ConfigTree, TreeItem {
 
     /**
      * Returns this node's name.

@@ -2,7 +2,10 @@ package me.zeroeightsix.fiber;
 
 import me.zeroeightsix.fiber.builder.ConfigNodeBuilder;
 import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
-import me.zeroeightsix.fiber.tree.*;
+import me.zeroeightsix.fiber.tree.ConfigTree;
+import me.zeroeightsix.fiber.tree.ConfigValue;
+import me.zeroeightsix.fiber.tree.Property;
+import me.zeroeightsix.fiber.tree.TreeItem;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +16,7 @@ class NodeOperationsTest {
     @Test
     @DisplayName("Node -> Node")
     void mergeTo() {
-        Node nodeOne = new ConfigNodeBuilder()
+        ConfigTree treeOne = new ConfigNodeBuilder()
                 .beginValue("A", Integer.class)
                 .withDefaultValue(10)
                 .finishValue()
@@ -21,7 +24,7 @@ class NodeOperationsTest {
 
         ConfigNodeBuilder nodeTwo = new ConfigNodeBuilder();
 
-        NodeOperations.mergeTo(nodeOne, nodeTwo);
+        NodeOperations.mergeTo(treeOne, nodeTwo);
 
         testNodeFor(nodeTwo, "A", Integer.class, 10);
     }
@@ -53,7 +56,7 @@ class NodeOperationsTest {
         testItemFor(Integer.class, 10, valueTwo);
     }
 
-    static <T> void testNodeFor(NodeLike node, String name, Class<T> type, T value) {
+    static <T> void testNodeFor(ConfigTree node, String name, Class<T> type, T value) {
         TreeItem item = node.lookup(name);
         testItemFor(type, value, item);
     }
