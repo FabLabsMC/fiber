@@ -1,6 +1,8 @@
 package me.zeroeightsix.fiber.builder;
 
 import me.zeroeightsix.fiber.annotation.AnnotatedSettings;
+import me.zeroeightsix.fiber.annotation.Setting;
+import me.zeroeightsix.fiber.annotation.Settings;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.tree.*;
@@ -72,7 +74,17 @@ public class ConfigTreeBuilder implements ConfigTree {
     }
 
     /**
-     * Marks the built node as being serialized separately
+     * Marks the built subtree as being serialized separately.
+     *
+     * <p> A subtree marked for separate serialization will not appear in the
+     * serialized representation of its ancestors. This property can be useful
+     * when partitioning a big configuration tree into several files.
+     *
+     * <p> This method has no effect if the built node is a tree root.
+     *
+     * @return {@code this}, for chaining
+     * @see #withSeparateSerialization()
+     * @see Node#isSerializedSeparately()
      */
     public ConfigTreeBuilder withSeparateSerialization() {
         withSeparateSerialization(true);
@@ -80,8 +92,16 @@ public class ConfigTreeBuilder implements ConfigTree {
     }
 
     /**
-     * @param serializeSeparately if {@code true}, the subtree will not appear in the
-     *                            serialized representation of the built {@code Node}
+     * Sets whether a subtree should be serialized separately.
+     *
+     * <p> If {@code serializeSeparately} is {@code true}, the subtree created
+     * from this builder will not appear in the serialized representation of the
+     * ancestor. This property can be especially useful when partitioning a
+     * big configuration tree into several files.
+     *
+     * <p> This method has no effect if the built node is a tree root.
+     *
+     * @param serializeSeparately {@code true} if the built tree should be serialized separately
      * @return {@code this}, for chaining
      */
     public ConfigTreeBuilder withSeparateSerialization(boolean serializeSeparately) {
@@ -94,16 +114,16 @@ public class ConfigTreeBuilder implements ConfigTree {
      *
      * <p> The node's structure will be based on the {@code pojo}'s fields,
      * recursively generating settings. The generated settings can be configured
-     * in the {@code pojo}'s class declaration, using annotations such as {@link me.zeroeightsix.fiber.annotation.Setting}.
+     * in the {@code pojo}'s class declaration, using annotations such as {@link Setting}.
      *
      * <p> The generated {@link ConfigValue}s will be bound to their respective fields,
      * setting the latter when the former's value is {@linkplain ConfigValue#setValue(Object) updated}.
      *
      * @param pojo an object serving as a base to reflectively generate a config tree
      * @return {@code this}, for chaining
-     * @see me.zeroeightsix.fiber.annotation.Setting
-     * @see me.zeroeightsix.fiber.annotation.Settings
-     * @see me.zeroeightsix.fiber.annotation.AnnotatedSettings#applyToNode(ConfigTreeBuilder, Object)
+     * @see Setting @Setting
+     * @see Settings @Settings
+     * @see AnnotatedSettings#applyToNode(ConfigTreeBuilder, Object)
      */
     public ConfigTreeBuilder applyFromPojo(Object pojo) throws FiberException {
         AnnotatedSettings.applyToNode(this, pojo);
