@@ -3,6 +3,7 @@ package me.zeroeightsix.fiber.tree;
 import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.ConstraintType;
+import me.zeroeightsix.fiber.constraint.FinalConstraint;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -77,6 +78,17 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p> A value is accepted if it satisfies every constraint
+     * this setting has. Note that some constraints such as {@link FinalConstraint}
+     * will cause even the current {@linkplain #getValue() value} to be rejected.
+     *
+     * @param value the value to check
+     * @see #setValue(Object)
+     * @see #getConstraints()
+     */
     @Override
     public boolean accepts(@Nullable T value) {
         for (Constraint<? super T> constraint : this.constraints) {

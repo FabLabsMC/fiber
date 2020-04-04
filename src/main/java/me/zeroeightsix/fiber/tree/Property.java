@@ -20,11 +20,13 @@ public interface Property<T> extends HasValue<T> {
     boolean setValue(T value);
 
     /**
-     * Returns {@code true} if the given value satisfies this property's constraints.
+     * Returns {@code true} if this property can be set to the given value.
      *
      * @param value the value to check
-     * @return {@code true} if the given value satisfies this property's constraints, {@code false} otherwise.
+     * @return {@code true} if this property accepts the given value, {@code false} otherwise.
      * @see #setValue(Object)
      */
-    boolean accepts(T value);
+    default boolean accepts(T value) {
+        return true;
+    }
 }
