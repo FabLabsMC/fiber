@@ -7,5 +7,5 @@ import java.lang.reflect.AnnotatedElement;
 
 @FunctionalInterface
 public interface ConstraintAnnotationProcessor<A extends Annotation, T> {
-    void apply(A annotation, AnnotatedElement annotated, Object pojo, AbstractConstraintsBuilder<?, ?, T, ?> constraints);
+    void apply(A annotation, AnnotatedElement annotated, Object pojo, AbstractConstraintsBuilder<?, ?, T> constraints);
 }

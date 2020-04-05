@@ -1,13 +1,17 @@
 package me.zeroeightsix.fiber.tree;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
  * A commentable tree item.
+ *
+ * @see ConfigNode
+ * @see ConfigValue
  */
-public class ConfigLeaf implements TreeItem, Commentable {
+public abstract class ConfigLeaf implements TreeItem, Commentable {
 
-    @Nullable
+    @Nonnull
     private final String name;
     @Nullable
     private final String comment;
@@ -15,17 +19,16 @@ public class ConfigLeaf implements TreeItem, Commentable {
     /**
      * Creates a new {@code ConfigLeaf}.
      *
-     * @param name the name for this leaf
+     * @param name    the name for this leaf
      * @param comment the comment for this leaf
-     * @see ConfigLeaf
      */
-    public ConfigLeaf(@Nullable String name, @Nullable String comment) {
+    public ConfigLeaf(@Nonnull String name, @Nullable String comment) {
         this.name = name;
         this.comment = comment;
     }
 
     @Override
-    @Nullable
+    @Nonnull
     public String getName() {
         return name;
     }

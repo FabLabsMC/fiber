@@ -1,8 +1,10 @@
 package me.zeroeightsix.fiber.builder.constraint;
 
-import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
+import me.zeroeightsix.fiber.builder.ConfigAggregateBuilder;
+import me.zeroeightsix.fiber.builder.ConfigNodeBuilder;
 import me.zeroeightsix.fiber.constraint.CompositeType;
 import me.zeroeightsix.fiber.constraint.Constraint;
+import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.tree.ConfigValue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,13 +23,13 @@ class ConstraintsBuilderTest {
     @Test
     public void testNumericalConstraints() {
         List<Constraint<? super Integer>> constraintList = new ArrayList<>();
-        ConstraintsBuilder.Scalar<Void, Integer> constraintsBuilder = ConstraintsBuilder.scalar(null, constraintList, Integer.class);
+        ConstraintsBuilder<Integer> constraintsBuilder = new ConstraintsBuilder<>(null, constraintList, Integer.class);
         constraintsBuilder.atLeast(5)
                 .composite(CompositeType.OR)
                 .atLeast(20)
                 .atMost(10)
                 .finishComposite()
-                .finish();
+                .finishConstraints();
 
         Predicate<Integer> finalConstraint = integer -> constraintList.stream().allMatch(constraint -> constraint.test(integer));
 
@@ -45,12 +47,12 @@ class ConstraintsBuilderTest {
     @DisplayName("Test array aggregate constraints")
     @Test
     public void testArrayConstraints() {
-        ConfigValue<Integer[]> config = ConfigValueBuilder.aggregate(Integer[].class)
-                .constraints().component()
+        ConfigValue<Integer[]> config = ConfigAggregateBuilder.create(null, "foo", Integer[].class)
+                .beginConstraints().component()
                 .range(3, 10)
                 .finishComponent()
                 .maxLength(3)
-                .finish()
+                .finishConstraints()
                 .build();
 
         assertTrue(config.setValue(new Integer[0]));
@@ -63,13 +65,24 @@ class ConstraintsBuilderTest {
     @DisplayName("Test collection aggregate constraints")
     @Test
     public void testCollectionConstraints() {
-        ConfigValue<List<Integer>> config = ConfigValueBuilder.<List<Integer>, Integer>aggregate(List.class, Integer.class)
-                .constraints().component()
+        ConfigNodeBuilder builder = new ConfigNodeBuilder();
+        ConfigAggregateBuilder<List<Integer>, Integer> aggregateBuilder = builder.beginAggregateValue("foo", Collections.emptyList(), Integer.class);
+        assertThrows(RuntimeFiberException.class, () -> aggregateBuilder.beginConstraints().component().regex(""), "Invalid constraint type at build time");
+
+        ConfigValue<List<Integer>> config = aggregateBuilder
+                .beginConstraints().component()
                 .atLeast(3).atMost(10)
                 .finishComponent()
                 .maxLength(3)
-                .finish()
+                .finishConstraints()
                 .build();
+
+        ConfigValue<List<Integer>> deferredConfig = builder.beginAggregateValue("deferred", Collections.<Integer>emptyList(), null)
+                .beginConstraints().component().regex("").finishComponent()
+                .finishConstraints().build();
+        assertThrows(RuntimeException.class, () -> deferredConfig.setValue(Collections.singletonList(1)),
+                "Invalid constraint type (deferred check)"
+        );
 
         assertTrue(config.setValue(Collections.emptyList()));
         assertTrue(config.setValue(Arrays.asList(4, 5, 6)));
@@ -77,5 +90,4 @@ class ConstraintsBuilderTest {
         assertFalse(config.setValue(Arrays.asList(5, 6, 7, 8)));
         assertFalse(config.setValue(Arrays.asList(9, 10, 11)));
     }
-
 }

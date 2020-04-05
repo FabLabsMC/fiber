@@ -5,13 +5,13 @@ import me.zeroeightsix.fiber.annotation.convention.NoNamingConvention;
 import me.zeroeightsix.fiber.annotation.convention.SettingNamingConvention;
 import me.zeroeightsix.fiber.annotation.exception.MalformedFieldException;
 import me.zeroeightsix.fiber.annotation.magic.TypeMagic;
+import me.zeroeightsix.fiber.builder.ConfigAggregateBuilder;
+import me.zeroeightsix.fiber.builder.ConfigNodeBuilder;
 import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
 import me.zeroeightsix.fiber.builder.constraint.AbstractConstraintsBuilder;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.tree.ConfigNode;
-import me.zeroeightsix.fiber.tree.Node;
-import me.zeroeightsix.fiber.tree.TreeItem;
 
 import javax.annotation.Nonnull;
 import java.lang.annotation.Annotation;
@@ -19,7 +19,6 @@ import java.lang.reflect.*;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.BiConsumer;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -105,17 +104,13 @@ public class AnnotatedSettings {
         return this;
     }
 
-    public <P> ConfigNode asNode(P pojo) throws FiberException {
-        return asNode(pojo, ConfigNode::new);
+    public ConfigNode asNode(Object pojo) throws FiberException {
+        ConfigNodeBuilder builder = new ConfigNodeBuilder();
+        applyToNode(builder, pojo);
+        return builder.build();
     }
 
-    public <N extends Node, P> N asNode(P pojo, Supplier<N> nodeSupplier) throws FiberException {
-        N node = nodeSupplier.get();
-        applyToNode(node, pojo);
-        return node;
-    }
-
-    public <P> void applyToNode(Node mergeTo, P pojo) throws FiberException {
+    public <P> void applyToNode(ConfigNodeBuilder mergeTo, P pojo) throws FiberException {
         @SuppressWarnings("unchecked")
         Class<P> pojoClass = (Class<P>) pojo.getClass();
 
@@ -134,8 +129,8 @@ public class AnnotatedSettings {
         NodeOperations.mergeTo(constructNode(pojoClass, pojo, onlyAnnotated, convention), mergeTo);
     }
 
-    private <P> Node constructNode(Class<P> pojoClass, P pojo, boolean onlyAnnotated, SettingNamingConvention convention) throws FiberException {
-        ConfigNode node = new ConfigNode();
+    private <P> ConfigNodeBuilder constructNode(Class<P> pojoClass, P pojo, boolean onlyAnnotated, SettingNamingConvention convention) throws FiberException {
+        ConfigNodeBuilder node = new ConfigNodeBuilder();
 
         List<Member> defaultEmpty = new ArrayList<>();
         Map<String, List<Member>> listenerMap = findListeners(pojoClass);
@@ -147,7 +142,7 @@ public class AnnotatedSettings {
             if (field.isAnnotationPresent(Setting.Node.class)) {
                 fieldToNode(pojo, node, field, name);
             } else {
-                node.add(fieldToItem(field, pojo, name, listenerMap.getOrDefault(name, defaultEmpty)));
+                fieldToItem(node, field, pojo, name, listenerMap.getOrDefault(name, defaultEmpty));
             }
         }
 
@@ -177,27 +172,27 @@ public class AnnotatedSettings {
         return field.isAnnotationPresent(Setting.class) ? Optional.of(field.getAnnotation(Setting.class)) : Optional.empty();
     }
 
-    private <P> void fieldToNode(P pojo, Node node, Field field, String name) throws FiberException {
-        Node sub = node.fork(name);
+    private <P> void fieldToNode(P pojo, ConfigNodeBuilder node, Field field, String name) throws FiberException {
+        ConfigNodeBuilder sub = node.fork(name);
         try {
             field.setAccessible(true);
             applyToNode(sub, field.get(pojo));
             applyAnnotationProcessors(pojo, field, sub, this.nodeSettingProcessors);
+            sub.build();
         } catch (IllegalAccessException e) {
             throw new FiberException("Couldn't fork and apply sub-node", e);
         }
     }
 
-    private <T> TreeItem fieldToItem(Field field, Object pojo, String name, List<Member> listeners) throws FiberException {
+    private <T> void fieldToItem(ConfigNodeBuilder node, Field field, Object pojo, String name, List<Member> listeners) throws FiberException {
         Class<T> type = getSettingTypeFromField(field);
 
-        ConfigValueBuilder<T, ?> builder = createConfigValueBuilder(type, field, pojo)
-                .withName(name)
+        ConfigValueBuilder<T> builder = createConfigValueBuilder(node, name, type, field, pojo)
                 .withComment(findComment(field))
                 .withDefaultValue(findDefaultValue(field, pojo))
-                .setFinal(getSettingAnnotation(field).map(Setting::constant).orElse(false));
+                .withFinality(getSettingAnnotation(field).map(Setting::constant).orElse(false));
 
-        constrain(builder.constraints(), field.getAnnotatedType(), pojo).finish();
+        constrain(builder.beginConstraints(), field.getAnnotatedType(), pojo).finishConstraints();
 
         for (Member listener : listeners) {
             BiConsumer<T, T> consumer = constructListener(listener, pojo, type);
@@ -216,7 +211,7 @@ public class AnnotatedSettings {
 
         applyAnnotationProcessors(pojo, field, builder, this.settingProcessors);
 
-        return builder.build();
+        builder.build();
     }
 
     private <C> void applyAnnotationProcessors(Object pojo, Field field, C sub, Map<Class<? extends Annotation>, ? extends SettingAnnotationProcessor<?, C>> settingProcessors) {
@@ -228,44 +223,44 @@ public class AnnotatedSettings {
         }
     }
 
-    @SuppressWarnings({"unchecked"})
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Nonnull
-    private <T, E> ConfigValueBuilder<T, ?> createConfigValueBuilder(Class<T> type, Field field, Object pojo) {
+    private <T, E> ConfigValueBuilder<T> createConfigValueBuilder(ConfigNodeBuilder parent, String name, Class<T> type, Field field, Object pojo) {
         AnnotatedType annotatedType = field.getAnnotatedType();
-        if (ConfigValueBuilder.isAggregate(type)) {
+        if (ConfigAggregateBuilder.isAggregate(type)) {
             if (Collection.class.isAssignableFrom(type)) {
                 if (annotatedType instanceof AnnotatedParameterizedType) {
                     AnnotatedType[] typeArgs = ((AnnotatedParameterizedType) annotatedType).getAnnotatedActualTypeArguments();
-                    if (typeArgs.length == 1) {
+                    if (typeArgs.length == 1) { // assume that the only type parameter is the Collection type parameter
                         AnnotatedType typeArg = typeArgs[0];
                         Class<E> componentType = (Class<E>) TypeMagic.classForType(typeArg.getType());
                         if (componentType != null) {
                             // coerce to a collection class and configure as such
-                            Class<Collection<E>> collectionType = (Class<Collection<E>>) type;
-                            ConfigValueBuilder.Aggregate<T, E> aggregate = (ConfigValueBuilder.Aggregate<T, E>) ConfigValueBuilder.aggregate(collectionType, componentType);
+                            ConfigAggregateBuilder<T, E> aggregate = ConfigAggregateBuilder.create(parent, name, (Class) type, componentType);
                             // element constraints are on the type argument (eg. List<@Regex String>), so we setup constraints from it
-                            constrain(aggregate.constraints().component(), typeArg, pojo).finishComponent().finish();
+                            constrain(aggregate.beginConstraints().component(), typeArg, pojo).finishComponent().finishConstraints();
                             return aggregate;
                         }
                     }
+                    return ConfigAggregateBuilder.create(parent, name, (Class) type, null);
                 }
             } else {
                 assert type.isArray();
                 if (annotatedType instanceof AnnotatedArrayType) {
                     // coerce to an array class
                     Class<E[]> arrayType = (Class<E[]>) type;
-                    ConfigValueBuilder.Aggregate<T, E> aggregate = (ConfigValueBuilder.Aggregate<T, E>) ConfigValueBuilder.aggregate(arrayType);
+                    ConfigAggregateBuilder<T, E> aggregate = (ConfigAggregateBuilder<T, E>) ConfigAggregateBuilder.create(parent, name, arrayType);
                     // take the component constraint information from the special annotated type
-                    constrain(aggregate.constraints().component(), ((AnnotatedArrayType) annotatedType).getAnnotatedGenericComponentType(), pojo).finishComponent().finish();
+                    constrain(aggregate.beginConstraints().component(), ((AnnotatedArrayType) annotatedType).getAnnotatedGenericComponentType(), pojo).finishComponent().finishConstraints();
                     return aggregate;
                 }
             }
         }
-        return ConfigValueBuilder.scalar(type);
+        return new ConfigValueBuilder<>(parent, name, type);
     }
 
     @SuppressWarnings("unchecked")
-    private <T, B extends AbstractConstraintsBuilder<?, ?, T, ?>> B constrain(B constraints, AnnotatedElement annotated, Object pojo) {
+    private <T, B extends AbstractConstraintsBuilder<?, T, ?>> B constrain(B constraints, AnnotatedElement annotated, Object pojo) {
         for (Annotation annotation : annotated.getAnnotations()) {
             ConstraintProcessorEntry entry = this.constraintProcessors.get(annotation.annotationType());
             if (entry != null) {

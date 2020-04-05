@@ -1,8 +1,9 @@
 package me.zeroeightsix.fiber.builder;
 
-import me.zeroeightsix.fiber.annotation.AnnotatedSettings;
 import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
+import me.zeroeightsix.fiber.constraint.FinalConstraint;
+import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.tree.ConfigValue;
 import me.zeroeightsix.fiber.tree.Node;
@@ -10,97 +11,46 @@ import me.zeroeightsix.fiber.tree.Node;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
- * A builder for {@code ConfigValue}s.
+ * A builder for scalar {@code ConfigValue}s.
  *
- * <p> This is the abstract base class for all builders of this type. Builders implementing this class include
- * {@link Scalar Scalar} and {@link Aggregate Aggregate} for scalar (one-value) and aggregate (collection/array) values, respectively.
+ * <p> The settings created by this builder are considered atomic, and do not allow specifications at the component level.
+ * Settings with aggregate types, such as arrays and collections, should be created using {@link ConfigAggregateBuilder}.
  *
  * @param <T> the type of value the produced {@code ConfigValue} will hold
- * @param <B> the type of {@code this}
  * @see ConfigValue
  */
-public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> {
+public class ConfigValueBuilder<T> {
 
-    /**
-     * Determines if a {@code Class} object represents an aggregate type,
-     * ie. if it is an {@linkplain Class#isArray() Array} or a {@linkplain Collection}.
-     *
-     * @param type the type to check
-     * @return {@code true} if {@code type} is an aggregate type;
-     * {@code false} otherwise
-     */
-    public static boolean isAggregate(Class<?> type) {
-        return type.isArray() || Collection.class.isAssignableFrom(type);
-    }
-
-    /**
-     * Creates and returns an {@link ConfigValueBuilder.Aggregate aggregate builder} for an array type.
-     *
-     * @param arrayType the class of the array used for this aggregate builder
-     * @param <E> the type of values held by {@code arrayType}
-     * @return the newly created builder
-     * @see #isAggregate
-     */
-    @SuppressWarnings("unchecked")
-    public static <E> Aggregate<E[], E> aggregate(@Nonnull Class<E[]> arrayType) {
-        if (!arrayType.isArray()) throw new RuntimeFiberException(arrayType + " is not a valid array type");
-        return new Aggregate<>(arrayType, (Class<E>) AnnotatedSettings.wrapPrimitive(arrayType.getComponentType()));
-    }
-
-    /**
-     * Creates and returns an {@link ConfigValueBuilder.Aggregate aggregate builder} for a collection type.
-     *
-     * @param collectionType the class of the collection used for this aggregate builder
-     * @param componentType the class of the type of elements {@code collectionType} holds
-     * @param <C> the type {@code collectionType} represents. eg. {@code List}
-     * @param <E> the type {@code componentType} represents. eg. {@code Integer}
-     * @return the newly created builder
-     */
-    @SuppressWarnings("unchecked")
-    public static <C extends Collection<E>, E> Aggregate<C, E> aggregate(@Nonnull Class<? super C> collectionType, @Nonnull Class<E> componentType) {
-        if (!Collection.class.isAssignableFrom(collectionType)) throw new RuntimeFiberException(collectionType + " is not a valid Collection type");
-        return new Aggregate<>((Class<C>) collectionType, componentType);
-    }
-
-    /**
-     * Creates and returns a scalar {@code ConfigValueBuilder}.
-     *
-     * @param type the class of the type used for this builder
-     * @param <T> the type {@code type} represents. For example, this could be {@code Integer}
-     * @return the newly created builder
-     * @see Scalar
-     */
-    public static <T> Scalar<T> scalar(Class<T> type) {
-        return new Scalar<>(type);
-    }
-
+    private final ConfigNodeBuilder parentNode;
     @Nonnull
     protected final Class<T> type;
-    @Nullable
+    @Nonnull
     private String name;
+
     @Nullable
     private String comment = null;
     @Nullable
     private T defaultValue = null;
+
     private boolean isFinal = false;
-    private BiConsumer<T, T> consumer = (t, t2) -> {};
+    private BiConsumer<T, T> consumer = (t, t2) -> { };
     protected List<Constraint<? super T>> constraintList = new ArrayList<>();
 
-    // Special snowflake that doesn't really belong in a builder.
-    // Used to easily register nodes to another node.
-    private Node parentNode = null;
-
     /**
-     * @see #aggregate(Class)
-     * @see #aggregate(Class, Class)
-     * @see #scalar(Class)
+     * Creates a new scalar {@code ConfigValueBuilder}.
+     *
+     * @param parentNode the {@code ConfigNodeBuilder} this builder originates from
+     * @param name the name of the {@code ConfigValue} produced by this builder
+     * @param type       the class object representing the type of values this builder will create settings for
      */
-    ConfigValueBuilder(@Nonnull Class<T> type) {
+    public ConfigValueBuilder(ConfigNodeBuilder parentNode, @Nonnull String name, @Nonnull Class<T> type) {
+        this.parentNode = parentNode;
+        this.name = name;
         this.type = type;
     }
 
@@ -118,9 +68,9 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
      * @return {@code this} builder
      * @see Node#lookup
      */
-    public B withName(String name) {
+    public ConfigValueBuilder<T> withName(String name) {
         this.name = name;
-        return self();
+        return this;
     }
 
     /**
@@ -131,9 +81,9 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
      * @param comment the comment
      * @return {@code this} builder
      */
-    public B withComment(String comment) {
+    public ConfigValueBuilder<T> withComment(String comment) {
         this.comment = comment;
-        return self();
+        return this;
     }
 
     /**
@@ -146,13 +96,13 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
      * @param consumer the listener
      * @return {@code this} builder
      */
-    public B withListener(BiConsumer<T, T> consumer) {
+    public ConfigValueBuilder<T> withListener(BiConsumer<T, T> consumer) {
         final BiConsumer<T, T> prevConsumer = this.consumer; // to avoid confusion
         this.consumer = (t, t2) -> {
             prevConsumer.accept(t, t2);
             consumer.accept(t, t2); // The newest consumer is called last -> listeners are called in the order they are added
         };
-        return self();
+        return this;
     }
 
     /**
@@ -160,12 +110,15 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
      *
      * <p> If {@code null}, or if this method is never called, the {@code ConfigValue} will have no default value.
      *
+     * <p> Note that every {@code ConfigValue} created from this builder will share a reference
+     * to the given {@code defaultValue}. Immutability is encouraged.
+     *
      * @param defaultValue the default value
      * @return {@code this} builder
      */
-    public B withDefaultValue(T defaultValue) {
+    public ConfigValueBuilder<T> withDefaultValue(T defaultValue) {
         this.defaultValue = defaultValue;
-        return self();
+        return this;
     }
 
     /**
@@ -175,40 +128,26 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
      * This method behaves as if: {@code this.setFinal(true)}.
      *
      * @return {@code this} builder
-     * @see #setFinal(boolean)
+     * @see #withFinality(boolean)
      */
-    public B setFinal() {
+    public ConfigValueBuilder<T> withFinality() {
         this.isFinal = true;
-        return self();
+        return this;
     }
 
     /**
      * Sets the finality.
      *
-     * <p> If {@code true}, the produced setting can not be changed. It will be initialised with its default value, if there is one. Afterwards, it can not be changed again.
+     * <p> If {@code true}, the produced setting can not be changed.
+     * It will be initialised with its default value, if there is one. Afterwards, it can not be changed again;
+     * {@link ConfigValue#setValue(Object)} will always return {@code false}.
      *
-     * @param isFinal the finality
+     * @param isFinal whether or not the value can be changed after building
      * @return {@code this} builder
      */
-    public B setFinal(boolean isFinal) {
+    public ConfigValueBuilder<T> withFinality(boolean isFinal) {
         this.isFinal = isFinal;
-        return self();
-    }
-
-    /**
-     * Sets the node that the {@code ConfigValue} will be registered to.
-     *
-     * @param node The node the {@link ConfigValue} will be registered to.
-     * @return The builder
-     */
-    public B withParent(Node node) {
-        parentNode = node;
-        return self();
-    }
-
-    @SuppressWarnings("unchecked")
-    protected final B self() {
-        return (B) this;
+        return this;
     }
 
     /**
@@ -217,17 +156,33 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
      * @return the created builder
      * @see ConstraintsBuilder
      */
-    public abstract ConstraintsBuilder<B, T, ?> constraints();
+    public ConstraintsBuilder<T> beginConstraints() {
+        return new ConstraintsBuilder<>(this, constraintList, type);
+    }
 
     /**
      * Builds the {@code ConfigValue}.
      *
-     * <p> If a parent was specified using {@link #withParent}, the {@code ConfigValue} will also be registered to its parent node.
+     * <p> If a parent was specified in the constructor, the {@code ConfigValue} will also be registered to its parent node.
+     *
+     * <p> This method should not be called multiple times <em>if the default value is intended to be mutated</em>.
+     * Multiple calls will result in duplicated references to the default value.
      *
      * @return the {@code ConfigValue}
      */
     public ConfigValue<T> build() {
-        ConfigValue<T> built = new ConfigValue<>(name, comment, defaultValue, defaultValue, consumer, constraintList, type, isFinal);
+        if (defaultValue != null) {
+            for (Constraint<? super T> constraint : constraintList) {
+                if (!constraint.test(defaultValue)) {
+                    throw new RuntimeFiberException("Default value '" + defaultValue + "' does not satisfy constraints");
+                }
+            }
+        }
+        List<Constraint<? super T>> constraints = new ArrayList<>(this.constraintList);
+        if (isFinal) {
+            constraints.add(0, FinalConstraint.instance());  // index 0 to avoid uselessly checking everything each time
+        }
+        ConfigValue<T> built = new ConfigValue<>(name, comment, defaultValue, consumer, constraints, type);
 
         if (parentNode != null) {
             // We don't know what kind of evil collection we're about to add a node to.
@@ -235,7 +190,7 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
             // Let's tread with caution.
             try {
                 parentNode.add(built);
-            } catch (Exception e) {
+            } catch (FiberException e) {
                 throw new RuntimeFiberException("Failed to register leaf to node", e);
             }
         }
@@ -243,49 +198,12 @@ public abstract class ConfigValueBuilder<T, B extends ConfigValueBuilder<T, B>> 
         return built;
     }
 
-    /**
-     * A {@code ConfigValueBuilder} that produces scalar {@code ConfigValue}s.
-     *
-     * <p>Scalar types are those with only one value, such as {@code Integer} or {@code String}.
-     * Settings with aggregate types, such as {@code List}s or arrays, are created using {@link Aggregate}
-     *
-     * @param <T> the type of scalar value
-     * @see #scalar
-     */
-    public static class Scalar<T> extends ConfigValueBuilder<T, Scalar<T>> {
-        Scalar(@Nonnull Class<T> type) {
-            super(type);
-        }
-
-        @Override
-        public ConstraintsBuilder.Scalar<Scalar<T>, T> constraints() {
-            return ConstraintsBuilder.scalar(this, constraintList, type);
-        }
+    public ConfigNodeBuilder finishValue() {
+        return finishValue(n -> {});
     }
 
-    /**
-     * A {@code ConfigValueBuilder} that produces aggregate {@code ConfigValue}s.
-     *
-     * <p>Aggregate types are those that hold multiple values, such as {@code List} or arrays.
-     * Settings with scalar types, such as {@code Integer} or {@code String}, are created using {@link Scalar}.
-     *
-     * @param <A> the type of aggregate value
-     * @param <E> the type of values held by {@code <A>}
-     * @see #aggregate
-     */
-    public static final class Aggregate<A, E> extends ConfigValueBuilder<A, Aggregate<A, E>> {
-        @Nonnull
-        private final Class<E> componentType;
-
-        Aggregate(@Nonnull Class<A> type, @Nonnull Class<E> componentType) {
-            super(type);
-            this.componentType = componentType;
-        }
-
-        @Override
-        public ConstraintsBuilder.Aggregate<Aggregate<A, E>, A, E> constraints() {
-            return ConstraintsBuilder.aggregate(this, constraintList, type, componentType);
-        }
-
+    public ConfigNodeBuilder finishValue(Consumer<ConfigValue<T>> action) {
+        action.accept(build());
+        return parentNode;
     }
 }

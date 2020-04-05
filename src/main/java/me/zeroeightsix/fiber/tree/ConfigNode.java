@@ -1,29 +1,40 @@
 package me.zeroeightsix.fiber.tree;
 
+import me.zeroeightsix.fiber.builder.ConfigNodeBuilder;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * A {@code ConfigLeaf} with children
  */
 public class ConfigNode extends ConfigLeaf implements Node {
 
-    @Nonnull
-    private Set<TreeItem> items = new HashSet<>();
-    private boolean serializeSeparately;
+    /**
+     * @return a new builder for a root config node
+     */
+    public static ConfigNodeBuilder builder() {
+        return new ConfigNodeBuilder();
+    }
+
+    private final Map<String, TreeItem> items;
+    private final boolean serializeSeparately;
 
     /**
      * Creates a new {@code ConfigNode}.
      *
      * @param name the name for this {@link ConfigNode}
      * @param comment the comment for this {@link ConfigNode}
+     * @param items the node's items
      * @param serializeSeparately whether or not this node should be serialised separately. If {@code true}, it will be ignored during serialisation.
-     * @see ConfigNode
      */
-    public ConfigNode(@Nullable String name, @Nullable String comment, boolean serializeSeparately) {
+    public ConfigNode(String name, @Nullable String comment, @Nonnull Map<String, TreeItem> items, boolean serializeSeparately) {
         super(name, comment);
+        this.items = Collections.unmodifiableMap(new TreeMap<>(items));
         this.serializeSeparately = serializeSeparately;
     }
 
@@ -36,8 +47,8 @@ public class ConfigNode extends ConfigLeaf implements Node {
      * @param comment the comment for this {@link ConfigNode}
      * @see ConfigNode
      */
-    public ConfigNode(@Nullable String name, @Nullable String comment) {
-        this(name, comment, false);
+    public ConfigNode(@Nonnull String name, @Nullable String comment) {
+        this(name, comment, Collections.emptyMap(), false);
     }
 
     /**
@@ -48,13 +59,19 @@ public class ConfigNode extends ConfigLeaf implements Node {
      * @see ConfigNode
      */
     public ConfigNode() {
-        this(null, null);
+        this(null, null, Collections.emptyMap(), false);
     }
 
     @Nonnull
     @Override
-    public Set<TreeItem> getItems() {
-        return items;
+    public Collection<TreeItem> getItems() {
+        return items.values();
+    }
+
+    @Nullable
+    @Override
+    public TreeItem lookup(String name) {
+        return items.get(name);
     }
 
     /**
