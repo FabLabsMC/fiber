@@ -62,6 +62,10 @@ val javadocJar = tasks.create<Jar>("javadocJar") {
     from(javadoc)
 }
 
+val processResources = tasks.getByName<ProcessResources>("processResources") {
+    expand("version" to version)
+}
+
 publishing {
     publications {
         val main = create("main", MavenPublication::class.java) {
