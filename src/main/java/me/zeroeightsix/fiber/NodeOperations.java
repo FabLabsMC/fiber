@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber;
 
-import me.zeroeightsix.fiber.builder.ConfigNodeBuilder;
+import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.tree.*;
@@ -17,7 +17,7 @@ public class NodeOperations {
      * @param from  The {@code ConfigNode} that will be read from, but not mutated.
      * @param to    The mutated {@link ConfigNode} that will inherit <code>from</code>'s values and nodes.
      */
-    public static void mergeTo(ConfigTree from, ConfigNodeBuilder to) {
+    public static void mergeTo(ConfigTree from, ConfigTreeBuilder to) {
         try {
             for (TreeItem item : from.getItems()) {
                 to.add(item, true);
@@ -33,7 +33,7 @@ public class NodeOperations {
      * @param value The leaf node to be inherited
      * @param to    The mutated {@link ConfigNode} that will inherit <code>value</code>
      */
-    public static void mergeTo(ConfigValue<?> value, ConfigNodeBuilder to) {
+    public static void mergeTo(ConfigValue<?> value, ConfigTreeBuilder to) {
         try {
             to.add(value, true);
         } catch (FiberException e) {

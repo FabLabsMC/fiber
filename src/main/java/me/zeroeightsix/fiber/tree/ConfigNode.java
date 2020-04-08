@@ -1,7 +1,5 @@
 package me.zeroeightsix.fiber.tree;
 
-import me.zeroeightsix.fiber.builder.ConfigNodeBuilder;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -13,13 +11,6 @@ import java.util.TreeMap;
  * A {@code ConfigLeaf} with children
  */
 public class ConfigNode extends ConfigLeaf implements Node {
-
-    /**
-     * @return a new builder for a root config node
-     */
-    public static ConfigNodeBuilder builder() {
-        return new ConfigNodeBuilder();
-    }
 
     private final Map<String, TreeItem> items;
     private final boolean serializeSeparately;
@@ -75,10 +66,13 @@ public class ConfigNode extends ConfigLeaf implements Node {
     }
 
     /**
-     * Returns if this node should be serialised separately.
+     * Returns whether this node should be serialised separately as a subtree.
      *
-     * <p> If {@code true}, it should be ignored during serialisation.
-     * @return whether or not it is serialised separately
+     * <p> If {@code true}, this node should be ignored during an ancestor's
+     * serialisation. This property should be ignored when this node is the
+     * root of the currently serialised tree.
+     *
+     * @return whether or not this node is serialised separately
      */
     @Override
     public boolean isSerializedSeparately() {

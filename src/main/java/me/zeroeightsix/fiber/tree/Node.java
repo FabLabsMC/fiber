@@ -47,10 +47,11 @@ public interface Node extends ConfigTree, TreeItem {
     Collection<TreeItem> getItems();
 
     /**
-     * Returns {@code true} if this node should be serialized separately to its parent.
+     * Returns {@code true} if this node should be serialized separately from its parent.
      *
      * <p> If a node is serialized separately, it should not appear in the serialized representation of
-     * its parent. This setting has no effect if this node is a root.
+     * its ancestors. This property should be ignored if this node is the
+     * root of the currently serialised tree.
      *
      * @return {@code true} if this node should be serialized separately, and {@code false} otherwise
      */

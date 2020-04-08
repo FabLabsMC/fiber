@@ -1,6 +1,8 @@
 package me.zeroeightsix.fiber.builder;
 
 import me.zeroeightsix.fiber.annotation.AnnotatedSettings;
+import me.zeroeightsix.fiber.annotation.Setting;
+import me.zeroeightsix.fiber.annotation.Settings;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.tree.*;
@@ -12,10 +14,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class ConfigNodeBuilder implements ConfigTree {
+public class ConfigTreeBuilder implements ConfigTree {
     private final Map<String, TreeItem> items = new HashMap<>();
     @Nullable
-    protected ConfigNodeBuilder parent;
+    protected ConfigTreeBuilder parent;
     @Nullable
     protected String name;
     @Nullable
@@ -23,7 +25,7 @@ public class ConfigNodeBuilder implements ConfigTree {
     private boolean serializeSeparately;
     private ConfigNode built;
 
-    public ConfigNodeBuilder() {
+    public ConfigTreeBuilder() {
         this.parent = null;
         this.name = null;
     }
@@ -54,37 +56,55 @@ public class ConfigNodeBuilder implements ConfigTree {
         return items.get(name);
     }
 
-    public ConfigNodeBuilder withParent(ConfigNodeBuilder parent) {
+    public ConfigTreeBuilder withParent(ConfigTreeBuilder parent) {
         if (name == null && parent != null) throw new IllegalStateException("A child node needs a name");
         this.parent = parent;
         return this;
     }
 
-    public ConfigNodeBuilder withName(String name) {
+    public ConfigTreeBuilder withName(String name) {
         if (name == null && parent != null) throw new IllegalStateException("Cannot remove the name from a child node");
         this.name = name;
         return this;
     }
 
-    public ConfigNodeBuilder withComment(@Nullable String comment) {
+    public ConfigTreeBuilder withComment(@Nullable String comment) {
         this.comment = comment;
         return this;
     }
 
     /**
-     * Marks the built node as being serialized separately
+     * Marks the built subtree as being serialized separately.
+     *
+     * <p> A subtree marked for separate serialization will not appear in the
+     * serialized representation of its ancestors. This property can be useful
+     * when partitioning a big configuration tree into several files.
+     *
+     * <p> This method has no effect if the built node is a tree root.
+     *
+     * @return {@code this}, for chaining
+     * @see #withSeparateSerialization()
+     * @see Node#isSerializedSeparately()
      */
-    public ConfigNodeBuilder withSeparateSerialization() {
+    public ConfigTreeBuilder withSeparateSerialization() {
         withSeparateSerialization(true);
         return this;
     }
 
     /**
-     * @param serializeSeparately if {@code true}, the subtree will not appear in the
-     *                            serialized representation of the built {@code Node}
+     * Sets whether a subtree should be serialized separately.
+     *
+     * <p> If {@code serializeSeparately} is {@code true}, the subtree created
+     * from this builder will not appear in the serialized representation of the
+     * ancestor. This property can be especially useful when partitioning a
+     * big configuration tree into several files.
+     *
+     * <p> This method has no effect if the built node is a tree root.
+     *
+     * @param serializeSeparately {@code true} if the built tree should be serialized separately
      * @return {@code this}, for chaining
      */
-    public ConfigNodeBuilder withSeparateSerialization(boolean serializeSeparately) {
+    public ConfigTreeBuilder withSeparateSerialization(boolean serializeSeparately) {
         this.serializeSeparately = serializeSeparately;
         return this;
     }
@@ -94,18 +114,18 @@ public class ConfigNodeBuilder implements ConfigTree {
      *
      * <p> The node's structure will be based on the {@code pojo}'s fields,
      * recursively generating settings. The generated settings can be configured
-     * in the {@code pojo}'s class declaration, using annotations such as {@link me.zeroeightsix.fiber.annotation.Setting}.
+     * in the {@code pojo}'s class declaration, using annotations such as {@link Setting}.
      *
      * <p> The generated {@link ConfigValue}s will be bound to their respective fields,
      * setting the latter when the former's value is {@linkplain ConfigValue#setValue(Object) updated}.
      *
      * @param pojo an object serving as a base to reflectively generate a config tree
      * @return {@code this}, for chaining
-     * @see me.zeroeightsix.fiber.annotation.Setting
-     * @see me.zeroeightsix.fiber.annotation.Settings
-     * @see me.zeroeightsix.fiber.annotation.AnnotatedSettings#applyToNode(ConfigNodeBuilder, Object)
+     * @see Setting @Setting
+     * @see Settings @Settings
+     * @see AnnotatedSettings#applyToNode(ConfigTreeBuilder, Object)
      */
-    public ConfigNodeBuilder applyFromPojo(Object pojo) throws FiberException {
+    public ConfigTreeBuilder applyFromPojo(Object pojo) throws FiberException {
         AnnotatedSettings.applyToNode(this, pojo);
         return this;
     }
@@ -179,7 +199,7 @@ public class ConfigNodeBuilder implements ConfigTree {
      * @throws FiberException if there was already a child by the same name
      * @see Property
      */
-    public ConfigNodeBuilder add(@Nonnull TreeItem item) throws FiberException {
+    public ConfigTreeBuilder add(@Nonnull TreeItem item) throws FiberException {
         add(item, false);
         return this;
     }
@@ -192,7 +212,7 @@ public class ConfigNodeBuilder implements ConfigTree {
      * @throws FiberException if there was already a child by the same name
      * @see Property
      */
-    public ConfigNodeBuilder add(@Nonnull TreeItem item, boolean overwrite) throws FiberException {
+    public ConfigTreeBuilder add(@Nonnull TreeItem item, boolean overwrite) throws FiberException {
         if (!overwrite && items.containsKey(item.getName())) {
             throw new FiberException("Attempt to replace node " + item.getName());
         }
@@ -216,8 +236,8 @@ public class ConfigNodeBuilder implements ConfigTree {
      * @param name the name of the new {@code Node}
      * @return the created node builder
      */
-    public ConfigNodeBuilder fork(String name) {
-        return new ConfigNodeBuilder().withName(name).withParent(this);
+    public ConfigTreeBuilder fork(String name) {
+        return new ConfigTreeBuilder().withName(name).withParent(this);
     }
 
     /**
@@ -246,11 +266,11 @@ public class ConfigNodeBuilder implements ConfigTree {
         return built;
     }
 
-    public ConfigNodeBuilder finishNode() {
+    public ConfigTreeBuilder finishNode() {
         return finishNode(n -> { });
     }
 
-    public ConfigNodeBuilder finishNode(Consumer<ConfigNode> action) {
+    public ConfigTreeBuilder finishNode(Consumer<ConfigNode> action) {
         if (parent == null) {
             throw new IllegalStateException("finishNode should not be called for a root node. Use build instead.");
         }

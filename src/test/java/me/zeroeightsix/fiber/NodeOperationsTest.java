@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber;
 
-import me.zeroeightsix.fiber.builder.ConfigNodeBuilder;
+import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
 import me.zeroeightsix.fiber.tree.ConfigTree;
 import me.zeroeightsix.fiber.tree.ConfigValue;
@@ -16,13 +16,13 @@ class NodeOperationsTest {
     @Test
     @DisplayName("Node -> Node")
     void mergeTo() {
-        ConfigTree treeOne = new ConfigNodeBuilder()
+        ConfigTree treeOne = new ConfigTreeBuilder()
                 .beginValue("A", Integer.class)
                 .withDefaultValue(10)
                 .finishValue()
                 .build();
 
-        ConfigNodeBuilder nodeTwo = new ConfigNodeBuilder();
+        ConfigTreeBuilder nodeTwo = new ConfigTreeBuilder();
 
         NodeOperations.mergeTo(treeOne, nodeTwo);
 
@@ -32,7 +32,7 @@ class NodeOperationsTest {
     @Test
     @DisplayName("Value -> Node")
     void mergeTo1() {
-        ConfigNodeBuilder node = new ConfigNodeBuilder();
+        ConfigTreeBuilder node = new ConfigTreeBuilder();
         ConfigValue<Integer> value = node.beginValue("A", Integer.class)
                 .withDefaultValue(10)
                 .build();
