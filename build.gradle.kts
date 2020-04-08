@@ -62,6 +62,11 @@ val javadocJar = tasks.create<Jar>("javadocJar") {
     from(javadoc)
 }
 
+val processResources = tasks.getByName<ProcessResources>("processResources") {
+    include("fabric.mod.json")
+    expand("version" to version)
+}
+
 publishing {
     publications {
         val main = create("main", MavenPublication::class.java) {

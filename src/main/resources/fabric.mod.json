@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "fiber",
+  "version": "${version}",
+  "name": "fiber",
+  "description": "A configuration system made for fabric",
+  "authors": [
+    "086",
+    "Pyrofab"
+  ],
+  "contact": {
+    "sources": "https://github.com/DaemonicLabs/fiber"
+  },
+  "license": "Apache License 2.0",
+  "icon": "assets/icon.png",
+  "environment": "*"
+}
