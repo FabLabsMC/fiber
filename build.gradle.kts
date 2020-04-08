@@ -63,6 +63,7 @@ val javadocJar = tasks.create<Jar>("javadocJar") {
 }
 
 val processResources = tasks.getByName<ProcessResources>("processResources") {
+    include("fabric.mod.json")
     expand("version" to version)
 }
 
