@@ -26,12 +26,12 @@ public class AnnotatedSettings {
 
     public static final AnnotatedSettings DEFAULT_SETTINGS = new AnnotatedSettings();
 
-    private final Map<Class<? extends Annotation>, SettingAnnotationProcessor.Value<?>> settingProcessors = new HashMap<>();
-    private final Map<Class<? extends Annotation>, SettingAnnotationProcessor.Node<?>> nodeSettingProcessors = new HashMap<>();
+    private final Map<Class<? extends Annotation>, SettingAnnotationProcessor.Value<?>> valueSettingProcessors = new HashMap<>();
+    private final Map<Class<? extends Annotation>, SettingAnnotationProcessor.Group<?>> groupSettingProcessors = new HashMap<>();
     private final Map<Class<? extends Annotation>, ConstraintProcessorEntry> constraintProcessors = new HashMap<>();
 
     {
-        registerNodeSettingProcessor(Setting.Node.class, (annotation, field, pojo, node) -> {});
+        registerGroupProcessor(Setting.Node.class, (annotation, field, pojo, node) -> {});
         registerConstraintProcessor(Setting.Constrain.Range.class, Number.class, (annotation, annotated, pojo, constraints) -> {
             if (annotation.min() > Double.NEGATIVE_INFINITY) {
                 constraints.atLeast(annotation.min());
@@ -65,26 +65,26 @@ public class AnnotatedSettings {
      * @return {@code this}, for chaining
      */
     public <A extends Annotation> AnnotatedSettings registerSettingProcessor(Class<A> annotationType, SettingAnnotationProcessor.Value<A> processor) {
-        if (settingProcessors.containsKey(annotationType)) {
+        if (valueSettingProcessors.containsKey(annotationType)) {
             throw new IllegalStateException("Cannot register multiple setting processors for the same annotation (" + annotationType + ")");
         }
-        settingProcessors.put(annotationType, processor);
+        valueSettingProcessors.put(annotationType, processor);
         return this;
     }
 
     /**
-     * Registers a node annotation processor, tasked with processing annotations on node fields (config fields annotated with {@link Setting.Node}.
+     * Registers a group annotation processor, tasked with processing annotations on ancestor fields (config fields annotated with {@link Setting.Node}.
      *
      * @param annotationType a class representing the type of annotation to process
      * @param processor      a processor for this annotation
      * @param <A>            the type of annotation to process
      * @return {@code this}, for chaining
      */
-    public <A extends Annotation> AnnotatedSettings registerNodeSettingProcessor(Class<A> annotationType, SettingAnnotationProcessor.Node<A> processor) {
-        if (nodeSettingProcessors.containsKey(annotationType)) {
+    public <A extends Annotation> AnnotatedSettings registerGroupProcessor(Class<A> annotationType, SettingAnnotationProcessor.Group<A> processor) {
+        if (groupSettingProcessors.containsKey(annotationType)) {
             throw new IllegalStateException("Cannot register multiple node processors for the same annotation (" + annotationType + ")");
         }
-        nodeSettingProcessors.put(annotationType, processor);
+        groupSettingProcessors.put(annotationType, processor);
         return this;
     }
 
@@ -179,7 +179,7 @@ public class AnnotatedSettings {
         try {
             field.setAccessible(true);
             applyToNode(sub, field.get(pojo));
-            applyAnnotationProcessors(pojo, field, sub, this.nodeSettingProcessors);
+            applyAnnotationProcessors(pojo, field, sub, this.groupSettingProcessors);
             sub.build();
         } catch (IllegalAccessException e) {
             throw new FiberException("Couldn't fork and apply sub-node", e);
@@ -211,7 +211,7 @@ public class AnnotatedSettings {
             }
         });
 
-        applyAnnotationProcessors(pojo, field, builder, this.settingProcessors);
+        applyAnnotationProcessors(pojo, field, builder, this.valueSettingProcessors);
 
         builder.build();
     }
