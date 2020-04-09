@@ -1,5 +1,8 @@
 package me.zeroeightsix.fiber.tree;
 
+import me.zeroeightsix.fiber.exception.FiberQueryException;
+
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,17 +18,49 @@ import java.util.Optional;
  * @param <T> the type of queried tree nodes
  */
 public final class ConfigQuery<T extends TreeItem> {
-    public static ConfigQuery<Node> node(String first, String... more) {
+
+    /**
+     * Creates a {@code ConfigQuery} for a subtree with a specific path.
+     *
+     * <p> Each part of the path must correspond to a single node name.
+     * The first part matches a direct child node of the root supplied to
+     * the {@link #search(NodeLike)} and {@link #run(NodeLike)} methods.
+     * Each additional name matches a node such that the <em>n</em>th name
+     * matches a node at depth <em>n</em>, starting from the supplied tree.
+     *
+     * @param first the first name in the config path
+     * @param more  additional node names forming the config path
+     * @return a config query for subtrees of existing trees
+     */
+    public static ConfigQuery<Node> subtree(String first, String... more) {
         return new ConfigQuery<>(Node.class, null, first, more);
     }
 
-    public static <V> ConfigQuery<ConfigValue<V>> property(Class<V> valueType, String first, String... more) {
-        return new ConfigQuery<>(ConfigValue.class, valueType, first, more);
+    /**
+     * Creates a {@code ConfigQuery} for a property with a specific path and value type.
+     *
+     * <p> Each part of the path must correspond to a single node name.
+     * The first part matches a direct child node of the root supplied to
+     * the {@link #search(NodeLike)} and {@link #run(NodeLike)} methods.
+     * Each additional name matches a node such that the <em>n</em>th name
+     * matches a node at depth <em>n</em>, starting from the supplied tree.
+     *
+     * <p> The returned query will only match a leaf with a {@linkplain Property#getType() property type}
+     * that is assignable to the given {@code propertyType}.
+     *
+     * @param propertyType a class object representing the type of values held by queried properties
+     * @param first the first name in the config path
+     * @param more  additional node names forming the config path
+     * @return a config query for subtrees of existing trees
+     */
+    public static <V> ConfigQuery<ConfigValue<? extends V>> property(Class<V> propertyType, String first, String... more) {
+        return new ConfigQuery<>(ConfigValue.class, propertyType, first, more);
     }
 
     private final List<String> path;
     private final Class<? super T> nodeType;
-    @Nullable private final Class<?> valueType;
+    @Nullable
+    private final Class<?> valueType;
 
     private ConfigQuery(Class<? super T> nodeType, @Nullable Class<?> valueType, String first, String[] path) {
         this.nodeType = nodeType;
@@ -35,30 +70,74 @@ public final class ConfigQuery<T extends TreeItem> {
         this.path.addAll(Arrays.asList(path));
     }
 
-    public Optional<T> run(NodeLike tree) {
-        NodeLike subTree = tree;
+    /**
+     * Searches a config tree for a node satisfying this query.
+     * If none is found, {@code Optional.empty()} is returned.
+     *
+     * @param cfg the config tree to search in
+     * @return an {@code Optional} describing the queried node,
+     * or {@code Optional.empty()}.
+     * @see #run(NodeLike)
+     */
+    public Optional<T> search(NodeLike cfg) {
+        try {
+            return Optional.of(this.run(cfg));
+        } catch (FiberQueryException e) {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Runs this query on a config tree.
+     *
+     * <p> If this query's parameters do not match the config's structure,
+     * a {@link FiberQueryException} carrying error details is thrown.
+     * The exception's information can be used for further handling of the erroring config.
+     *
+     * @param cfg the config tree to run the query on
+     * @return the queried node, with the right path and type
+     * @throws FiberQueryException if this query's parameters do not match the config's structure
+     * @see FiberQueryException.MissingChild
+     * @see FiberQueryException.WrongType
+     * @see #search(NodeLike)
+     */
+    @Nonnull
+    public T run(NodeLike cfg) throws FiberQueryException {
         List<String> path = this.path;
-        int len = path.size();
-        for (int i = 0; i < len; i++) {
-            TreeItem node = subTree.lookup(path.get(i));
-            if (i == len - 1) {
-                if (isValidResult(node)) {
-                    @SuppressWarnings("unchecked") Optional<T> result = (Optional<T>) Optional.of(node);
-                    return result;
-                }
-            } else if (node instanceof NodeLike) {
+        NodeLike subTree = cfg;
+        for (int i = 0; i < path.size() - 1; i++) {
+            String name = path.get(i);
+            TreeItem node = subTree.lookup(name);
+            if (node instanceof NodeLike) {
                 subTree = (NodeLike) node;
+            } else if (node != null) {
+                throw new FiberQueryException.WrongType(subTree, node, Node.class, null);
             } else {
-                break;
+                throw new FiberQueryException.MissingChild(name, subTree);
             }
         }
-        return Optional.empty();
+        TreeItem node = subTree.lookup(path.get(path.size() - 1));
+        if (isValidResult(node)) {
+            assert node != null;
+            @SuppressWarnings("unchecked") T result = (T) node;
+            return result;
+        }
+        throw new FiberQueryException.WrongType(subTree, node, this.nodeType, this.valueType);
     }
 
     private boolean isValidResult(TreeItem node) {
-        return nodeType.isInstance(node) && (valueType == null || valueType.isAssignableFrom(((ConfigValue<?>)node).getType()));
+        return nodeType.isInstance(node) && (valueType == null || valueType.isAssignableFrom(((ConfigValue<?>) node).getType()));
     }
 
+    /**
+     * Returns a string representation of this query.
+     *
+     * <p> The string representation consists of the expected node type, followed
+     * by the expected value type, if any, followed by a representation of this
+     * query's path where individual node names are joined by dots.
+     *
+     * @return a string representation of this query
+     */
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder().append(nodeType.getSimpleName());
