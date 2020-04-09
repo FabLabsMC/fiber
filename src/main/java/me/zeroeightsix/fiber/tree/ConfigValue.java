@@ -133,4 +133,9 @@ public class ConfigValue<T> extends ConfigLeaf implements Property<T> {
         return constraints;
     }
 
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + '<' + getType().getSimpleName() + ">[name=" + getName() + ", comment=" + getComment() + "]";
+    }
+
 }
