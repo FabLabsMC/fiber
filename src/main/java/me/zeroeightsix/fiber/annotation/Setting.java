@@ -1,5 +1,7 @@
 package me.zeroeightsix.fiber.annotation;
 
+import me.zeroeightsix.fiber.tree.ConfigGroup;
+
 import javax.annotation.RegEx;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -49,7 +51,7 @@ public @interface Setting {
     /**
      * Indicates that this setting is a node.
      *
-     * @see me.zeroeightsix.fiber.tree.Node
+     * @see ConfigGroup
      */
     @Target(ElementType.FIELD)
     @Retention(RetentionPolicy.RUNTIME)

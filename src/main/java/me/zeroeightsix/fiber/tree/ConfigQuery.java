@@ -17,7 +17,7 @@ import java.util.Optional;
  *
  * @param <T> the type of queried tree nodes
  */
-public final class ConfigQuery<T extends TreeItem> {
+public final class ConfigQuery<T extends ConfigNode> {
 
     /**
      * Creates a {@code ConfigQuery} for a subtree with a specific path.
@@ -32,8 +32,8 @@ public final class ConfigQuery<T extends TreeItem> {
      * @param more  additional node names forming the config path
      * @return a config query for subtrees of existing trees
      */
-    public static ConfigQuery<Node> subtree(String first, String... more) {
-        return new ConfigQuery<>(Node.class, null, first, more);
+    public static ConfigQuery<ConfigGroup> subtree(String first, String... more) {
+        return new ConfigQuery<>(ConfigGroup.class, null, first, more);
     }
 
     /**
@@ -53,8 +53,8 @@ public final class ConfigQuery<T extends TreeItem> {
      * @param more  additional node names forming the config path
      * @return a config query for subtrees of existing trees
      */
-    public static <V> ConfigQuery<ConfigValue<V>> property(Class<? super V> propertyType, String first, String... more) {
-        return new ConfigQuery<>(ConfigValue.class, propertyType, first, more);
+    public static <V> ConfigQuery<ConfigLeaf<V>> property(Class<? super V> propertyType, String first, String... more) {
+        return new ConfigQuery<>(ConfigLeaf.class, propertyType, first, more);
     }
 
     private final List<String> path;
@@ -107,7 +107,7 @@ public final class ConfigQuery<T extends TreeItem> {
         NodeLike subtree = cfg;
         int lastIndex = path.size() - 1;
         for (int i = 0; i < lastIndex; i++) {
-            subtree = this.lookupChild(subtree, path.get(i), Node.class, null);
+            subtree = this.lookupChild(subtree, path.get(i), ConfigGroup.class, null);
         }
         @SuppressWarnings("unchecked") T result =
                 (T) this.lookupChild(subtree, path.get(lastIndex), this.nodeType, this.valueType);
@@ -115,8 +115,8 @@ public final class ConfigQuery<T extends TreeItem> {
     }
 
     private <N> N lookupChild(NodeLike tree, String name, Class<N> nodeType, @Nullable Class<?> valueType) throws FiberQueryException {
-        TreeItem node = tree.lookup(name);
-        if (nodeType.isInstance(node) && (valueType == null || valueType == ((ConfigValue<?>) node).getType())) {
+        ConfigNode node = tree.lookup(name);
+        if (nodeType.isInstance(node) && (valueType == null || valueType == ((ConfigLeaf<?>) node).getType())) {
             return nodeType.cast(node);
         } else if (node != null) {
             throw new FiberQueryException.WrongType(tree, node, nodeType, valueType);

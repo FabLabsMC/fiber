@@ -1,9 +1,9 @@
 package me.zeroeightsix.fiber.exception;
 
 import me.zeroeightsix.fiber.tree.ConfigQuery;
-import me.zeroeightsix.fiber.tree.Node;
+import me.zeroeightsix.fiber.tree.ConfigGroup;
 import me.zeroeightsix.fiber.tree.NodeLike;
-import me.zeroeightsix.fiber.tree.TreeItem;
+import me.zeroeightsix.fiber.tree.ConfigNode;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -18,8 +18,8 @@ public class FiberQueryException extends FiberException {
     private final NodeLike invalidTree;
 
     public FiberQueryException(String message, NodeLike invalidTree) {
-        super(message + (invalidTree instanceof Node && ((Node) invalidTree).getName() != null
-                ? " (in subtree " + ((Node) invalidTree).getName() + ")" : ""));
+        super(message + (invalidTree instanceof ConfigGroup && ((ConfigGroup) invalidTree).getName() != null
+                ? " (in subtree " + ((ConfigGroup) invalidTree).getName() + ")" : ""));
         this.invalidTree = invalidTree;
     }
 
@@ -68,12 +68,12 @@ public class FiberQueryException extends FiberException {
      * a different type than expected.
      */
     public static class WrongType extends FiberQueryException {
-        private final TreeItem invalidItem;
+        private final ConfigNode invalidItem;
         private final Class<?> expectedNodeType;
         @Nullable
         private final Class<?> expectedValueType;
 
-        public WrongType(NodeLike invalidTree, TreeItem invalidItem, Class<?> expectedNodeType, @Nullable Class<?> expectedValueType) {
+        public WrongType(NodeLike invalidTree, ConfigNode invalidItem, Class<?> expectedNodeType, @Nullable Class<?> expectedValueType) {
             super("Expected node of type " + expectedNodeType.getSimpleName()
                     + (expectedValueType == null ? "" : "<" + expectedValueType.getSimpleName() + ">")
                     + ", got " + invalidItem, invalidTree);
@@ -82,7 +82,7 @@ public class FiberQueryException extends FiberException {
             this.expectedValueType = expectedValueType;
         }
 
-        public TreeItem getInvalidNode() {
+        public ConfigNode getInvalidNode() {
             return invalidItem;
         }
 

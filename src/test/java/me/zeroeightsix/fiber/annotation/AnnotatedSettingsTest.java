@@ -3,9 +3,9 @@ package me.zeroeightsix.fiber.annotation;
 import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.tree.ConfigTree;
-import me.zeroeightsix.fiber.tree.ConfigValue;
+import me.zeroeightsix.fiber.tree.ConfigLeaf;
 import me.zeroeightsix.fiber.tree.Property;
-import me.zeroeightsix.fiber.tree.TreeItem;
+import me.zeroeightsix.fiber.tree.ConfigNode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,12 +33,12 @@ class AnnotatedSettingsTest {
         OneFieldPojo pojo = new OneFieldPojo();
         AnnotatedSettings.applyToNode(node, pojo);
 
-        Collection<TreeItem> items = node.build().getItems();
+        Collection<ConfigNode> items = node.build().getItems();
         assertEquals(1, items.size(), "Setting map is 1 entry large");
-        TreeItem item = node.lookup("a");
+        ConfigNode item = node.lookup("a");
         assertNotNull(item, "Setting exists");
-        assertTrue(ConfigValue.class.isAssignableFrom(item.getClass()), "Setting is a ConfigValue");
-        ConfigValue<?> configValue = (ConfigValue<?>) item;
+        assertTrue(ConfigLeaf.class.isAssignableFrom(item.getClass()), "Setting is a ConfigValue");
+        ConfigLeaf<?> configValue = (ConfigLeaf<?>) item;
         assertNotNull(configValue.getValue(), "Setting value is non-null");
         assertEquals(Integer.class, configValue.getType(), "Setting type is correct");
         assertEquals(Integer.class, configValue.getValue().getClass(), "Setting value reflects correct type");
@@ -59,7 +59,7 @@ class AnnotatedSettingsTest {
         ListenerPojo pojo = new ListenerPojo();
         AnnotatedSettings.applyToNode(node, pojo);
 
-        TreeItem treeItem = node.lookup("a");
+        ConfigNode treeItem = node.lookup("a");
         assertNotNull(treeItem, "Setting A exists");
         assertTrue(treeItem instanceof Property<?>, "Setting A is a property");
         @SuppressWarnings("unchecked")
@@ -172,7 +172,7 @@ class AnnotatedSettingsTest {
     void testConstantSetting() throws FiberException {
         ConstantSettingPojo pojo = new ConstantSettingPojo();
         AnnotatedSettings.applyToNode(node, pojo);
-        assertFalse(((ConfigValue<Integer>) node.lookup("a")).setValue(0));
+        assertFalse(((ConfigLeaf<Integer>) node.lookup("a")).setValue(0));
     }
 
     @Test
@@ -192,7 +192,7 @@ class AnnotatedSettingsTest {
     void testComment() throws FiberException {
         CommentPojo pojo = new CommentPojo();
         AnnotatedSettings.applyToNode(node, pojo);
-        assertEquals("comment", ((ConfigValue<Integer>) node.lookup("a")).getComment(), "Comment exists and is correct");
+        assertEquals("comment", ((ConfigLeaf<Integer>) node.lookup("a")).getComment(), "Comment exists and is correct");
     }
 
     @Test

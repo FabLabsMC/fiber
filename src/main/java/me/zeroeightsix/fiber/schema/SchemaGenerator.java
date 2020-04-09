@@ -11,8 +11,8 @@ import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.ValuedConstraint;
 import me.zeroeightsix.fiber.serialization.Marshaller;
 import me.zeroeightsix.fiber.tree.ConfigTree;
-import me.zeroeightsix.fiber.tree.ConfigValue;
-import me.zeroeightsix.fiber.tree.Node;
+import me.zeroeightsix.fiber.tree.ConfigLeaf;
+import me.zeroeightsix.fiber.tree.ConfigGroup;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;
@@ -48,17 +48,17 @@ public class SchemaGenerator {
 
 		tree.getItems().forEach(item -> {
 			// TODO: Maybe allow for custom schema deserialisers? / generic metadata
-			if (item instanceof Node) {
+			if (item instanceof ConfigGroup) {
 				object.put(item.getName(), createSchema((ConfigTree) item));
-			} else if (item instanceof ConfigValue) {
-				object.put(item.getName(), createSchema((ConfigValue<?>) item));
+			} else if (item instanceof ConfigLeaf) {
+				object.put(item.getName(), createSchema((ConfigLeaf<?>) item));
 			}
 		});
 
 		return object;
 	}
 
-	private JsonObject createSchema(ConfigValue<?> item) {
+	private JsonObject createSchema(ConfigLeaf<?> item) {
 		JsonObject object = new JsonObject();
 		if (item.getType() != null && classIdentifierHashMap.containsKey(item.getType())) {
 			object.put("type", new JsonPrimitive(classIdentifierHashMap.get(item.getType())));

@@ -22,7 +22,7 @@ public interface ConfigTree {
      * @return the set of children
      */
     @Nonnull
-    Collection<TreeItem> getItems();
+    Collection<ConfigNode> getItems();
 
     /**
      * Tries to find a child in this node by name. If a child is found, it will be returned.
@@ -31,6 +31,6 @@ public interface ConfigTree {
      * @return the child if found, otherwise {@code null}
      */
     @Nullable
-    TreeItem lookup(String name);
+    ConfigNode lookup(String name);
 
 }

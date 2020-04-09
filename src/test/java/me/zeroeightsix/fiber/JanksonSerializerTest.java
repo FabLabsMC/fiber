@@ -4,7 +4,7 @@ import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.constraint.CompositeType;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.serialization.JanksonSerializer;
-import me.zeroeightsix.fiber.tree.ConfigNode;
+import me.zeroeightsix.fiber.tree.ConfigGroupImpl;
 import me.zeroeightsix.fiber.tree.PropertyMirror;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,13 +23,13 @@ class JanksonSerializerTest {
     void nodeSerialization() throws IOException, FiberException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         JanksonSerializer jk = new JanksonSerializer();
-        ConfigNode nodeOne = new ConfigTreeBuilder()
+        ConfigGroupImpl nodeOne = new ConfigTreeBuilder()
                 .beginValue("A", Integer.class)
                 .withDefaultValue(10)
                 .finishValue()
                 .build();
 
-        ConfigNode nodeTwo = new ConfigTreeBuilder()
+        ConfigGroupImpl nodeTwo = new ConfigTreeBuilder()
                 .beginValue("A", Integer.class)
                 .withDefaultValue(20)
                 .finishValue()
@@ -45,7 +45,7 @@ class JanksonSerializerTest {
     void nodeSerialization1() throws IOException, FiberException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         JanksonSerializer jk = new JanksonSerializer();
-        ConfigNode nodeOne = new ConfigTreeBuilder()
+        ConfigGroupImpl nodeOne = new ConfigTreeBuilder()
                 .fork("child")
                     .beginValue("A", 10)
                     .finishValue()
@@ -53,12 +53,12 @@ class JanksonSerializerTest {
                 .build();
 
         ConfigTreeBuilder builderTwo = new ConfigTreeBuilder();
-        ConfigNode childTwo = builderTwo
+        ConfigGroupImpl childTwo = builderTwo
                 .fork("child")
                     .beginValue("A", 20)
                     .finishValue()
                 .build();
-        ConfigNode nodeTwo = builderTwo.build();
+        ConfigGroupImpl nodeTwo = builderTwo.build();
 
         jk.serialize(nodeOne, bos);
         jk.deserialize(nodeTwo, new ByteArrayInputStream(bos.toByteArray()));
@@ -71,7 +71,7 @@ class JanksonSerializerTest {
         PropertyMirror<String> versionOne = new PropertyMirror<>();
         PropertyMirror<Integer> settingOne = new PropertyMirror<>();
 
-        ConfigNode nodeOne = new ConfigTreeBuilder()
+        ConfigGroupImpl nodeOne = new ConfigTreeBuilder()
                 .beginValue("version", "0.1")
                     .withFinality()
                 .finishValue(versionOne::mirror)
@@ -84,7 +84,7 @@ class JanksonSerializerTest {
         PropertyMirror<String> versionTwo = new PropertyMirror<>();
         PropertyMirror<Integer> settingTwo = new PropertyMirror<>();
 
-        ConfigNode nodeTwo = new ConfigTreeBuilder()
+        ConfigGroupImpl nodeTwo = new ConfigTreeBuilder()
                 .beginValue("version", "1.0.0")
                 .withFinality()
                 .beginConstraints() // technically redundant with final, but checks the default value
@@ -126,17 +126,17 @@ class JanksonSerializerTest {
     void nodeSerialization2() throws IOException, FiberException {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         JanksonSerializer jk = new JanksonSerializer();
-        ConfigNode parentOne = new ConfigTreeBuilder()
+        ConfigGroupImpl parentOne = new ConfigTreeBuilder()
                 .fork("child").withSeparateSerialization()
                 .beginValue("A", 10)
                 .finishValue()
                 .build();
         ConfigTreeBuilder builderTwo = new ConfigTreeBuilder();
-        ConfigNode childTwo = builderTwo.fork("child").withSeparateSerialization()
+        ConfigGroupImpl childTwo = builderTwo.fork("child").withSeparateSerialization()
                 .beginValue("A", 20)
                 .finishValue()
                 .build();
-        ConfigNode parentTwo = builderTwo.build();
+        ConfigGroupImpl parentTwo = builderTwo.build();
 
         jk.serialize(parentOne, bos);
         jk.deserialize(parentTwo, new ByteArrayInputStream(bos.toByteArray()));

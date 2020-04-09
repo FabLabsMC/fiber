@@ -7,9 +7,9 @@ import java.util.Collection;
 /**
  * A member of a tree that can hold any amount of children
  *
- * @see ConfigNode
+ * @see ConfigGroupImpl
  */
-public interface Node extends ConfigTree, TreeItem {
+public interface ConfigGroup extends ConfigTree, ConfigNode {
 
     /**
      * Returns this node's name.
@@ -33,7 +33,7 @@ public interface Node extends ConfigTree, TreeItem {
      */
     @Nullable
     @Override
-    TreeItem lookup(String name);
+    ConfigNode lookup(String name);
 
     /**
      * Returns a collection of this node's children.
@@ -44,7 +44,7 @@ public interface Node extends ConfigTree, TreeItem {
      */
     @Nonnull
     @Override
-    Collection<TreeItem> getItems();
+    Collection<ConfigNode> getItems();
 
     /**
      * Returns {@code true} if this node should be serialized separately from its parent.

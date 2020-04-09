@@ -6,7 +6,7 @@ import me.zeroeightsix.fiber.constraint.FinalConstraint;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.tree.ConfigTree;
-import me.zeroeightsix.fiber.tree.ConfigValue;
+import me.zeroeightsix.fiber.tree.ConfigLeaf;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -22,7 +22,7 @@ import java.util.function.Consumer;
  * Settings with aggregate types, such as arrays and collections, should be created using {@link ConfigAggregateBuilder}.
  *
  * @param <T> the type of value the produced {@code ConfigValue} will hold
- * @see ConfigValue
+ * @see ConfigLeaf
  */
 public class ConfigValueBuilder<T> {
 
@@ -135,7 +135,7 @@ public class ConfigValueBuilder<T> {
      *
      * <p> If {@code true}, the produced setting can not be changed.
      * It will be initialised with its default value, if there is one. Afterwards, it can not be changed again;
-     * {@link ConfigValue#setValue(Object)} will always return {@code false}.
+     * {@link ConfigLeaf#setValue(Object)} will always return {@code false}.
      *
      * @param isFinal whether or not the value can be changed after building
      * @return {@code this} builder
@@ -165,7 +165,7 @@ public class ConfigValueBuilder<T> {
      *
      * @return the {@code ConfigValue}
      */
-    public ConfigValue<T> build() {
+    public ConfigLeaf<T> build() {
         if (defaultValue != null) {
             for (Constraint<? super T> constraint : constraintList) {
                 if (!constraint.test(defaultValue)) {
@@ -177,7 +177,7 @@ public class ConfigValueBuilder<T> {
         if (isFinal) {
             constraints.add(0, FinalConstraint.instance());  // index 0 to avoid uselessly checking everything each time
         }
-        ConfigValue<T> built = new ConfigValue<>(name, comment, defaultValue, consumer, constraints, type);
+        ConfigLeaf<T> built = new ConfigLeaf<>(name, comment, defaultValue, consumer, constraints, type);
 
         if (parentNode != null) {
             // We don't know what kind of evil collection we're about to add a node to.
@@ -197,7 +197,7 @@ public class ConfigValueBuilder<T> {
         return finishValue(n -> {});
     }
 
-    public ConfigTreeBuilder finishValue(Consumer<ConfigValue<T>> action) {
+    public ConfigTreeBuilder finishValue(Consumer<ConfigLeaf<T>> action) {
         action.accept(build());
         return parentNode;
     }

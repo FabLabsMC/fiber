@@ -1,10 +1,12 @@
 package me.zeroeightsix.fiber.constraint;
 
+import me.zeroeightsix.fiber.tree.ConfigLeaf;
+
 /**
  * Specifies a condition values must satisfy before being set to a {@code ConfigValue}.
  *
  * @param <A> the type of values this constraint checks
- * @see me.zeroeightsix.fiber.tree.ConfigValue
+ * @see ConfigLeaf
  */
 public abstract class Constraint<A> { // A is the type of values we're gonna check
 

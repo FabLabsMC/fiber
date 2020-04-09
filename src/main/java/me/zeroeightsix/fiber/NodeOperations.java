@@ -15,11 +15,11 @@ public class NodeOperations {
      * <p> If both nodes have one or more children with the same name, the child from {@code from} takes priority.
      *
      * @param from  The {@code ConfigNode} that will be read from, but not mutated.
-     * @param to    The mutated {@link ConfigNode} that will inherit <code>from</code>'s values and nodes.
+     * @param to    The mutated {@link ConfigGroupImpl} that will inherit <code>from</code>'s values and nodes.
      */
     public static void mergeTo(ConfigTree from, ConfigTreeBuilder to) {
         try {
-            for (TreeItem item : from.getItems()) {
+            for (ConfigNode item : from.getItems()) {
                 to.add(item, true);
             }
         } catch (FiberException e) {
@@ -31,9 +31,9 @@ public class NodeOperations {
      * Merges a leaf node ({@code ConfigValue}) into a {@code ConfigNode}.
      *
      * @param value The leaf node to be inherited
-     * @param to    The mutated {@link ConfigNode} that will inherit <code>value</code>
+     * @param to    The mutated {@link ConfigGroupImpl} that will inherit <code>value</code>
      */
-    public static void mergeTo(ConfigValue<?> value, ConfigTreeBuilder to) {
+    public static void mergeTo(ConfigLeaf<?> value, ConfigTreeBuilder to) {
         try {
             to.add(value, true);
         } catch (FiberException e) {
