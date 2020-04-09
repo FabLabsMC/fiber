@@ -46,14 +46,14 @@ public final class ConfigQuery<T extends TreeItem> {
      * matches a node at depth <em>n</em>, starting from the supplied tree.
      *
      * <p> The returned query will only match a leaf with a {@linkplain Property#getType() property type}
-     * that is assignable to the given {@code propertyType}.
+     * that is identical to the given {@code propertyType}.
      *
      * @param propertyType a class object representing the type of values held by queried properties
      * @param first the first name in the config path
      * @param more  additional node names forming the config path
      * @return a config query for subtrees of existing trees
      */
-    public static <V> ConfigQuery<ConfigValue<? extends V>> property(Class<V> propertyType, String first, String... more) {
+    public static <V> ConfigQuery<ConfigValue<V>> property(Class<? super V> propertyType, String first, String... more) {
         return new ConfigQuery<>(ConfigValue.class, propertyType, first, more);
     }
 
@@ -104,29 +104,25 @@ public final class ConfigQuery<T extends TreeItem> {
     @Nonnull
     public T run(NodeLike cfg) throws FiberQueryException {
         List<String> path = this.path;
-        NodeLike subTree = cfg;
-        for (int i = 0; i < path.size() - 1; i++) {
-            String name = path.get(i);
-            TreeItem node = subTree.lookup(name);
-            if (node instanceof NodeLike) {
-                subTree = (NodeLike) node;
-            } else if (node != null) {
-                throw new FiberQueryException.WrongType(subTree, node, Node.class, null);
-            } else {
-                throw new FiberQueryException.MissingChild(name, subTree);
-            }
+        NodeLike subtree = cfg;
+        int lastIndex = path.size() - 1;
+        for (int i = 0; i < lastIndex; i++) {
+            subtree = this.lookupChild(subtree, path.get(i), Node.class, null);
         }
-        TreeItem node = subTree.lookup(path.get(path.size() - 1));
-        if (isValidResult(node)) {
-            assert node != null;
-            @SuppressWarnings("unchecked") T result = (T) node;
-            return result;
-        }
-        throw new FiberQueryException.WrongType(subTree, node, this.nodeType, this.valueType);
+        @SuppressWarnings("unchecked") T result =
+                (T) this.lookupChild(subtree, path.get(lastIndex), this.nodeType, this.valueType);
+        return result;
     }
 
-    private boolean isValidResult(TreeItem node) {
-        return nodeType.isInstance(node) && (valueType == null || valueType.isAssignableFrom(((ConfigValue<?>) node).getType()));
+    private <N> N lookupChild(NodeLike tree, String name, Class<N> nodeType, @Nullable Class<?> valueType) throws FiberQueryException {
+        TreeItem node = tree.lookup(name);
+        if (nodeType.isInstance(node) && (valueType == null || valueType == ((ConfigValue<?>) node).getType())) {
+            return nodeType.cast(node);
+        } else if (node != null) {
+            throw new FiberQueryException.WrongType(tree, node, nodeType, valueType);
+        } else {
+            throw new FiberQueryException.MissingChild(name, tree);
+        }
     }
 
     /**
