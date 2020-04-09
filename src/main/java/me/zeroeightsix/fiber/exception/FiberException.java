@@ -5,11 +5,11 @@ package me.zeroeightsix.fiber.exception;
  */
 public class FiberException extends Exception {
 
-    public FiberException(String s) {
-        super(s);
+    public FiberException(String message) {
+        super(message);
     }
 
-    public FiberException(String s, Throwable throwable) {
-        super(s, throwable);
+    public FiberException(String message, Throwable cause) {
+        super(message, cause);
     }
 }
