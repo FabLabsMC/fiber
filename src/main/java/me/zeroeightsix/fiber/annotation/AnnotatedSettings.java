@@ -24,6 +24,8 @@ import java.util.stream.Stream;
 
 public class AnnotatedSettings {
 
+    public static final AnnotatedSettings DEFAULT_SETTINGS = new AnnotatedSettings();
+
     private final Map<Class<? extends Annotation>, SettingAnnotationProcessor.Value<?>> settingProcessors = new HashMap<>();
     private final Map<Class<? extends Annotation>, SettingAnnotationProcessor.Node<?>> nodeSettingProcessors = new HashMap<>();
     private final Map<Class<? extends Annotation>, ConstraintProcessorEntry> constraintProcessors = new HashMap<>();

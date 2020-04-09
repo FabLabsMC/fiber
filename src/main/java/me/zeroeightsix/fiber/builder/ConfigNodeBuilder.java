@@ -108,7 +108,7 @@ public class ConfigNodeBuilder implements NodeLike {
      * @see AnnotatedSettings#applyToNode(ConfigNodeBuilder, Object)
      */
     public ConfigNodeBuilder applyFromPojo(Object pojo) throws FiberException {
-        return applyFromPojo(pojo, new AnnotatedSettings());
+        return applyFromPojo(pojo, AnnotatedSettings.DEFAULT_SETTINGS);
     }
 
     /**
