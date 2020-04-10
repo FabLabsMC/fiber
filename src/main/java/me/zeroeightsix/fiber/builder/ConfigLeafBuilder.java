@@ -5,8 +5,9 @@ import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.FinalConstraint;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.tree.ConfigValue;
-import me.zeroeightsix.fiber.tree.Node;
+import me.zeroeightsix.fiber.tree.ConfigLeaf;
+import me.zeroeightsix.fiber.tree.ConfigLeafImpl;
+import me.zeroeightsix.fiber.tree.ConfigTree;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -16,17 +17,17 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
- * A builder for scalar {@code ConfigValue}s.
+ * A builder for scalar {@code ConfigLeaf}s.
  *
  * <p> The settings created by this builder are considered atomic, and do not allow specifications at the component level.
  * Settings with aggregate types, such as arrays and collections, should be created using {@link ConfigAggregateBuilder}.
  *
- * @param <T> the type of value the produced {@code ConfigValue} will hold
- * @see ConfigValue
+ * @param <T> the type of value the produced {@code ConfigLeaf} will hold
+ * @see ConfigLeaf
  */
-public class ConfigValueBuilder<T> {
+public class ConfigLeafBuilder<T> {
 
-    private final ConfigNodeBuilder parentNode;
+    private final ConfigTreeBuilder parentNode;
     @Nonnull
     protected final Class<T> type;
     @Nonnull
@@ -42,13 +43,13 @@ public class ConfigValueBuilder<T> {
     protected List<Constraint<? super T>> constraintList = new ArrayList<>();
 
     /**
-     * Creates a new scalar {@code ConfigValueBuilder}.
+     * Creates a new scalar {@code ConfigLeafBuilder}.
      *
-     * @param parentNode the {@code ConfigNodeBuilder} this builder originates from
-     * @param name the name of the {@code ConfigValue} produced by this builder
+     * @param parentNode the {@code ConfigTreeBuilder} this builder originates from
+     * @param name the name of the {@code ConfigLeaf} produced by this builder
      * @param type       the class object representing the type of values this builder will create settings for
      */
-    public ConfigValueBuilder(ConfigNodeBuilder parentNode, @Nonnull String name, @Nonnull Class<T> type) {
+    public ConfigLeafBuilder(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull Class<T> type) {
         this.parentNode = parentNode;
         this.name = name;
         this.type = type;
@@ -60,43 +61,43 @@ public class ConfigValueBuilder<T> {
     }
 
     /**
-     * Sets the {@code ConfigValue}'s name.
+     * Sets the {@code ConfigLeaf}'s name.
      *
-     * <p> If {@code null}, or if this method is never called, the {@code ConfigValue} won't have a name. Thus, it might be ignored during (de)serialisation. It also won't be able to be found by name in its parent node.
+     * <p> If {@code null}, or if this method is never called, the {@code ConfigLeaf} won't have a name. Thus, it might be ignored during (de)serialisation. It also won't be able to be found by name in its parent node.
      *
      * @param name the name
      * @return {@code this} builder
-     * @see Node#lookup
+     * @see ConfigTree#lookup
      */
-    public ConfigValueBuilder<T> withName(String name) {
+    public ConfigLeafBuilder<T> withName(String name) {
         this.name = name;
         return this;
     }
 
     /**
-     * Sets the {@code ConfigValue}'s comment.
+     * Sets the {@code ConfigLeaf}'s comment.
      *
-     * <p> If {@code null}, or if this method is never called, the {@code ConfigValue} won't have a comment. An empty comment (non null, but only consisting of whitespace) will be serialised.
+     * <p> If {@code null}, or if this method is never called, the {@code ConfigLeaf} won't have a comment. An empty comment (non null, but only consisting of whitespace) will be serialised.
      *
      * @param comment the comment
      * @return {@code this} builder
      */
-    public ConfigValueBuilder<T> withComment(String comment) {
+    public ConfigLeafBuilder<T> withComment(String comment) {
         this.comment = comment;
         return this;
     }
 
     /**
-     * Adds a listener to the {@code ConfigValue}.
+     * Adds a listener to the {@code ConfigLeaf}.
      *
-     * <p> Listeners are called when the value of a {@code ConfigValue} is changed. They are of type {@link BiConsumer}: the first argument being the old value, and the second argument being the new value.
+     * <p> Listeners are called when the value of a {@code ConfigLeaf} is changed. They are of type {@link BiConsumer}: the first argument being the old value, and the second argument being the new value.
      *
      * <p> Listeners set with this method are chained: if there was already one specified, a new listener is created that calls the old one first, and then the new one.
      *
      * @param consumer the listener
      * @return {@code this} builder
      */
-    public ConfigValueBuilder<T> withListener(BiConsumer<T, T> consumer) {
+    public ConfigLeafBuilder<T> withListener(BiConsumer<T, T> consumer) {
         final BiConsumer<T, T> prevConsumer = this.consumer; // to avoid confusion
         this.consumer = (t, t2) -> {
             prevConsumer.accept(t, t2);
@@ -108,15 +109,15 @@ public class ConfigValueBuilder<T> {
     /**
      * Sets the default value.
      *
-     * <p> If {@code null}, or if this method is never called, the {@code ConfigValue} will have no default value.
+     * <p> If {@code null}, or if this method is never called, the {@code ConfigLeaf} will have no default value.
      *
-     * <p> Note that every {@code ConfigValue} created from this builder will share a reference
+     * <p> Note that every {@code ConfigLeaf} created from this builder will share a reference
      * to the given {@code defaultValue}. Immutability is encouraged.
      *
      * @param defaultValue the default value
      * @return {@code this} builder
      */
-    public ConfigValueBuilder<T> withDefaultValue(T defaultValue) {
+    public ConfigLeafBuilder<T> withDefaultValue(T defaultValue) {
         this.defaultValue = defaultValue;
         return this;
     }
@@ -130,7 +131,7 @@ public class ConfigValueBuilder<T> {
      * @return {@code this} builder
      * @see #withFinality(boolean)
      */
-    public ConfigValueBuilder<T> withFinality() {
+    public ConfigLeafBuilder<T> withFinality() {
         this.isFinal = true;
         return this;
     }
@@ -140,18 +141,18 @@ public class ConfigValueBuilder<T> {
      *
      * <p> If {@code true}, the produced setting can not be changed.
      * It will be initialised with its default value, if there is one. Afterwards, it can not be changed again;
-     * {@link ConfigValue#setValue(Object)} will always return {@code false}.
+     * {@link ConfigLeaf#setValue(Object)} will always return {@code false}.
      *
      * @param isFinal whether or not the value can be changed after building
      * @return {@code this} builder
      */
-    public ConfigValueBuilder<T> withFinality(boolean isFinal) {
+    public ConfigLeafBuilder<T> withFinality(boolean isFinal) {
         this.isFinal = isFinal;
         return this;
     }
 
     /**
-     * Creates a constraint builder for this {@code ConfigValueBuilder}.
+     * Creates a constraint builder for this {@code ConfigLeafBuilder}.
      *
      * @return the created builder
      * @see ConstraintsBuilder
@@ -161,16 +162,16 @@ public class ConfigValueBuilder<T> {
     }
 
     /**
-     * Builds the {@code ConfigValue}.
+     * Builds the {@code ConfigLeaf}.
      *
-     * <p> If a parent was specified in the constructor, the {@code ConfigValue} will also be registered to its parent node.
+     * <p> If a parent was specified in the constructor, the {@code ConfigLeaf} will also be registered to its parent node.
      *
      * <p> This method should not be called multiple times <em>if the default value is intended to be mutated</em>.
      * Multiple calls will result in duplicated references to the default value.
      *
-     * @return the {@code ConfigValue}
+     * @return the {@code ConfigLeaf}
      */
-    public ConfigValue<T> build() {
+    public ConfigLeaf<T> build() {
         if (defaultValue != null) {
             for (Constraint<? super T> constraint : constraintList) {
                 if (!constraint.test(defaultValue)) {
@@ -182,7 +183,7 @@ public class ConfigValueBuilder<T> {
         if (isFinal) {
             constraints.add(0, FinalConstraint.instance());  // index 0 to avoid uselessly checking everything each time
         }
-        ConfigValue<T> built = new ConfigValue<>(name, comment, defaultValue, consumer, constraints, type);
+        ConfigLeaf<T> built = new ConfigLeafImpl<>(name, comment, defaultValue, consumer, constraints, type);
 
         if (parentNode != null) {
             // We don't know what kind of evil collection we're about to add a node to.
@@ -198,11 +199,11 @@ public class ConfigValueBuilder<T> {
         return built;
     }
 
-    public ConfigNodeBuilder finishValue() {
+    public ConfigTreeBuilder finishValue() {
         return finishValue(n -> {});
     }
 
-    public ConfigNodeBuilder finishValue(Consumer<ConfigValue<T>> action) {
+    public ConfigTreeBuilder finishValue(Consumer<ConfigLeaf<T>> action) {
         action.accept(build());
         return parentNode;
     }

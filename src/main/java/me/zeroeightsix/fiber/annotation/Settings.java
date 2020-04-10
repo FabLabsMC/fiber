@@ -2,6 +2,7 @@ package me.zeroeightsix.fiber.annotation;
 
 import me.zeroeightsix.fiber.annotation.convention.NoNamingConvention;
 import me.zeroeightsix.fiber.annotation.convention.SettingNamingConvention;
+import me.zeroeightsix.fiber.tree.ConfigTree;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -11,7 +12,8 @@ import java.lang.annotation.Target;
 /**
  * Indicates a type represents a structure in a configuration file.
  *
- * <p> While it not necessary to use this annotation to serialise a POJO into a {@link me.zeroeightsix.fiber.annotation.Setting.Node Node}, it can be used to specify other metadata.
+ * <p> While it not necessary to use this annotation to generate {@link ConfigTree}s from a POJO class,
+ * it can be used to specify other metadata.
  *
  * @see Settings#onlyAnnotated()
  * @see Settings#namingConvention()
@@ -23,7 +25,7 @@ public @interface Settings {
     /**
      * Specifies whether or not all fields in this class should be serialised, or only those annotated with {@link Setting}.
      *
-     * <p> Note that if you want to exclude one field without having to mark all others with the {@link Setting} annotation, the field can be marked as {@code transient} instead.
+     * <p> If you want to exclude one field without having to mark all others with the {@link Setting} annotation, the field can be marked as {@code transient} instead.
      * All transient fields are ignored by default.
      *
      * @return whether or not only annotated fields should be serialised

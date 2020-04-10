@@ -6,12 +6,13 @@ import me.zeroeightsix.fiber.annotation.convention.SettingNamingConvention;
 import me.zeroeightsix.fiber.annotation.exception.MalformedFieldException;
 import me.zeroeightsix.fiber.annotation.magic.TypeMagic;
 import me.zeroeightsix.fiber.builder.ConfigAggregateBuilder;
-import me.zeroeightsix.fiber.builder.ConfigNodeBuilder;
-import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
+import me.zeroeightsix.fiber.builder.ConfigLeafBuilder;
+import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.builder.constraint.AbstractConstraintsBuilder;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.tree.ConfigNode;
+import me.zeroeightsix.fiber.tree.ConfigTree;
 
 import javax.annotation.Nonnull;
 import java.lang.annotation.Annotation;
@@ -31,7 +32,7 @@ public class AnnotatedSettings {
     private final Map<Class<? extends Annotation>, ConstraintProcessorEntry> constraintProcessors = new HashMap<>();
 
     {
-        registerGroupProcessor(Setting.Node.class, (annotation, field, pojo, node) -> {});
+        registerGroupProcessor(Setting.Group.class, (annotation, field, pojo, node) -> {});
         registerConstraintProcessor(Setting.Constrain.Range.class, Number.class, (annotation, annotated, pojo, constraints) -> {
             if (annotation.min() > Double.NEGATIVE_INFINITY) {
                 constraints.atLeast(annotation.min());
@@ -73,7 +74,7 @@ public class AnnotatedSettings {
     }
 
     /**
-     * Registers a group annotation processor, tasked with processing annotations on ancestor fields (config fields annotated with {@link Setting.Node}.
+     * Registers a group annotation processor, tasked with processing annotations on ancestor fields (config fields annotated with {@link Setting.Group}.
      *
      * @param annotationType a class representing the type of annotation to process
      * @param processor      a processor for this annotation
@@ -107,12 +108,12 @@ public class AnnotatedSettings {
     }
 
     public ConfigNode asNode(Object pojo) throws FiberException {
-        ConfigNodeBuilder builder = new ConfigNodeBuilder();
+        ConfigTreeBuilder builder = ConfigTree.builder();
         applyToNode(builder, pojo);
         return builder.build();
     }
 
-    public <P> void applyToNode(ConfigNodeBuilder mergeTo, P pojo) throws FiberException {
+    public <P> void applyToNode(ConfigTreeBuilder mergeTo, P pojo) throws FiberException {
         @SuppressWarnings("unchecked")
         Class<P> pojoClass = (Class<P>) pojo.getClass();
 
@@ -131,8 +132,8 @@ public class AnnotatedSettings {
         NodeOperations.mergeTo(constructNode(pojoClass, pojo, onlyAnnotated, convention), mergeTo);
     }
 
-    private <P> ConfigNodeBuilder constructNode(Class<P> pojoClass, P pojo, boolean onlyAnnotated, SettingNamingConvention convention) throws FiberException {
-        ConfigNodeBuilder node = new ConfigNodeBuilder();
+    private <P> ConfigTreeBuilder constructNode(Class<P> pojoClass, P pojo, boolean onlyAnnotated, SettingNamingConvention convention) throws FiberException {
+        ConfigTreeBuilder node = ConfigTree.builder();
 
         List<Member> defaultEmpty = new ArrayList<>();
         Map<String, List<Member>> listenerMap = findListeners(pojoClass);
@@ -141,7 +142,7 @@ public class AnnotatedSettings {
             if (field.isSynthetic() || !isIncluded(field, onlyAnnotated)) continue;
             checkViolation(field);
             String name = findName(field, convention);
-            if (field.isAnnotationPresent(Setting.Node.class)) {
+            if (field.isAnnotationPresent(Setting.Group.class)) {
                 fieldToNode(pojo, node, field, name);
             } else {
                 fieldToItem(node, field, pojo, name, listenerMap.getOrDefault(name, defaultEmpty));
@@ -174,8 +175,8 @@ public class AnnotatedSettings {
         return field.isAnnotationPresent(Setting.class) ? Optional.of(field.getAnnotation(Setting.class)) : Optional.empty();
     }
 
-    private <P> void fieldToNode(P pojo, ConfigNodeBuilder node, Field field, String name) throws FiberException {
-        ConfigNodeBuilder sub = node.fork(name);
+    private <P> void fieldToNode(P pojo, ConfigTreeBuilder node, Field field, String name) throws FiberException {
+        ConfigTreeBuilder sub = node.fork(name);
         try {
             field.setAccessible(true);
             applyToNode(sub, field.get(pojo));
@@ -186,10 +187,10 @@ public class AnnotatedSettings {
         }
     }
 
-    private <T> void fieldToItem(ConfigNodeBuilder node, Field field, Object pojo, String name, List<Member> listeners) throws FiberException {
+    private <T> void fieldToItem(ConfigTreeBuilder node, Field field, Object pojo, String name, List<Member> listeners) throws FiberException {
         Class<T> type = getSettingTypeFromField(field);
 
-        ConfigValueBuilder<T> builder = createConfigValueBuilder(node, name, type, field, pojo)
+        ConfigLeafBuilder<T> builder = createConfigLeafBuilder(node, name, type, field, pojo)
                 .withComment(findComment(field))
                 .withDefaultValue(findDefaultValue(field, pojo))
                 .withFinality(getSettingAnnotation(field).map(Setting::constant).orElse(false));
@@ -227,7 +228,7 @@ public class AnnotatedSettings {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Nonnull
-    private <T, E> ConfigValueBuilder<T> createConfigValueBuilder(ConfigNodeBuilder parent, String name, Class<T> type, Field field, Object pojo) {
+    private <T, E> ConfigLeafBuilder<T> createConfigLeafBuilder(ConfigTreeBuilder parent, String name, Class<T> type, Field field, Object pojo) {
         AnnotatedType annotatedType = field.getAnnotatedType();
         if (ConfigAggregateBuilder.isAggregate(type)) {
             if (Collection.class.isAssignableFrom(type)) {
@@ -258,7 +259,7 @@ public class AnnotatedSettings {
                 }
             }
         }
-        return new ConfigValueBuilder<>(parent, name, type);
+        return new ConfigLeafBuilder<>(parent, name, type);
     }
 
     @SuppressWarnings("unchecked")
@@ -266,7 +267,7 @@ public class AnnotatedSettings {
         for (Annotation annotation : annotated.getAnnotations()) {
             ConstraintProcessorEntry entry = this.constraintProcessors.get(annotation.annotationType());
             if (entry != null) {
-                if (entry.acceptedType.isAssignableFrom(constraints.getType())) {
+                if (constraints.getType() == null || entry.acceptedType.isAssignableFrom(constraints.getType())) {
                     entry.processor.apply(annotation, annotated, pojo, constraints);
                 } else {
                     throw new RuntimeFiberException(annotation + " does not support " +
@@ -393,8 +394,8 @@ public class AnnotatedSettings {
 
     private String findName(Field field, SettingNamingConvention convention) {
         return Optional.ofNullable(
-                field.isAnnotationPresent(Setting.Node.class) ?
-                        field.getAnnotation(Setting.Node.class).name() :
+                field.isAnnotationPresent(Setting.Group.class) ?
+                        field.getAnnotation(Setting.Group.class).name() :
                         getSettingAnnotation(field).map(Setting::name).orElse(null))
                 .filter(s -> !s.isEmpty())
                 .orElse(convention.name(field.getName()));

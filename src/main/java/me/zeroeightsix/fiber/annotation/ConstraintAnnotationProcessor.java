@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.annotation;
 
-import me.zeroeightsix.fiber.builder.ConfigNodeBuilder;
+import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.builder.constraint.AbstractConstraintsBuilder;
 
 import java.lang.annotation.Annotation;
@@ -26,7 +26,7 @@ public interface ConstraintAnnotationProcessor<A extends Annotation, T> {
      * @param annotated an annotated type use site declared in {@code pojo}'s class
      * @param pojo the <em>plain old java object</em> being processed
      * @param constraints the constraints builder being configured
-     * @see AnnotatedSettings#applyToNode(ConfigNodeBuilder, Object)
+     * @see AnnotatedSettings#applyToNode(ConfigTreeBuilder, Object)
      */
     void apply(A annotation, AnnotatedElement annotated, Object pojo, AbstractConstraintsBuilder<?, ?, T> constraints);
 }

@@ -27,7 +27,7 @@ public class AggregateConstraintsBuilder<A, E> extends ConstraintsBuilder<A> {
     /**
      * Creates a new aggregate constraint builder
      *
-     * @param source        the {@code ConfigValueBuilder} this {@code ConstraintsBuilder} originates from
+     * @param source        the {@code ConfigLeafBuilder} this {@code ConstraintsBuilder} originates from
      * @param constraints   the list of constraints this builder will add to
      * @param aggregateType the type of collection or array {@code source} holds
      * @param componentType the type of all elements in {@code aggregateType}

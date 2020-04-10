@@ -1,12 +1,12 @@
 package me.zeroeightsix.fiber.annotation;
 
-import me.zeroeightsix.fiber.builder.ConfigNodeBuilder;
+import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.tree.ConfigValue;
-import me.zeroeightsix.fiber.tree.Node;
+import me.zeroeightsix.fiber.tree.ConfigLeaf;
+import me.zeroeightsix.fiber.tree.ConfigNode;
+import me.zeroeightsix.fiber.tree.ConfigTree;
 import me.zeroeightsix.fiber.tree.Property;
-import me.zeroeightsix.fiber.tree.TreeItem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -22,12 +22,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class AnnotatedSettingsTest {
 
     private AnnotatedSettings annotatedSettings;
-    private ConfigNodeBuilder node;
+    private ConfigTreeBuilder node;
 
     @BeforeEach
     void setup() {
         annotatedSettings = new AnnotatedSettings();
-        node = new ConfigNodeBuilder();
+        node = ConfigTree.builder();
     }
 
     @Test
@@ -36,16 +36,16 @@ class AnnotatedSettingsTest {
         OneFieldPojo pojo = new OneFieldPojo();
         annotatedSettings.applyToNode(node, pojo);
 
-        Collection<TreeItem> items = node.build().getItems();
+        Collection<ConfigNode> items = node.build().getItems();
         assertEquals(1, items.size(), "Setting map is 1 entry large");
-        TreeItem item = node.lookup("a");
+        ConfigNode item = node.lookup("a");
         assertNotNull(item, "Setting exists");
-        assertTrue(ConfigValue.class.isAssignableFrom(item.getClass()), "Setting is a ConfigValue");
-        ConfigValue<?> configValue = (ConfigValue<?>) item;
-        assertNotNull(configValue.getValue(), "Setting value is non-null");
-        assertEquals(Integer.class, configValue.getType(), "Setting type is correct");
-        assertEquals(Integer.class, configValue.getValue().getClass(), "Setting value reflects correct type");
-        Integer integer = (Integer) configValue.getValue();
+        assertTrue(ConfigLeaf.class.isAssignableFrom(item.getClass()), "Setting is a ConfigLeaf");
+        ConfigLeaf<?> leaf = (ConfigLeaf<?>) item;
+        assertNotNull(leaf.getValue(), "Setting value is non-null");
+        assertEquals(Integer.class, leaf.getType(), "Setting type is correct");
+        assertEquals(Integer.class, leaf.getValue().getClass(), "Setting value reflects correct type");
+        Integer integer = (Integer) leaf.getValue();
         assertEquals(integer, 5, "Setting value is correct");
     }
 
@@ -62,7 +62,7 @@ class AnnotatedSettingsTest {
         ListenerPojo pojo = new ListenerPojo();
         annotatedSettings.applyToNode(node, pojo);
 
-        TreeItem treeItem = node.lookup("a");
+        ConfigNode treeItem = node.lookup("a");
         assertNotNull(treeItem, "Setting A exists");
         assertTrue(treeItem instanceof Property<?>, "Setting A is a property");
         @SuppressWarnings("unchecked")
@@ -181,7 +181,7 @@ class AnnotatedSettingsTest {
     void testConstantSetting() throws FiberException {
         ConstantSettingPojo pojo = new ConstantSettingPojo();
         annotatedSettings.applyToNode(node, pojo);
-        assertFalse(((ConfigValue<Integer>) node.lookup("a")).setValue(0));
+        assertFalse(((ConfigLeaf<Integer>) node.lookup("a")).setValue(0));
     }
 
     @Test
@@ -190,7 +190,7 @@ class AnnotatedSettingsTest {
         SubNodePojo pojo = new SubNodePojo();
         annotatedSettings.applyToNode(node, pojo);
         assertEquals(1, node.getItems().size(), "Node has one item");
-        Node subnode = (Node) node.lookup("a");
+        ConfigTree subnode = (ConfigTree) node.lookup("a");
         assertNotNull(subnode, "Subnode exists");
         assertEquals(1, subnode.getItems().size(), "Subnode has one item");
     }
@@ -201,7 +201,7 @@ class AnnotatedSettingsTest {
     void testComment() throws FiberException {
         CommentPojo pojo = new CommentPojo();
         annotatedSettings.applyToNode(node, pojo);
-        assertEquals("comment", ((ConfigValue<Integer>) node.lookup("a")).getComment(), "Comment exists and is correct");
+        assertEquals("comment", ((ConfigLeaf<Integer>) node.lookup("a")).getComment(), "Comment exists and is correct");
     }
 
     @Test
@@ -317,7 +317,7 @@ class AnnotatedSettingsTest {
     }
 
     private static class SubNodePojo {
-        @Setting.Node(name = "a")
+        @Setting.Group(name = "a")
         public SubNode node = new SubNode();
 
         class SubNode {

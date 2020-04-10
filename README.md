@@ -1,4 +1,6 @@
-![logo](https://i.imgur.com/DAlYiDB.png)
+![logo](https://i.imgur.com/apskb0q.png)
+
+
 A configuration system made for [Fabric](https://github.com/FabricMC)
 
 ## Concept

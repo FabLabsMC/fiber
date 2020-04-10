@@ -5,11 +5,14 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 
 /**
- * A member of a tree that can hold any amount of children
+ * A node that can hold any amount of children
  *
- * @see ConfigNode
+ * <p> A branch may represent an entire config tree,
+ * or a subtree grouping further configuration items.
+ *
+ * @see me.zeroeightsix.fiber.builder.ConfigTreeBuilder
  */
-public interface Node extends NodeLike, TreeItem {
+public interface ConfigBranch extends ConfigTree, ConfigNode, Commentable {
 
     /**
      * Returns this node's name.
@@ -24,19 +27,19 @@ public interface Node extends NodeLike, TreeItem {
     String getName();
 
     /**
-     * Tries to find a child in this node by name. If a child is found, it will be returned.
+     * Tries to find a child in this group by name. If a child is found, it will be returned.
      *
-     * <p> The value returned for a given {@code name} is always the same.
+     * <p> The node returned for a given {@code name} is always the same.
      *
      * @param name The name of the child to look for
      * @return the child if found, otherwise {@code null}
      */
     @Nullable
     @Override
-    TreeItem lookup(String name);
+    ConfigNode lookup(String name);
 
     /**
-     * Returns a collection of this node's children.
+     * Returns a collection of this group's children.
      *
      * <p> The returned collection is unmodifiable, and guaranteed not to have two nodes with the same name.
      *
@@ -44,13 +47,14 @@ public interface Node extends NodeLike, TreeItem {
      */
     @Nonnull
     @Override
-    Collection<TreeItem> getItems();
+    Collection<ConfigNode> getItems();
 
     /**
-     * Returns {@code true} if this node should be serialized separately to its parent.
+     * Returns {@code true} if this node should be serialized separately from its parent.
      *
      * <p> If a node is serialized separately, it should not appear in the serialized representation of
-     * its parent. This setting has no effect if this node is a root.
+     * its ancestors. This property should be ignored if this node is the
+     * root of the currently serialised tree.
      *
      * @return {@code true} if this node should be serialized separately, and {@code false} otherwise
      */
