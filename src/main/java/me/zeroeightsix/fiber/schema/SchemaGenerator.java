@@ -6,7 +6,7 @@ import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.JsonPrimitive;
 import blue.endless.jankson.impl.MarshallerImpl;
 import me.zeroeightsix.fiber.Identifier;
-import me.zeroeightsix.fiber.builder.constraint.CompositeConstraintsBuilder;
+import me.zeroeightsix.fiber.api.builder.constraint.CompositeConstraintsBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.ValuedConstraint;
 import me.zeroeightsix.fiber.serialization.Marshaller;

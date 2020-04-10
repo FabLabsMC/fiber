@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.tree;
 
-import me.zeroeightsix.fiber.builder.ConfigLeafBuilder;
+import me.zeroeightsix.fiber.api.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.FinalConstraint;
 
@@ -15,7 +15,7 @@ import java.util.function.BiConsumer;
  * @param <T> The type of value this class holds
  * @see ConfigNodeImpl
  * @see ConfigLeafBuilder
- * @see me.zeroeightsix.fiber.builder.ConfigAggregateBuilder
+ * @see me.zeroeightsix.fiber.api.builder.ConfigAggregateBuilder
  */
 public interface ConfigLeaf<T> extends ConfigNode, Property<T>, Commentable {
 

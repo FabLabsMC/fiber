@@ -1,10 +1,10 @@
-package me.zeroeightsix.fiber.annotation;
+package me.zeroeightsix.fiber.api.annotation;
 
 import me.zeroeightsix.fiber.api.annotation.AnnotatedSettings;
 import me.zeroeightsix.fiber.api.annotation.Listener;
 import me.zeroeightsix.fiber.api.annotation.Setting;
 import me.zeroeightsix.fiber.api.annotation.Settings;
-import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
+import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.tree.ConfigTree;
 import me.zeroeightsix.fiber.tree.ConfigLeaf;

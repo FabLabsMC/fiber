@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber.builder;
+package me.zeroeightsix.fiber.api.builder;
 
 import me.zeroeightsix.fiber.api.annotation.AnnotatedSettings;
 import me.zeroeightsix.fiber.api.annotation.Setting;

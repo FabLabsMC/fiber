@@ -1,6 +1,6 @@
-package me.zeroeightsix.fiber.builder;
+package me.zeroeightsix.fiber.api.builder;
 
-import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
+import me.zeroeightsix.fiber.api.builder.constraint.ConstraintsBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.FinalConstraint;
 import me.zeroeightsix.fiber.exception.FiberException;

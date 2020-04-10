@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber.builder.constraint;
+package me.zeroeightsix.fiber.api.builder.constraint;
 
 import me.zeroeightsix.fiber.constraint.CompositeType;
 import me.zeroeightsix.fiber.constraint.Constraint;

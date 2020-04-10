@@ -1,7 +1,7 @@
-package me.zeroeightsix.fiber.builder;
+package me.zeroeightsix.fiber.api.builder;
 
 import me.zeroeightsix.fiber.api.annotation.AnnotatedSettings;
-import me.zeroeightsix.fiber.builder.constraint.AggregateConstraintsBuilder;
+import me.zeroeightsix.fiber.api.builder.constraint.AggregateConstraintsBuilder;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 
 import javax.annotation.Nonnull;

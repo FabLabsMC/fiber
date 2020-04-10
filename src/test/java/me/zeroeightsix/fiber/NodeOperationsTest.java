@@ -1,7 +1,7 @@
 package me.zeroeightsix.fiber;
 
-import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
-import me.zeroeightsix.fiber.builder.ConfigLeafBuilder;
+import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
+import me.zeroeightsix.fiber.api.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.tree.ConfigTree;
 import me.zeroeightsix.fiber.tree.ConfigLeaf;
 import me.zeroeightsix.fiber.tree.Property;

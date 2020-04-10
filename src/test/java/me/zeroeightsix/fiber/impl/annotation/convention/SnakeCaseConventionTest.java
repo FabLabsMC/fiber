@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber.annotation.convention;
+package me.zeroeightsix.fiber.impl.annotation.convention;
 
 import me.zeroeightsix.fiber.impl.annotation.convention.SnakeCaseConvention;
 import org.junit.jupiter.api.DisplayName;

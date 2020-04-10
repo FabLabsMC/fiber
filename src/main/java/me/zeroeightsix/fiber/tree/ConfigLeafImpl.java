@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.tree;
 
-import me.zeroeightsix.fiber.builder.ConfigLeafBuilder;
+import me.zeroeightsix.fiber.api.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.ConstraintType;
 import me.zeroeightsix.fiber.constraint.FinalConstraint;
@@ -37,7 +37,7 @@ public class ConfigLeafImpl<T> extends ConfigNodeImpl implements ConfigLeaf<T> {
      * @param constraints  the list of constraints for this item. For a value to be accepted, all constraints must be satisfied.
      * @param type         the type of value this item holds
      * @see ConfigLeafBuilder
-     * @see me.zeroeightsix.fiber.builder.ConfigAggregateBuilder
+     * @see me.zeroeightsix.fiber.api.builder.ConfigAggregateBuilder
      */
     public ConfigLeafImpl(@Nonnull String name, @Nullable String comment, @Nullable T defaultValue, @Nonnull BiConsumer<T, T> listener, @Nonnull List<Constraint<? super T>> constraints, @Nonnull Class<T> type) {
         super(name, comment);
