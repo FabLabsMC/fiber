@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class UnderscoredLowerCaseConventionTest extends UnderscoredLowerCaseConvention {
+class SnakeCaseConventionTest extends SnakeCaseConvention {
 
     private static final String[] STRINGS = {
             "Hello world",

@@ -3,9 +3,9 @@ package me.zeroeightsix.fiber.annotation.convention;
 /**
  * A naming convention that converts java-styled {@code lowerCamelCase} names and {@code Proper case} names to {@code snake_case}.
  *
- * @see UnderscoredLowerCaseConvention#name(String)
+ * @see SnakeCaseConvention#name(String)
  */
-public class UnderscoredLowerCaseConvention implements SettingNamingConvention {
+public class SnakeCaseConvention implements SettingNamingConvention {
 
     /**
      * Attempts to convert java-styled names or spaced names to underscored, lowercase names (C style).
