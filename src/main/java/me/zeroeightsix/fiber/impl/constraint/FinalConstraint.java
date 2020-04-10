@@ -1,4 +1,7 @@
-package me.zeroeightsix.fiber.constraint;
+package me.zeroeightsix.fiber.impl.constraint;
+
+import me.zeroeightsix.fiber.api.constraint.Constraint;
+import me.zeroeightsix.fiber.api.constraint.ConstraintType;
 
 public final class FinalConstraint<V> extends Constraint<V> {
     private static final FinalConstraint<?> INSTANCE = new FinalConstraint<>();

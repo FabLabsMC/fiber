@@ -1,9 +1,9 @@
 package me.zeroeightsix.fiber.api.builder.constraint;
 
-import me.zeroeightsix.fiber.constraint.CompositeType;
-import me.zeroeightsix.fiber.constraint.Constraint;
-import me.zeroeightsix.fiber.constraint.ConstraintType;
-import me.zeroeightsix.fiber.constraint.ValuedConstraint;
+import me.zeroeightsix.fiber.api.constraint.CompositeType;
+import me.zeroeightsix.fiber.api.constraint.Constraint;
+import me.zeroeightsix.fiber.api.constraint.ConstraintType;
+import me.zeroeightsix.fiber.impl.constraint.ValuedConstraint;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 
 import java.util.List;

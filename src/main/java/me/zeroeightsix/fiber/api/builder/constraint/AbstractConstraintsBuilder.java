@@ -1,6 +1,8 @@
 package me.zeroeightsix.fiber.api.builder.constraint;
 
-import me.zeroeightsix.fiber.constraint.*;
+import me.zeroeightsix.fiber.api.constraint.Constraint;
+import me.zeroeightsix.fiber.api.constraint.ConstraintType;
+import me.zeroeightsix.fiber.impl.constraint.*;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 
 import javax.annotation.Nullable;

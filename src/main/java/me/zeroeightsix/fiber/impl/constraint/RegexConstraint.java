@@ -1,4 +1,6 @@
-package me.zeroeightsix.fiber.constraint;
+package me.zeroeightsix.fiber.impl.constraint;
+
+import me.zeroeightsix.fiber.api.constraint.ConstraintType;
 
 import java.util.regex.Pattern;
 

@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber.constraint;
+package me.zeroeightsix.fiber.api.constraint;
 
 /**
  * A set of composite types Fiber supports.
