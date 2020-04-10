@@ -15,6 +15,8 @@ public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
     private final String name;
     @Nullable
     private final String comment;
+    @Nullable
+    private ConfigGroup parent;
 
     /**
      * Creates a new {@code ConfigLeaf}.
@@ -37,6 +39,23 @@ public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
     @Nullable
     public String getComment() {
         return comment;
+    }
+
+    @Nullable
+    @Override
+    public ConfigGroup getParent() {
+        return this.parent;
+    }
+
+    public void detach() {
+        this.parent = null;
+    }
+
+    public void setParent(ConfigGroup parent) {
+        if (this.parent != null) {
+            throw new IllegalStateException(this + " needs to be detached before changing the parent");
+        }
+        this.parent = parent;
     }
 
     @Override
