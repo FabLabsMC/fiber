@@ -14,6 +14,34 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
+/**
+ * A builder for configuration trees/branches.
+ *
+ * <p> Usage example:
+ * <pre>{@code
+ * ConfigNode config = new ConfigNodeBuilder()
+ *         .beginValue("version", "1.0.0")
+ *             .withFinality()
+ *             .beginConstraints() // checks the default value
+ *                 .regex("\\d+\\.\\d+\\.\\d+")
+ *             .finishConstraints()
+ *         .finishValue()
+ *         .fork("child")
+ *             .beginValue("A", 10)
+ *                 .beginConstraints()
+ *                     .composite(CompositeType.OR)
+ *                         .atLeast(3)
+ *                         .atMost(0)
+ *                     .finishComposite()
+ *                 .finishConstraints()
+ *             .finishValue()
+ *         .finishNode()
+ *         .build();
+ * }</pre>
+ *
+ * @see ConfigTree#builder()
+ * @see PropertyMirror
+ */
 public class ConfigTreeBuilder implements ConfigTree {
     private final Map<String, ConfigNode> items = new HashMap<>();
     @Nullable
