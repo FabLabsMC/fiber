@@ -1,5 +1,7 @@
 package me.zeroeightsix.fiber.annotation;
 
+import me.zeroeightsix.fiber.tree.ConfigGroup;
+
 import javax.annotation.RegEx;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -47,13 +49,13 @@ public @interface Setting {
     boolean ignore() default false;
 
     /**
-     * Indicates that this setting is a node.
+     * Indicates that this setting is a group.
      *
-     * @see me.zeroeightsix.fiber.tree.Node
+     * @see ConfigGroup
      */
     @Target(ElementType.FIELD)
     @Retention(RetentionPolicy.RUNTIME)
-    @interface Node {
+    @interface Group {
         /**
          * Sets the name that will be used for this node.
          *

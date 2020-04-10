@@ -12,7 +12,7 @@ import java.util.regex.Pattern;
 /**
  *
  * @param <A> the type of {@link Constraint} this builder should output
- * @param <S> the type of this builder's source object (eg. {@code ConfigValueBuilder} or {@code ConstraintsBuilder}
+ * @param <S> the type of this builder's source object (eg. {@code ConfigLeafBuilder} or {@code ConstraintsBuilder})
  * @param <T> the type of intermediary objects this builder's constraints should process. May be identical to {@code A}.
  */
 public abstract class AbstractConstraintsBuilder<S, A, T> {

@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.builder.constraint;
 
-import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
+import me.zeroeightsix.fiber.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.constraint.CompositeType;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
@@ -17,16 +17,16 @@ import java.util.List;
  * @param <T> the type of {@link Constraint} this builder should output
  * @see AggregateConstraintsBuilder
  */
-public class ConstraintsBuilder<T> extends AbstractConstraintsBuilder<ConfigValueBuilder<T>, T, T> {
+public class ConstraintsBuilder<T> extends AbstractConstraintsBuilder<ConfigLeafBuilder<T>, T, T> {
 
     /**
      * Creates a new scalar constraint builder
      *
-     * @param source      the {@code ConfigValueBuilder} this {@code ConstraintsBuilder} originates from
+     * @param source      the {@code ConfigLeafBuilder} this {@code ConstraintsBuilder} originates from
      * @param constraints the list of constraints this builder will add to
      * @param type        the class of the type of values checked by constraints built by this builder
      */
-    public ConstraintsBuilder(ConfigValueBuilder<T> source, List<Constraint<? super T>> constraints, Class<T> type) {
+    public ConstraintsBuilder(ConfigLeafBuilder<T> source, List<Constraint<? super T>> constraints, Class<T> type) {
         super(source, constraints, type);
     }
 
@@ -83,11 +83,11 @@ public class ConstraintsBuilder<T> extends AbstractConstraintsBuilder<ConfigValu
     /**
      * Finishes building constraints.
      *
-     * <p> As a result of this call, the built constraints will be added to the source {@code ConfigValue} builder.
+     * <p> As a result of this call, the built constraints will be added to the source {@code ConfigLeaf} builder.
      *
      * @return the source builder
      */
-    public ConfigValueBuilder<T> finishConstraints() {
+    public ConfigLeafBuilder<T> finishConstraints() {
         sourceConstraints.addAll(newConstraints);
         return source;
     }

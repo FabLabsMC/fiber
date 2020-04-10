@@ -17,14 +17,14 @@ import java.util.Optional;
  *
  * @param <T> the type of queried tree nodes
  */
-public final class ConfigQuery<T extends TreeItem> {
+public final class ConfigQuery<T extends ConfigNode> {
 
     /**
      * Creates a {@code ConfigQuery} for a subtree with a specific path.
      *
      * <p> Each part of the path must correspond to a single node name.
      * The first part matches a direct child node of the root supplied to
-     * the {@link #search(NodeLike)} and {@link #run(NodeLike)} methods.
+     * the {@link #search(ConfigTree)} and {@link #run(ConfigTree)} methods.
      * Each additional name matches a node such that the <em>n</em>th name
      * matches a node at depth <em>n</em>, starting from the supplied tree.
      *
@@ -32,8 +32,8 @@ public final class ConfigQuery<T extends TreeItem> {
      * @param more  additional node names forming the config path
      * @return a config query for subtrees of existing trees
      */
-    public static ConfigQuery<Node> subtree(String first, String... more) {
-        return new ConfigQuery<>(Node.class, null, first, more);
+    public static ConfigQuery<ConfigGroup> subtree(String first, String... more) {
+        return new ConfigQuery<>(ConfigGroup.class, null, first, more);
     }
 
     /**
@@ -41,7 +41,7 @@ public final class ConfigQuery<T extends TreeItem> {
      *
      * <p> Each part of the path must correspond to a single node name.
      * The first part matches a direct child node of the root supplied to
-     * the {@link #search(NodeLike)} and {@link #run(NodeLike)} methods.
+     * the {@link #search(ConfigTree)} and {@link #run(ConfigTree)} methods.
      * Each additional name matches a node such that the <em>n</em>th name
      * matches a node at depth <em>n</em>, starting from the supplied tree.
      *
@@ -53,8 +53,8 @@ public final class ConfigQuery<T extends TreeItem> {
      * @param more  additional node names forming the config path
      * @return a config query for subtrees of existing trees
      */
-    public static <V> ConfigQuery<ConfigValue<V>> property(Class<? super V> propertyType, String first, String... more) {
-        return new ConfigQuery<>(ConfigValue.class, propertyType, first, more);
+    public static <V> ConfigQuery<ConfigLeaf<V>> property(Class<? super V> propertyType, String first, String... more) {
+        return new ConfigQuery<>(ConfigLeaf.class, propertyType, first, more);
     }
 
     private final List<String> path;
@@ -77,9 +77,9 @@ public final class ConfigQuery<T extends TreeItem> {
      * @param cfg the config tree to search in
      * @return an {@code Optional} describing the queried node,
      * or {@code Optional.empty()}.
-     * @see #run(NodeLike)
+     * @see #run(ConfigTree)
      */
-    public Optional<T> search(NodeLike cfg) {
+    public Optional<T> search(ConfigTree cfg) {
         try {
             return Optional.of(this.run(cfg));
         } catch (FiberQueryException e) {
@@ -99,24 +99,24 @@ public final class ConfigQuery<T extends TreeItem> {
      * @throws FiberQueryException if this query's parameters do not match the config's structure
      * @see FiberQueryException.MissingChild
      * @see FiberQueryException.WrongType
-     * @see #search(NodeLike)
+     * @see #search(ConfigTree)
      */
     @Nonnull
-    public T run(NodeLike cfg) throws FiberQueryException {
+    public T run(ConfigTree cfg) throws FiberQueryException {
         List<String> path = this.path;
-        NodeLike subtree = cfg;
+        ConfigTree subtree = cfg;
         int lastIndex = path.size() - 1;
         for (int i = 0; i < lastIndex; i++) {
-            subtree = this.lookupChild(subtree, path.get(i), Node.class, null);
+            subtree = this.lookupChild(subtree, path.get(i), ConfigGroup.class, null);
         }
         @SuppressWarnings("unchecked") T result =
                 (T) this.lookupChild(subtree, path.get(lastIndex), this.nodeType, this.valueType);
         return result;
     }
 
-    private <N> N lookupChild(NodeLike tree, String name, Class<N> nodeType, @Nullable Class<?> valueType) throws FiberQueryException {
-        TreeItem node = tree.lookup(name);
-        if (nodeType.isInstance(node) && (valueType == null || valueType == ((ConfigValue<?>) node).getType())) {
+    private <N> N lookupChild(ConfigTree tree, String name, Class<N> nodeType, @Nullable Class<?> valueType) throws FiberQueryException {
+        ConfigNode node = tree.lookup(name);
+        if (nodeType.isInstance(node) && (valueType == null || valueType == ((ConfigLeaf<?>) node).getType())) {
             return nodeType.cast(node);
         } else if (node != null) {
             throw new FiberQueryException.WrongType(tree, node, nodeType, valueType);

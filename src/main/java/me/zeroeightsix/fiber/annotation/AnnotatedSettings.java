@@ -6,11 +6,11 @@ import me.zeroeightsix.fiber.annotation.convention.SettingNamingConvention;
 import me.zeroeightsix.fiber.annotation.exception.MalformedFieldException;
 import me.zeroeightsix.fiber.annotation.magic.TypeMagic;
 import me.zeroeightsix.fiber.builder.ConfigAggregateBuilder;
-import me.zeroeightsix.fiber.builder.ConfigNodeBuilder;
-import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
+import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
+import me.zeroeightsix.fiber.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.builder.constraint.AbstractConstraintsBuilder;
 import me.zeroeightsix.fiber.exception.FiberException;
-import me.zeroeightsix.fiber.tree.ConfigNode;
+import me.zeroeightsix.fiber.tree.ConfigGroupImpl;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.*;
@@ -22,13 +22,13 @@ import java.util.stream.Stream;
 
 public class AnnotatedSettings {
 
-    public static ConfigNode asNode(Object pojo) throws FiberException {
-        ConfigNodeBuilder builder = new ConfigNodeBuilder();
+    public static ConfigGroupImpl asNode(Object pojo) throws FiberException {
+        ConfigTreeBuilder builder = new ConfigTreeBuilder();
         applyToNode(builder, pojo);
         return builder.build();
     }
 
-    public static <P> void applyToNode(ConfigNodeBuilder mergeTo, P pojo) throws FiberException {
+    public static <P> void applyToNode(ConfigTreeBuilder mergeTo, P pojo) throws FiberException {
         @SuppressWarnings("unchecked")
         Class<P> pojoClass = (Class<P>) pojo.getClass();
 
@@ -47,8 +47,8 @@ public class AnnotatedSettings {
         NodeOperations.mergeTo(constructNode(pojoClass, pojo, onlyAnnotated, convention), mergeTo);
     }
 
-    private static <P> ConfigNodeBuilder constructNode(Class<P> pojoClass, P pojo, boolean onlyAnnotated, SettingNamingConvention convention) throws FiberException {
-        ConfigNodeBuilder node = new ConfigNodeBuilder();
+    private static <P> ConfigTreeBuilder constructNode(Class<P> pojoClass, P pojo, boolean onlyAnnotated, SettingNamingConvention convention) throws FiberException {
+        ConfigTreeBuilder node = new ConfigTreeBuilder();
 
         List<Member> defaultEmpty = new ArrayList<>();
         Map<String, List<Member>> listenerMap = findListeners(pojoClass);
@@ -57,8 +57,8 @@ public class AnnotatedSettings {
             if (field.isSynthetic() || !isIncluded(field, onlyAnnotated)) continue;
             checkViolation(field);
             String name = findName(field, convention);
-            if (field.isAnnotationPresent(Setting.Node.class)) {
-                ConfigNodeBuilder sub = node.fork(name);
+            if (field.isAnnotationPresent(Setting.Group.class)) {
+                ConfigTreeBuilder sub = node.fork(name);
                 try {
                     field.setAccessible(true);
                     AnnotatedSettings.applyToNode(sub, field.get(pojo));
@@ -97,10 +97,10 @@ public class AnnotatedSettings {
         return field.isAnnotationPresent(Setting.class) ? Optional.of(field.getAnnotation(Setting.class)) : Optional.empty();
     }
 
-    private static <T> void fieldToItem(ConfigNodeBuilder node, Field field, Object pojo, String name, List<Member> listeners) throws FiberException {
+    private static <T> void fieldToItem(ConfigTreeBuilder node, Field field, Object pojo, String name, List<Member> listeners) throws FiberException {
         Class<T> type = getSettingTypeFromField(field);
 
-        ConfigValueBuilder<T> builder = createConfigValueBuilder(node, name, type, field)
+        ConfigLeafBuilder<T> builder = createConfigLeafBuilder(node, name, type, field)
                 .withComment(findComment(field))
                 .withDefaultValue(findDefaultValue(field, pojo))
                 .withFinality(getSettingAnnotation(field).map(Setting::constant).orElse(false));
@@ -127,7 +127,7 @@ public class AnnotatedSettings {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Nonnull
-    private static <N extends ConfigNodeBuilder, T, E> ConfigValueBuilder<T> createConfigValueBuilder(N parent, String name, Class<T> type, Field field) {
+    private static <N extends ConfigTreeBuilder, T, E> ConfigLeafBuilder<T> createConfigLeafBuilder(N parent, String name, Class<T> type, Field field) {
         AnnotatedType annotatedType = field.getAnnotatedType();
         if (ConfigAggregateBuilder.isAggregate(type)) {
             if (Collection.class.isAssignableFrom(type)) {
@@ -158,7 +158,7 @@ public class AnnotatedSettings {
                 }
             }
         }
-        return new ConfigValueBuilder<>(parent, name, type);
+        return new ConfigLeafBuilder<>(parent, name, type);
     }
 
     @SuppressWarnings("unchecked")
@@ -301,8 +301,8 @@ public class AnnotatedSettings {
 
     private static String findName(Field field, SettingNamingConvention convention) {
         return Optional.ofNullable(
-                field.isAnnotationPresent(Setting.Node.class) ?
-                        field.getAnnotation(Setting.Node.class).name() :
+                field.isAnnotationPresent(Setting.Group.class) ?
+                        field.getAnnotation(Setting.Group.class).name() :
                         getSettingAnnotation(field).map(Setting::name).orElse(null))
                 .filter(s -> !s.isEmpty())
                 .orElse(convention.name(field.getName()));

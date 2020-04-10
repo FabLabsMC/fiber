@@ -1,9 +1,9 @@
 package me.zeroeightsix.fiber.exception;
 
 import me.zeroeightsix.fiber.tree.ConfigQuery;
-import me.zeroeightsix.fiber.tree.Node;
-import me.zeroeightsix.fiber.tree.NodeLike;
-import me.zeroeightsix.fiber.tree.TreeItem;
+import me.zeroeightsix.fiber.tree.ConfigGroup;
+import me.zeroeightsix.fiber.tree.ConfigTree;
+import me.zeroeightsix.fiber.tree.ConfigNode;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -15,15 +15,15 @@ import javax.annotation.Nullable;
  * config tree queries.
  */
 public class FiberQueryException extends FiberException {
-    private final NodeLike invalidTree;
+    private final ConfigTree invalidTree;
 
-    public FiberQueryException(String message, NodeLike invalidTree) {
-        super(message + (invalidTree instanceof Node && ((Node) invalidTree).getName() != null
-                ? " (in subtree " + ((Node) invalidTree).getName() + ")" : ""));
+    public FiberQueryException(String message, ConfigTree invalidTree) {
+        super(message + (invalidTree instanceof ConfigGroup && ((ConfigGroup) invalidTree).getName() != null
+                ? " (in subtree " + ((ConfigGroup) invalidTree).getName() + ")" : ""));
         this.invalidTree = invalidTree;
     }
 
-    public FiberQueryException(String message, Throwable cause, NodeLike invalidTree) {
+    public FiberQueryException(String message, Throwable cause, ConfigTree invalidTree) {
         super(message, cause);
         this.invalidTree = invalidTree;
     }
@@ -36,7 +36,7 @@ public class FiberQueryException extends FiberException {
      *
      * @return the parent of the erroring node.
      */
-    public NodeLike getErrorParent() {
+    public ConfigTree getErrorParent() {
         return invalidTree;
     }
 
@@ -47,7 +47,7 @@ public class FiberQueryException extends FiberException {
     public static class MissingChild extends FiberQueryException {
         private final String missingNodeName;
 
-        public MissingChild(String name, NodeLike invalidTree) {
+        public MissingChild(String name, ConfigTree invalidTree) {
             super("Missing child " + name, invalidTree);
             this.missingNodeName = name;
         }
@@ -68,12 +68,12 @@ public class FiberQueryException extends FiberException {
      * a different type than expected.
      */
     public static class WrongType extends FiberQueryException {
-        private final TreeItem invalidItem;
+        private final ConfigNode invalidItem;
         private final Class<?> expectedNodeType;
         @Nullable
         private final Class<?> expectedValueType;
 
-        public WrongType(NodeLike invalidTree, TreeItem invalidItem, Class<?> expectedNodeType, @Nullable Class<?> expectedValueType) {
+        public WrongType(ConfigTree invalidTree, ConfigNode invalidItem, Class<?> expectedNodeType, @Nullable Class<?> expectedValueType) {
             super("Expected node of type " + expectedNodeType.getSimpleName()
                     + (expectedValueType == null ? "" : "<" + expectedValueType.getSimpleName() + ">")
                     + ", got " + invalidItem, invalidTree);
@@ -82,7 +82,7 @@ public class FiberQueryException extends FiberException {
             this.expectedValueType = expectedValueType;
         }
 
-        public TreeItem getInvalidNode() {
+        public ConfigNode getInvalidNode() {
             return invalidItem;
         }
 

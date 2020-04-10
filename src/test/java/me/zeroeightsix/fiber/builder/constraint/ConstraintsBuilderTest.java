@@ -1,11 +1,11 @@
 package me.zeroeightsix.fiber.builder.constraint;
 
 import me.zeroeightsix.fiber.builder.ConfigAggregateBuilder;
-import me.zeroeightsix.fiber.builder.ConfigNodeBuilder;
+import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.constraint.CompositeType;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.tree.ConfigValue;
+import me.zeroeightsix.fiber.tree.ConfigLeaf;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -47,7 +47,7 @@ class ConstraintsBuilderTest {
     @DisplayName("Test array aggregate constraints")
     @Test
     public void testArrayConstraints() {
-        ConfigValue<Integer[]> config = ConfigAggregateBuilder.create(null, "foo", Integer[].class)
+        ConfigLeaf<Integer[]> config = ConfigAggregateBuilder.create(null, "foo", Integer[].class)
                 .beginConstraints().component()
                 .range(3, 10)
                 .finishComponent()
@@ -65,11 +65,11 @@ class ConstraintsBuilderTest {
     @DisplayName("Test collection aggregate constraints")
     @Test
     public void testCollectionConstraints() {
-        ConfigNodeBuilder builder = new ConfigNodeBuilder();
+        ConfigTreeBuilder builder = new ConfigTreeBuilder();
         ConfigAggregateBuilder<List<Integer>, Integer> aggregateBuilder = builder.beginAggregateValue("foo", Collections.emptyList(), Integer.class);
         assertThrows(RuntimeFiberException.class, () -> aggregateBuilder.beginConstraints().component().regex(""), "Invalid constraint type at build time");
 
-        ConfigValue<List<Integer>> config = aggregateBuilder
+        ConfigLeaf<List<Integer>> config = aggregateBuilder
                 .beginConstraints().component()
                 .atLeast(3).atMost(10)
                 .finishComponent()
@@ -77,7 +77,7 @@ class ConstraintsBuilderTest {
                 .finishConstraints()
                 .build();
 
-        ConfigValue<List<Integer>> deferredConfig = builder.beginAggregateValue("deferred", Collections.<Integer>emptyList(), null)
+        ConfigLeaf<List<Integer>> deferredConfig = builder.beginAggregateValue("deferred", Collections.<Integer>emptyList(), null)
                 .beginConstraints().component().regex("").finishComponent()
                 .finishConstraints().build();
         assertThrows(RuntimeException.class, () -> deferredConfig.setValue(Collections.singletonList(1)),

@@ -34,7 +34,7 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 	}
 
 	@Override
-	public JsonObject deserialize(Node node, InputStream stream) throws IOException, FiberException {
+	public JsonObject deserialize(ConfigTree tree, InputStream stream) throws IOException, FiberException {
 		Jankson jankson = Jankson.builder().build();
 		JsonObject object;
 		try {
@@ -42,22 +42,22 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 		} catch (SyntaxError syntaxError) {
 			throw new FiberException("Configuration file was malformed", syntaxError);
 		}
-		return deserialize(node, object);
+		return deserialize(tree, object);
 	}
 
 	@Override
-	public JsonObject deserialize(Node node, JsonObject element) throws FiberException {
+	public JsonObject deserialize(ConfigTree tree, JsonObject element) throws FiberException {
 		JsonObject leftovers = new JsonObject();
 		for (Map.Entry<String, JsonElement> entry : element.entrySet()) {
 			String key = entry.getKey();
 			JsonElement child = entry.getValue();
 
-			TreeItem item = node.lookup(key);
+			ConfigNode item = tree.lookup(key);
 			if (item != null) {
 				if (item instanceof Property) {
 					setPropertyValue((Property<?>) item, child);
-				} else if (item instanceof Node && child instanceof JsonObject) {
-					deserialize((Node) item, (JsonObject) child);
+				} else if (item instanceof ConfigGroup && child instanceof JsonObject) {
+					deserialize((ConfigTree) item, (JsonObject) child);
 				} else {
 					throw new FiberException("Value read for non-property node: " + item.getName());
 				}
@@ -73,8 +73,8 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 	}
 
 	@Override
-	public void serialize(Node node, @Nullable JsonObject additionalData, OutputStream out) throws IOException {
-		JsonObject object = serialize(node);
+	public void serialize(ConfigTree tree, @Nullable JsonObject additionalData, OutputStream out) throws IOException {
+		JsonObject object = serialize(tree);
 		if (additionalData != null) {
 			object.putAll(additionalData);
 		}
@@ -82,14 +82,14 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 	}
 
 	@Override
-	public JsonObject serialize(Node node) {
+	public JsonObject serialize(ConfigTree tree) {
 		JsonObject object = new JsonObject();
 
-		for (TreeItem treeItem : node.getItems()) {
+		for (ConfigNode treeItem : tree.getItems()) {
 			String name = null;
 
-			if (treeItem instanceof Node) {
-				Node subNode = (Node) treeItem;
+			if (treeItem instanceof ConfigGroup) {
+				ConfigGroup subNode = (ConfigGroup) treeItem;
 				if (!subNode.isSerializedSeparately()) {
 					object.put((name = subNode.getName()), serialize(subNode));
 				}
