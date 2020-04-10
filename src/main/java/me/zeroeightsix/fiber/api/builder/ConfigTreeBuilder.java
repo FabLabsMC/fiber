@@ -3,8 +3,8 @@ package me.zeroeightsix.fiber.api.builder;
 import me.zeroeightsix.fiber.api.annotation.AnnotatedSettings;
 import me.zeroeightsix.fiber.api.annotation.Setting;
 import me.zeroeightsix.fiber.api.annotation.Settings;
-import me.zeroeightsix.fiber.exception.FiberException;
-import me.zeroeightsix.fiber.exception.RuntimeFiberException;
+import me.zeroeightsix.fiber.api.exception.FiberException;
+import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.tree.*;
 
 import javax.annotation.Nonnull;

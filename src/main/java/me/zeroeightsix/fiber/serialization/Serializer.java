@@ -1,7 +1,7 @@
 package me.zeroeightsix.fiber.serialization;
 
 import me.zeroeightsix.fiber.Identifier;
-import me.zeroeightsix.fiber.exception.FiberException;
+import me.zeroeightsix.fiber.api.exception.FiberException;
 import me.zeroeightsix.fiber.tree.ConfigTree;
 import me.zeroeightsix.fiber.tree.ConfigGroup;
 

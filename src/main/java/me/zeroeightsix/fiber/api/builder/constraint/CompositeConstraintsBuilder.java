@@ -4,7 +4,7 @@ import me.zeroeightsix.fiber.api.constraint.CompositeType;
 import me.zeroeightsix.fiber.api.constraint.Constraint;
 import me.zeroeightsix.fiber.api.constraint.ConstraintType;
 import me.zeroeightsix.fiber.impl.constraint.ValuedConstraint;
-import me.zeroeightsix.fiber.exception.RuntimeFiberException;
+import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
 
 import java.util.List;
 

@@ -1,7 +1,7 @@
 package me.zeroeightsix.fiber.api.annotation.exception;
 
 import me.zeroeightsix.fiber.api.annotation.AnnotatedSettings;
-import me.zeroeightsix.fiber.exception.FiberException;
+import me.zeroeightsix.fiber.api.exception.FiberException;
 import me.zeroeightsix.fiber.tree.ConfigGroup;
 
 /**

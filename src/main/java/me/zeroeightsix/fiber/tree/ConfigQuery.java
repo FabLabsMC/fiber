@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.tree;
 
-import me.zeroeightsix.fiber.exception.FiberQueryException;
+import me.zeroeightsix.fiber.api.exception.FiberQueryException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

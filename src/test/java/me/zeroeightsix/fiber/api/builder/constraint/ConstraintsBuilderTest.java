@@ -4,7 +4,7 @@ import me.zeroeightsix.fiber.api.builder.ConfigAggregateBuilder;
 import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.api.constraint.CompositeType;
 import me.zeroeightsix.fiber.api.constraint.Constraint;
-import me.zeroeightsix.fiber.exception.RuntimeFiberException;
+import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.tree.ConfigLeaf;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

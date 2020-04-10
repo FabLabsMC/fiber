@@ -3,7 +3,7 @@ package me.zeroeightsix.fiber.api.builder.constraint;
 import me.zeroeightsix.fiber.api.builder.ConfigAggregateBuilder;
 import me.zeroeightsix.fiber.api.constraint.CompositeType;
 import me.zeroeightsix.fiber.api.constraint.Constraint;
-import me.zeroeightsix.fiber.exception.RuntimeFiberException;
+import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

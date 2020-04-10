@@ -8,7 +8,7 @@ import me.zeroeightsix.fiber.api.builder.ConfigAggregateBuilder;
 import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.api.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.api.builder.constraint.AbstractConstraintsBuilder;
-import me.zeroeightsix.fiber.exception.FiberException;
+import me.zeroeightsix.fiber.api.exception.FiberException;
 import me.zeroeightsix.fiber.impl.annotation.magic.TypeMagic;
 import me.zeroeightsix.fiber.tree.ConfigGroupImpl;
 

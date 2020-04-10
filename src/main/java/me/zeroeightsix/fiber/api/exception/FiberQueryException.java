@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber.exception;
+package me.zeroeightsix.fiber.api.exception;
 
 import me.zeroeightsix.fiber.tree.ConfigQuery;
 import me.zeroeightsix.fiber.tree.ConfigGroup;

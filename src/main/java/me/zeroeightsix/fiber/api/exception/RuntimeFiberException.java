@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber.exception;
+package me.zeroeightsix.fiber.api.exception;
 
 /**
  * An exception thrown by fiber when something goes unrecoverably wrong.

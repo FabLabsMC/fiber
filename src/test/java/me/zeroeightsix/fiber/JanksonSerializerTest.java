@@ -2,7 +2,7 @@ package me.zeroeightsix.fiber;
 
 import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.api.constraint.CompositeType;
-import me.zeroeightsix.fiber.exception.FiberException;
+import me.zeroeightsix.fiber.api.exception.FiberException;
 import me.zeroeightsix.fiber.serialization.JanksonSerializer;
 import me.zeroeightsix.fiber.tree.ConfigGroupImpl;
 import me.zeroeightsix.fiber.tree.PropertyMirror;
