@@ -78,13 +78,13 @@ public class IndexedNodeCollection extends AbstractCollection<ConfigNode> implem
     }
 
     @Override
-    public ConfigNodeImpl getByName(String name) {
+    public ConfigNode getByName(String name) {
         return this.items.get(name);
     }
 
     @Override
     @Nullable
-    public ConfigNodeImpl removeByName(String name) {
+    public ConfigNode removeByName(String name) {
         ConfigNodeImpl removed = this.items.remove(name);
         if (removed != null) {
             removed.detach();
