@@ -6,8 +6,9 @@ import javax.annotation.Nullable;
 /**
  * A commentable node.
  *
- * @see ConfigGroupImpl
- * @see ConfigLeaf
+ * @see ConfigNode
+ * @see ConfigBranchImpl
+ * @see ConfigLeafImpl
  */
 public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
 

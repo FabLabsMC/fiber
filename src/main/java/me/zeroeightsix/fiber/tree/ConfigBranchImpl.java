@@ -8,9 +8,9 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * Class implementing {@link ConfigGroup}
+ * Class implementing {@link ConfigBranch}
  */
-public class ConfigGroupImpl extends ConfigNodeImpl implements ConfigGroup {
+public class ConfigBranchImpl extends ConfigNodeImpl implements ConfigBranch {
 
     private final Map<String, ConfigNode> items;
     private final boolean serializeSeparately;
@@ -18,12 +18,12 @@ public class ConfigGroupImpl extends ConfigNodeImpl implements ConfigGroup {
     /**
      * Creates a new {@code ConfigGroup}.
      *
-     * @param name the name for this {@link ConfigGroupImpl}
-     * @param comment the comment for this {@link ConfigGroupImpl}
+     * @param name the name for this {@link ConfigBranchImpl}
+     * @param comment the comment for this {@link ConfigBranchImpl}
      * @param items the node's items
      * @param serializeSeparately whether or not this node should be serialised separately. If {@code true}, it will be ignored during serialisation.
      */
-    public ConfigGroupImpl(String name, @Nullable String comment, @Nonnull Map<String, ConfigNode> items, boolean serializeSeparately) {
+    public ConfigBranchImpl(String name, @Nullable String comment, @Nonnull Map<String, ConfigNode> items, boolean serializeSeparately) {
         super(name, comment);
         this.items = Collections.unmodifiableMap(new TreeMap<>(items));
         this.serializeSeparately = serializeSeparately;
@@ -34,11 +34,10 @@ public class ConfigGroupImpl extends ConfigNodeImpl implements ConfigGroup {
      *
      * <p> This node will not be serialised separately.
      *
-     * @param name the name for this {@link ConfigGroupImpl}
-     * @param comment the comment for this {@link ConfigGroupImpl}
-     * @see ConfigGroupImpl
+     * @param name the name for this {@link ConfigBranchImpl}
+     * @param comment the comment for this {@link ConfigBranchImpl}
      */
-    public ConfigGroupImpl(@Nonnull String name, @Nullable String comment) {
+    public ConfigBranchImpl(@Nonnull String name, @Nullable String comment) {
         this(name, comment, Collections.emptyMap(), false);
     }
 
@@ -46,10 +45,8 @@ public class ConfigGroupImpl extends ConfigNodeImpl implements ConfigGroup {
      * Creates a new {@code ConfigGroup} without a name or comment.
      *
      * <p> This node will not be serialised separately.
-     *
-     * @see ConfigGroupImpl
      */
-    public ConfigGroupImpl() {
+    public ConfigBranchImpl() {
         this(null, null, Collections.emptyMap(), false);
     }
 

@@ -15,7 +15,7 @@ public class NodeOperations {
      * <p> If both nodes have one or more children with the same name, the child from {@code from} takes priority.
      *
      * @param from  The {@code ConfigNode} that will be read from, but not mutated.
-     * @param to    The mutated {@link ConfigGroupImpl} that will inherit <code>from</code>'s values and nodes.
+     * @param to    The mutated {@link ConfigBranch} that will inherit <code>from</code>'s values and nodes.
      */
     public static void mergeTo(ConfigTree from, ConfigTreeBuilder to) {
         try {
@@ -31,7 +31,7 @@ public class NodeOperations {
      * Merges a leaf node ({@code ConfigLeaf}) into a {@code ConfigNode}.
      *
      * @param value The leaf node to be inherited
-     * @param to    The mutated {@link ConfigGroupImpl} that will inherit <code>value</code>
+     * @param to    The mutated {@link ConfigBranch} that will inherit <code>value</code>
      */
     public static void mergeTo(ConfigLeaf<?> value, ConfigTreeBuilder to) {
         try {
