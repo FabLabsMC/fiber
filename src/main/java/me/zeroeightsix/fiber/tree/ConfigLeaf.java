@@ -2,7 +2,6 @@ package me.zeroeightsix.fiber.tree;
 
 import me.zeroeightsix.fiber.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
-import me.zeroeightsix.fiber.constraint.ConstraintType;
 import me.zeroeightsix.fiber.constraint.FinalConstraint;
 
 import javax.annotation.Nonnull;
@@ -18,85 +17,56 @@ import java.util.function.BiConsumer;
  * @see ConfigLeafBuilder
  * @see me.zeroeightsix.fiber.builder.ConfigAggregateBuilder
  */
-public class ConfigLeaf<T> extends ConfigNodeImpl implements Property<T> {
-
-    @Nullable
-    private T value;
-    @Nullable
-    private final T defaultValue;
-    @Nonnull
-    private final BiConsumer<T, T> listener;
-    @Nonnull
-    private final List<Constraint<? super T>> constraints;
-    @Nonnull
-    private final Class<T> type;
+public interface ConfigLeaf<T> extends ConfigNode, Property<T>, Commentable {
 
     /**
-     * Creates a {@code ConfigLeaf}.
+     * Sets the value held by this {@code ConfigLeaf}.
      *
-     * @param name         the name for this node
-     * @param comment      the comment for this node
-     * @param defaultValue the default value for this node
-     *                     <p> While the default value should generally satisfy the supplied {@code constraints},
-     *                     this is not enforced by this constructor.
-     *                     This allows constraints such as {@link ConstraintType#FINAL} to work as intended.
-     *                     If this {@code ConfigLeaf} is built by a {@link ConfigLeafBuilder}, this criterion will always be met.
-     * @param listener     the consumer or listener for this item. When this item's value changes, the consumer will be called with the old value as first argument and the new value as second argument.
-     * @param constraints  the list of constraints for this item. For a value to be accepted, all constraints must be satisfied.
-     * @param type         the type of value this item holds
-     * @see ConfigLeafBuilder
-     * @see me.zeroeightsix.fiber.builder.ConfigAggregateBuilder
+     * <p> If the value does not satisfy this setting's {@linkplain #getConstraints() constraints},
+     * the current value is not updated and the method returns {@code false}.
+     *
+     * @param value the new value this {@code ConfigLeaf} should hold
+     * @return {@code true} if this property changed as a result of the call, and {@code false} otherwise.
+     * @see #accepts(Object)
      */
-    public ConfigLeaf(@Nonnull String name, @Nullable String comment, @Nullable T defaultValue, @Nonnull BiConsumer<T, T> listener, @Nonnull List<Constraint<? super T>> constraints, @Nonnull Class<T> type) {
-        super(name, comment);
-        this.value = defaultValue;
-        this.defaultValue = defaultValue;
-        this.listener = listener;
-        this.constraints = constraints;
-        this.type = type;
-    }
-
     @Override
-    @Nullable
-    public T getValue() {
-        return value;
-    }
+    boolean setValue(T value);
 
-    @Nonnull
+    /**
+     * Returns this {@code ConfigLeaf}'s current value.
+     *
+     * <p> If no successful call to {@link #setValue(Object)} has been made,
+     * this method returns this node's {@linkplain #getDefaultValue() default value}.
+     * @return this node's value
+     */
     @Override
-    public Class<T> getType() {
-        return type;
-    }
+    T getValue();
 
+    /**
+     * Returns a class object representing the type of values this node can hold.
+     *
+     * <p> The returned class object can be used for various runtime type checks,
+     * as well as constraint configuration.
+     *
+     * @return the class representing the type of this node's values
+     */
     @Override
-    public boolean setValue(@Nullable T value) {
-        if (!this.accepts(value)) return false;
-
-        T oldValue = this.value;
-        this.value = value;
-        this.listener.accept(oldValue, value);
-        return true;
-    }
+    Class<T> getType();
 
     /**
      * {@inheritDoc}
      *
      * <p> A value is accepted if it satisfies every constraint
      * this setting has. Note that some constraints such as {@link FinalConstraint}
-     * will cause even the current {@linkplain #getValue() value} to be rejected.
+     * will cause even the {@linkplain #getValue() current value} to be rejected.
      *
      * @param value the value to check
      * @see #setValue(Object)
      * @see #getConstraints()
      */
     @Override
-    public boolean accepts(@Nullable T value) {
-        for (Constraint<? super T> constraint : this.constraints) {
-            if (!constraint.test(value)) {
-                return false;
-            }
-        }
-        return true;
+    default boolean accepts(T value) {
+        return false;
     }
 
     /**
@@ -107,9 +77,7 @@ public class ConfigLeaf<T> extends ConfigNodeImpl implements Property<T> {
      * @return the listener
      */
     @Nonnull
-    public BiConsumer<T, T> getListener() {
-        return listener;
-    }
+    BiConsumer<T, T> getListener();
 
     /**
      * Returns the default value for this item.
@@ -117,9 +85,7 @@ public class ConfigLeaf<T> extends ConfigNodeImpl implements Property<T> {
      * @return the default value
      */
     @Nullable
-    public T getDefaultValue() {
-        return defaultValue;
-    }
+    T getDefaultValue();
 
     /**
      * Returns the list of constraints for this item.
@@ -129,13 +95,5 @@ public class ConfigLeaf<T> extends ConfigNodeImpl implements Property<T> {
      * @return the list of constraints
      */
     @Nonnull
-    public List<Constraint<? super T>> getConstraints() {
-        return constraints;
-    }
-
-    @Override
-    public String toString() {
-        return getClass().getSimpleName() + '<' + getType().getSimpleName() + ">[name=" + getName() + ", comment=" + getComment() + "]";
-    }
-
+    List<Constraint<? super T>> getConstraints();
 }

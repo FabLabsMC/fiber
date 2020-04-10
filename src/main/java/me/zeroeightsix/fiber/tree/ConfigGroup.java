@@ -9,7 +9,7 @@ import java.util.Collection;
  *
  * @see ConfigGroupImpl
  */
-public interface ConfigGroup extends ConfigTree, ConfigNode {
+public interface ConfigGroup extends ConfigTree, ConfigNode, Commentable {
 
     /**
      * Returns this node's name.

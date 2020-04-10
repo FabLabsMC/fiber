@@ -5,8 +5,9 @@ import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.FinalConstraint;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.tree.ConfigTree;
 import me.zeroeightsix.fiber.tree.ConfigLeaf;
+import me.zeroeightsix.fiber.tree.ConfigLeafImpl;
+import me.zeroeightsix.fiber.tree.ConfigTree;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -177,7 +178,7 @@ public class ConfigLeafBuilder<T> {
         if (isFinal) {
             constraints.add(0, FinalConstraint.instance());  // index 0 to avoid uselessly checking everything each time
         }
-        ConfigLeaf<T> built = new ConfigLeaf<>(name, comment, defaultValue, consumer, constraints, type);
+        ConfigLeaf<T> built = new ConfigLeafImpl<>(name, comment, defaultValue, consumer, constraints, type);
 
         if (parentNode != null) {
             // We don't know what kind of evil collection we're about to add a node to.
