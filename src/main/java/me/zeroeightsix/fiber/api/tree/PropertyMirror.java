@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber.tree;
+package me.zeroeightsix.fiber.api.tree;
 
 /**
  * A {@code Property} that delegates all operations to another.

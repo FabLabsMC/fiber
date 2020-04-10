@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber.tree;
+package me.zeroeightsix.fiber.api.tree;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

@@ -1,6 +1,7 @@
 package me.zeroeightsix.fiber.api.annotation;
 
 import me.zeroeightsix.fiber.api.annotation.convention.SettingNamingConvention;
+import me.zeroeightsix.fiber.api.tree.ConfigBranch;
 
 import javax.annotation.RegEx;
 import java.lang.annotation.ElementType;
@@ -51,7 +52,7 @@ public @interface Setting {
     /**
      * Indicates that this setting represents a group of settings, rather than a single value.
      *
-     * @see me.zeroeightsix.fiber.tree.ConfigBranch
+     * @see ConfigBranch
      */
     @Target(ElementType.FIELD)
     @Retention(RetentionPolicy.RUNTIME)

@@ -1,9 +1,9 @@
 package me.zeroeightsix.fiber.api.serialization;
 
-import me.zeroeightsix.fiber.Identifier;
+import me.zeroeightsix.fiber.api.Identifier;
 import me.zeroeightsix.fiber.api.exception.FiberException;
 import me.zeroeightsix.fiber.impl.serialization.JanksonSerializer;
-import me.zeroeightsix.fiber.tree.ConfigTree;
+import me.zeroeightsix.fiber.api.tree.ConfigTree;
 
 import javax.annotation.Nullable;
 import java.io.IOException;

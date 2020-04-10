@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber.tree;
+package me.zeroeightsix.fiber.api.tree;
 
 /**
  * Implementing this interface means that this class has a nullable value which can be mutated using the {@link Property#setValue(Object) setValue} method.

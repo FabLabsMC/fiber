@@ -1,9 +1,9 @@
-package me.zeroeightsix.fiber;
+package me.zeroeightsix.fiber.api;
 
 import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.api.exception.FiberException;
 import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.tree.*;
+import me.zeroeightsix.fiber.api.tree.*;
 
 public class NodeOperations {
 

@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber.tree;
+package me.zeroeightsix.fiber.api.tree;
 
 /**
  * The building block of a tree: every node implement this interface.

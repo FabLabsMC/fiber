@@ -1,8 +1,9 @@
-package me.zeroeightsix.fiber.tree;
+package me.zeroeightsix.fiber.impl.tree;
 
 import me.zeroeightsix.fiber.api.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.api.constraint.Constraint;
 import me.zeroeightsix.fiber.api.constraint.ConstraintType;
+import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
 import me.zeroeightsix.fiber.impl.constraint.FinalConstraint;
 
 import javax.annotation.Nonnull;

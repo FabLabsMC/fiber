@@ -5,9 +5,9 @@ import me.zeroeightsix.fiber.api.constraint.Constraint;
 import me.zeroeightsix.fiber.impl.constraint.FinalConstraint;
 import me.zeroeightsix.fiber.api.exception.FiberException;
 import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.tree.ConfigLeaf;
-import me.zeroeightsix.fiber.tree.ConfigLeafImpl;
-import me.zeroeightsix.fiber.tree.ConfigTree;
+import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
+import me.zeroeightsix.fiber.impl.tree.ConfigLeafImpl;
+import me.zeroeightsix.fiber.api.tree.ConfigTree;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

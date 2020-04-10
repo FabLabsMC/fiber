@@ -4,8 +4,8 @@ import me.zeroeightsix.fiber.NodeOperationsTest;
 import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.api.constraint.CompositeType;
 import me.zeroeightsix.fiber.api.exception.FiberException;
-import me.zeroeightsix.fiber.tree.ConfigTree;
-import me.zeroeightsix.fiber.tree.PropertyMirror;
+import me.zeroeightsix.fiber.api.tree.ConfigTree;
+import me.zeroeightsix.fiber.api.tree.PropertyMirror;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

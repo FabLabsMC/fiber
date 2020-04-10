@@ -1,4 +1,7 @@
-package me.zeroeightsix.fiber.tree;
+package me.zeroeightsix.fiber.impl.tree;
+
+import me.zeroeightsix.fiber.api.tree.Commentable;
+import me.zeroeightsix.fiber.api.tree.ConfigNode;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.api.annotation;
 
-import me.zeroeightsix.fiber.NodeOperations;
+import me.zeroeightsix.fiber.api.NodeOperations;
 import me.zeroeightsix.fiber.api.annotation.convention.SettingNamingConvention;
 import me.zeroeightsix.fiber.api.annotation.exception.MalformedFieldException;
 import me.zeroeightsix.fiber.impl.annotation.convention.NoNamingConvention;
@@ -10,7 +10,7 @@ import me.zeroeightsix.fiber.api.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.api.builder.constraint.AbstractConstraintsBuilder;
 import me.zeroeightsix.fiber.api.exception.FiberException;
 import me.zeroeightsix.fiber.impl.annotation.magic.TypeMagic;
-import me.zeroeightsix.fiber.tree.ConfigBranch;
+import me.zeroeightsix.fiber.api.tree.ConfigBranch;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.*;

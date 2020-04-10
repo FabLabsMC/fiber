@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.api.constraint;
 
-import me.zeroeightsix.fiber.tree.ConfigLeaf;
+import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
 
 /**
  * Specifies a condition values must satisfy before being set to a {@code ConfigLeaf}.

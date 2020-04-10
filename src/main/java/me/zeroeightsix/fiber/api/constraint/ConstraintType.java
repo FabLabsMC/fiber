@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.api.constraint;
 
-import me.zeroeightsix.fiber.Identifier;
+import me.zeroeightsix.fiber.api.Identifier;
 
 import java.util.Collection;
 

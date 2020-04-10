@@ -4,11 +4,11 @@ import blue.endless.jankson.Jankson;
 import blue.endless.jankson.JsonElement;
 import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.api.SyntaxError;
-import me.zeroeightsix.fiber.Identifier;
+import me.zeroeightsix.fiber.api.Identifier;
 import me.zeroeightsix.fiber.api.exception.FiberException;
 import me.zeroeightsix.fiber.api.serialization.Marshaller;
 import me.zeroeightsix.fiber.api.serialization.Serializer;
-import me.zeroeightsix.fiber.tree.*;
+import me.zeroeightsix.fiber.api.tree.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

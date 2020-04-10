@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber;
+package me.zeroeightsix.fiber.api;
 
 public class Identifier {
     String domain;
