@@ -6,8 +6,8 @@ import me.zeroeightsix.fiber.annotation.convention.SettingNamingConvention;
 import me.zeroeightsix.fiber.annotation.exception.MalformedFieldException;
 import me.zeroeightsix.fiber.annotation.magic.TypeMagic;
 import me.zeroeightsix.fiber.builder.ConfigAggregateBuilder;
-import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.builder.ConfigLeafBuilder;
+import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.builder.constraint.AbstractConstraintsBuilder;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.tree.ConfigGroupImpl;
@@ -44,7 +44,7 @@ public class AnnotatedSettings {
             convention = new NoNamingConvention();
         }
 
-        NodeOperations.mergeTo(constructNode(pojoClass, pojo, onlyAnnotated, convention), mergeTo);
+        NodeOperations.moveChildren(constructNode(pojoClass, pojo, onlyAnnotated, convention), mergeTo);
     }
 
     private static <P> ConfigTreeBuilder constructNode(Class<P> pojoClass, P pojo, boolean onlyAnnotated, SettingNamingConvention convention) throws FiberException {
