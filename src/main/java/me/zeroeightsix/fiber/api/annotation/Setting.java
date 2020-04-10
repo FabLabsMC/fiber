@@ -1,5 +1,6 @@
-package me.zeroeightsix.fiber.annotation;
+package me.zeroeightsix.fiber.api.annotation;
 
+import me.zeroeightsix.fiber.api.annotation.convention.SettingNamingConvention;
 import me.zeroeightsix.fiber.tree.ConfigGroup;
 
 import javax.annotation.RegEx;
@@ -26,7 +27,7 @@ public @interface Setting {
     /**
      * Sets the name that will be used for this setting.
      *
-     * <p> Custom names have a higher authority than {@link me.zeroeightsix.fiber.annotation.convention.SettingNamingConvention naming conventions}, and will not be affected by them.
+     * <p> Custom names have a higher authority than {@link SettingNamingConvention naming conventions}, and will not be affected by them.
      * If the name is empty, the name of the field being annotated will be used and the naming convention will be applied to that name.
      *
      * @return An empty string ({@code ""}) if no custom name was set, or the custom name if one was set.
@@ -59,7 +60,7 @@ public @interface Setting {
         /**
          * Sets the name that will be used for this node.
          *
-         * <p> Custom names have a higher authority than {@link me.zeroeightsix.fiber.annotation.convention.SettingNamingConvention naming conventions}, and will not be affected by them.
+         * <p> Custom names have a higher authority than {@link SettingNamingConvention naming conventions}, and will not be affected by them.
          * If the name is empty, the name of the field being annotated will be used and the naming convention will be applied to that name.
          *
          * @return An empty string ({@code ""}) if no custom name was set, or the custom name if one was set.

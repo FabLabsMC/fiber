@@ -1,4 +1,6 @@
-package me.zeroeightsix.fiber.annotation.convention;
+package me.zeroeightsix.fiber.impl.annotation.convention;
+
+import me.zeroeightsix.fiber.api.annotation.convention.SettingNamingConvention;
 
 /**
  * A naming convention that converts java-styled {@code lowerCamelCase} names and {@code Proper case} names to {@code snake_case}.
@@ -7,14 +9,6 @@ package me.zeroeightsix.fiber.annotation.convention;
  */
 public class SnakeCaseConvention implements SettingNamingConvention {
 
-    /**
-     * Attempts to convert java-styled names or spaced names to underscored, lowercase names (C style).
-     *
-     * <p> For example, "helloWorld" or "Hello world" become "hello_world"
-     *
-     * @param name  The name to convert to underscored lower case
-     * @return      The converted name
-     */
     @Override
     public String name(String name) {
         return name.replaceAll("(?!^)[ _]*([A-Z])", "_$1").toLowerCase().replace(' ', '_');

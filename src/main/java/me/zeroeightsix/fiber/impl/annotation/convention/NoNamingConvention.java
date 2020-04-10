@@ -1,4 +1,6 @@
-package me.zeroeightsix.fiber.annotation.convention;
+package me.zeroeightsix.fiber.impl.annotation.convention;
+
+import me.zeroeightsix.fiber.api.annotation.convention.SettingNamingConvention;
 
 /**
  * A naming convention that does not modify any names.

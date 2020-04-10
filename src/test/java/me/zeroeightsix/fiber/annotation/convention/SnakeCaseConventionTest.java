@@ -1,5 +1,6 @@
 package me.zeroeightsix.fiber.annotation.convention;
 
+import me.zeroeightsix.fiber.impl.annotation.convention.SnakeCaseConvention;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

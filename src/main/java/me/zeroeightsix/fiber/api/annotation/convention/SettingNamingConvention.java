@@ -1,4 +1,8 @@
-package me.zeroeightsix.fiber.annotation.convention;
+package me.zeroeightsix.fiber.api.annotation.convention;
+
+import me.zeroeightsix.fiber.impl.annotation.convention.LowercaseConvention;
+import me.zeroeightsix.fiber.impl.annotation.convention.NoNamingConvention;
+import me.zeroeightsix.fiber.impl.annotation.convention.SnakeCaseConvention;
 
 /**
  * A setting naming convention decides how a setting is named based upon the variable it was created from.

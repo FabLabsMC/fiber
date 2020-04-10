@@ -1,8 +1,8 @@
 package me.zeroeightsix.fiber.builder;
 
-import me.zeroeightsix.fiber.annotation.AnnotatedSettings;
-import me.zeroeightsix.fiber.annotation.Setting;
-import me.zeroeightsix.fiber.annotation.Settings;
+import me.zeroeightsix.fiber.api.annotation.AnnotatedSettings;
+import me.zeroeightsix.fiber.api.annotation.Setting;
+import me.zeroeightsix.fiber.api.annotation.Settings;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.tree.*;

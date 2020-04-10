@@ -1,7 +1,7 @@
-package me.zeroeightsix.fiber.annotation;
+package me.zeroeightsix.fiber.api.annotation;
 
-import me.zeroeightsix.fiber.annotation.convention.NoNamingConvention;
-import me.zeroeightsix.fiber.annotation.convention.SettingNamingConvention;
+import me.zeroeightsix.fiber.api.annotation.convention.SettingNamingConvention;
+import me.zeroeightsix.fiber.impl.annotation.convention.NoNamingConvention;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

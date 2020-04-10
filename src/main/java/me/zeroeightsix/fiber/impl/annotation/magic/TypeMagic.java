@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 
-package me.zeroeightsix.fiber.annotation.magic;
+package me.zeroeightsix.fiber.impl.annotation.magic;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.*;
