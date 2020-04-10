@@ -9,7 +9,7 @@ import me.zeroeightsix.fiber.Identifier;
 import me.zeroeightsix.fiber.api.builder.constraint.CompositeConstraintsBuilder;
 import me.zeroeightsix.fiber.api.constraint.Constraint;
 import me.zeroeightsix.fiber.impl.constraint.ValuedConstraint;
-import me.zeroeightsix.fiber.serialization.Marshaller;
+import me.zeroeightsix.fiber.api.serialization.Marshaller;
 import me.zeroeightsix.fiber.tree.ConfigTree;
 import me.zeroeightsix.fiber.tree.ConfigLeaf;
 import me.zeroeightsix.fiber.tree.ConfigGroup;

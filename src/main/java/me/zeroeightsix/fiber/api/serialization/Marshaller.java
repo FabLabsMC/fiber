@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber.serialization;
+package me.zeroeightsix.fiber.api.serialization;
 
 public interface Marshaller<T> {
 

@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class NodeOperationsTest {
+public class NodeOperationsTest {
 
     @Test
     @DisplayName("Node -> Node")
@@ -56,7 +56,7 @@ class NodeOperationsTest {
         testItemFor(Integer.class, 10, valueTwo);
     }
 
-    static <T> void testNodeFor(ConfigTree node, String name, Class<T> type, T value) {
+    public static <T> void testNodeFor(ConfigTree node, String name, Class<T> type, T value) {
         ConfigNode item = node.lookup(name);
         testItemFor(type, value, item);
     }
