@@ -10,16 +10,16 @@ import java.util.Collection;
 import java.util.function.BiConsumer;
 
 /**
- * A {@code ConfigValueBuilder} that produces aggregate {@code ConfigValue}s.
+ * A {@code ConfigLeafBuilder} that produces aggregate {@code ConfigLeaf}s.
  *
  * <p>Aggregate types are those that hold multiple values, such as {@code List} or arrays.
- * Settings with scalar types, such as {@code Integer} or {@code String}, are created using {@link ConfigValueBuilder}.
+ * Settings with scalar types, such as {@code Integer} or {@code String}, are created using {@link ConfigLeafBuilder}.
  *
  * @param <A> the type of aggregate value
  * @param <E> the type of values held by {@code <A>}
  * @see #create
  */
-public final class ConfigAggregateBuilder<A, E> extends ConfigValueBuilder<A> {
+public final class ConfigAggregateBuilder<A, E> extends ConfigLeafBuilder<A> {
     /**
      * Determines if a {@code Class} object represents an aggregate type,
      * ie. if it is an {@linkplain Class#isArray() Array} or a {@linkplain Collection}.

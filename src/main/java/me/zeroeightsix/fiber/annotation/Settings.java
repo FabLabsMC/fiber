@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
 /**
  * Indicates a type represents a structure in a configuration file.
  *
- * <p> While it not necessary to use this annotation to serialise a POJO into a {@link me.zeroeightsix.fiber.annotation.Setting.Node Node}, it can be used to specify other metadata.
+ * <p> While it not necessary to use this annotation to serialise a POJO into a {@link Setting.Group Node}, it can be used to specify other metadata.
  *
  * @see Settings#onlyAnnotated()
  * @see Settings#namingConvention()

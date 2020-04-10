@@ -37,12 +37,12 @@ class AnnotatedSettingsTest {
         assertEquals(1, items.size(), "Setting map is 1 entry large");
         ConfigNode item = node.lookup("a");
         assertNotNull(item, "Setting exists");
-        assertTrue(ConfigLeaf.class.isAssignableFrom(item.getClass()), "Setting is a ConfigValue");
-        ConfigLeaf<?> configValue = (ConfigLeaf<?>) item;
-        assertNotNull(configValue.getValue(), "Setting value is non-null");
-        assertEquals(Integer.class, configValue.getType(), "Setting type is correct");
-        assertEquals(Integer.class, configValue.getValue().getClass(), "Setting value reflects correct type");
-        Integer integer = (Integer) configValue.getValue();
+        assertTrue(ConfigLeaf.class.isAssignableFrom(item.getClass()), "Setting is a ConfigLeaf");
+        ConfigLeaf<?> leaf = (ConfigLeaf<?>) item;
+        assertNotNull(leaf.getValue(), "Setting value is non-null");
+        assertEquals(Integer.class, leaf.getType(), "Setting type is correct");
+        assertEquals(Integer.class, leaf.getValue().getClass(), "Setting value reflects correct type");
+        Integer integer = (Integer) leaf.getValue();
         assertEquals(integer, 5, "Setting value is correct");
     }
 
@@ -304,7 +304,7 @@ class AnnotatedSettingsTest {
     }
 
     private static class SubNodePojo {
-        @Setting.Node(name = "a")
+        @Setting.Group(name = "a")
         public SubNode node = new SubNode();
 
         class SubNode {

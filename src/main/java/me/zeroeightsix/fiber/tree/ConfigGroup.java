@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 
 /**
- * A member of a tree that can hold any amount of children
+ * A node that can hold any amount of children
  *
  * @see ConfigGroupImpl
  */
@@ -24,9 +24,9 @@ public interface ConfigGroup extends ConfigTree, ConfigNode {
     String getName();
 
     /**
-     * Tries to find a child in this node by name. If a child is found, it will be returned.
+     * Tries to find a child in this group by name. If a child is found, it will be returned.
      *
-     * <p> The value returned for a given {@code name} is always the same.
+     * <p> The node returned for a given {@code name} is always the same.
      *
      * @param name The name of the child to look for
      * @return the child if found, otherwise {@code null}
@@ -36,7 +36,7 @@ public interface ConfigGroup extends ConfigTree, ConfigNode {
     ConfigNode lookup(String name);
 
     /**
-     * Returns a collection of this node's children.
+     * Returns a collection of this group's children.
      *
      * <p> The returned collection is unmodifiable, and guaranteed not to have two nodes with the same name.
      *

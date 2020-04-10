@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.tree;
 
-import me.zeroeightsix.fiber.builder.ConfigNodeBuilder;
+import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.exception.FiberQueryException;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +13,7 @@ class ConfigQueryTest {
     @Test
     void run() throws FiberQueryException {
         AtomicReference<ConfigLeaf<Integer>> a = new AtomicReference<>();
-        ConfigGroupImpl tree = new ConfigNodeBuilder()
+        ConfigGroupImpl tree = new ConfigTreeBuilder()
                 .fork("child")
                 .fork("stuff")
                 .beginValue("A", 10)

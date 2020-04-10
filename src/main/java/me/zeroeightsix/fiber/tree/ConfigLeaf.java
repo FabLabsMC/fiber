@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.tree;
 
-import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
+import me.zeroeightsix.fiber.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.ConstraintType;
 import me.zeroeightsix.fiber.constraint.FinalConstraint;
@@ -11,11 +11,11 @@ import java.util.List;
 import java.util.function.BiConsumer;
 
 /**
- * A {@code ConfigLeaf} with some value of type {@code T}.
+ * A {@code ConfigNode} with some value of type {@code T}.
  *
  * @param <T> The type of value this class holds
  * @see ConfigNodeImpl
- * @see ConfigValueBuilder
+ * @see ConfigLeafBuilder
  * @see me.zeroeightsix.fiber.builder.ConfigAggregateBuilder
  */
 public class ConfigLeaf<T> extends ConfigNodeImpl implements Property<T> {
@@ -32,19 +32,19 @@ public class ConfigLeaf<T> extends ConfigNodeImpl implements Property<T> {
     private final Class<T> type;
 
     /**
-     * Creates a {@code ConfigValue}.
+     * Creates a {@code ConfigLeaf}.
      *
-     * @param name         the name for this item
-     * @param comment      the comment for this item
-     * @param defaultValue the default value for this item
+     * @param name         the name for this node
+     * @param comment      the comment for this node
+     * @param defaultValue the default value for this node
      *                     <p> While the default value should generally satisfy the supplied {@code constraints},
      *                     this is not enforced by this constructor.
      *                     This allows constraints such as {@link ConstraintType#FINAL} to work as intended.
-     *                     If this {@code ConfigValue} is built by a {@link ConfigValueBuilder}, this criterion will always be met.
+     *                     If this {@code ConfigLeaf} is built by a {@link ConfigLeafBuilder}, this criterion will always be met.
      * @param listener     the consumer or listener for this item. When this item's value changes, the consumer will be called with the old value as first argument and the new value as second argument.
      * @param constraints  the list of constraints for this item. For a value to be accepted, all constraints must be satisfied.
      * @param type         the type of value this item holds
-     * @see ConfigValueBuilder
+     * @see ConfigLeafBuilder
      * @see me.zeroeightsix.fiber.builder.ConfigAggregateBuilder
      */
     public ConfigLeaf(@Nonnull String name, @Nullable String comment, @Nullable T defaultValue, @Nonnull BiConsumer<T, T> listener, @Nonnull List<Constraint<? super T>> constraints, @Nonnull Class<T> type) {

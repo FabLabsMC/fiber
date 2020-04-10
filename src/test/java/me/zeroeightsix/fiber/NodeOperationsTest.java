@@ -1,7 +1,7 @@
 package me.zeroeightsix.fiber;
 
 import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
-import me.zeroeightsix.fiber.builder.ConfigValueBuilder;
+import me.zeroeightsix.fiber.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.tree.ConfigTree;
 import me.zeroeightsix.fiber.tree.ConfigLeaf;
 import me.zeroeightsix.fiber.tree.Property;
@@ -45,10 +45,10 @@ class NodeOperationsTest {
     @Test
     @DisplayName("Value -> Value")
     void mergeTo2() {
-        ConfigLeaf<Integer> valueOne = new ConfigValueBuilder<>(null, "A", Integer.class)
+        ConfigLeaf<Integer> valueOne = new ConfigLeafBuilder<>(null, "A", Integer.class)
                 .withDefaultValue(10)
                 .build();
-        ConfigLeaf<Integer> valueTwo = new ConfigValueBuilder<>(null, "A", Integer.class)
+        ConfigLeaf<Integer> valueTwo = new ConfigLeafBuilder<>(null, "A", Integer.class)
                 .withDefaultValue(20)
                 .build();
 

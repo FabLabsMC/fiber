@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 /**
- * A {@code ConfigLeaf} with children
+ * Class implementing {@link ConfigGroup}
  */
 public class ConfigGroupImpl extends ConfigNodeImpl implements ConfigGroup {
 
@@ -16,7 +16,7 @@ public class ConfigGroupImpl extends ConfigNodeImpl implements ConfigGroup {
     private final boolean serializeSeparately;
 
     /**
-     * Creates a new {@code ConfigNode}.
+     * Creates a new {@code ConfigGroup}.
      *
      * @param name the name for this {@link ConfigGroupImpl}
      * @param comment the comment for this {@link ConfigGroupImpl}
@@ -30,7 +30,7 @@ public class ConfigGroupImpl extends ConfigNodeImpl implements ConfigGroup {
     }
 
     /**
-     * Creates a new {@code ConfigNode} with the provided {@code name} and {@code comment}.
+     * Creates a new {@code ConfigGroup} with the provided {@code name} and {@code comment}.
      *
      * <p> This node will not be serialised separately.
      *
@@ -43,7 +43,7 @@ public class ConfigGroupImpl extends ConfigNodeImpl implements ConfigGroup {
     }
 
     /**
-     * Creates a new {@code ConfigNode} without a name or comment.
+     * Creates a new {@code ConfigGroup} without a name or comment.
      *
      * <p> This node will not be serialised separately.
      *
@@ -65,15 +65,6 @@ public class ConfigGroupImpl extends ConfigNodeImpl implements ConfigGroup {
         return items.get(name);
     }
 
-    /**
-     * Returns whether this node should be serialised separately as a subtree.
-     *
-     * <p> If {@code true}, this node should be ignored during an ancestor's
-     * serialisation. This property should be ignored when this node is the
-     * root of the currently serialised tree.
-     *
-     * @return whether or not this node is serialised separately
-     */
     @Override
     public boolean isSerializedSeparately() {
         return serializeSeparately;

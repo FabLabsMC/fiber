@@ -28,7 +28,7 @@ public class NodeOperations {
     }
 
     /**
-     * Merges a leaf node ({@code ConfigValue}) into a {@code ConfigNode}.
+     * Merges a leaf node ({@code ConfigLeaf}) into a {@code ConfigNode}.
      *
      * @param value The leaf node to be inherited
      * @param to    The mutated {@link ConfigGroupImpl} that will inherit <code>value</code>

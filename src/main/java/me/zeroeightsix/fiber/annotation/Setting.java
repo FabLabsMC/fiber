@@ -49,13 +49,13 @@ public @interface Setting {
     boolean ignore() default false;
 
     /**
-     * Indicates that this setting is a node.
+     * Indicates that this setting is a group.
      *
      * @see ConfigGroup
      */
     @Target(ElementType.FIELD)
     @Retention(RetentionPolicy.RUNTIME)
-    @interface Node {
+    @interface Group {
         /**
          * Sets the name that will be used for this node.
          *

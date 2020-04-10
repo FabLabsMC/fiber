@@ -131,28 +131,28 @@ public class ConfigTreeBuilder implements ConfigTree {
     }
 
     /**
-     * Creates a scalar {@code ConfigValueBuilder}.
+     * Creates a scalar {@code ConfigLeafBuilder}.
      *
      * @param type the class of the type of value the {@link ConfigLeaf} produced by the builder holds
      * @param <T> the type {@code type} represents
      * @return the newly created builder
-     * @see ConfigValueBuilder ConfigValueBuilder
+     * @see ConfigLeafBuilder ConfigLeafBuilder
      */
-    public <T> ConfigValueBuilder<T> beginValue(@Nonnull String name, @Nonnull Class<T> type) {
-        return new ConfigValueBuilder<>(this, name, type);
+    public <T> ConfigLeafBuilder<T> beginValue(@Nonnull String name, @Nonnull Class<T> type) {
+        return new ConfigLeafBuilder<>(this, name, type);
     }
 
     /**
-     * Creates a {@code ConfigValueBuilder} with the given default value.
+     * Creates a {@code ConfigLeafBuilder} with the given default value.
      *
      * @param defaultValue the default value of the {@link ConfigLeaf} that will be produced by the created builder.
      * @param <T> the type of value the {@link ConfigLeaf} produced by the builder holds
      * @return the newly created builder
-     * @see ConfigValueBuilder
+     * @see ConfigLeafBuilder
      * @see ConfigAggregateBuilder
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public <T> ConfigValueBuilder<T> beginValue(@Nonnull String name, @Nonnull T defaultValue) {
+    public <T> ConfigLeafBuilder<T> beginValue(@Nonnull String name, @Nonnull T defaultValue) {
         Class<T> type = (Class<T>) defaultValue.getClass();
         if (ConfigAggregateBuilder.isAggregate(type)) {
             if (type.isArray()) {
@@ -161,12 +161,12 @@ public class ConfigTreeBuilder implements ConfigTree {
                 return ConfigAggregateBuilder.create(this, name, (Class) type, null);
             }
         } else {
-            return new ConfigValueBuilder<>(this, name, type).withDefaultValue(defaultValue);
+            return new ConfigLeafBuilder<>(this, name, type).withDefaultValue(defaultValue);
         }
     }
 
     /**
-     * Creates an aggregate {@code ConfigValueBuilder}.
+     * Creates an aggregate {@code ConfigLeafBuilder}.
      *
      * @param defaultValue the default array of values the {@link ConfigLeaf} will hold.
      * @param <E> the type of elements {@code defaultValue} holds
@@ -179,7 +179,7 @@ public class ConfigTreeBuilder implements ConfigTree {
     }
 
     /**
-     * Creates an aggregate {@code ConfigValueBuilder}.
+     * Creates an aggregate {@code ConfigLeafBuilder}.
      *
      * @param defaultValue the default collection of values the {@link ConfigLeaf} will hold.
      * @param elementType the class of the type of elements {@code defaultValue} holds
