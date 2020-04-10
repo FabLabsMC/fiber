@@ -6,10 +6,14 @@ package me.zeroeightsix.fiber.annotation.convention;
  * <p> Java fields are usually {@code lowerCamelCase}, while developers might want their configuration to use {@code snake_case} or {@code lowercase}.
  * Classes implementing this interface are required to make the conversion from {@code lowerCamelCase} to another format.
  *
- * @see UnderscoredLowerCaseConvention
+ * @see SnakeCaseConvention
  * @see NoNamingConvention
  */
 public interface SettingNamingConvention {
+
+    Class<? extends SettingNamingConvention> LOWER_CASE = LowercaseConvention.class;
+    Class<? extends SettingNamingConvention> NONE = NoNamingConvention.class;
+    Class<? extends SettingNamingConvention> SNAKE_CASE = SnakeCaseConvention.class;
 
     String name(String name);
 
