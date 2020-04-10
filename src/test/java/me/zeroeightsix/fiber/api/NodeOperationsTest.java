@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber;
+package me.zeroeightsix.fiber.api;
 
 import me.zeroeightsix.fiber.api.NodeOperations;
 import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;

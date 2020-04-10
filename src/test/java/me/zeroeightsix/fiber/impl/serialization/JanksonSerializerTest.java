@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.impl.serialization;
 
-import me.zeroeightsix.fiber.NodeOperationsTest;
+import me.zeroeightsix.fiber.api.NodeOperationsTest;
 import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.api.constraint.CompositeType;
 import me.zeroeightsix.fiber.api.exception.FiberException;
