@@ -14,6 +14,34 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
+/**
+ * A builder for configuration trees/branches.
+ *
+ * <p> Usage example:
+ * <pre>{@code
+ * ConfigNode config = new ConfigNodeBuilder()
+ *         .beginValue("version", "1.0.0")
+ *             .withFinality()
+ *             .beginConstraints() // checks the default value
+ *                 .regex("\\d+\\.\\d+\\.\\d+")
+ *             .finishConstraints()
+ *         .finishValue()
+ *         .fork("child")
+ *             .beginValue("A", 10)
+ *                 .beginConstraints()
+ *                     .composite(CompositeType.OR)
+ *                         .atLeast(3)
+ *                         .atMost(0)
+ *                     .finishComposite()
+ *                 .finishConstraints()
+ *             .finishValue()
+ *         .finishNode()
+ *         .build();
+ * }</pre>
+ *
+ * @see ConfigTree#builder()
+ * @see PropertyMirror
+ */
 public class ConfigTreeBuilder implements ConfigTree {
     private final Map<String, ConfigNode> items = new HashMap<>();
     @Nullable
@@ -23,7 +51,7 @@ public class ConfigTreeBuilder implements ConfigTree {
     @Nullable
     private String comment;
     private boolean serializeSeparately;
-    private ConfigGroupImpl built;
+    private ConfigBranch built;
 
     public ConfigTreeBuilder() {
         this.parent = null;
@@ -84,7 +112,7 @@ public class ConfigTreeBuilder implements ConfigTree {
      *
      * @return {@code this}, for chaining
      * @see #withSeparateSerialization()
-     * @see ConfigGroup#isSerializedSeparately()
+     * @see ConfigBranch#isSerializedSeparately()
      */
     public ConfigTreeBuilder withSeparateSerialization() {
         withSeparateSerialization(true);
@@ -250,11 +278,11 @@ public class ConfigTreeBuilder implements ConfigTree {
      * @return a new {@code ConfigNode}
      * @throws IllegalStateException if this builder already built a node
      */
-    public ConfigGroupImpl build() {
+    public ConfigBranch build() {
         if (built != null) {
             throw new IllegalStateException("Cannot build a node more than once");
         }
-        built = new ConfigGroupImpl(this.name, this.comment, this.items, this.serializeSeparately);
+        built = new ConfigBranchImpl(this.name, this.comment, this.items, this.serializeSeparately);
         if (this.parent != null) {
             assert name != null;
             try {
@@ -270,7 +298,7 @@ public class ConfigTreeBuilder implements ConfigTree {
         return finishNode(n -> { });
     }
 
-    public ConfigTreeBuilder finishNode(Consumer<ConfigGroupImpl> action) {
+    public ConfigTreeBuilder finishNode(Consumer<ConfigBranch> action) {
         if (parent == null) {
             throw new IllegalStateException("finishNode should not be called for a root node. Use build instead.");
         }

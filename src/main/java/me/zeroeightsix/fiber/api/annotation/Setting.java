@@ -1,7 +1,6 @@
 package me.zeroeightsix.fiber.api.annotation;
 
 import me.zeroeightsix.fiber.api.annotation.convention.SettingNamingConvention;
-import me.zeroeightsix.fiber.tree.ConfigGroup;
 
 import javax.annotation.RegEx;
 import java.lang.annotation.ElementType;
@@ -50,9 +49,9 @@ public @interface Setting {
     boolean ignore() default false;
 
     /**
-     * Indicates that this setting is a group.
+     * Indicates that this setting represents a group of settings, rather than a single value.
      *
-     * @see ConfigGroup
+     * @see me.zeroeightsix.fiber.tree.ConfigBranch
      */
     @Target(ElementType.FIELD)
     @Retention(RetentionPolicy.RUNTIME)

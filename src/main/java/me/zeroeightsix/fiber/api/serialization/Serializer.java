@@ -4,7 +4,6 @@ import me.zeroeightsix.fiber.Identifier;
 import me.zeroeightsix.fiber.api.exception.FiberException;
 import me.zeroeightsix.fiber.impl.serialization.JanksonSerializer;
 import me.zeroeightsix.fiber.tree.ConfigTree;
-import me.zeroeightsix.fiber.tree.ConfigGroup;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -15,7 +14,7 @@ import java.io.OutputStream;
  * A {@code Serializer} serializes and deserializes data from a certain format into and from {@code Node}s
  *
  * @param <T> the type of serialized objects processed by this serializer
- * @see ConfigGroup
+ * @see ConfigTree
  * @see JanksonSerializer
  */
 public interface Serializer<T> {

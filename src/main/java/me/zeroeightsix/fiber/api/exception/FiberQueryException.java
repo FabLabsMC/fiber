@@ -1,9 +1,9 @@
 package me.zeroeightsix.fiber.api.exception;
 
-import me.zeroeightsix.fiber.tree.ConfigQuery;
-import me.zeroeightsix.fiber.tree.ConfigGroup;
-import me.zeroeightsix.fiber.tree.ConfigTree;
+import me.zeroeightsix.fiber.tree.ConfigBranch;
 import me.zeroeightsix.fiber.tree.ConfigNode;
+import me.zeroeightsix.fiber.tree.ConfigQuery;
+import me.zeroeightsix.fiber.tree.ConfigTree;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -18,8 +18,8 @@ public class FiberQueryException extends FiberException {
     private final ConfigTree invalidTree;
 
     public FiberQueryException(String message, ConfigTree invalidTree) {
-        super(message + (invalidTree instanceof ConfigGroup && ((ConfigGroup) invalidTree).getName() != null
-                ? " (in subtree " + ((ConfigGroup) invalidTree).getName() + ")" : ""));
+        super(message + (invalidTree instanceof ConfigBranch && ((ConfigBranch) invalidTree).getName() != null
+                ? " (in branch " + ((ConfigBranch) invalidTree).getName() + ")" : ""));
         this.invalidTree = invalidTree;
     }
 

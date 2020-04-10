@@ -20,20 +20,21 @@ import java.util.Optional;
 public final class ConfigQuery<T extends ConfigNode> {
 
     /**
-     * Creates a {@code ConfigQuery} for a subtree with a specific path.
+     * Creates a {@code ConfigQuery} for a branch with a specific path.
      *
      * <p> Each part of the path must correspond to a single node name.
      * The first part matches a direct child node of the root supplied to
      * the {@link #search(ConfigTree)} and {@link #run(ConfigTree)} methods.
      * Each additional name matches a node such that the <em>n</em>th name
      * matches a node at depth <em>n</em>, starting from the supplied tree.
+     * The last name should be the name of the branch to retrieve.
      *
      * @param first the first name in the config path
      * @param more  additional node names forming the config path
-     * @return a config query for subtrees of existing trees
+     * @return a config query for branches of existing trees
      */
-    public static ConfigQuery<ConfigGroup> subtree(String first, String... more) {
-        return new ConfigQuery<>(ConfigGroup.class, null, first, more);
+    public static ConfigQuery<ConfigBranch> branch(String first, String... more) {
+        return new ConfigQuery<>(ConfigBranch.class, null, first, more);
     }
 
     /**
@@ -44,6 +45,7 @@ public final class ConfigQuery<T extends ConfigNode> {
      * the {@link #search(ConfigTree)} and {@link #run(ConfigTree)} methods.
      * Each additional name matches a node such that the <em>n</em>th name
      * matches a node at depth <em>n</em>, starting from the supplied tree.
+     * The last name should be the name of the leaf to retrieve.
      *
      * <p> The returned query will only match a leaf with a {@linkplain Property#getType() property type}
      * that is identical to the given {@code propertyType}.
@@ -51,9 +53,9 @@ public final class ConfigQuery<T extends ConfigNode> {
      * @param propertyType a class object representing the type of values held by queried properties
      * @param first the first name in the config path
      * @param more  additional node names forming the config path
-     * @return a config query for subtrees of existing trees
+     * @return a config query for leaves of existing trees
      */
-    public static <V> ConfigQuery<ConfigLeaf<V>> property(Class<? super V> propertyType, String first, String... more) {
+    public static <V> ConfigQuery<ConfigLeaf<V>> leaf(Class<? super V> propertyType, String first, String... more) {
         return new ConfigQuery<>(ConfigLeaf.class, propertyType, first, more);
     }
 
@@ -104,13 +106,13 @@ public final class ConfigQuery<T extends ConfigNode> {
     @Nonnull
     public T run(ConfigTree cfg) throws FiberQueryException {
         List<String> path = this.path;
-        ConfigTree subtree = cfg;
+        ConfigTree branch = cfg;
         int lastIndex = path.size() - 1;
         for (int i = 0; i < lastIndex; i++) {
-            subtree = this.lookupChild(subtree, path.get(i), ConfigGroup.class, null);
+            branch = this.lookupChild(branch, path.get(i), ConfigBranch.class, null);
         }
         @SuppressWarnings("unchecked") T result =
-                (T) this.lookupChild(subtree, path.get(lastIndex), this.nodeType, this.valueType);
+                (T) this.lookupChild(branch, path.get(lastIndex), this.nodeType, this.valueType);
         return result;
     }
 

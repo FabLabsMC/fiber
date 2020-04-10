@@ -10,7 +10,7 @@ import me.zeroeightsix.fiber.api.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.api.builder.constraint.AbstractConstraintsBuilder;
 import me.zeroeightsix.fiber.api.exception.FiberException;
 import me.zeroeightsix.fiber.impl.annotation.magic.TypeMagic;
-import me.zeroeightsix.fiber.tree.ConfigGroupImpl;
+import me.zeroeightsix.fiber.tree.ConfigBranch;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.*;
@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 
 public class AnnotatedSettings {
 
-    public static ConfigGroupImpl asNode(Object pojo) throws FiberException {
+    public static ConfigBranch asNode(Object pojo) throws FiberException {
         ConfigTreeBuilder builder = new ConfigTreeBuilder();
         applyToNode(builder, pojo);
         return builder.build();
