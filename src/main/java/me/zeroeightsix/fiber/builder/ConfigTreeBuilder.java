@@ -10,12 +10,10 @@ import me.zeroeightsix.fiber.tree.*;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Consumer;
 
 public class ConfigTreeBuilder implements ConfigTree {
-    private final Map<String, ConfigNode> items = new HashMap<>();
+    private final NodeCollection items = new NodeCollection(null);
     @Nullable
     protected ConfigTreeBuilder parent;
     @Nullable
@@ -42,7 +40,7 @@ public class ConfigTreeBuilder implements ConfigTree {
     @Nonnull
     @Override
     public Collection<ConfigNode> getItems() {
-        return items.values();
+        return items;
     }
 
     /**
@@ -213,10 +211,15 @@ public class ConfigTreeBuilder implements ConfigTree {
      * @see Property
      */
     public ConfigTreeBuilder add(@Nonnull ConfigNode item, boolean overwrite) throws FiberException {
-        if (!overwrite && items.containsKey(item.getName())) {
-            throw new FiberException("Attempt to replace node " + item.getName());
+        ConfigNode existing = this.items.get(item.getName());
+        if (existing != null) {
+            if (overwrite) {
+                this.items.remove(existing);
+            } else {
+                throw new FiberException("Attempt to replace node " + item.getName());
+            }
         }
-        items.put(item.getName(), item);
+        this.items.add(item);
         return this;
     }
 
@@ -227,7 +230,7 @@ public class ConfigTreeBuilder implements ConfigTree {
      * @return the child if removed, otherwise {@code null}
      */
     public ConfigNode remove(String name) {
-        return items.remove(name);
+        return items.removeByName(name);
     }
 
     /**
