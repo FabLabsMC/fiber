@@ -3,6 +3,7 @@ package me.zeroeightsix.fiber.builder;
 import me.zeroeightsix.fiber.annotation.AnnotatedSettings;
 import me.zeroeightsix.fiber.annotation.Setting;
 import me.zeroeightsix.fiber.annotation.Settings;
+import me.zeroeightsix.fiber.exception.DuplicateChildException;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.tree.*;
@@ -13,7 +14,7 @@ import java.util.Collection;
 import java.util.function.Consumer;
 
 public class ConfigTreeBuilder implements ConfigTree {
-    private final NodeCollection items = new NodeCollection(null);
+    private final NodeCollection items = new IndexedNodeCollection(null);
     @Nullable
     protected ConfigTreeBuilder parent;
     @Nullable
@@ -51,7 +52,7 @@ public class ConfigTreeBuilder implements ConfigTree {
      */
     @Nullable
     public ConfigNode lookup(String name) {
-        return items.get(name);
+        return items.getByName(name);
     }
 
     public ConfigTreeBuilder withParent(ConfigTreeBuilder parent) {
@@ -194,10 +195,10 @@ public class ConfigTreeBuilder implements ConfigTree {
      * Attempts to introduce a new child to this node.
      *
      * @param item The child to add
-     * @throws FiberException if there was already a child by the same name
+     * @throws DuplicateChildException if there was already a child by the same name
      * @see Property
      */
-    public ConfigTreeBuilder add(@Nonnull ConfigNode item) throws FiberException {
+    public ConfigTreeBuilder add(@Nonnull ConfigNode item) throws DuplicateChildException {
         add(item, false);
         return this;
     }
@@ -207,17 +208,12 @@ public class ConfigTreeBuilder implements ConfigTree {
      *
      * @param item      The child to add
      * @param overwrite whether existing items should be overwritten
-     * @throws FiberException if there was already a child by the same name
+     * @throws DuplicateChildException if there was already a child by the same name
      * @see Property
      */
-    public ConfigTreeBuilder add(@Nonnull ConfigNode item, boolean overwrite) throws FiberException {
-        ConfigNode existing = this.items.get(item.getName());
-        if (existing != null) {
-            if (overwrite) {
-                this.items.remove(existing);
-            } else {
-                throw new FiberException("Attempt to replace node " + item.getName());
-            }
+    public ConfigTreeBuilder add(@Nonnull ConfigNode item, boolean overwrite) throws DuplicateChildException {
+        if (overwrite) {
+            this.items.removeByName(item.getName());
         }
         this.items.add(item);
         return this;
@@ -262,7 +258,7 @@ public class ConfigTreeBuilder implements ConfigTree {
             assert name != null;
             try {
                 this.parent.add(built);
-            } catch (FiberException e) {
+            } catch (RuntimeFiberException e) {
                 throw new RuntimeFiberException("Failed to attach built node to parent", e);
             }
         }

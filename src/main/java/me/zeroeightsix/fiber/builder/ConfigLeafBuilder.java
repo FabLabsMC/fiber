@@ -3,7 +3,6 @@ package me.zeroeightsix.fiber.builder;
 import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.FinalConstraint;
-import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.tree.ConfigLeaf;
 import me.zeroeightsix.fiber.tree.ConfigLeafImpl;
@@ -186,7 +185,7 @@ public class ConfigLeafBuilder<T> {
             // Let's tread with caution.
             try {
                 parentNode.add(built);
-            } catch (FiberException e) {
+            } catch (RuntimeFiberException e) {
                 throw new RuntimeFiberException("Failed to register leaf to node", e);
             }
         }

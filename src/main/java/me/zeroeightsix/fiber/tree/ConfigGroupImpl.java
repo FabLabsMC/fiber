@@ -23,7 +23,7 @@ public class ConfigGroupImpl extends ConfigNodeImpl implements ConfigGroup {
      */
     public ConfigGroupImpl(String name, @Nullable String comment, @Nonnull Collection<ConfigNode> items, boolean serializeSeparately) {
         super(name, comment);
-        this.items = new NodeCollection(this, items);
+        this.items = new IndexedNodeCollection(this, items);
         this.serializeSeparately = serializeSeparately;
     }
 
@@ -60,7 +60,7 @@ public class ConfigGroupImpl extends ConfigNodeImpl implements ConfigGroup {
     @Nullable
     @Override
     public ConfigNode lookup(String name) {
-        return items.get(name);
+        return items.getByName(name);
     }
 
     @Override

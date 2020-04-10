@@ -2,7 +2,6 @@ package me.zeroeightsix.fiber;
 
 import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.exception.DuplicateChildException;
-import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.tree.*;
 
@@ -28,7 +27,7 @@ public class NodeOperations {
                 it.remove();
                 to.add(item, true);
             }
-        } catch (FiberException | DuplicateChildException e) {
+        } catch (DuplicateChildException e) {
             throw new RuntimeFiberException("Failed to merge nodes", e);
         }
     }
@@ -49,7 +48,7 @@ public class NodeOperations {
                 parent.getItems().remove(value);
             }
             to.add(value, true);
-        } catch (FiberException | DuplicateChildException e) {
+        } catch (DuplicateChildException e) {
             throw new RuntimeFiberException("Failed to merge value", e);
         }
     }
