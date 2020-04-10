@@ -8,7 +8,7 @@ import me.zeroeightsix.fiber.tree.ConfigLeaf;
  * @param <A> the type of values this constraint checks
  * @see ConfigLeaf
  */
-public abstract class Constraint<A> { // A is the type of values we're gonna check
+public abstract class Constraint<A> {
 
 	private final ConstraintType type;
 

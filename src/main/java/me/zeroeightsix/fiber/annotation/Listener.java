@@ -13,7 +13,6 @@ import java.lang.annotation.Target;
 public @interface Listener {
     /**
      * The name of the setting this listener is listening for.
-     * <br>
      *
      * <p> Note that this must be equal to the resolved name of the setting: if you have specified a naming convention for your settings, or you have set a custom name for the setting, this value must be equal to the name of the setting you're listening for after that naming convention was applied!
      *

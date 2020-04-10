@@ -31,7 +31,7 @@ public class ConfigTreeBuilder implements ConfigTree {
     }
 
     /**
-     * Returns a collection of this node's children.
+     * Returns a collection of this builder's children.
      *
      * <p> The returned collection is guaranteed to have no two nodes with the same name.
      * Elements may be removed from it, but no elements may be added directly.
@@ -46,7 +46,7 @@ public class ConfigTreeBuilder implements ConfigTree {
     }
 
     /**
-     * Tries to find a child in this node by name. If a child is found, it will be returned.
+     * Tries to find a child in this builder by name. If a child is found, it will be returned.
      *
      * @param name The name of the child to look for
      * @return the child if found, otherwise {@code null}

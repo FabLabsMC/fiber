@@ -12,7 +12,7 @@ import java.util.function.BiConsumer;
 /**
  * A {@code ConfigLeafBuilder} that produces aggregate {@code ConfigLeaf}s.
  *
- * <p>Aggregate types are those that hold multiple values, such as {@code List} or arrays.
+ * <p> Aggregate types are those that hold multiple values, such as {@code List} or arrays.
  * Settings with scalar types, such as {@code Integer} or {@code String}, are created using {@link ConfigLeafBuilder}.
  *
  * @param <A> the type of aggregate value
