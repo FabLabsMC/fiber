@@ -56,7 +56,7 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 			if (item != null) {
 				if (item instanceof Property) {
 					setPropertyValue((Property<?>) item, child);
-				} else if (item instanceof ConfigGroup && child instanceof JsonObject) {
+				} else if (item instanceof ConfigBranch && child instanceof JsonObject) {
 					deserialize((ConfigTree) item, (JsonObject) child);
 				} else {
 					throw new FiberException("Value read for non-property node: " + item.getName());
@@ -88,8 +88,8 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 		for (ConfigNode treeItem : tree.getItems()) {
 			String name = null;
 
-			if (treeItem instanceof ConfigGroup) {
-				ConfigGroup subNode = (ConfigGroup) treeItem;
+			if (treeItem instanceof ConfigBranch) {
+				ConfigBranch subNode = (ConfigBranch) treeItem;
 				if (!subNode.isSerializedSeparately()) {
 					object.put((name = subNode.getName()), serialize(subNode));
 				}

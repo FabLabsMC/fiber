@@ -6,8 +6,9 @@ import javax.annotation.Nullable;
 /**
  * A commentable node.
  *
- * @see ConfigGroupImpl
- * @see ConfigLeaf
+ * @see ConfigNode
+ * @see ConfigBranchImpl
+ * @see ConfigLeafImpl
  */
 public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
 
@@ -16,7 +17,7 @@ public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
     @Nullable
     private final String comment;
     @Nullable
-    private ConfigGroup parent;
+    private ConfigBranch parent;
 
     /**
      * Creates a new {@code ConfigLeaf}.
@@ -43,7 +44,7 @@ public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
 
     @Nullable
     @Override
-    public ConfigGroup getParent() {
+    public ConfigBranch getParent() {
         return this.parent;
     }
 
@@ -51,7 +52,7 @@ public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
         this.parent = null;
     }
 
-    public void setParent(ConfigGroup parent) {
+    public void setParent(ConfigBranch parent) {
         if (this.parent != null) {
             throw new IllegalStateException(this + " needs to be detached before changing the parent");
         }

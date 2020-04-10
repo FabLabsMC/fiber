@@ -8,13 +8,13 @@ import java.util.*;
 
 public class IndexedNodeCollection extends AbstractCollection<ConfigNode> implements NodeCollection {
     private final Map<String, ConfigNodeImpl> items = new TreeMap<>();
-    @Nullable private final ConfigGroup owner;
+    @Nullable private final ConfigBranch owner;
 
-    public IndexedNodeCollection(@Nullable ConfigGroup owner) {
+    public IndexedNodeCollection(@Nullable ConfigBranch owner) {
         this.owner = owner;
     }
 
-    public IndexedNodeCollection(@Nullable ConfigGroup owner, Collection<ConfigNode> items) {
+    public IndexedNodeCollection(@Nullable ConfigBranch owner, Collection<ConfigNode> items) {
         this(owner);
         this.addAll(items);
     }

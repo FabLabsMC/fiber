@@ -6,48 +6,45 @@ import java.util.Collection;
 import java.util.Collections;
 
 /**
- * Class implementing {@link ConfigGroup}
+ * Class implementing {@link ConfigBranch}
  */
-public class ConfigGroupImpl extends ConfigNodeImpl implements ConfigGroup {
+public class ConfigBranchImpl extends ConfigNodeImpl implements ConfigBranch {
 
     private final NodeCollection items;
     private final boolean serializeSeparately;
 
     /**
-     * Creates a new {@code ConfigGroup}.
+     * Creates a new {@code ConfigBranch}.
      *
-     * @param name the name for this {@link ConfigGroupImpl}
-     * @param comment the comment for this {@link ConfigGroupImpl}
+     * @param name the name for this {@link ConfigBranchImpl}
+     * @param comment the comment for this {@link ConfigBranchImpl}
      * @param items the node's items
      * @param serializeSeparately whether or not this node should be serialised separately. If {@code true}, it will be ignored during serialisation.
      */
-    public ConfigGroupImpl(String name, @Nullable String comment, @Nonnull Collection<ConfigNode> items, boolean serializeSeparately) {
+    public ConfigBranchImpl(String name, @Nullable String comment, @Nonnull Collection<ConfigNode> items, boolean serializeSeparately) {
         super(name, comment);
         this.items = new IndexedNodeCollection(this, items);
         this.serializeSeparately = serializeSeparately;
     }
 
     /**
-     * Creates a new {@code ConfigGroup} with the provided {@code name} and {@code comment}.
+     * Creates a new {@code ConfigBranch} with the provided {@code name} and {@code comment}.
      *
      * <p> This node will not be serialised separately.
      *
-     * @param name the name for this {@link ConfigGroupImpl}
-     * @param comment the comment for this {@link ConfigGroupImpl}
-     * @see ConfigGroupImpl
+     * @param name the name for this {@link ConfigBranchImpl}
+     * @param comment the comment for this {@link ConfigBranchImpl}
      */
-    public ConfigGroupImpl(@Nonnull String name, @Nullable String comment) {
+    public ConfigBranchImpl(@Nonnull String name, @Nullable String comment) {
         this(name, comment, Collections.emptyList(), false);
     }
 
     /**
-     * Creates a new {@code ConfigGroup} without a name or comment.
+     * Creates a new {@code ConfigBranch} without a name or comment.
      *
      * <p> This node will not be serialised separately.
-     *
-     * @see ConfigGroupImpl
      */
-    public ConfigGroupImpl() {
+    public ConfigBranchImpl() {
         this(null, null, Collections.emptyList(), false);
     }
 

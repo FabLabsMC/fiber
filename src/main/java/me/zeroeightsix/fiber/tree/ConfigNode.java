@@ -20,6 +20,6 @@ public interface ConfigNode {
      * @return this node's parent, or {@code null} if it is not part of a config tree
      */
     @Nullable
-    ConfigGroup getParent();
+    ConfigBranch getParent();
 
 }

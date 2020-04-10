@@ -3,7 +3,10 @@ package me.zeroeightsix.fiber;
 import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.exception.DuplicateChildException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.tree.*;
+import me.zeroeightsix.fiber.tree.ConfigBranch;
+import me.zeroeightsix.fiber.tree.ConfigNode;
+import me.zeroeightsix.fiber.tree.ConfigTree;
+import me.zeroeightsix.fiber.tree.Property;
 
 import java.util.Iterator;
 
@@ -18,7 +21,7 @@ public class NodeOperations {
      * <p> If both nodes have one or more children with the same name, the child from {@code from} takes priority.
      *
      * @param from  The {@code ConfigNode} that will be read from, but not mutated.
-     * @param to    The mutated {@link ConfigGroupImpl} that will inherit <code>from</code>'s values and nodes.
+     * @param to    The mutated {@link ConfigBranch} that will inherit <code>from</code>'s values and nodes.
      */
     public static void moveChildren(ConfigTree from, ConfigTreeBuilder to) {
         try {
@@ -38,12 +41,12 @@ public class NodeOperations {
      * <p> If the moved node has an existing parent, it will be detached.
      * If the new parent has an existing node with the same name, it will be overwritten.
      *
-     * @param value The node to be inherited
-     * @param to    The mutated {@link ConfigGroupImpl} that will inherit <code>value</code>
+     * @param value The leaf node to be inherited
+     * @param to    The mutated {@link ConfigBranch} that will inherit <code>value</code>
      */
     public static void moveNode(ConfigNode value, ConfigTreeBuilder to) {
         try {
-            ConfigGroup parent = value.getParent();
+            ConfigBranch parent = value.getParent();
             if (parent != null) {
                 parent.getItems().remove(value);
             }

@@ -7,9 +7,12 @@ import java.util.Collection;
 /**
  * A node that can hold any amount of children
  *
- * @see ConfigGroupImpl
+ * <p> A branch may represent an entire config tree,
+ * or a subtree grouping further configuration items.
+ *
+ * @see me.zeroeightsix.fiber.builder.ConfigTreeBuilder
  */
-public interface ConfigGroup extends ConfigTree, ConfigNode, Commentable {
+public interface ConfigBranch extends ConfigTree, ConfigNode, Commentable {
 
     /**
      * Returns this node's name.
