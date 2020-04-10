@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber.schema;
+package me.zeroeightsix.fiber.api.schema;
 
 import blue.endless.jankson.JsonArray;
 import blue.endless.jankson.JsonElement;
