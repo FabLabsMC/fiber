@@ -44,7 +44,7 @@ import java.util.function.Consumer;
 public class ConfigTreeBuilder implements ConfigTree {
     private final NodeCollection items = new IndexedNodeCollection(null);
     @Nullable
-    protected ConfigTreeBuilder parent;
+    protected ConfigTree parent;
     @Nullable
     protected String name;
     @Nullable
@@ -58,9 +58,9 @@ public class ConfigTreeBuilder implements ConfigTree {
      * @param parent the initial parent
      * @param name   the initial name
      * @see ConfigTree#builder()
-     * @see ConfigBranch#builder(ConfigTreeBuilder, String)
+     * @see ConfigBranch#builder(ConfigTree, String)
      */
-    public ConfigTreeBuilder(@Nullable ConfigTreeBuilder parent, @Nullable String name) {
+    public ConfigTreeBuilder(@Nullable ConfigTree parent, @Nullable String name) {
         if (parent != null && name == null) throw new IllegalArgumentException("A child node needs a name");
         this.parent = parent;
         this.name = name;
@@ -160,7 +160,7 @@ public class ConfigTreeBuilder implements ConfigTree {
      * @return {@code this}, for chaining
      * @see Setting
      * @see Settings
-     * @see AnnotatedSettings#applyToNode(ConfigTreeBuilder, Object)
+     * @see AnnotatedSettings#applyToNode(ConfigTree, Object)
      */
     public ConfigTreeBuilder applyFromPojo(Object pojo) throws FiberException {
         return applyFromPojo(pojo, AnnotatedSettings.DEFAULT_SETTINGS);
@@ -181,7 +181,7 @@ public class ConfigTreeBuilder implements ConfigTree {
      * @return {@code this}, for chaining
      * @see Setting @Setting
      * @see Settings @Settings
-     * @see AnnotatedSettings#applyToNode(ConfigTreeBuilder, Object)
+     * @see AnnotatedSettings#applyToNode(ConfigTree, Object)
      */
     public ConfigTreeBuilder applyFromPojo(Object pojo, AnnotatedSettings settings) throws FiberException {
         settings.applyToNode(this, pojo);
@@ -327,11 +327,12 @@ public class ConfigTreeBuilder implements ConfigTree {
     }
 
     public ConfigTreeBuilder finishBranch(Consumer<ConfigBranch> action) {
-        if (parent == null) {
-            throw new IllegalStateException("finishNode should not be called for a root node. Use build instead.");
+        if (parent instanceof ConfigTreeBuilder) {
+            action.accept(build());
+            return (ConfigTreeBuilder) parent;
+        } else {
+            throw new IllegalStateException("finishNode should not be called for a root builder. Use build instead.");
         }
-        action.accept(build());
-        return parent;
     }
 
 }

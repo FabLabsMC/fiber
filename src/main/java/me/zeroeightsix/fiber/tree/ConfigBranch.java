@@ -15,7 +15,7 @@ import javax.annotation.Nullable;
  */
 public interface ConfigBranch extends ConfigTree, ConfigNode, Commentable {
 
-    static ConfigTreeBuilder builder(ConfigTreeBuilder parent, String name) {
+    static ConfigTreeBuilder builder(ConfigTree parent, String name) {
         return new ConfigTreeBuilder(parent, name);
     }
 

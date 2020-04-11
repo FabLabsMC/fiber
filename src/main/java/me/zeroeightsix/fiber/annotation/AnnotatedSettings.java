@@ -113,7 +113,7 @@ public class AnnotatedSettings {
         return builder.build();
     }
 
-    public <P> void applyToNode(ConfigTreeBuilder mergeTo, P pojo) throws FiberException {
+    public <P> void applyToNode(ConfigTree mergeTo, P pojo) throws FiberException {
         @SuppressWarnings("unchecked")
         Class<P> pojoClass = (Class<P>) pojo.getClass();
 

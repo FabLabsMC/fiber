@@ -1,6 +1,5 @@
 package me.zeroeightsix.fiber;
 
-import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.exception.DuplicateChildException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.tree.ConfigBranch;
@@ -44,13 +43,13 @@ public class NodeOperations {
      * @param value The leaf node to be inherited
      * @param to    The mutated {@link ConfigBranch} that will inherit <code>value</code>
      */
-    public static void moveNode(ConfigNode value, ConfigTreeBuilder to) {
+    public static void moveNode(ConfigNode value, ConfigTree to) {
         try {
             ConfigBranch parent = value.getParent();
             if (parent != null) {
                 parent.getItems().remove(value);
             }
-            to.withChild(value, true);
+            to.getItems().add(value, true);
         } catch (DuplicateChildException e) {
             throw new RuntimeFiberException("Failed to merge value", e);
         }
