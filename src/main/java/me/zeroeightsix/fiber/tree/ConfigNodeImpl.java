@@ -1,5 +1,7 @@
 package me.zeroeightsix.fiber.tree;
 
+import me.zeroeightsix.fiber.exception.IllegalTreeStateException;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -54,7 +56,7 @@ public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
 
     public void setParent(ConfigBranch parent) {
         if (this.parent != null && this.parent != parent) {
-            throw new IllegalStateException(this + " needs to be detached before changing the parent");
+            throw new IllegalTreeStateException(this + " needs to be detached before changing the parent");
         }
         this.parent = parent;
     }

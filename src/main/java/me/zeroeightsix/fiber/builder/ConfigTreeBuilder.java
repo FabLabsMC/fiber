@@ -5,6 +5,7 @@ import me.zeroeightsix.fiber.annotation.Setting;
 import me.zeroeightsix.fiber.annotation.Settings;
 import me.zeroeightsix.fiber.exception.DuplicateChildException;
 import me.zeroeightsix.fiber.exception.FiberException;
+import me.zeroeightsix.fiber.exception.IllegalTreeStateException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.tree.*;
 
@@ -44,13 +45,12 @@ import java.util.function.Consumer;
 public class ConfigTreeBuilder implements ConfigTree {
     private final NodeCollection items = new IndexedNodeCollection(null);
     @Nullable
-    protected ConfigTree parent;
+    private ConfigTree parent;
     @Nullable
-    protected String name;
+    private String name;
     @Nullable
     private String comment;
     private boolean serializeSeparately;
-    private ConfigBranch built;
 
     /**
      * Creates a new builder with initial settings.
@@ -299,27 +299,23 @@ public class ConfigTreeBuilder implements ConfigTree {
     /**
      * Construct a new {@code ConfigNode} based on this builder's specifications.
      *
-     * <p> This method cannot be called more than once, as allowing multiple nodes to be
-     * built would result in duplicated references.
-     * To guard against this, usually undesirable, behaviour, this method will throw an exception on successive calls.
+     * <p> Calling this method more than once with the same parameters (specifically same parent and/or children)
+     * may result in exceptions being thrown, as the resulting tree structure will be invalid.
      *
      * @return a new {@code ConfigNode}
-     * @throws IllegalStateException if this builder already built a node
+     * @throws RuntimeFiberException if building the node results in an invalid tree
      */
-    public ConfigBranch build() {
-        if (built != null) {
-            throw new IllegalStateException("Cannot build a node more than once");
-        }
-        built = new ConfigBranchImpl(this.name, this.comment, this.items, this.serializeSeparately);
-        if (this.parent != null) {
-            assert name != null;
-            try {
+    public ConfigBranch build() throws RuntimeFiberException {
+        try {
+            ConfigBranch built = new ConfigBranchImpl(this.name, this.comment, this.items, this.serializeSeparately);
+            if (this.parent != null) {
+                assert name != null;
                 this.parent.getItems().add(built);
-            } catch (RuntimeFiberException e) {
-                throw new RuntimeFiberException("Failed to attach built node to parent", e);
             }
+            return built;
+        } catch (IllegalTreeStateException e) {
+            throw new RuntimeFiberException("Failed to build branch '" + this.name + "'", e);
         }
-        return built;
     }
 
     public ConfigTreeBuilder finishBranch() {
