@@ -11,7 +11,7 @@ import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.builder.constraint.AbstractConstraintsBuilder;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.tree.ConfigNode;
+import me.zeroeightsix.fiber.tree.ConfigBranch;
 import me.zeroeightsix.fiber.tree.ConfigTree;
 
 import javax.annotation.Nonnull;
@@ -107,7 +107,7 @@ public class AnnotatedSettings {
         return this;
     }
 
-    public ConfigNode asNode(Object pojo) throws FiberException {
+    public ConfigBranch makeTree(Object pojo) throws FiberException {
         ConfigTreeBuilder builder = ConfigTree.builder();
         applyToNode(builder, pojo);
         return builder.build();

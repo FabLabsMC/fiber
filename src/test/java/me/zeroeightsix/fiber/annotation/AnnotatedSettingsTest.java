@@ -157,7 +157,7 @@ class AnnotatedSettingsTest {
     @Test
     @DisplayName("Invalid constraints")
     void testInvalidConstraints() {
-        assertThrows(RuntimeFiberException.class, () -> annotatedSettings.asNode(new InvalidConstraintPojo()));
+        assertThrows(RuntimeFiberException.class, () -> annotatedSettings.makeTree(new InvalidConstraintPojo()));
     }
 
     @Test
