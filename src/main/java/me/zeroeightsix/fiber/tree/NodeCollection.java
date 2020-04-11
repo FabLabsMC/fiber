@@ -8,6 +8,9 @@ import java.util.Collection;
 /**
  * A specialized {@link Collection} implementation for use with nodes.
  *
+ * <p>Note: This is not a general-purpose collection.
+ * Mutating methods in this class <strong>will</strong> mutate external state.
+ *
  * <p> Elements in a node collection are considered children of the same tree.
  * For this reason, each element of a node collection must have a distinct name.
  * Mutating methods in this class will also update the {@linkplain ConfigNode#getParent() parent}

@@ -7,24 +7,19 @@ import javax.annotation.Nullable;
 import java.util.*;
 
 public class IndexedNodeCollection extends AbstractCollection<ConfigNode> implements NodeCollection {
-    private final Map<String, ConfigNodeImpl> items = new TreeMap<>();
+    private final Map<String, ConfigNode> items = new TreeMap<>();
     @Nullable private final ConfigBranch owner;
 
     public IndexedNodeCollection(@Nullable ConfigBranch owner) {
         this.owner = owner;
     }
 
-    public IndexedNodeCollection(@Nullable ConfigBranch owner, Collection<ConfigNode> items) {
-        this(owner);
-        this.addAll(items);
-    }
-
     @Nonnull
     @Override
     public Iterator<ConfigNode> iterator() {
     return new Iterator<ConfigNode>() {
-            @Nullable private ConfigNodeImpl last;
-            private Iterator<ConfigNodeImpl> backing = items.values().iterator();
+            @Nullable private ConfigNode last;
+            private final Iterator<ConfigNode> backing = items.values().iterator();
 
             @Override
             public boolean hasNext() {
@@ -40,17 +35,16 @@ public class IndexedNodeCollection extends AbstractCollection<ConfigNode> implem
             @Override
             public void remove() {
                 if (this.last == null) throw new IllegalStateException();
+                // order is important to avoid infinite recursion
                 this.backing.remove();
                 this.last.detach();
             }
         };
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Spliterator<ConfigNode> spliterator() {
-        // The Spliterator interface is read-only, so we consider its element type covariant
-        return (Spliterator/*<out ConfigNode>*/) this.items.values().spliterator();
+        return this.items.values().spliterator();
     }
 
     @Override
@@ -61,22 +55,19 @@ public class IndexedNodeCollection extends AbstractCollection<ConfigNode> implem
     @Override
     public boolean add(ConfigNode item, boolean overwrite) throws DuplicateChildException {
         Objects.requireNonNull(item);
-        if (!(item instanceof ConfigNodeImpl)) {
-            throw new IllegalArgumentException("Invalid config node implementation " + item);
-        }
         if (overwrite) {
             this.removeByName(item.getName());
         } else if (this.items.containsKey(item.getName())) {
             throw new DuplicateChildException("Attempt to replace node " + item.getName());
         }
-        this.items.put(item.getName(), (ConfigNodeImpl) item);
-        ((ConfigNodeImpl) item).setParent(this.owner);
+        this.items.put(item.getName(), item);
+        item.attachTo(this.owner);
         return true;
     }
 
     @Override
     public boolean contains(@Nullable Object o) {
-        if (o instanceof ConfigNodeImpl) {
+        if (o instanceof ConfigNode) {
             return Objects.equals(this.items.get(((ConfigNode) o).getName()), o);
         }
         return false;
@@ -84,10 +75,10 @@ public class IndexedNodeCollection extends AbstractCollection<ConfigNode> implem
 
     @Override
     public boolean remove(@Nullable Object o) {
-        if (o instanceof ConfigNodeImpl) {
+        if (o instanceof ConfigNode) {
             boolean removed = this.items.remove(((ConfigNode) o).getName(), o);
             if (removed) {
-                ((ConfigNodeImpl) o).detach();
+                ((ConfigNode) o).detach();
                 return true;
             }
         }
@@ -107,7 +98,7 @@ public class IndexedNodeCollection extends AbstractCollection<ConfigNode> implem
     @Override
     @Nullable
     public ConfigNode removeByName(String name) {
-        ConfigNodeImpl removed = this.items.remove(name);
+        ConfigNode removed = this.items.remove(name);
         if (removed != null) {
             removed.detach();
         }

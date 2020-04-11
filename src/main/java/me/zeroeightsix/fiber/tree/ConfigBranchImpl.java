@@ -23,8 +23,10 @@ public class ConfigBranchImpl extends ConfigNodeImpl implements ConfigBranch {
      */
     public ConfigBranchImpl(String name, @Nullable String comment, @Nonnull Collection<ConfigNode> items, boolean serializeSeparately) {
         super(name, comment);
-        this.items = new IndexedNodeCollection(this, items);
+        this.items = new IndexedNodeCollection(this);
         this.serializeSeparately = serializeSeparately;
+        // must do 2-step initialization, to avoid leaking uninitialized <this>
+        this.items.addAll(items);
     }
 
     /**
