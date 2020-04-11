@@ -57,7 +57,10 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 				if (item instanceof Property) {
 					setPropertyValue((Property<?>) item, child);
 				} else if (item instanceof ConfigBranch && child instanceof JsonObject) {
-					deserialize((ConfigTree) item, (JsonObject) child);
+					JsonObject childLeftovers = deserialize((ConfigTree) item, (JsonObject) child);
+					if (!childLeftovers.isEmpty()) {
+						leftovers.put(key, childLeftovers);
+					}
 				} else {
 					throw new FiberException("Value read for non-property node: " + item.getName());
 				}
