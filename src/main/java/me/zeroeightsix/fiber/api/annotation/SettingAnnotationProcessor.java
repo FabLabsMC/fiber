@@ -1,7 +1,7 @@
-package me.zeroeightsix.fiber.annotation;
+package me.zeroeightsix.fiber.api.annotation;
 
-import me.zeroeightsix.fiber.builder.ConfigLeafBuilder;
-import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
+import me.zeroeightsix.fiber.api.builder.ConfigLeafBuilder;
+import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
@@ -15,7 +15,7 @@ import java.lang.reflect.Field;
  *
  * @param <A> the type of annotations processed
  * @param <C> the type of builders configured
- * @see AnnotatedSettings
+ * @see me.zeroeightsix.fiber.api.annotation.AnnotatedSettings
  */
 public interface SettingAnnotationProcessor<A extends Annotation, C> {
     /**
@@ -33,13 +33,13 @@ public interface SettingAnnotationProcessor<A extends Annotation, C> {
      * An annotation processor for config fields holding values.
      *
      * <p> In effect, this is called for every field in a config POJO
-     * class that is not annotated with {@link Setting.Group} or {@link Setting#ignore()}.
+     * class that is not annotated with {@link Setting.Group Setting.Gropu} or {@link Setting#ignore()}.
      *
      * <p> Annotations made handled by these processors should
      * specifically target {@link ElementType#FIELD}.
      *
      * @param <A> the type of annotations processed
-     * @see AnnotatedSettings#registerSettingProcessor(Class, Value) 
+     * @see AnnotatedSettings#registerSettingProcessor(Class, Value)
      */
     @FunctionalInterface
     interface Value<A extends Annotation> extends SettingAnnotationProcessor<A, ConfigLeafBuilder<?>> {

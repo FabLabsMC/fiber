@@ -2,6 +2,7 @@ package me.zeroeightsix.fiber.api.annotation;
 
 import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.api.exception.FiberException;
+import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.api.tree.ConfigTree;
 import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
 import me.zeroeightsix.fiber.api.tree.Property;

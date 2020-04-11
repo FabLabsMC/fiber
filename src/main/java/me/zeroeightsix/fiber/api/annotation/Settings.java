@@ -1,6 +1,7 @@
 package me.zeroeightsix.fiber.api.annotation;
 
 import me.zeroeightsix.fiber.api.annotation.convention.SettingNamingConvention;
+import me.zeroeightsix.fiber.api.tree.ConfigTree;
 import me.zeroeightsix.fiber.impl.annotation.convention.NoNamingConvention;
 
 import java.lang.annotation.ElementType;

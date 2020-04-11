@@ -1,7 +1,7 @@
-package me.zeroeightsix.fiber.annotation;
+package me.zeroeightsix.fiber.api.annotation;
 
-import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
-import me.zeroeightsix.fiber.builder.constraint.AbstractConstraintsBuilder;
+import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
+import me.zeroeightsix.fiber.api.builder.constraint.AbstractConstraintsBuilder;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
