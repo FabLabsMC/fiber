@@ -48,7 +48,7 @@ public class IndexedNodeCollection extends AbstractCollection<ConfigNode> implem
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public Spliterator</*out*/ ConfigNode> spliterator() {
+    public Spliterator<ConfigNode> spliterator() {
         // The Spliterator interface is read-only, so we consider its element type covariant
         return (Spliterator/*<out ConfigNode>*/) this.items.values().spliterator();
     }
@@ -75,7 +75,15 @@ public class IndexedNodeCollection extends AbstractCollection<ConfigNode> implem
     }
 
     @Override
-    public boolean remove(Object o) {
+    public boolean contains(@Nullable Object o) {
+        if (o instanceof ConfigNodeImpl) {
+            return Objects.equals(this.items.get(((ConfigNode) o).getName()), o);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean remove(@Nullable Object o) {
         if (o instanceof ConfigNodeImpl) {
             boolean removed = this.items.remove(((ConfigNode) o).getName(), o);
             if (removed) {
