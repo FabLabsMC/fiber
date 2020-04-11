@@ -19,7 +19,7 @@ public abstract class AbstractConstraintsBuilder<S, A, T> {
 
     protected final S source;
     protected final List<Constraint<? super A>> sourceConstraints;
-    @Nullable protected final Class<T> type;
+    /*MonotonicNonnull*/ @Nullable protected final Class<T> type;
 
     final List<Constraint<? super T>> newConstraints = new ArrayList<>();
 
@@ -27,6 +27,11 @@ public abstract class AbstractConstraintsBuilder<S, A, T> {
         this.source = source;
         this.sourceConstraints = sourceConstraints;
         this.type = type;
+    }
+
+    @Nullable
+    public final Class<T> getType() {
+        return type;
     }
 
     /**

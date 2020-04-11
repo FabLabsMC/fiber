@@ -19,7 +19,7 @@ import java.util.function.Consumer;
  *
  * <p> Usage example:
  * <pre>{@code
- * ConfigNode config = new ConfigNodeBuilder()
+ * ConfigNode config = new ConfigTreeBuilder()
  *         .beginValue("version", "1.0.0")
  *             .withFinality()
  *             .beginConstraints() // checks the default value
@@ -149,12 +149,33 @@ public class ConfigTreeBuilder implements ConfigTree {
      *
      * @param pojo an object serving as a base to reflectively generate a config tree
      * @return {@code this}, for chaining
+     * @see Setting
+     * @see Settings
+     * @see AnnotatedSettings#applyToNode(ConfigTreeBuilder, Object)
+     */
+    public ConfigTreeBuilder applyFromPojo(Object pojo) throws FiberException {
+        return applyFromPojo(pojo, AnnotatedSettings.DEFAULT_SETTINGS);
+    }
+
+    /**
+     * Configure this builder using a POJO (Plain Old Java Object).
+     *
+     * <p> The node's structure will be based on the {@code pojo}'s fields,
+     * recursively generating settings. The generated settings can be configured
+     * in the {@code pojo}'s class declaration, using annotations such as {@link Setting}.
+     *
+     * <p> The generated {@link ConfigLeaf}s will be bound to their respective fields,
+     * setting the latter when the former's value is {@linkplain ConfigLeaf#setValue(Object) updated}.
+     *
+     * @param pojo an object serving as a base to reflectively generate a config tree
+     * @param settings an {@link AnnotatedSettings} instance used to configure this builder
+     * @return {@code this}, for chaining
      * @see Setting @Setting
      * @see Settings @Settings
      * @see AnnotatedSettings#applyToNode(ConfigTreeBuilder, Object)
      */
-    public ConfigTreeBuilder applyFromPojo(Object pojo) throws FiberException {
-        AnnotatedSettings.applyToNode(this, pojo);
+    public ConfigTreeBuilder applyFromPojo(Object pojo, AnnotatedSettings settings) throws FiberException {
+        settings.applyToNode(this, pojo);
         return this;
     }
 
