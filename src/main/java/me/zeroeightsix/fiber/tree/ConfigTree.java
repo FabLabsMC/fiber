@@ -4,7 +4,6 @@ import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collection;
 
 public interface ConfigTree {
     /**
@@ -18,11 +17,13 @@ public interface ConfigTree {
      * Returns a collection of this node's children.
      *
      * <p> The returned collection is guaranteed to have no two nodes with the same name.
+     * Any changes made to it will be reflected by this tree.
      *
      * @return the set of children
+     * @see me.zeroeightsix.fiber.NodeOperations
      */
     @Nonnull
-    Collection<ConfigNode> getItems();
+    NodeCollection getItems();
 
     /**
      * Tries to find a child in this node by name. If a child is found, it will be returned.

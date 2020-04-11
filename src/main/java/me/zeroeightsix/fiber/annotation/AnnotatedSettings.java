@@ -129,7 +129,7 @@ public class AnnotatedSettings {
             convention = new NoNamingConvention();
         }
 
-        NodeOperations.mergeTo(constructNode(pojoClass, pojo, onlyAnnotated, convention), mergeTo);
+        NodeOperations.moveChildren(constructNode(pojoClass, pojo, onlyAnnotated, convention), mergeTo);
     }
 
     private <P> ConfigTreeBuilder constructNode(Class<P> pojoClass, P pojo, boolean onlyAnnotated, SettingNamingConvention convention) throws FiberException {
