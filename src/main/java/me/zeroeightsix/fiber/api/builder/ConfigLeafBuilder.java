@@ -45,7 +45,7 @@ public class ConfigLeafBuilder<T> {
     /**
      * Creates a new scalar {@code ConfigLeafBuilder}.
      *
-     * @param parentNode the {@code ConfigNodeBuilder} this builder originates from
+     * @param parentNode the {@code ConfigTreeBuilder} this builder originates from
      * @param name the name of the {@code ConfigLeaf} produced by this builder
      * @param type       the class object representing the type of values this builder will create settings for
      */
@@ -53,6 +53,11 @@ public class ConfigLeafBuilder<T> {
         this.parentNode = parentNode;
         this.name = name;
         this.type = type;
+    }
+
+    @Nonnull
+    public Class<T> getType() {
+        return type;
     }
 
     /**
