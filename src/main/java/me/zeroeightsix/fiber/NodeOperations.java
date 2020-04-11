@@ -45,10 +45,7 @@ public class NodeOperations {
      */
     public static void moveNode(ConfigNode value, ConfigTree to) {
         try {
-            ConfigBranch parent = value.getParent();
-            if (parent != null) {
-                parent.getItems().remove(value);
-            }
+            value.detach();
             to.getItems().add(value, true);
         } catch (DuplicateChildException e) {
             throw new RuntimeFiberException("Failed to merge value", e);

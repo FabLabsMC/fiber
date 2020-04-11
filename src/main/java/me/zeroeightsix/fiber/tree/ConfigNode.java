@@ -40,6 +40,7 @@ public interface ConfigNode {
      * @param parent the new parent branch for this node
      * @throws DuplicateChildException   if the new parent already has a child of the same name
      * @throws IllegalTreeStateException if this node is already attached to another branch
+     * @see NodeCollection#add(ConfigNode, boolean)
      */
     void attachTo(ConfigBranch parent) throws DuplicateChildException, IllegalTreeStateException;
 
@@ -51,6 +52,8 @@ public interface ConfigNode {
      * node's parent will be set to {@code null}.
      *
      * <p> This method has no effect is this node has no parent.
+     *
+     * @see NodeCollection#remove(Object)
      */
     void detach();
 

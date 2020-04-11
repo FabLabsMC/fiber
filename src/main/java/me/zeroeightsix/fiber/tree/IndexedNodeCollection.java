@@ -74,11 +74,11 @@ public class IndexedNodeCollection extends AbstractCollection<ConfigNode> implem
     }
 
     @Override
-    public boolean remove(@Nullable Object o) {
-        if (o instanceof ConfigNode) {
-            boolean removed = this.items.remove(((ConfigNode) o).getName(), o);
+    public boolean remove(@Nullable Object child) {
+        if (child instanceof ConfigNode) {
+            boolean removed = this.items.remove(((ConfigNode) child).getName(), child);
             if (removed) {
-                ((ConfigNode) o).detach();
+                ((ConfigNode) child).detach();
                 return true;
             }
         }
