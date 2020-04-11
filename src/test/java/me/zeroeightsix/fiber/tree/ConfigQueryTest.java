@@ -17,8 +17,8 @@ class ConfigQueryTest {
                 .fork("stuff")
                 .beginValue("A", 10)
                 .finishValue(a::set)
-                .finishNode()
-                .finishNode()
+                .finishBranch()
+                .finishBranch()
                 .build();
         ConfigQuery<?> query1 = ConfigQuery.leaf(Integer.class , "child", "stuff", "A");
         assertEquals(a.get(), query1.run(tree));

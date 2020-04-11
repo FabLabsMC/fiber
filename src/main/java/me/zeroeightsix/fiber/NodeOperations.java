@@ -20,7 +20,7 @@ public class NodeOperations {
     public static void mergeTo(ConfigTree from, ConfigTreeBuilder to) {
         try {
             for (ConfigNode item : from.getItems()) {
-                to.add(item, true);
+                to.withChild(item, true);
             }
         } catch (FiberException e) {
             throw new RuntimeFiberException("Failed to merge nodes", e);
@@ -35,7 +35,7 @@ public class NodeOperations {
      */
     public static void mergeTo(ConfigLeaf<?> value, ConfigTreeBuilder to) {
         try {
-            to.add(value, true);
+            to.withChild(value, true);
         } catch (FiberException e) {
             throw new RuntimeFiberException("Failed to merge value", e);
         }

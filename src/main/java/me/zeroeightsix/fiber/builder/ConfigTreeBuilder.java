@@ -53,9 +53,18 @@ public class ConfigTreeBuilder implements ConfigTree {
     private boolean serializeSeparately;
     private ConfigBranch built;
 
-    public ConfigTreeBuilder() {
-        this.parent = null;
-        this.name = null;
+    /**
+     * Creates a new builder with initial settings.
+     *
+     * @param parent the initial parent
+     * @param name   the initial name
+     * @see ConfigTree#builder()
+     * @see ConfigBranch#builder(ConfigTreeBuilder, String)
+     */
+    public ConfigTreeBuilder(@Nullable ConfigTreeBuilder parent, @Nullable String name) {
+        if (parent != null && name == null) throw new IllegalArgumentException("A child node needs a name");
+        this.parent = parent;
+        this.name = name;
     }
 
     /**
@@ -65,7 +74,7 @@ public class ConfigTreeBuilder implements ConfigTree {
      * Elements may be removed from it, but no elements may be added directly.
      *
      * @return the set of children
-     * @see #add(ConfigNode)
+     * @see #withChild(ConfigNode)
      */
     @Nonnull
     @Override
@@ -183,7 +192,7 @@ public class ConfigTreeBuilder implements ConfigTree {
      * Creates a scalar {@code ConfigLeafBuilder}.
      *
      * @param type the class of the type of value the {@link ConfigLeaf} produced by the builder holds
-     * @param <T> the type {@code type} represents
+     * @param <T>  the type {@code type} represents
      * @return the newly created builder
      * @see ConfigLeafBuilder ConfigLeafBuilder
      */
@@ -195,7 +204,7 @@ public class ConfigTreeBuilder implements ConfigTree {
      * Creates a {@code ConfigLeafBuilder} with the given default value.
      *
      * @param defaultValue the default value of the {@link ConfigLeaf} that will be produced by the created builder.
-     * @param <T> the type of value the {@link ConfigLeaf} produced by the builder holds
+     * @param <T>          the type of value the {@link ConfigLeaf} produced by the builder holds
      * @return the newly created builder
      * @see ConfigLeafBuilder
      * @see ConfigAggregateBuilder
@@ -218,7 +227,7 @@ public class ConfigTreeBuilder implements ConfigTree {
      * Creates an aggregate {@code ConfigLeafBuilder}.
      *
      * @param defaultValue the default array of values the {@link ConfigLeaf} will hold.
-     * @param <E> the type of elements {@code defaultValue} holds
+     * @param <E>          the type of elements {@code defaultValue} holds
      * @return the newly created builder
      * @see ConfigAggregateBuilder Aggregate
      */
@@ -231,9 +240,9 @@ public class ConfigTreeBuilder implements ConfigTree {
      * Creates an aggregate {@code ConfigLeafBuilder}.
      *
      * @param defaultValue the default collection of values the {@link ConfigLeaf} will hold.
-     * @param elementType the class of the type of elements {@code defaultValue} holds
-     * @param <C> the type of collection {@code defaultValue} is
-     * @param <E> the type {@code elementType} represents
+     * @param elementType  the class of the type of elements {@code defaultValue} holds
+     * @param <C>          the type of collection {@code defaultValue} is
+     * @param <E>          the type {@code elementType} represents
      * @return the newly created builder
      */
     public <C extends Collection<E>, E> ConfigAggregateBuilder<C, E> beginAggregateValue(@Nonnull String name, @Nonnull C defaultValue, @Nullable Class<E> elementType) {
@@ -248,8 +257,8 @@ public class ConfigTreeBuilder implements ConfigTree {
      * @throws FiberException if there was already a child by the same name
      * @see Property
      */
-    public ConfigTreeBuilder add(@Nonnull ConfigNode item) throws FiberException {
-        add(item, false);
+    public ConfigTreeBuilder withChild(@Nonnull ConfigNode item) throws FiberException {
+        withChild(item, false);
         return this;
     }
 
@@ -258,10 +267,11 @@ public class ConfigTreeBuilder implements ConfigTree {
      *
      * @param item      The child to add
      * @param overwrite whether existing items should be overwritten
+     * @return {@code this}, for chaining
      * @throws FiberException if there was already a child by the same name
      * @see Property
      */
-    public ConfigTreeBuilder add(@Nonnull ConfigNode item, boolean overwrite) throws FiberException {
+    public ConfigTreeBuilder withChild(@Nonnull ConfigNode item, boolean overwrite) throws FiberException {
         if (!overwrite && items.containsKey(item.getName())) {
             throw new FiberException("Attempt to replace node " + item.getName());
         }
@@ -286,7 +296,7 @@ public class ConfigTreeBuilder implements ConfigTree {
      * @return the created node builder
      */
     public ConfigTreeBuilder fork(String name) {
-        return new ConfigTreeBuilder().withName(name).withParent(this);
+        return new ConfigTreeBuilder(this, name);
     }
 
     /**
@@ -307,7 +317,7 @@ public class ConfigTreeBuilder implements ConfigTree {
         if (this.parent != null) {
             assert name != null;
             try {
-                this.parent.add(built);
+                this.parent.withChild(built);
             } catch (FiberException e) {
                 throw new RuntimeFiberException("Failed to attach built node to parent", e);
             }
@@ -315,11 +325,11 @@ public class ConfigTreeBuilder implements ConfigTree {
         return built;
     }
 
-    public ConfigTreeBuilder finishNode() {
-        return finishNode(n -> { });
+    public ConfigTreeBuilder finishBranch() {
+        return finishBranch(n -> { });
     }
 
-    public ConfigTreeBuilder finishNode(Consumer<ConfigBranch> action) {
+    public ConfigTreeBuilder finishBranch(Consumer<ConfigBranch> action) {
         if (parent == null) {
             throw new IllegalStateException("finishNode should not be called for a root node. Use build instead.");
         }

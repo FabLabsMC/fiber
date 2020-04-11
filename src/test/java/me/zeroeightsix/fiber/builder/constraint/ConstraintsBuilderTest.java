@@ -6,6 +6,7 @@ import me.zeroeightsix.fiber.constraint.CompositeType;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.tree.ConfigLeaf;
+import me.zeroeightsix.fiber.tree.ConfigTree;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -65,7 +66,7 @@ class ConstraintsBuilderTest {
     @DisplayName("Test collection aggregate constraints")
     @Test
     public void testCollectionConstraints() {
-        ConfigTreeBuilder builder = new ConfigTreeBuilder();
+        ConfigTreeBuilder builder = ConfigTree.builder();
         ConfigAggregateBuilder<List<Integer>, Integer> aggregateBuilder = builder.beginAggregateValue("foo", Collections.emptyList(), Integer.class);
         assertThrows(RuntimeFiberException.class, () -> aggregateBuilder.beginConstraints().component().regex(""), "Invalid constraint type at build time");
 

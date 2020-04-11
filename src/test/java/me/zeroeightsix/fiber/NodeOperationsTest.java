@@ -1,11 +1,11 @@
 package me.zeroeightsix.fiber;
 
-import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.builder.ConfigLeafBuilder;
-import me.zeroeightsix.fiber.tree.ConfigTree;
+import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.tree.ConfigLeaf;
-import me.zeroeightsix.fiber.tree.Property;
 import me.zeroeightsix.fiber.tree.ConfigNode;
+import me.zeroeightsix.fiber.tree.ConfigTree;
+import me.zeroeightsix.fiber.tree.Property;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -16,13 +16,13 @@ class NodeOperationsTest {
     @Test
     @DisplayName("Node -> Node")
     void mergeTo() {
-        ConfigTree treeOne = new ConfigTreeBuilder()
+        ConfigTree treeOne = ConfigTree.builder()
                 .beginValue("A", Integer.class)
                 .withDefaultValue(10)
                 .finishValue()
                 .build();
 
-        ConfigTreeBuilder nodeTwo = new ConfigTreeBuilder();
+        ConfigTreeBuilder nodeTwo = ConfigTree.builder();
 
         NodeOperations.mergeTo(treeOne, nodeTwo);
 
@@ -32,7 +32,7 @@ class NodeOperationsTest {
     @Test
     @DisplayName("Value -> Node")
     void mergeTo1() {
-        ConfigTreeBuilder node = new ConfigTreeBuilder();
+        ConfigTreeBuilder node = ConfigTree.builder();
         ConfigLeaf<Integer> value = node.beginValue("A", Integer.class)
                 .withDefaultValue(10)
                 .build();

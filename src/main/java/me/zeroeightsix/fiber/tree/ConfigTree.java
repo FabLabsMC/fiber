@@ -11,7 +11,7 @@ public interface ConfigTree {
      * @return a new builder for a root config node
      */
     static ConfigTreeBuilder builder() {
-        return new ConfigTreeBuilder();
+        return new ConfigTreeBuilder(null, null);
     }
 
     /**

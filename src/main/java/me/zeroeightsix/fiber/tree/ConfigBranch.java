@@ -1,5 +1,7 @@
 package me.zeroeightsix.fiber.tree;
 
+import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
+
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -13,6 +15,10 @@ import java.util.Collection;
  * @see me.zeroeightsix.fiber.builder.ConfigTreeBuilder
  */
 public interface ConfigBranch extends ConfigTree, ConfigNode, Commentable {
+
+    static ConfigTreeBuilder builder(ConfigTreeBuilder parent, String name) {
+        return new ConfigTreeBuilder(parent, name);
+    }
 
     /**
      * Returns this node's name.
