@@ -16,36 +16,36 @@ public class NodeOperationsTest {
 
     @Test
     @DisplayName("Node -> Node")
-    void mergeTo() {
-        ConfigTree treeOne = new ConfigTreeBuilder()
+    void moveChildren() {
+        ConfigTree treeOne = ConfigTree.builder()
                 .beginValue("A", Integer.class)
                 .withDefaultValue(10)
                 .finishValue()
                 .build();
 
-        ConfigTreeBuilder nodeTwo = new ConfigTreeBuilder();
+        ConfigTreeBuilder nodeTwo = ConfigTree.builder();
 
-        NodeOperations.mergeTo(treeOne, nodeTwo);
+        NodeOperations.moveChildren(treeOne, nodeTwo);
 
         testNodeFor(nodeTwo, "A", Integer.class, 10);
     }
 
     @Test
     @DisplayName("Value -> Node")
-    void mergeTo1() {
-        ConfigTreeBuilder node = new ConfigTreeBuilder();
+    void moveNode() {
+        ConfigTreeBuilder node = ConfigTree.builder();
         ConfigLeaf<Integer> value = node.beginValue("A", Integer.class)
                 .withDefaultValue(10)
                 .build();
 
-        NodeOperations.mergeTo(value, node);
+        NodeOperations.moveNode(value, node);
 
         testNodeFor(node, "A", Integer.class, 10);
     }
 
     @Test
     @DisplayName("Value -> Value")
-    void mergeTo2() {
+    void copyValue() {
         ConfigLeaf<Integer> valueOne = new ConfigLeafBuilder<>(null, "A", Integer.class)
                 .withDefaultValue(10)
                 .build();
@@ -53,7 +53,7 @@ public class NodeOperationsTest {
                 .withDefaultValue(20)
                 .build();
 
-        NodeOperations.mergeTo(valueOne, valueTwo);
+        NodeOperations.copyValue(valueOne, valueTwo);
         testItemFor(Integer.class, 10, valueTwo);
     }
 

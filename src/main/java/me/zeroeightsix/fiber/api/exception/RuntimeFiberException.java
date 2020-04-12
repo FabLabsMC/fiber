@@ -7,6 +7,10 @@ package me.zeroeightsix.fiber.api.exception;
  */
 public class RuntimeFiberException extends RuntimeException {
 
+    public RuntimeFiberException() {
+        super();
+    }
+
     public RuntimeFiberException(String s) {
         super(s);
     }

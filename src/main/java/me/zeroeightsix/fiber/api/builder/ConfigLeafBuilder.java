@@ -190,8 +190,8 @@ public class ConfigLeafBuilder<T> {
             // Though, we don't really want to throw an exception on this method because no developer likes try-catching every setting they build.
             // Let's tread with caution.
             try {
-                parentNode.add(built);
-            } catch (FiberException e) {
+                parentNode.getItems().add(built);
+            } catch (RuntimeFiberException e) {
                 throw new RuntimeFiberException("Failed to register leaf to node", e);
             }
         }

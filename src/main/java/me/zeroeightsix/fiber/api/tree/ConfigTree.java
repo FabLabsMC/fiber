@@ -1,28 +1,31 @@
 package me.zeroeightsix.fiber.api.tree;
 
+import me.zeroeightsix.fiber.api.NodeOperations;
 import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
+import me.zeroeightsix.fiber.tree.NodeCollection;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collection;
 
 public interface ConfigTree {
     /**
      * @return a new builder for a root config node
      */
     static ConfigTreeBuilder builder() {
-        return new ConfigTreeBuilder();
+        return new ConfigTreeBuilder(null, null);
     }
 
     /**
      * Returns a collection of this node's children.
      *
      * <p> The returned collection is guaranteed to have no two nodes with the same name.
+     * Any changes made to it will be reflected by this tree.
      *
      * @return the set of children
+     * @see NodeOperations
      */
     @Nonnull
-    Collection<ConfigNode> getItems();
+    NodeCollection getItems();
 
     /**
      * Tries to find a child in this node by name. If a child is found, it will be returned.

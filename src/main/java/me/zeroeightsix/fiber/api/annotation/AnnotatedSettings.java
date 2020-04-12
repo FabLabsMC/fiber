@@ -4,6 +4,7 @@ import me.zeroeightsix.fiber.api.NodeOperations;
 import me.zeroeightsix.fiber.api.annotation.convention.SettingNamingConvention;
 import me.zeroeightsix.fiber.api.annotation.exception.MalformedFieldException;
 import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
+import me.zeroeightsix.fiber.api.tree.ConfigBranch;
 import me.zeroeightsix.fiber.api.tree.ConfigNode;
 import me.zeroeightsix.fiber.api.tree.ConfigTree;
 import me.zeroeightsix.fiber.impl.annotation.convention.NoNamingConvention;
@@ -107,13 +108,13 @@ public class AnnotatedSettings {
         return this;
     }
 
-    public ConfigNode asNode(Object pojo) throws FiberException {
+    public ConfigBranch makeTree(Object pojo) throws FiberException {
         ConfigTreeBuilder builder = ConfigTree.builder();
         applyToNode(builder, pojo);
         return builder.build();
     }
 
-    public <P> void applyToNode(ConfigTreeBuilder mergeTo, P pojo) throws FiberException {
+    public <P> void applyToNode(ConfigTree mergeTo, P pojo) throws FiberException {
         @SuppressWarnings("unchecked")
         Class<P> pojoClass = (Class<P>) pojo.getClass();
 
@@ -129,7 +130,7 @@ public class AnnotatedSettings {
             convention = new NoNamingConvention();
         }
 
-        NodeOperations.mergeTo(constructNode(pojoClass, pojo, onlyAnnotated, convention), mergeTo);
+        NodeOperations.moveChildren(constructNode(pojoClass, pojo, onlyAnnotated, convention), mergeTo);
     }
 
     private <P> ConfigTreeBuilder constructNode(Class<P> pojoClass, P pojo, boolean onlyAnnotated, SettingNamingConvention convention) throws FiberException {

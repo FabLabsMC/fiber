@@ -49,7 +49,7 @@ class JanksonSerializerTest {
                 .fork("child")
                     .beginValue("A", 10)
                     .finishValue()
-                .finishNode()
+                .finishBranch()
                 .build();
 
         ConfigTreeBuilder builderTwo = ConfigTree.builder();
@@ -78,7 +78,7 @@ class JanksonSerializerTest {
                 .fork("child")
                     .beginValue("A", 10)
                     .finishValue(settingOne::mirror)
-                .finishNode()
+                .finishBranch()
                 .build();
 
         PropertyMirror<String> versionTwo = new PropertyMirror<>();
@@ -100,7 +100,7 @@ class JanksonSerializerTest {
                     .finishComposite()
                     .finishConstraints()
                 .finishValue(settingTwo::mirror)
-                .finishNode()
+                .finishBranch()
                 .build();
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
