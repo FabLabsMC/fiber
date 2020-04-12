@@ -18,6 +18,20 @@ public interface ConfigNode {
     String getName();
 
     /**
+     * Returns the meta-configuration tree that describes the attributes of this node.
+     *
+     * <p> Attributes store metadata pertaining to the node itself, rather than its value.
+     * The returned tree can be mutated by third parties to supplement the default node metadata.
+     * Examples of attributes include translation keys or rendering information.
+     *
+     * <p> As the returned data structure is shared by every attribute source,
+     * attributes should be grouped by namespace.
+     *
+     * @return this node's configurable attributes
+     */
+    AttributeTree getAttributes();
+
+    /**
      * Returns this node's parent, if any.
      *
      * @return this node's parent, or {@code null} if it is not part of a config tree

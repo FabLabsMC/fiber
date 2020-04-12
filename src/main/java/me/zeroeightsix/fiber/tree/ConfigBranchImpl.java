@@ -10,6 +10,7 @@ import java.util.Collections;
  */
 public class ConfigBranchImpl extends ConfigNodeImpl implements ConfigBranch {
 
+    private AttributeTree attributes;
     private final NodeCollection items;
     private final boolean serializeSeparately;
 
@@ -48,6 +49,15 @@ public class ConfigBranchImpl extends ConfigNodeImpl implements ConfigBranch {
      */
     public ConfigBranchImpl() {
         this(null, null, Collections.emptyList(), false);
+    }
+
+    @Override
+    public AttributeTree getAttributes() {
+        // lazy init is important to avoid unlimited branch recursion
+        if (this.attributes == null) {
+            this.attributes = new AttributeTreeImpl(this);
+        }
+        return this.attributes;
     }
 
     @Nonnull
