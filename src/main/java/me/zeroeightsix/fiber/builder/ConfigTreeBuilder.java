@@ -224,6 +224,30 @@ public class ConfigTreeBuilder implements ConfigTree {
     }
 
     /**
+     * Creates and finishes a {@code ConfigLeaf} with the given default value.
+     *
+     * @param defaultValue the default value of the {@link ConfigLeaf} to create.
+     * @param <T>          the type of value the {@link ConfigLeaf} holds.
+     * @return {@code this}, for chaining
+     */
+    public <T> ConfigTreeBuilder withValue(@Nonnull String name, @Nonnull T defaultValue) {
+        return beginValue(name, defaultValue)
+                .finishValue();
+    }
+
+    /**
+     * Creates and finishes a {@code ConfigLeaf} with the given type.
+     *
+     * @param type the type of the value of the {@link ConfigLeaf} to create.
+     * @param <T>  the type {@code type} represents
+     * @return {@code this}, for chaining
+     */
+    public <T> ConfigTreeBuilder withValue(@Nonnull String name, @Nonnull Class<T> type) {
+        return beginValue(name, type)
+                .finishValue();
+    }
+
+    /**
      * Creates an aggregate {@code ConfigLeafBuilder}.
      *
      * @param defaultValue the default array of values the {@link ConfigLeaf} will hold.
