@@ -1,9 +1,12 @@
 package me.zeroeightsix.fiber.tree;
 
+import me.zeroeightsix.fiber.Identifier;
 import me.zeroeightsix.fiber.exception.DuplicateChildException;
 import me.zeroeightsix.fiber.exception.IllegalTreeStateException;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Map;
 
 /**
  * The building block of a tree: every node implement this interface.
@@ -18,10 +21,10 @@ public interface ConfigNode {
     String getName();
 
     /**
-     * Returns the meta-configuration tree that describes the attributes of this node.
+     * Returns the map describing the attributes of this node.
      *
      * <p> Attributes store metadata pertaining to the node itself, rather than its value.
-     * The returned tree can be mutated by third parties to supplement the default node metadata.
+     * The returned map can be mutated by third parties to supplement the default node metadata.
      * Examples of attributes include translation keys or rendering information.
      *
      * <p> As the returned data structure is shared by every attribute source,
@@ -29,7 +32,9 @@ public interface ConfigNode {
      *
      * @return this node's configurable attributes
      */
-    AttributeTree getAttributes();
+    Map<Identifier, ConfigAttribute<?>> getAttributes();
+
+    <A> ConfigAttribute<A> getOrCreateAttribute(Identifier id, @Nonnull A defaultValue);
 
     /**
      * Returns this node's parent, if any.

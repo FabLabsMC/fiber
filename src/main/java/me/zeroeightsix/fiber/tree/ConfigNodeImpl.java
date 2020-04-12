@@ -1,9 +1,13 @@
 package me.zeroeightsix.fiber.tree;
 
+import me.zeroeightsix.fiber.Identifier;
 import me.zeroeightsix.fiber.exception.IllegalTreeStateException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * A commentable node.
@@ -14,6 +18,7 @@ import javax.annotation.Nullable;
  */
 public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
 
+    private final Map<Identifier, ConfigAttribute<?>> attributes;
     @Nonnull
     private final String name;
     @Nullable
@@ -28,6 +33,7 @@ public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
      * @param comment the comment for this leaf
      */
     public ConfigNodeImpl(@Nonnull String name, @Nullable String comment) {
+        this.attributes = new TreeMap<>(Comparator.comparing(Identifier::toString));
         this.name = name;
         this.comment = comment;
     }
@@ -48,6 +54,18 @@ public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
     @Override
     public ConfigBranch getParent() {
         return this.parent;
+    }
+
+    @Override
+    public Map<Identifier, ConfigAttribute<?>> getAttributes() {
+        return this.attributes;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <A> ConfigAttribute<A> getOrCreateAttribute(Identifier id, @Nonnull A defaultValue) {
+        return (ConfigAttribute<A>) getAttributes()
+                .computeIfAbsent(id, i -> new ConfigAttributeImpl<>(defaultValue, (Class<A>) defaultValue.getClass()));
     }
 
     @Override
