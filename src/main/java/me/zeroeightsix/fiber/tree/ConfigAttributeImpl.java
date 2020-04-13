@@ -1,12 +1,12 @@
 package me.zeroeightsix.fiber.tree;
 
 public class ConfigAttributeImpl<T> implements ConfigAttribute<T> {
-    private T value;
     private final Class<T> type;
+    private T value;
 
-    public ConfigAttributeImpl(T value, Class<T> type) {
-        this.value = value;
+    public ConfigAttributeImpl(Class<T> type, T value) {
         this.type = type;
+        this.value = value;
     }
 
     @Override

@@ -4,9 +4,9 @@ import me.zeroeightsix.fiber.Identifier;
 import me.zeroeightsix.fiber.exception.DuplicateChildException;
 import me.zeroeightsix.fiber.exception.IllegalTreeStateException;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * The building block of a tree: every node implement this interface.
@@ -34,7 +34,29 @@ public interface ConfigNode {
      */
     Map<Identifier, ConfigAttribute<?>> getAttributes();
 
-    <A> ConfigAttribute<A> getOrCreateAttribute(Identifier id, @Nonnull A defaultValue);
+    /**
+     * Retrieves the value of the attribute with the given id.
+     *
+     * @param id           the attribute's id
+     * @param expectedType the class object describing the type of values expected
+     * @param <A>          the type of values expected from the attribute
+     * @return an {@code Optional} describing the value of the attribute,
+     * or an empty {@code Optional} if the attribute does not exist
+     * @throws ClassCastException if the attribute exists but has a type that is not assignable to {@code expectedType}
+     */
+    <A> Optional<A> getAttributeValue(Identifier id, Class<A> expectedType);
+
+    /**
+     * Retrieves the attribute with the given id. If it does not exist, one is created with the given type and default value.
+     *
+     * @param id            the id of the desired attribute
+     * @param attributeType the type of values held by the attribute
+     * @param defaultValue  the default value, used if the attribute does not exist
+     * @param <A>           the type of value stored by the attribute
+     * @return the current (existing or computed) attribute associated with the given id
+     * @see #getAttributes()
+     */
+    <A> ConfigAttribute<A> getOrCreateAttribute(Identifier id, Class<A> attributeType, @Nullable A defaultValue);
 
     /**
      * Returns this node's parent, if any.

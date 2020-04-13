@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Comparator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TreeMap;
 
 /**
@@ -63,9 +64,26 @@ public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <A> ConfigAttribute<A> getOrCreateAttribute(Identifier id, @Nonnull A defaultValue) {
-        return (ConfigAttribute<A>) getAttributes()
-                .computeIfAbsent(id, i -> new ConfigAttributeImpl<>(defaultValue, (Class<A>) defaultValue.getClass()));
+    public <A> ConfigAttribute<A> getOrCreateAttribute(Identifier id, Class<A> attributeType, @Nullable A defaultValue) {
+        ConfigAttribute<?> attr = getAttributes().computeIfAbsent(id, i -> new ConfigAttributeImpl<>(attributeType, defaultValue));
+        checkAttributeType(attributeType, attr);
+        return (ConfigAttribute<A>) attr;
+    }
+
+    @Override
+    public <A> Optional<A> getAttributeValue(Identifier id, Class<A> expectedType) {
+        ConfigAttribute<?> attr = this.attributes.get(id);
+        if (attr != null) {
+            checkAttributeType(expectedType, attr);
+            return Optional.ofNullable(expectedType.cast(attr.getValue()));
+        }
+        return Optional.empty();
+    }
+
+    private static <A> void checkAttributeType(Class<A> expectedType, ConfigAttribute<?> attr) {
+        if (!expectedType.isAssignableFrom(attr.getType())) {
+            throw new ClassCastException("Attempt to retrieve a value of type " + expectedType + " from attribute with type " + attr.getType());
+        }
     }
 
     @Override
