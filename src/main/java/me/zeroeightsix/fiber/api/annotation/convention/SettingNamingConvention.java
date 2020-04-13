@@ -1,9 +1,5 @@
 package me.zeroeightsix.fiber.api.annotation.convention;
 
-import me.zeroeightsix.fiber.impl.annotation.convention.LowercaseConvention;
-import me.zeroeightsix.fiber.impl.annotation.convention.NoNamingConvention;
-import me.zeroeightsix.fiber.impl.annotation.convention.SnakeCaseConvention;
-
 /**
  * A setting naming convention decides how a setting is named based upon the variable it was created from.
  *
@@ -14,10 +10,6 @@ import me.zeroeightsix.fiber.impl.annotation.convention.SnakeCaseConvention;
  * @see NoNamingConvention
  */
 public interface SettingNamingConvention {
-
-    Class<? extends SettingNamingConvention> LOWER_CASE = LowercaseConvention.class;
-    Class<? extends SettingNamingConvention> NONE = NoNamingConvention.class;
-    Class<? extends SettingNamingConvention> SNAKE_CASE = SnakeCaseConvention.class;
 
     String name(String name);
 

@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.impl.annotation.convention;
 
-import me.zeroeightsix.fiber.impl.annotation.convention.NoNamingConvention;
+import me.zeroeightsix.fiber.api.annotation.convention.NoNamingConvention;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;

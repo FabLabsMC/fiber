@@ -1,6 +1,4 @@
-package me.zeroeightsix.fiber.impl.annotation.convention;
-
-import me.zeroeightsix.fiber.api.annotation.convention.SettingNamingConvention;
+package me.zeroeightsix.fiber.api.annotation.convention;
 
 /**
  * A naming convention that converts java-styled {@code lowerCamelCase} names and {@code Proper case} names to {@code snake_case}.

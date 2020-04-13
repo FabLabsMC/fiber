@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber.impl.annotation.convention;
+package me.zeroeightsix.fiber.api.annotation.convention;
 
 import me.zeroeightsix.fiber.api.annotation.convention.SettingNamingConvention;
 
