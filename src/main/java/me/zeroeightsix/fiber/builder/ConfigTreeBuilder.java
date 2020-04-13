@@ -310,16 +310,6 @@ public class ConfigTreeBuilder implements ConfigTree {
     }
 
     /**
-     * Attempts to remove an item from this node by name.
-     *
-     * @param name the name of the child that should be removed
-     * @return the child if removed, otherwise {@code null}
-     */
-    public ConfigNode remove(String name) {
-        return items.removeByName(name);
-    }
-
-    /**
      * Forks this builder, creating a subtree whose parent is this node.
      *
      * @param name the name of the new {@code Node}
