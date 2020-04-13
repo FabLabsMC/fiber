@@ -27,9 +27,7 @@ public abstract class ConfigNodeBuilder {
     }
 
     /**
-     * Sets the {@code ConfigLeaf}'s name.
-     *
-     * <p> If {@code null}, or if this method is never called, the {@code ConfigLeaf} won't have a name. Thus, it might be ignored during (de)serialisation. It also won't be able to be found by name in its parent node.
+     * Sets the {@code ConfigNode}'s name.
      *
      * @param name the name
      * @return {@code this} builder
@@ -41,9 +39,10 @@ public abstract class ConfigNodeBuilder {
     }
 
     /**
-     * Sets the {@code ConfigLeaf}'s comment.
+     * Sets the {@code ConfigNode}'s comment.
      *
-     * <p> If {@code null}, or if this method is never called, the {@code ConfigLeaf} won't have a comment. An empty comment (non null, but only consisting of whitespace) will be serialised.
+     * <p> If {@code null}, or if this method is never called, the {@code ConfigNode} will not have a comment.
+     * An empty comment (non null, but only consisting of whitespace) will be serialised.
      *
      * @param comment the comment
      * @return {@code this} builder
