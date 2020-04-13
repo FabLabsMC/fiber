@@ -1,5 +1,6 @@
 package me.zeroeightsix.fiber.builder;
 
+import me.zeroeightsix.fiber.annotation.AnnotatedSettings;
 import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.FinalConstraint;
@@ -51,7 +52,7 @@ public class ConfigLeafBuilder<T> {
     public ConfigLeafBuilder(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull Class<T> type) {
         this.parentNode = parentNode;
         this.name = name;
-        this.type = type;
+        this.type = AnnotatedSettings.wrapPrimitive(type);
     }
 
     @Nonnull
