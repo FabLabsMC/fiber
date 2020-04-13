@@ -18,9 +18,7 @@ public class NodeOperationsTest {
     @DisplayName("Node -> Node")
     void moveChildren() {
         ConfigTree treeOne = ConfigTree.builder()
-                .beginValue("A", Integer.class)
-                .withDefaultValue(10)
-                .finishValue()
+                .withValue("A", Integer.class, 10)
                 .build();
 
         ConfigTreeBuilder nodeTwo = ConfigTree.builder();
@@ -34,9 +32,7 @@ public class NodeOperationsTest {
     @DisplayName("Value -> Node")
     void moveNode() {
         ConfigTreeBuilder node = ConfigTree.builder();
-        ConfigLeaf<Integer> value = node.beginValue("A", Integer.class)
-                .withDefaultValue(10)
-                .build();
+        ConfigLeaf<Integer> value = node.beginValue("A", Integer.class, 10).build();
 
         NodeOperations.moveNode(value, node);
 

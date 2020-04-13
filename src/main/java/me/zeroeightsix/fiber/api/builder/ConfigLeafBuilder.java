@@ -1,9 +1,9 @@
 package me.zeroeightsix.fiber.api.builder;
 
+import me.zeroeightsix.fiber.api.annotation.AnnotatedSettings;
 import me.zeroeightsix.fiber.api.builder.constraint.ConstraintsBuilder;
 import me.zeroeightsix.fiber.api.constraint.Constraint;
 import me.zeroeightsix.fiber.impl.constraint.FinalConstraint;
-import me.zeroeightsix.fiber.api.exception.FiberException;
 import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
 import me.zeroeightsix.fiber.impl.tree.ConfigLeafImpl;
@@ -52,7 +52,7 @@ public class ConfigLeafBuilder<T> {
     public ConfigLeafBuilder(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull Class<T> type) {
         this.parentNode = parentNode;
         this.name = name;
-        this.type = type;
+        this.type = AnnotatedSettings.wrapPrimitive(type);
     }
 
     @Nonnull
