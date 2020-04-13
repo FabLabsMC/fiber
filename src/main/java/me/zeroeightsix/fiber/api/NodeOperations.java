@@ -1,10 +1,8 @@
 package me.zeroeightsix.fiber.api;
 
-import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
-import me.zeroeightsix.fiber.api.exception.FiberException;
 import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.api.tree.*;
-import me.zeroeightsix.fiber.exception.DuplicateChildException;
+import me.zeroeightsix.fiber.api.exception.DuplicateChildException;
 
 import java.util.Iterator;
 

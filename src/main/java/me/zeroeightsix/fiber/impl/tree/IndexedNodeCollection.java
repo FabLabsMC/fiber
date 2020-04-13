@@ -1,8 +1,9 @@
-package me.zeroeightsix.fiber.tree;
+package me.zeroeightsix.fiber.impl.tree;
 
 import me.zeroeightsix.fiber.api.tree.ConfigBranch;
 import me.zeroeightsix.fiber.api.tree.ConfigNode;
-import me.zeroeightsix.fiber.exception.DuplicateChildException;
+import me.zeroeightsix.fiber.api.exception.DuplicateChildException;
+import me.zeroeightsix.fiber.api.tree.NodeCollection;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

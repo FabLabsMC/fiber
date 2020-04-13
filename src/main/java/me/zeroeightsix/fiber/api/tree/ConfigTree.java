@@ -2,7 +2,6 @@ package me.zeroeightsix.fiber.api.tree;
 
 import me.zeroeightsix.fiber.api.NodeOperations;
 import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
-import me.zeroeightsix.fiber.tree.NodeCollection;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

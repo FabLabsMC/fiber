@@ -6,11 +6,11 @@ import me.zeroeightsix.fiber.api.annotation.Settings;
 import me.zeroeightsix.fiber.api.exception.FiberException;
 import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.api.tree.*;
-import me.zeroeightsix.fiber.exception.DuplicateChildException;
-import me.zeroeightsix.fiber.exception.IllegalTreeStateException;
+import me.zeroeightsix.fiber.api.exception.DuplicateChildException;
+import me.zeroeightsix.fiber.api.exception.IllegalTreeStateException;
 import me.zeroeightsix.fiber.impl.tree.ConfigBranchImpl;
-import me.zeroeightsix.fiber.tree.IndexedNodeCollection;
-import me.zeroeightsix.fiber.tree.NodeCollection;
+import me.zeroeightsix.fiber.impl.tree.IndexedNodeCollection;
+import me.zeroeightsix.fiber.api.tree.NodeCollection;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

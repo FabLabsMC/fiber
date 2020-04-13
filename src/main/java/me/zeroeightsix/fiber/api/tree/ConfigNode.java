@@ -1,8 +1,7 @@
 package me.zeroeightsix.fiber.api.tree;
 
-import me.zeroeightsix.fiber.exception.DuplicateChildException;
-import me.zeroeightsix.fiber.exception.IllegalTreeStateException;
-import me.zeroeightsix.fiber.tree.NodeCollection;
+import me.zeroeightsix.fiber.api.exception.DuplicateChildException;
+import me.zeroeightsix.fiber.api.exception.IllegalTreeStateException;
 
 import javax.annotation.Nullable;
 

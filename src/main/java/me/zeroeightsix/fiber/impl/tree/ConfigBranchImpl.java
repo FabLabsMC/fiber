@@ -2,8 +2,7 @@ package me.zeroeightsix.fiber.impl.tree;
 
 import me.zeroeightsix.fiber.api.tree.ConfigBranch;
 import me.zeroeightsix.fiber.api.tree.ConfigNode;
-import me.zeroeightsix.fiber.tree.IndexedNodeCollection;
-import me.zeroeightsix.fiber.tree.NodeCollection;
+import me.zeroeightsix.fiber.api.tree.NodeCollection;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

@@ -4,7 +4,7 @@ import me.zeroeightsix.fiber.api.tree.Commentable;
 import me.zeroeightsix.fiber.api.tree.ConfigBranch;
 import me.zeroeightsix.fiber.api.tree.ConfigNode;
 
-import me.zeroeightsix.fiber.exception.IllegalTreeStateException;
+import me.zeroeightsix.fiber.api.exception.IllegalTreeStateException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
