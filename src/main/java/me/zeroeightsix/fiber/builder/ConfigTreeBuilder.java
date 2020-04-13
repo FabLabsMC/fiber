@@ -11,7 +11,7 @@ import me.zeroeightsix.fiber.tree.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collection;
+import java.util.*;
 import java.util.function.Consumer;
 
 /**
@@ -176,7 +176,7 @@ public class ConfigTreeBuilder implements ConfigTree {
      * <p> The generated {@link ConfigLeaf}s will be bound to their respective fields,
      * setting the latter when the former's value is {@linkplain ConfigLeaf#setValue(Object) updated}.
      *
-     * @param pojo an object serving as a base to reflectively generate a config tree
+     * @param pojo     an object serving as a base to reflectively generate a config tree
      * @param settings an {@link AnnotatedSettings} instance used to configure this builder
      * @return {@code this}, for chaining
      * @see Setting @Setting
@@ -189,62 +189,42 @@ public class ConfigTreeBuilder implements ConfigTree {
     }
 
     /**
-     * Creates a scalar {@code ConfigLeafBuilder}.
+     * Creates a scalar {@code ConfigLeafBuilder} with the given default value.
      *
      * @param type the class of the type of value the {@link ConfigLeaf} produced by the builder holds
      * @param <T>  the type {@code type} represents
      * @return the newly created builder
      * @see ConfigLeafBuilder ConfigLeafBuilder
+     * @see #withValue(String, Class, Object)
+     * @see #beginAggregateValue(String, Object[])
+     * @see #beginAggregateValue(String, Class, Class, Collection)
+     * @see #beginListValue(String, Class, Object[])
+     * @see #beginSetValue(String, Class, Object[])
      */
-    public <T> ConfigLeafBuilder<T> beginValue(@Nonnull String name, @Nonnull Class<T> type) {
-        return new ConfigLeafBuilder<>(this, name, type);
+    public <T> ConfigLeafBuilder<T> beginValue(@Nonnull String name, @Nonnull Class<T> type, @Nullable T defaultValue) {
+        return new ConfigLeafBuilder<>(this, name, type).withDefaultValue(defaultValue);
     }
 
     /**
-     * Creates a {@code ConfigLeafBuilder} with the given default value.
+     * Adds a {@code ConfigLeaf} with the given type and default value to the tree.
      *
-     * @param defaultValue the default value of the {@link ConfigLeaf} that will be produced by the created builder.
-     * @param <T>          the type of value the {@link ConfigLeaf} produced by the builder holds
-     * @return the newly created builder
-     * @see ConfigLeafBuilder
-     * @see ConfigAggregateBuilder
-     */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public <T> ConfigLeafBuilder<T> beginValue(@Nonnull String name, @Nonnull T defaultValue) {
-        Class<T> type = (Class<T>) defaultValue.getClass();
-        if (ConfigAggregateBuilder.isAggregate(type)) {
-            if (type.isArray()) {
-                return ConfigAggregateBuilder.create(this, name, (Class) type);
-            } else {
-                return ConfigAggregateBuilder.create(this, name, (Class) type, null);
-            }
-        } else {
-            return new ConfigLeafBuilder<>(this, name, type).withDefaultValue(defaultValue);
-        }
-    }
-
-    /**
-     * Creates and finishes a {@code ConfigLeaf} with the given default value.
+     * <p> This method allows only basic configuration of the created leaf.
+     * For more flexibility, one of the {@code begin*Value} methods can be used.
      *
+     * @param name         the name of the child leaf
+     * @param type         the type of values held by the leaf
      * @param defaultValue the default value of the {@link ConfigLeaf} to create.
      * @param <T>          the type of value the {@link ConfigLeaf} holds.
      * @return {@code this}, for chaining
+     * @see #beginValue(String, Class, Object)
+     * @see #beginAggregateValue(String, Object[])
+     * @see #beginAggregateValue(String, Class, Class, Collection)
+     * @see #beginListValue(String, Class, Object[])
+     * @see #beginSetValue(String, Class, Object[])
      */
-    public <T> ConfigTreeBuilder withValue(@Nonnull String name, @Nonnull T defaultValue) {
-        return beginValue(name, defaultValue)
-                .finishValue();
-    }
-
-    /**
-     * Creates and finishes a {@code ConfigLeaf} with the given type.
-     *
-     * @param type the type of the value of the {@link ConfigLeaf} to create.
-     * @param <T>  the type {@code type} represents
-     * @return {@code this}, for chaining
-     */
-    public <T> ConfigTreeBuilder withValue(@Nonnull String name, @Nonnull Class<T> type) {
-        return beginValue(name, type)
-                .finishValue();
+    public <T> ConfigTreeBuilder withValue(@Nonnull String name, @Nonnull Class<T> type, @Nullable T defaultValue) {
+        this.items.add(new ConfigLeafImpl<>(name, null, defaultValue, (a, b) -> {}, Collections.emptyList(), type));
+        return this;
     }
 
     /**
@@ -261,17 +241,46 @@ public class ConfigTreeBuilder implements ConfigTree {
     }
 
     /**
-     * Creates an aggregate {@code ConfigLeafBuilder}.
+     * Creates a {@code ConfigAggregateBuilder} for a {@link List} settings with the given default elements.
      *
-     * @param defaultValue the default collection of values the {@link ConfigLeaf} will hold.
-     * @param elementType  the class of the type of elements {@code defaultValue} holds
-     * @param <C>          the type of collection {@code defaultValue} is
-     * @param <E>          the type {@code elementType} represents
+     * <p> This method should not be called by intermediary generic methods
+     * (eg. {@code <T> void f(ConfigTreeBuilder b, T t) {b.beginListValue("", t);}}),
+     * as it will prevent type checking while building the tree.
+     * Use {@link #beginAggregateValue(String, Class, Class, Collection)} in those cases instead.
+     *
+     * @param defaultValues the default values of the
+     * @param <E>            the type of elements contained by the set
      * @return the newly created builder
      */
-    public <C extends Collection<E>, E> ConfigAggregateBuilder<C, E> beginAggregateValue(@Nonnull String name, @Nonnull C defaultValue, @Nullable Class<E> elementType) {
-        @SuppressWarnings("unchecked") Class<C> type = (Class<C>) defaultValue.getClass();
-        return ConfigAggregateBuilder.create(this, name, type, elementType).withDefaultValue(defaultValue);
+    @SuppressWarnings("unchecked")
+    public <E> ConfigAggregateBuilder<List<E>, E> beginListValue(@Nonnull String name, Class<E> elementType, E... defaultValues) {
+        return this.beginAggregateValue(name, List.class, elementType, Collections.unmodifiableList(Arrays.asList(defaultValues)));
+    }
+
+    /**
+     * Creates a {@code ConfigAggregateBuilder} for a {@link Set} settings with the given default elements.
+     *
+     * @param defaultElements the elements contained by default in the set setting
+     * @param <E>            the type of elements contained by the set
+     * @return the newly created builder
+     */
+    @SuppressWarnings("unchecked")
+    public <E> ConfigAggregateBuilder<Set<E>, E> beginSetValue(@Nonnull String name, Class<E> elementType, E... defaultElements) {
+        return this.beginAggregateValue(name, Set.class, elementType, Collections.unmodifiableSet(new HashSet<>(Arrays.asList(defaultElements))));
+    }
+
+    /**
+     * Creates an aggregate {@code ConfigLeafBuilder}.
+     *
+     * @param collectionType the class object representing the type of collection to create a setting for
+     * @param elementType    the class object representing the type of elements {@code defaultValue} holds
+     * @param defaultValue   the default collection of values the {@link ConfigLeaf} will hold.
+     * @param <C>            the type of collection {@code defaultValue} is
+     * @param <E>            the type {@code elementType} represents
+     * @return the newly created builder
+     */
+    public <C extends Collection<E>, E> ConfigAggregateBuilder<C, E> beginAggregateValue(@Nonnull String name, @Nonnull Class<? super C> collectionType, @Nullable Class<E> elementType, @Nonnull C defaultValue) {
+        return ConfigAggregateBuilder.<C, E>create(this, name, collectionType, elementType).withDefaultValue(defaultValue);
     }
 
     /**
@@ -343,7 +352,7 @@ public class ConfigTreeBuilder implements ConfigTree {
     }
 
     public ConfigTreeBuilder finishBranch() {
-        return finishBranch(n -> { });
+        return finishBranch(n -> {});
     }
 
     public ConfigTreeBuilder finishBranch(Consumer<ConfigBranch> action) {

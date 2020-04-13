@@ -56,7 +56,7 @@ public final class ConfigAggregateBuilder<A, E> extends ConfigLeafBuilder<A> {
      * @return the newly created builder
      */
     @SuppressWarnings("unchecked")
-    public static <S extends ConfigTreeBuilder, C extends Collection<E>, E> ConfigAggregateBuilder<C, E> create(S source, @Nonnull String name, @Nonnull Class<? super C> collectionType, @Nullable Class<E> componentType) {
+    public static <C extends Collection<E>, E> ConfigAggregateBuilder<C, E> create(ConfigTreeBuilder source, @Nonnull String name, @Nonnull Class<? super C> collectionType, @Nullable Class<E> componentType) {
         if (!Collection.class.isAssignableFrom(collectionType))
             throw new RuntimeFiberException(collectionType + " is not a valid Collection type");
         return new ConfigAggregateBuilder<>(source, name, (Class<C>) collectionType, componentType);

@@ -15,7 +15,7 @@ class ConfigQueryTest {
         ConfigTree tree = ConfigTree.builder()
                 .fork("child")
                 .fork("stuff")
-                .beginValue("A", 10)
+                .beginValue("A", Integer.class, 10)
                 .finishValue(a::set)
                 .finishBranch()
                 .finishBranch()

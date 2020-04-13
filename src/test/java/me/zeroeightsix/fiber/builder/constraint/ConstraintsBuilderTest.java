@@ -67,7 +67,7 @@ class ConstraintsBuilderTest {
     @Test
     public void testCollectionConstraints() {
         ConfigTreeBuilder builder = ConfigTree.builder();
-        ConfigAggregateBuilder<List<Integer>, Integer> aggregateBuilder = builder.beginAggregateValue("foo", Collections.emptyList(), Integer.class);
+        ConfigAggregateBuilder<List<Integer>, Integer> aggregateBuilder = builder.beginListValue("foo", Integer.class);
         assertThrows(RuntimeFiberException.class, () -> aggregateBuilder.beginConstraints().component().regex(""), "Invalid constraint type at build time");
 
         ConfigLeaf<List<Integer>> config = aggregateBuilder
@@ -78,7 +78,7 @@ class ConstraintsBuilderTest {
                 .finishConstraints()
                 .build();
 
-        ConfigLeaf<List<Integer>> deferredConfig = builder.beginAggregateValue("deferred", Collections.<Integer>emptyList(), null)
+        ConfigLeaf<List<Integer>> deferredConfig = builder.beginAggregateValue("deferred", List.class, null, Collections.<Integer>emptyList())
                 .beginConstraints().component().regex("").finishComponent()
                 .finishConstraints().build();
         assertThrows(RuntimeException.class, () -> deferredConfig.setValue(Collections.singletonList(1)),
