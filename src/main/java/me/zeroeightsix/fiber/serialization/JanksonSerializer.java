@@ -4,7 +4,7 @@ import blue.endless.jankson.Jankson;
 import blue.endless.jankson.JsonElement;
 import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.api.SyntaxError;
-import me.zeroeightsix.fiber.Identifier;
+import me.zeroeightsix.fiber.FiberId;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.tree.*;
 
@@ -18,7 +18,7 @@ import java.util.Map;
 
 public class JanksonSerializer implements Serializer<JsonObject> {
 
-	private static final Identifier IDENTIFIER = new Identifier("fiber", "jankson");
+	private static final FiberId IDENTIFIER = new FiberId("fiber", "jankson");
 
 	private final boolean compress;
 	@Nonnull
@@ -118,7 +118,7 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 	}
 
 	@Override
-	public Identifier getIdentifier() {
+	public FiberId getIdentifier() {
 		return IDENTIFIER;
 	}
 

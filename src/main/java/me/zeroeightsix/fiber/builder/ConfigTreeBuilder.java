@@ -1,5 +1,6 @@
 package me.zeroeightsix.fiber.builder;
 
+import me.zeroeightsix.fiber.FiberId;
 import me.zeroeightsix.fiber.annotation.AnnotatedSettings;
 import me.zeroeightsix.fiber.annotation.Setting;
 import me.zeroeightsix.fiber.annotation.Settings;
@@ -42,10 +43,8 @@ import java.util.function.Consumer;
  * @see ConfigTree#builder()
  * @see PropertyMirror
  */
-public class ConfigTreeBuilder implements ConfigTree {
+public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
     private final NodeCollection items = new IndexedNodeCollection(null);
-    @Nullable
-    private ConfigTree parent;
     @Nullable
     private String name;
     @Nullable
@@ -61,7 +60,7 @@ public class ConfigTreeBuilder implements ConfigTree {
      * @see ConfigBranch#builder(ConfigTree, String)
      */
     public ConfigTreeBuilder(@Nullable ConfigTree parent, @Nullable String name) {
-        if (parent != null && name == null) throw new IllegalArgumentException("A child node needs a name");
+        super(parent, name);
         this.parent = parent;
         this.name = name;
     }
@@ -99,14 +98,48 @@ public class ConfigTreeBuilder implements ConfigTree {
         return this;
     }
 
+    /**
+     * Sets the {@code ConfigBranch}'s name.
+     *
+     * @param name the name
+     * @return {@code this} builder
+     * @see ConfigTree#lookup
+     */
+    @Override
     public ConfigTreeBuilder withName(String name) {
         if (name == null && parent != null) throw new IllegalStateException("Cannot remove the name from a child node");
         this.name = name;
         return this;
     }
 
+    /**
+     * Sets the {@code ConfigBranch}'s comment.
+     *
+     * <p> If {@code null}, or if this method is never called, the {@code ConfigLeaf} won't have a comment.
+     * An empty comment (non null, but only consisting of whitespace) will be serialised.
+     *
+     * @param comment the comment
+     * @return {@code this} builder
+     */
+    @Override
     public ConfigTreeBuilder withComment(@Nullable String comment) {
         this.comment = comment;
+        return this;
+    }
+
+    /**
+     * Adds a {@link me.zeroeightsix.fiber.tree.ConfigAttribute} to the built {@code ConfigBranch}.
+     *
+     * @param id           the id of the attribute
+     * @param type         the class object representing the type of values stored in the attribute
+     * @param defaultValue the attribute's default value
+     * @param <A>          the type of values stored in the attribute
+     * @return {@code this}, for chaining
+     * @see ConfigNode#getAttributes()
+     */
+    @Override
+    public <A> ConfigTreeBuilder withAttribute(FiberId id, Class<A> type, A defaultValue) {
+        super.withAttribute(id, type, defaultValue);
         return this;
     }
 
@@ -328,9 +361,11 @@ public class ConfigTreeBuilder implements ConfigTree {
      * @return a new {@code ConfigNode}
      * @throws RuntimeFiberException if building the node results in an invalid tree
      */
+    @Override
     public ConfigBranch build() throws RuntimeFiberException {
         try {
             ConfigBranch built = new ConfigBranchImpl(this.name, this.comment, this.items, this.serializeSeparately);
+            built.getAttributes().putAll(this.attributes);
             if (this.parent != null) {
                 assert name != null;
                 this.parent.getItems().add(built);

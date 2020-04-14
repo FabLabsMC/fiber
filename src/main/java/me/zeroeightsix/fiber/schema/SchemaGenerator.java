@@ -5,7 +5,7 @@ import blue.endless.jankson.JsonElement;
 import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.JsonPrimitive;
 import blue.endless.jankson.impl.MarshallerImpl;
-import me.zeroeightsix.fiber.Identifier;
+import me.zeroeightsix.fiber.FiberId;
 import me.zeroeightsix.fiber.builder.constraint.CompositeConstraintsBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.ValuedConstraint;
@@ -21,7 +21,7 @@ import java.util.Optional;
 
 public class SchemaGenerator {
 
-	private HashMap<Class<?>, Identifier> classIdentifierHashMap = new HashMap<>();
+	private HashMap<Class<?>, FiberId> classIdentifierHashMap = new HashMap<>();
 
 	@Nullable
 	private Marshaller<JsonElement> marshaller;
@@ -92,8 +92,8 @@ public class SchemaGenerator {
 		return array;
 	}
 
-	private Identifier identifier(String name) {
-		return new Identifier("fiber", name);
+	private FiberId identifier(String name) {
+		return new FiberId("fiber", name);
 	}
 
 }

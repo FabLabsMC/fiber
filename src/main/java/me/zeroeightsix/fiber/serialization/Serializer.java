@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.serialization;
 
-import me.zeroeightsix.fiber.Identifier;
+import me.zeroeightsix.fiber.FiberId;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.tree.ConfigTree;
 
@@ -18,7 +18,7 @@ import java.io.OutputStream;
  */
 public interface Serializer<T> {
 
-    Identifier getIdentifier();
+    FiberId getIdentifier();
 
     /**
      * Deserializes data from an {@code InputStream} into a config tree.

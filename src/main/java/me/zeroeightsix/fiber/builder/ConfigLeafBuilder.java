@@ -1,5 +1,6 @@
 package me.zeroeightsix.fiber.builder;
 
+import me.zeroeightsix.fiber.FiberId;
 import me.zeroeightsix.fiber.annotation.AnnotatedSettings;
 import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
@@ -7,12 +8,14 @@ import me.zeroeightsix.fiber.constraint.FinalConstraint;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.tree.ConfigLeaf;
 import me.zeroeightsix.fiber.tree.ConfigLeafImpl;
+import me.zeroeightsix.fiber.tree.ConfigNode;
 import me.zeroeightsix.fiber.tree.ConfigTree;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -25,16 +28,11 @@ import java.util.function.Consumer;
  * @param <T> the type of value the produced {@code ConfigLeaf} will hold
  * @see ConfigLeaf
  */
-public class ConfigLeafBuilder<T> {
+public class ConfigLeafBuilder<T> extends ConfigNodeBuilder {
 
-    private final ConfigTreeBuilder parentNode;
     @Nonnull
     protected final Class<T> type;
-    @Nonnull
-    private String name;
 
-    @Nullable
-    private String comment = null;
     @Nullable
     private T defaultValue = null;
 
@@ -50,8 +48,7 @@ public class ConfigLeafBuilder<T> {
      * @param type       the class object representing the type of values this builder will create settings for
      */
     public ConfigLeafBuilder(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull Class<T> type) {
-        this.parentNode = parentNode;
-        this.name = name;
+        super(parentNode, name);
         this.type = AnnotatedSettings.wrapPrimitive(type);
     }
 
@@ -63,27 +60,44 @@ public class ConfigLeafBuilder<T> {
     /**
      * Sets the {@code ConfigLeaf}'s name.
      *
-     * <p> If {@code null}, or if this method is never called, the {@code ConfigLeaf} won't have a name. Thus, it might be ignored during (de)serialisation. It also won't be able to be found by name in its parent node.
-     *
      * @param name the name
      * @return {@code this} builder
      * @see ConfigTree#lookup
      */
-    public ConfigLeafBuilder<T> withName(String name) {
-        this.name = name;
+    @Override
+    public ConfigLeafBuilder<T> withName(@Nonnull String name) {
+        super.withName(name);
         return this;
     }
 
     /**
      * Sets the {@code ConfigLeaf}'s comment.
      *
-     * <p> If {@code null}, or if this method is never called, the {@code ConfigLeaf} won't have a comment. An empty comment (non null, but only consisting of whitespace) will be serialised.
+     * <p> If {@code null}, or if this method is never called, the {@code ConfigLeaf} won't have a comment.
+     * An empty comment (non null, but only consisting of whitespace) will be serialised.
      *
      * @param comment the comment
      * @return {@code this} builder
      */
+    @Override
     public ConfigLeafBuilder<T> withComment(String comment) {
-        this.comment = comment;
+        super.withComment(comment);
+        return this;
+    }
+
+    /**
+     * Adds a {@link me.zeroeightsix.fiber.tree.ConfigAttribute} to the built {@code ConfigLeaf}.
+     *
+     * @param id           the id of the attribute
+     * @param type         the class object representing the type of values stored in the attribute
+     * @param defaultValue the attribute's default value
+     * @param <A>          the type of values stored in the attribute
+     * @return {@code this}, for chaining
+     * @see ConfigNode#getAttributes()
+     */
+    @Override
+    public <A> ConfigLeafBuilder<T> withAttribute(FiberId id, Class<A> type, A defaultValue) {
+        super.withAttribute(id, type, defaultValue);
         return this;
     }
 
@@ -171,6 +185,7 @@ public class ConfigLeafBuilder<T> {
      *
      * @return the {@code ConfigLeaf}
      */
+    @Override
     public ConfigLeaf<T> build() {
         if (defaultValue != null) {
             for (Constraint<? super T> constraint : constraintList) {
@@ -183,14 +198,15 @@ public class ConfigLeafBuilder<T> {
         if (isFinal) {
             constraints.add(0, FinalConstraint.instance());  // index 0 to avoid uselessly checking everything each time
         }
-        ConfigLeaf<T> built = new ConfigLeafImpl<>(name, comment, defaultValue, consumer, constraints, type);
+        ConfigLeaf<T> built = new ConfigLeafImpl<>(Objects.requireNonNull(name, "Cannot build a value without a name"), comment, defaultValue, consumer, constraints, type);
+        built.getAttributes().putAll(this.attributes);
 
-        if (parentNode != null) {
+        if (parent != null) {
             // We don't know what kind of evil collection we're about to add a node to.
             // Though, we don't really want to throw an exception on this method because no developer likes try-catching every setting they build.
             // Let's tread with caution.
             try {
-                parentNode.getItems().add(built);
+                parent.getItems().add(built);
             } catch (RuntimeFiberException e) {
                 throw new RuntimeFiberException("Failed to register leaf to node", e);
             }
@@ -204,7 +220,11 @@ public class ConfigLeafBuilder<T> {
     }
 
     public ConfigTreeBuilder finishValue(Consumer<ConfigLeaf<T>> action) {
-        action.accept(build());
-        return parentNode;
+        if (parent instanceof ConfigTreeBuilder) {
+            action.accept(build());
+            return (ConfigTreeBuilder) parent;
+        } else {
+            throw new IllegalStateException("finishValue should not be called for an independent builder. Use build instead.");
+        }
     }
 }
