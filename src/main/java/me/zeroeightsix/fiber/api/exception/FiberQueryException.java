@@ -2,7 +2,7 @@ package me.zeroeightsix.fiber.api.exception;
 
 import me.zeroeightsix.fiber.api.tree.ConfigBranch;
 import me.zeroeightsix.fiber.api.tree.ConfigNode;
-import me.zeroeightsix.fiber.impl.tree.ConfigQuery;
+import me.zeroeightsix.fiber.api.tree.ConfigQuery;
 import me.zeroeightsix.fiber.api.tree.ConfigTree;
 
 import javax.annotation.Nonnull;
