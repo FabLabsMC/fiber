@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.tree;
 
-import me.zeroeightsix.fiber.Identifier;
+import me.zeroeightsix.fiber.FiberId;
 import me.zeroeightsix.fiber.exception.DuplicateChildException;
 import me.zeroeightsix.fiber.exception.IllegalTreeStateException;
 
@@ -32,7 +32,7 @@ public interface ConfigNode {
      *
      * @return this node's configurable attributes
      */
-    Map<Identifier, ConfigAttribute<?>> getAttributes();
+    Map<FiberId, ConfigAttribute<?>> getAttributes();
 
     /**
      * Retrieves the value of the attribute with the given id.
@@ -44,7 +44,7 @@ public interface ConfigNode {
      * or an empty {@code Optional} if the attribute does not exist
      * @throws ClassCastException if the attribute exists but has a type that is not assignable to {@code expectedType}
      */
-    <A> Optional<A> getAttributeValue(Identifier id, Class<A> expectedType);
+    <A> Optional<A> getAttributeValue(FiberId id, Class<A> expectedType);
 
     /**
      * Retrieves the attribute with the given id. If it does not exist, one is created with the given type and default value.
@@ -56,7 +56,7 @@ public interface ConfigNode {
      * @return the current (existing or computed) attribute associated with the given id
      * @see #getAttributes()
      */
-    <A> ConfigAttribute<A> getOrCreateAttribute(Identifier id, Class<A> attributeType, @Nullable A defaultValue);
+    <A> ConfigAttribute<A> getOrCreateAttribute(FiberId id, Class<A> attributeType, @Nullable A defaultValue);
 
     /**
      * Returns this node's parent, if any.

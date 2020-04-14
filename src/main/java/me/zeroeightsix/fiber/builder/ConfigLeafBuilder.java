@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.builder;
 
-import me.zeroeightsix.fiber.Identifier;
+import me.zeroeightsix.fiber.FiberId;
 import me.zeroeightsix.fiber.annotation.AnnotatedSettings;
 import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
@@ -96,7 +96,7 @@ public class ConfigLeafBuilder<T> extends ConfigNodeBuilder {
      * @see ConfigNode#getAttributes()
      */
     @Override
-    public <A> ConfigLeafBuilder<T> withAttribute(Identifier id, Class<A> type, A defaultValue) {
+    public <A> ConfigLeafBuilder<T> withAttribute(FiberId id, Class<A> type, A defaultValue) {
         super.withAttribute(id, type, defaultValue);
         return this;
     }

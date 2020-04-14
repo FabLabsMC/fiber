@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.tree;
 
-import me.zeroeightsix.fiber.Identifier;
+import me.zeroeightsix.fiber.FiberId;
 import me.zeroeightsix.fiber.exception.IllegalTreeStateException;
 
 import javax.annotation.Nonnull;
@@ -19,7 +19,7 @@ import java.util.TreeMap;
  */
 public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
 
-    private final Map<Identifier, ConfigAttribute<?>> attributes;
+    private final Map<FiberId, ConfigAttribute<?>> attributes;
     @Nonnull
     private final String name;
     @Nullable
@@ -34,7 +34,7 @@ public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
      * @param comment the comment for this leaf
      */
     public ConfigNodeImpl(@Nonnull String name, @Nullable String comment) {
-        this.attributes = new TreeMap<>(Comparator.comparing(Identifier::toString));
+        this.attributes = new TreeMap<>(Comparator.comparing(FiberId::toString));
         this.name = name;
         this.comment = comment;
     }
@@ -58,20 +58,20 @@ public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
     }
 
     @Override
-    public Map<Identifier, ConfigAttribute<?>> getAttributes() {
+    public Map<FiberId, ConfigAttribute<?>> getAttributes() {
         return this.attributes;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <A> ConfigAttribute<A> getOrCreateAttribute(Identifier id, Class<A> attributeType, @Nullable A defaultValue) {
+    public <A> ConfigAttribute<A> getOrCreateAttribute(FiberId id, Class<A> attributeType, @Nullable A defaultValue) {
         ConfigAttribute<?> attr = getAttributes().computeIfAbsent(id, i -> new ConfigAttributeImpl<>(attributeType, defaultValue));
         checkAttributeType(attributeType, attr);
         return (ConfigAttribute<A>) attr;
     }
 
     @Override
-    public <A> Optional<A> getAttributeValue(Identifier id, Class<A> expectedType) {
+    public <A> Optional<A> getAttributeValue(FiberId id, Class<A> expectedType) {
         ConfigAttribute<?> attr = this.attributes.get(id);
         if (attr != null) {
             checkAttributeType(expectedType, attr);

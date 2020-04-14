@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.constraint;
 
-import me.zeroeightsix.fiber.Identifier;
+import me.zeroeightsix.fiber.FiberId;
 
 import java.util.Collection;
 
@@ -84,15 +84,15 @@ public enum ConstraintType {
 	COMPOSITE(false, identifier("composite"));
 
 	private final boolean numerical;
-	private final Identifier identifier;
+	private final FiberId identifier;
 
-	ConstraintType(boolean numerical, Identifier identifier) {
+	ConstraintType(boolean numerical, FiberId identifier) {
 		this.numerical = numerical;
 		this.identifier = identifier;
 	}
 
-	private static Identifier identifier(String name) {
-		return new Identifier("fiber", name);
+	private static FiberId identifier(String name) {
+		return new FiberId("fiber", name);
 	}
 
 	/**
@@ -109,7 +109,7 @@ public enum ConstraintType {
 	 *
 	 * @return the identifier
 	 */
-	public Identifier getIdentifier() {
+	public FiberId getIdentifier() {
 		return identifier;
 	}
 

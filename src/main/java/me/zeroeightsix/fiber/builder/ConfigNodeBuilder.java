@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.builder;
 
-import me.zeroeightsix.fiber.Identifier;
+import me.zeroeightsix.fiber.FiberId;
 import me.zeroeightsix.fiber.tree.ConfigAttribute;
 import me.zeroeightsix.fiber.tree.ConfigAttributeImpl;
 import me.zeroeightsix.fiber.tree.ConfigNode;
@@ -17,7 +17,7 @@ public abstract class ConfigNodeBuilder {
     protected String name;
     @Nullable
     protected String comment = null;
-    protected Map<Identifier, ConfigAttribute<?>> attributes;
+    protected Map<FiberId, ConfigAttribute<?>> attributes;
 
     public ConfigNodeBuilder(@Nullable ConfigTree parent, @Nullable String name) {
         if (parent != null && name == null) throw new IllegalArgumentException("A child node needs a name");
@@ -52,7 +52,7 @@ public abstract class ConfigNodeBuilder {
         return this;
     }
 
-    public <A> ConfigNodeBuilder withAttribute(Identifier attribute, Class<A> type, A defaultValue) {
+    public <A> ConfigNodeBuilder withAttribute(FiberId attribute, Class<A> type, A defaultValue) {
         this.attributes.put(attribute, new ConfigAttributeImpl<>(type, defaultValue));
         return this;
     }
