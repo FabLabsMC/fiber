@@ -1,6 +1,8 @@
 package me.zeroeightsix.fiber.impl.tree;
 
+import me.zeroeightsix.fiber.api.FiberId;
 import me.zeroeightsix.fiber.api.tree.Commentable;
+import me.zeroeightsix.fiber.api.tree.ConfigAttribute;
 import me.zeroeightsix.fiber.api.tree.ConfigBranch;
 import me.zeroeightsix.fiber.api.tree.ConfigNode;
 
@@ -8,6 +10,10 @@ import me.zeroeightsix.fiber.api.exception.IllegalTreeStateException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TreeMap;
 
 /**
  * A commentable node.
@@ -18,6 +24,7 @@ import javax.annotation.Nullable;
  */
 public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
 
+    private final Map<FiberId, ConfigAttribute<?>> attributes;
     @Nonnull
     private final String name;
     @Nullable
@@ -32,6 +39,7 @@ public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
      * @param comment the comment for this leaf
      */
     public ConfigNodeImpl(@Nonnull String name, @Nullable String comment) {
+        this.attributes = new TreeMap<>(Comparator.comparing(FiberId::toString));
         this.name = name;
         this.comment = comment;
     }
@@ -52,6 +60,35 @@ public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
     @Override
     public ConfigBranch getParent() {
         return this.parent;
+    }
+
+    @Override
+    public Map<FiberId, ConfigAttribute<?>> getAttributes() {
+        return this.attributes;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <A> ConfigAttribute<A> getOrCreateAttribute(FiberId id, Class<A> attributeType, @Nullable A defaultValue) {
+        ConfigAttribute<?> attr = getAttributes().computeIfAbsent(id, i -> new ConfigAttributeImpl<>(attributeType, defaultValue));
+        checkAttributeType(attributeType, attr);
+        return (ConfigAttribute<A>) attr;
+    }
+
+    @Override
+    public <A> Optional<A> getAttributeValue(FiberId id, Class<A> expectedType) {
+        ConfigAttribute<?> attr = this.attributes.get(id);
+        if (attr != null) {
+            checkAttributeType(expectedType, attr);
+            return Optional.ofNullable(expectedType.cast(attr.getValue()));
+        }
+        return Optional.empty();
+    }
+
+    private static <A> void checkAttributeType(Class<A> expectedType, ConfigAttribute<?> attr) {
+        if (!expectedType.isAssignableFrom(attr.getType())) {
+            throw new ClassCastException("Attempt to retrieve a value of type " + expectedType + " from attribute with type " + attr.getType());
+        }
     }
 
     @Override
