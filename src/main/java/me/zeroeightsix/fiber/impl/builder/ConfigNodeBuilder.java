@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber.api.builder;
+package me.zeroeightsix.fiber.impl.builder;
 
 import me.zeroeightsix.fiber.api.FiberId;
 import me.zeroeightsix.fiber.api.tree.ConfigAttribute;
