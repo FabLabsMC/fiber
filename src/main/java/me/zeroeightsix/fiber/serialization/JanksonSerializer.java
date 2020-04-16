@@ -122,6 +122,24 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 		return IDENTIFIER;
 	}
 
+	public static Marshaller<JsonElement> extendDefaultMarshaller(Marshaller<JsonElement> marshaller) {
+		return new Marshaller<JsonElement>() {
+			@Override
+			public JsonElement marshall(Object value) {
+				JsonElement object = marshaller.marshall(value);
+				if (object == null) return JanksonFallbackMarshaller.INSTANCE.marshall(value);
+				return object;
+			}
+
+			@Override
+			public <A> A marshallReverse(Class<A> type, JsonElement value) {
+				A object = marshaller.marshallReverse(type, value);
+				if (object == null) return JanksonFallbackMarshaller.INSTANCE.marshallReverse(type, value);
+				return object;
+			}
+		};
+	}
+
 	private static class JanksonFallbackMarshaller implements Marshaller<JsonElement> {
 		private static final JanksonFallbackMarshaller INSTANCE = new JanksonFallbackMarshaller();
 
