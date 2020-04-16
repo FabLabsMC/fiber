@@ -2,6 +2,7 @@ package me.zeroeightsix.fiber.annotation;
 
 import me.zeroeightsix.fiber.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
+import me.zeroeightsix.fiber.tree.ConfigTree;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
@@ -25,7 +26,7 @@ public interface SettingAnnotationProcessor<A extends Annotation, C> {
      * @param field a field declared in {@code pojo}'s class
      * @param pojo the <em>plain old java object</em> being processed
      * @param setting the builder being configured
-     * @see AnnotatedSettings#applyToNode(ConfigTreeBuilder, Object)
+     * @see AnnotatedSettings#applyToNode(ConfigTree, Object)
      */
     void apply(A annotation, Field field, Object pojo, C setting);
 
