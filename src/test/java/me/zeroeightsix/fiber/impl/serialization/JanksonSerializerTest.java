@@ -1,9 +1,14 @@
 package me.zeroeightsix.fiber.impl.serialization;
 
+import blue.endless.jankson.JsonElement;
+import blue.endless.jankson.JsonObject;
+import blue.endless.jankson.JsonPrimitive;
 import me.zeroeightsix.fiber.api.NodeOperationsTest;
 import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.api.constraint.CompositeType;
 import me.zeroeightsix.fiber.api.exception.FiberException;
+import me.zeroeightsix.fiber.api.serialization.Marshaller;
+import me.zeroeightsix.fiber.api.tree.ConfigBranch;
 import me.zeroeightsix.fiber.api.tree.ConfigTree;
 import me.zeroeightsix.fiber.api.tree.PropertyMirror;
 import org.junit.jupiter.api.DisplayName;
@@ -12,9 +17,9 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-
 
 class JanksonSerializerTest {
 
@@ -141,6 +146,77 @@ class JanksonSerializerTest {
         jk.deserialize(parentTwo, new ByteArrayInputStream(bos.toByteArray()));
         // the child data should not have been saved -> default value
         NodeOperationsTest.testNodeFor(childTwo, "A", Integer.class, 20);
+    }
+
+    @Test
+    @DisplayName("Extended marshaller")
+    void testExtendedMarshaller() throws IOException, FiberException {
+        JanksonSerializer jk = new JanksonSerializer(
+                JanksonSerializer.extendDefaultMarshaller(new Marshaller<JsonElement>() {
+                    @Override
+                    public JsonElement marshall(Object value) {
+                        if (value instanceof SomeObject) {
+                            JsonObject object = new JsonObject();
+                            object.put("some_a", new JsonPrimitive(((SomeObject) value).a));
+                            object.put("some_b", new JsonPrimitive(((SomeObject) value).b));
+                            return object;
+                        }
+                        return null;
+                    }
+
+                    @Override
+                    public <A> A marshallReverse(Class<A> type, JsonElement value) {
+                        if (type.equals(SomeObject.class)) {
+                            JsonObject object = (JsonObject) value;
+                            return (A) new SomeObject(
+                                    object.getInt("some_a", 0),
+                                    object.get(String.class, "some_b")
+                            );
+                        }
+                        return null;
+                    }
+                }), false
+        );
+
+        SomeObject so = new SomeObject(0, "foo");
+
+        ConfigBranch branch = ConfigTree.builder()
+                .withValue("some", SomeObject.class, so)
+                .build();
+
+        ConfigBranch branch2 = ConfigTree.builder()
+                .withValue("some", SomeObject.class, null)
+                .build();
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        jk.serialize(branch, bos);
+        jk.deserialize(branch2, new ByteArrayInputStream(bos.toByteArray()));
+
+        NodeOperationsTest.testNodeFor(branch2, "some", SomeObject.class, so);
+    }
+
+    private class SomeObject {
+        private final int a;
+        private final String b;
+
+        public SomeObject(int a, String b) {
+            this.a = a;
+            this.b = b;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            SomeObject that = (SomeObject) o;
+            return a == that.a &&
+                    Objects.equals(b, that.b);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(a, b);
+        }
     }
 
 }
