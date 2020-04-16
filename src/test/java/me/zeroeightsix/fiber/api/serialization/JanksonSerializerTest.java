@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber.impl.serialization;
+package me.zeroeightsix.fiber.api.serialization;
 
 import blue.endless.jankson.JsonElement;
 import blue.endless.jankson.JsonObject;
@@ -7,7 +7,6 @@ import me.zeroeightsix.fiber.api.NodeOperationsTest;
 import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.api.constraint.CompositeType;
 import me.zeroeightsix.fiber.api.exception.FiberException;
-import me.zeroeightsix.fiber.api.serialization.Marshaller;
 import me.zeroeightsix.fiber.api.tree.ConfigBranch;
 import me.zeroeightsix.fiber.api.tree.ConfigTree;
 import me.zeroeightsix.fiber.api.tree.PropertyMirror;
