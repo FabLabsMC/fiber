@@ -1,7 +1,6 @@
 package me.zeroeightsix.fiber.builder;
 
 import me.zeroeightsix.fiber.FiberId;
-import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.schema.ConfigType;
@@ -19,10 +18,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 /**
- * A builder for scalar {@code ConfigLeaf}s.
- *
- * <p> The settings created by this builder are considered atomic, and do not allow specifications at the component level.
- * Settings with aggregate types, such as arrays and collections, should be created using {@link ConfigAggregateBuilder}.
+ * A builder for {@code ConfigLeaf}s.
  *
  * @param <T> the type of value the produced {@code ConfigLeaf} will hold
  * @see ConfigLeaf
@@ -131,16 +127,6 @@ public class ConfigLeafBuilder<T, T0> extends ConfigNodeBuilder {
     public ConfigLeafBuilder<T, T0> withDefaultValue(T defaultValue) {
         this.defaultValue = defaultValue;
         return this;
-    }
-
-    /**
-     * Creates a constraint builder for this {@code ConfigLeafBuilder}.
-     *
-     * @return the created builder
-     * @see ConstraintsBuilder
-     */
-    public ConstraintsBuilder<T, T0> beginConstraints() {
-        return new ConstraintsBuilder<>(this, this.constraints, this.type);
     }
 
     /**

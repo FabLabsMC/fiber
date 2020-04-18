@@ -1,6 +1,5 @@
 package me.zeroeightsix.fiber.builder.constraint;
 
-import me.zeroeightsix.fiber.builder.ConfigAggregateBuilder;
 import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.constraint.CompositeType;
 import me.zeroeightsix.fiber.constraint.Constraint;

@@ -9,14 +9,12 @@ import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.exception.IllegalTreeStateException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.schema.ConfigType;
+import me.zeroeightsix.fiber.schema.ConfigTypes;
 import me.zeroeightsix.fiber.tree.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -25,20 +23,10 @@ import java.util.function.Consumer;
  * <p> Usage example:
  * <pre>{@code
  * ConfigNode config = new ConfigTreeBuilder()
- *         .beginValue("version", "1.0.0")
- *             .withFinality()
- *             .beginConstraints() // checks the default value
- *                 .regex("\\d+\\.\\d+\\.\\d+")
- *             .finishConstraints()
- *         .finishValue()
+ *         .withValue("A", ConfigTypes.INTEGER, 10)
  *         .fork("child")
- *             .beginValue("A", 10)
- *                 .beginConstraints()
- *                     .composite(CompositeType.OR)
- *                         .atLeast(3)
- *                         .atMost(0)
- *                     .finishComposite()
- *                 .finishConstraints()
+ *             .beginValue("drops", ConfigTypes.STRING_SET, new HashSet<>(Arrays.asList("diamond", "cactus"))
+ *             .withComment("List of things to drop")
  *             .finishValue()
  *         .finishNode()
  *         .build();
@@ -231,11 +219,9 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
      * @param type the class of the type of value the {@link ConfigLeaf} produced by the builder holds
      * @param <T>  the type {@code type} represents
      * @return the newly created builder
-     * @see ConfigLeafBuilder ConfigLeafBuilder
-     * @see #withValue(String, Class, Object)
-     * @see #beginAggregateValue(String, Class, Class, Collection)
-     * @see #beginListValue(String, Class, Object[])
-     * @see #beginSetValue(String, Class, Object[])
+     * @see #withValue(String, ConfigType, Object)
+     * @see ConfigLeafBuilder
+     * @see ConfigTypes
      */
     public <T, T0> ConfigLeafBuilder<T, T0> beginValue(@Nonnull String name, @Nonnull ConfigType<T, T0> type, @Nullable T defaultValue) {
         return new ConfigLeafBuilder<>(this, name, type).withDefaultValue(defaultValue);
@@ -252,45 +238,12 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
      * @param defaultValue the default value of the {@link ConfigLeaf} to create.
      * @param <T>          the type of value the {@link ConfigLeaf} holds.
      * @return {@code this}, for chaining
-     * @see #beginValue(String, Class, Object)
-     * @see #beginAggregateValue(String, Class, Class, Collection)
-     * @see #beginListValue(String, Class, Object[])
-     * @see #beginSetValue(String, Class, Object[])
+     * @see #beginValue(String, ConfigType, Object)
+     * @see ConfigTypes
      */
     public <T, T0> ConfigTreeBuilder withValue(@Nonnull String name, @Nonnull ConfigType<T, T0> type, @Nullable T defaultValue) {
         this.items.add(new ConfigLeafImpl<>(name, null, defaultValue, (a, b) -> { }, Collections.emptySet(), type));
         return this;
-    }
-
-    /**
-     * Creates a {@code ConfigAggregateBuilder} for a {@link List} settings with the given default elements.
-     *
-     * <p> This method should not be called by intermediary generic methods
-     * (eg. {@code <T> void f(ConfigTreeBuilder b, T t) {b.beginListValue("", t);}}),
-     * as it will prevent type checking while building the tree.
-     * Use {@link #beginAggregateValue(String, Class, Class, Collection)} in those cases instead.
-     *
-     * @param defaultValues the default values of the
-     * @param <E>            the type of elements contained by the set
-     * @return the newly created builder
-     */
-    @SuppressWarnings("unchecked")
-    public <E, E0> ConfigAggregateBuilder<List<E>, E, E0> beginListValue(@Nonnull String name, ConfigType<E, E0> elementType, E... defaultValues) {
-        return this.beginAggregateValue(name, List.class, elementType, Collections.unmodifiableList(Arrays.asList(defaultValues)));
-    }
-
-    /**
-     * Creates an aggregate {@code ConfigLeafBuilder}.
-     *
-     * @param collectionType the class object representing the type of collection to create a setting for
-     * @param elementType    the class object representing the type of elements {@code defaultValue} holds
-     * @param defaultValue   the default collection of values the {@link ConfigLeaf} will hold.
-     * @param <C>            the type of collection {@code defaultValue} is
-     * @param <E>            the type {@code elementType} represents
-     * @return the newly created builder
-     */
-    public <C, E, E0> ConfigAggregateBuilder<C, E, E0> beginAggregateValue(@Nonnull String name, @Nonnull ConfigType<C, List<E0>> collectionType, @Nonnull C defaultValue) {
-        return ConfigAggregateBuilder.<C, E, E0>create(this, name, collectionType).withDefaultValue(defaultValue);
     }
 
     /**

@@ -5,7 +5,6 @@ import me.zeroeightsix.fiber.annotation.convention.NoNamingConvention;
 import me.zeroeightsix.fiber.annotation.convention.SettingNamingConvention;
 import me.zeroeightsix.fiber.annotation.exception.MalformedFieldException;
 import me.zeroeightsix.fiber.annotation.magic.TypeMagic;
-import me.zeroeightsix.fiber.builder.ConfigAggregateBuilder;
 import me.zeroeightsix.fiber.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.builder.constraint.AbstractConstraintsBuilder;
@@ -56,6 +55,20 @@ public class AnnotatedSettings {
                 (annotation, annotated, pojo, constraints) -> constraints.maxLength(annotation.value()));
         registerConstraintProcessor(Setting.Constrain.Regex.class, CharSequence.class,
                 (annotation, annotated, pojo, constraints) -> constraints.regex(annotation.value()));
+    }
+
+    /**
+     * Determines if a {@code Class} object represents an aggregate type,
+     * ie. if it is an {@linkplain Class#isArray() Array} or a {@linkplain Collection}.
+     *
+     * @param type the type to check
+     * @return {@code true} if {@code type} is an aggregate type;
+     * {@code false} otherwise
+     */
+    public static boolean isAggregate(Class<?> type) {
+        // TODO replace with ConvertibleType.isAggregate
+        // TODO for annotation handling, add generic type processing (ParameterizedType -> ConvertibleType)
+        return type.isArray() || Collection.class.isAssignableFrom(type);
     }
 
     /**
@@ -231,7 +244,7 @@ public class AnnotatedSettings {
     @Nonnull
     private <T, E> ConfigLeafBuilder<T, ?> createConfigLeafBuilder(ConfigTreeBuilder parent, String name, Class<T> type, Field field, Object pojo) {
         AnnotatedType annotatedType = field.getAnnotatedType();
-        if (ConfigAggregateBuilder.isAggregate(type)) {
+        if (isAggregate(type)) {
             if (Collection.class.isAssignableFrom(type)) {
                 if (annotatedType instanceof AnnotatedParameterizedType) {
                     AnnotatedType[] typeArgs = ((AnnotatedParameterizedType) annotatedType).getAnnotatedActualTypeArguments();

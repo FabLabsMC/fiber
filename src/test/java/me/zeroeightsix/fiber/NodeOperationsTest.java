@@ -42,10 +42,10 @@ class NodeOperationsTest {
     @Test
     @DisplayName("Value -> Value")
     void copyValue() {
-        ConfigLeaf<Integer, ?> valueOne = new ConfigLeafBuilder<>(null, "A", ConfigTypes.INT)
+        ConfigLeaf<Integer, ?> valueOne = new ConfigLeafBuilder<>(null, "A", ConfigTypes.INTEGER)
                 .withDefaultValue(10)
                 .build();
-        ConfigLeaf<Integer, ?> valueTwo = new ConfigLeafBuilder<>(null, "A", ConfigTypes.INT)
+        ConfigLeaf<Integer, ?> valueTwo = new ConfigLeafBuilder<>(null, "A", ConfigTypes.INTEGER)
                 .withDefaultValue(20)
                 .build();
 

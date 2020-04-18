@@ -19,7 +19,7 @@ public final class ConfigTypes {
             makeNumber(Byte.class, BigDecimal::new, BigDecimal::byteValue, Byte.MIN_VALUE, Byte.MAX_VALUE, (byte) 1);
     public static final DecimalConfigType<Short> SHORT =
             makeNumber(Short.class, BigDecimal::new, BigDecimal::shortValue, Short.MIN_VALUE, Short.MAX_VALUE, (short) 1);
-    public static final DecimalConfigType<Integer> INT =
+    public static final DecimalConfigType<Integer> INTEGER =
             makeNumber(Integer.class, BigDecimal::new, BigDecimal::intValue, Integer.MIN_VALUE, Integer.MAX_VALUE, 1);
     public static final DecimalConfigType<Long> LONG =
             makeNumber(Long.class, BigDecimal::new, BigDecimal::longValue, Long.MIN_VALUE, Long.MAX_VALUE, 1L);
