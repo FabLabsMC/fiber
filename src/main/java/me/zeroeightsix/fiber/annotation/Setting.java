@@ -21,7 +21,7 @@ public @interface Setting {
      * <p> Constant settings can not have their value changed after being initialised.
      * @return whether or not this setting is constant
      */
-    boolean constant() default false;
+    @Deprecated boolean constant() default false;
 
     /**
      * Sets the name that will be used for this setting.
@@ -96,6 +96,8 @@ public @interface Setting {
              * @return the maximum value
              */
             double max() default Double.POSITIVE_INFINITY;
+
+            double step() default Double.MIN_VALUE;
         }
 
         /**
@@ -120,6 +122,8 @@ public @interface Setting {
              * @return the maximum value
              */
             String max() default "";
+
+            String step() default "";
         }
 
         /**

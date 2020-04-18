@@ -40,6 +40,9 @@ public final class ConfigTypes {
     public static final StringConfigType<String> STRING =
             StringConfigType.STRING;
 
+    public static final StringConfigType<Character> CHARACTER =
+            STRING.withMinLength(1).withMaxLength(1).derive(Character.class, Object::toString, s -> s.charAt(0));
+
     public static <E extends Enum<E>> ConfigType<E, String> makeEnum(Class<E> enumType) {
         Set<String> validValues = Arrays.stream(enumType.getEnumConstants()).map(Enum::name).collect(Collectors.toSet());
         return STRING.withValidValues(validValues).derive(enumType, Enum::name, v0 -> Enum.valueOf(enumType, v0));
@@ -47,22 +50,29 @@ public final class ConfigTypes {
 
     /* List-derived types */
 
+    // most common collection types in configs
     public static final ListConfigType<List<String>> STRING_LIST =
-            makeList(STRING);
+            ListConfigType.of(STRING);
     public static final ListConfigType<Set<String>> STRING_SET =
-            makeSet(STRING);
+            STRING_LIST.withUniqueElements().derive(Set.class, ArrayList::new, l -> Collections.unmodifiableSet(new HashSet<>(l)));
     public static final ListConfigType<String[]> STRING_ARRAY =
-            makeArray(STRING);
+            STRING_LIST.derive(String[].class, Arrays::asList, l -> l.toArray(new String[0]));
 
+    @SuppressWarnings("unchecked")
     public static <E0, E, U extends ConfigType<E, E0>> ListConfigType<List<E>> makeList(U elementType) {
+        if (elementType == STRING) return (ListConfigType<List<E>>) (ListConfigType<?>) STRING_LIST;
         return ListConfigType.of(elementType);
     }
 
+    @SuppressWarnings("unchecked")
     public static <E0, E, U extends ConfigType<E, E0>> ListConfigType<Set<E>> makeSet(U elementType) {
+        if (elementType == STRING) return (ListConfigType<Set<E>>) (ListConfigType<?>) STRING_SET;
         return ListConfigType.of(elementType).withUniqueElements().derive(Set.class, ArrayList::new, l -> Collections.unmodifiableSet(new LinkedHashSet<>(l)));
     }
 
+    @SuppressWarnings("unchecked")
     public static <E0, E, U extends ConfigType<E, E0>> ListConfigType<E[]> makeArray(U elementType) {
+        if (elementType == STRING) return (ListConfigType<E[]>) (ListConfigType<?>) STRING_ARRAY;
         @SuppressWarnings("unchecked") E[] z = (E[]) Array.newInstance(elementType.getActualType(), 0);
         @SuppressWarnings("unchecked") Class<E[]> arrType = (Class<E[]>) z.getClass();
         return ListConfigType.of(elementType).derive(arrType, Arrays::asList, l -> l.toArray(z));

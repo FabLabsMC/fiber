@@ -67,7 +67,7 @@ public final class ListConfigType<T> extends ConfigType<T, List<?>> {
 
     @Override
     public String toString() {
-        return this.getActualType().getName() + "<" + this.getElementType().getActualType().getSimpleName() + ">(" + this.getKind() + ")";
+        return this.getActualType().getTypeName() + "<" + this.getElementType().getActualType().getSimpleName() + ">(" + this.getKind() + ")";
     }
 
     @Override
