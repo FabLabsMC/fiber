@@ -3,7 +3,7 @@ package me.zeroeightsix.fiber.builder.constraint;
 import me.zeroeightsix.fiber.builder.ConfigAggregateBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.schema.ConvertibleType;
+import me.zeroeightsix.fiber.schema.ConfigType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -29,7 +29,7 @@ public class AggregateConstraintsBuilder<A, E, E0> extends ConstraintsBuilder<A,
      * @param source        the {@code ConfigLeafBuilder} this {@code ConstraintsBuilder} originates from
      * @param constraints   the list of constraints this builder will add to
      */
-    public AggregateConstraintsBuilder(ConfigAggregateBuilder<A, E, E0> source, Set<Constraint<? super List<E0>>> constraints, @Nonnull ConvertibleType<A, List<E0>> type) {
+    public AggregateConstraintsBuilder(ConfigAggregateBuilder<A, E, E0> source, Set<Constraint<? super List<E0>>> constraints, @Nonnull ConfigType<A, List<E0>> type) {
         super(source, constraints, type);
     }
 
@@ -77,7 +77,7 @@ public class AggregateConstraintsBuilder<A, E, E0> extends ConstraintsBuilder<A,
      * @return the newly created builder
      */
     public ComponentConstraintsBuilder<AggregateConstraintsBuilder<A, E, E0>, A, E, E0> component() {
-        @SuppressWarnings("unchecked") ConvertibleType<E, E0> elementType = (ConvertibleType<E, E0>) this.type.getElementType();
+        @SuppressWarnings("unchecked") ConfigType<E, E0> elementType = (ConfigType<E, E0>) this.type.getElementType();
         return new ComponentConstraintsBuilder<>(this, sourceConstraints, elementType);
     }
 

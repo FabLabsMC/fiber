@@ -1,10 +1,5 @@
 package me.zeroeightsix.fiber.constraint;
 
-import me.zeroeightsix.fiber.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.schema.ConvertibleType;
-
-import javax.annotation.Nonnull;
-import java.util.List;
 import java.util.function.ToIntFunction;
 
 /**
@@ -14,26 +9,13 @@ import java.util.function.ToIntFunction;
  * @see ConstraintType#MINIMUM_LENGTH
  * @see ConstraintType#MAXIMUM_LENGTH
  */
-public class LengthConstraint<T> extends ValuedConstraint<Integer, T> {
-    public static <T> LengthConstraint<T> min(ConvertibleType<?, T> type, int min) {
-        return new LengthConstraint<>(ConstraintType.MINIMUM_LENGTH, getLengthFunction(type), min);
+public final class LengthConstraint<T> extends ValuedConstraint<Integer, T> {
+    public static <T> LengthConstraint<T> min(ToIntFunction<T> lengthGetter, int min) {
+        return new LengthConstraint<>(ConstraintType.MINIMUM_LENGTH, lengthGetter, min);
     }
 
-    public static <T> LengthConstraint<T> max(ConvertibleType<?, T> type, int min) {
-        return new LengthConstraint<>(ConstraintType.MAXIMUM_LENGTH, getLengthFunction(type), min);
-    }
-
-    @Nonnull
-    private static <T> ToIntFunction<T> getLengthFunction(ConvertibleType<?, T> type) {
-        ToIntFunction<T> length;
-        if (type.isList()) {
-            length = t -> ((List<?>) t).size();
-        } else if (type.isString()) {
-            length = t -> ((CharSequence) t).length();
-        } else {
-            throw new RuntimeFiberException("Instances of " + type + " do not have a known length or size");
-        }
-        return length;
+    public static <T> LengthConstraint<T> max(ToIntFunction<T> lengthGetter, int min) {
+        return new LengthConstraint<>(ConstraintType.MAXIMUM_LENGTH, lengthGetter, min);
     }
 
     private final ToIntFunction<T> lengthGetter;

@@ -4,7 +4,7 @@ import me.zeroeightsix.fiber.FiberId;
 import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.schema.ConvertibleType;
+import me.zeroeightsix.fiber.schema.ConfigType;
 import me.zeroeightsix.fiber.tree.ConfigLeaf;
 import me.zeroeightsix.fiber.tree.ConfigLeafImpl;
 import me.zeroeightsix.fiber.tree.ConfigNode;
@@ -30,7 +30,7 @@ import java.util.function.Consumer;
 public class ConfigLeafBuilder<T, T0> extends ConfigNodeBuilder {
 
     @Nonnull
-    protected final ConvertibleType<T, T0> type;
+    protected final ConfigType<T, T0> type;
 
     @Nullable
     private T defaultValue = null;
@@ -44,13 +44,13 @@ public class ConfigLeafBuilder<T, T0> extends ConfigNodeBuilder {
      * @param name the name of the {@code ConfigLeaf} produced by this builder
      * @param type       the class object representing the type of values this builder will create settings for
      */
-    public ConfigLeafBuilder(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull ConvertibleType<T, T0> type) {
+    public ConfigLeafBuilder(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull ConfigType<T, T0> type) {
         super(parentNode, name);
         this.type = type;
     }
 
     @Nonnull
-    public ConvertibleType<T, T0> getType() {
+    public ConfigType<T, T0> getType() {
         return type;
     }
 
@@ -93,7 +93,7 @@ public class ConfigLeafBuilder<T, T0> extends ConfigNodeBuilder {
      * @see ConfigNode#getAttributes()
      */
     @Override
-    public <A> ConfigLeafBuilder<T, T0> withAttribute(FiberId id, ConvertibleType<A, A> type, A defaultValue) {
+    public <A> ConfigLeafBuilder<T, T0> withAttribute(FiberId id, ConfigType<A, A> type, A defaultValue) {
         super.withAttribute(id, type, defaultValue);
         return this;
     }

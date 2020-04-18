@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.tree;
 
-import me.zeroeightsix.fiber.schema.ConvertibleType;
+import me.zeroeightsix.fiber.schema.ConfigType;
 
 /**
  * Indicates that this class holds some nullable value.
@@ -24,6 +24,6 @@ public interface ConvertibleValue<T, T0> {
         return this.getConvertibleType().getActualType();
     }
 
-    ConvertibleType<T, T0> getConvertibleType();
+    ConfigType<T, T0> getConvertibleType();
 
 }

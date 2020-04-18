@@ -2,7 +2,7 @@ package me.zeroeightsix.fiber.tree;
 
 import me.zeroeightsix.fiber.FiberId;
 import me.zeroeightsix.fiber.exception.IllegalTreeStateException;
-import me.zeroeightsix.fiber.schema.ConvertibleType;
+import me.zeroeightsix.fiber.schema.ConfigType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -65,14 +65,14 @@ public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <A> ConfigAttribute<A> getOrCreateAttribute(FiberId id, ConvertibleType<A, A> attributeType, @Nullable A defaultValue) {
+    public <A> ConfigAttribute<A> getOrCreateAttribute(FiberId id, ConfigType<A, A> attributeType, @Nullable A defaultValue) {
         ConfigAttribute<?> attr = getAttributes().computeIfAbsent(id, i -> new ConfigAttributeImpl<>(attributeType, defaultValue));
         checkAttributeType(attributeType, attr);
         return (ConfigAttribute<A>) attr;
     }
 
     @Override
-    public <A> Optional<A> getAttributeValue(FiberId id, ConvertibleType<A, A> expectedType) {
+    public <A> Optional<A> getAttributeValue(FiberId id, ConfigType<A, A> expectedType) {
         ConfigAttribute<?> attr = this.attributes.get(id);
         if (attr != null) {
             checkAttributeType(expectedType, attr);
@@ -81,7 +81,7 @@ public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
         return Optional.empty();
     }
 
-    private static <A> void checkAttributeType(ConvertibleType<A, A> expectedType, ConfigAttribute<?> attr) {
+    private static <A> void checkAttributeType(ConfigType<A, A> expectedType, ConfigAttribute<?> attr) {
         if (!expectedType.equals(attr.getConvertibleType())) {
             throw new ClassCastException("Attempt to retrieve a value of type " + expectedType + " from attribute with type " + attr.getType());
         }

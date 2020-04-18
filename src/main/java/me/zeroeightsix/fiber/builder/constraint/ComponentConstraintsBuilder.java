@@ -3,7 +3,7 @@ package me.zeroeightsix.fiber.builder.constraint;
 import me.zeroeightsix.fiber.constraint.ComponentConstraint;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.schema.ConvertibleType;
+import me.zeroeightsix.fiber.schema.ConfigType;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -19,7 +19,7 @@ import java.util.Set;
  * @param <T> the type of elements processed by this builder's constraints
  */
 public final class ComponentConstraintsBuilder<S, A, T, T0> extends AbstractConstraintsBuilder<S, A, List<T0>, T, T0> {
-    public ComponentConstraintsBuilder(S source, Set<Constraint<? super List<T0>>> sourceConstraints, ConvertibleType<T, T0> type) {
+    public ComponentConstraintsBuilder(S source, Set<Constraint<? super List<T0>>> sourceConstraints, ConfigType<T, T0> type) {
         super(source, sourceConstraints, type);
     }
 

@@ -2,7 +2,7 @@ package me.zeroeightsix.fiber.tree;
 
 import me.zeroeightsix.fiber.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
-import me.zeroeightsix.fiber.schema.ConvertibleType;
+import me.zeroeightsix.fiber.schema.ConfigType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -54,7 +54,7 @@ public interface ConfigLeaf<T, T0> extends ConfigNode, Property<T, T0>, Commenta
     @Override
     Class<T> getType();
 
-    ConvertibleType<T, T0> getConvertibleType();
+    ConfigType<T, T0> getConvertibleType();
 
     /**
      * {@inheritDoc}

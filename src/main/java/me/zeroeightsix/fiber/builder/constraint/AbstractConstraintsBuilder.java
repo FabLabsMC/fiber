@@ -4,7 +4,7 @@ import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.LengthConstraint;
 import me.zeroeightsix.fiber.constraint.RegexConstraint;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.schema.ConvertibleType;
+import me.zeroeightsix.fiber.schema.ConfigType;
 
 import javax.annotation.Nullable;
 import javax.annotation.RegEx;
@@ -25,11 +25,11 @@ public abstract class AbstractConstraintsBuilder<S, A, A0, T, T0> {
     protected T numberMax;
     protected T numberStep;
     protected final Set<Constraint<? super A0>> sourceConstraints;
-    protected final ConvertibleType<T, T0> type;
+    protected final ConfigType<T, T0> type;
 
     final Set<Constraint<? super T0>> newConstraints = new LinkedHashSet<>();
 
-    AbstractConstraintsBuilder(S source, Set<Constraint<? super A0>> sourceConstraints, ConvertibleType<T, T0> type) {
+    AbstractConstraintsBuilder(S source, Set<Constraint<? super A0>> sourceConstraints, ConfigType<T, T0> type) {
         this.source = source;
         this.sourceConstraints = sourceConstraints;
         this.type = type;

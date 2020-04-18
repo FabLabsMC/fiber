@@ -11,7 +11,7 @@ import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.builder.constraint.AbstractConstraintsBuilder;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.schema.FiberTypes;
+import me.zeroeightsix.fiber.schema.ConfigTypes;
 import me.zeroeightsix.fiber.tree.ConfigBranch;
 import me.zeroeightsix.fiber.tree.ConfigTree;
 
@@ -240,7 +240,7 @@ public class AnnotatedSettings {
                         Class<E> componentType = (Class<E>) TypeMagic.classForType(typeArg.getType());
                         if (componentType != null) {
                             // coerce to a collection class and configure as such
-                            ConfigAggregateBuilder<T, E> aggregate = ConfigAggregateBuilder.create(parent, name, FiberTypes.makeCollection());
+                            ConfigAggregateBuilder<T, E> aggregate = ConfigAggregateBuilder.create(parent, name, ConfigTypes.makeCollection());
                             // element constraints are on the type argument (eg. List<@Regex String>), so we setup constraints from it
                             constrain(aggregate.beginConstraints().component(), typeArg, pojo).finishComponent().finishConstraints();
                             return aggregate;

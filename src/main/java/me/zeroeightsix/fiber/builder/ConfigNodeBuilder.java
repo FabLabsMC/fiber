@@ -1,7 +1,7 @@
 package me.zeroeightsix.fiber.builder;
 
 import me.zeroeightsix.fiber.FiberId;
-import me.zeroeightsix.fiber.schema.ConvertibleType;
+import me.zeroeightsix.fiber.schema.ConfigType;
 import me.zeroeightsix.fiber.tree.ConfigAttribute;
 import me.zeroeightsix.fiber.tree.ConfigAttributeImpl;
 import me.zeroeightsix.fiber.tree.ConfigNode;
@@ -53,7 +53,7 @@ public abstract class ConfigNodeBuilder {
         return this;
     }
 
-    public <A> ConfigNodeBuilder withAttribute(FiberId attribute, ConvertibleType<A, A> type, A defaultValue) {
+    public <A> ConfigNodeBuilder withAttribute(FiberId attribute, ConfigType<A, A> type, A defaultValue) {
         this.attributes.put(attribute, new ConfigAttributeImpl<>(type, defaultValue));
         return this;
     }

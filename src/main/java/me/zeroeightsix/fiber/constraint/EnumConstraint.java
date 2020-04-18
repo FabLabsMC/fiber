@@ -1,11 +1,12 @@
 package me.zeroeightsix.fiber.constraint;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.Set;
 
-public class EnumConstraint<V> extends ValuedConstraint<Set<V>, V>  {
+public final class EnumConstraint<V> extends ValuedConstraint<Set<V>, V>  {
     public EnumConstraint(@Nonnull Set<V> value) {
-        super(ConstraintType.ONE_OF, value);
+        super(ConstraintType.ONE_OF, Collections.unmodifiableSet(value));
     }
 
     @Override

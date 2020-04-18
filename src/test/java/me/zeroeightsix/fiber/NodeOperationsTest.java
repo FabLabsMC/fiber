@@ -2,7 +2,7 @@ package me.zeroeightsix.fiber;
 
 import me.zeroeightsix.fiber.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
-import me.zeroeightsix.fiber.schema.FiberTypes;
+import me.zeroeightsix.fiber.schema.ConfigTypes;
 import me.zeroeightsix.fiber.tree.ConfigLeaf;
 import me.zeroeightsix.fiber.tree.ConfigNode;
 import me.zeroeightsix.fiber.tree.ConfigTree;
@@ -42,10 +42,10 @@ class NodeOperationsTest {
     @Test
     @DisplayName("Value -> Value")
     void copyValue() {
-        ConfigLeaf<Integer, ?> valueOne = new ConfigLeafBuilder<>(null, "A", FiberTypes.INT)
+        ConfigLeaf<Integer, ?> valueOne = new ConfigLeafBuilder<>(null, "A", ConfigTypes.INT)
                 .withDefaultValue(10)
                 .build();
-        ConfigLeaf<Integer, ?> valueTwo = new ConfigLeafBuilder<>(null, "A", FiberTypes.INT)
+        ConfigLeaf<Integer, ?> valueTwo = new ConfigLeafBuilder<>(null, "A", ConfigTypes.INT)
                 .withDefaultValue(20)
                 .build();
 

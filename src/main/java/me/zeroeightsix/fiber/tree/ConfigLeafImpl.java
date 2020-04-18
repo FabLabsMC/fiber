@@ -3,7 +3,7 @@ package me.zeroeightsix.fiber.tree;
 import me.zeroeightsix.fiber.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.ConstraintType;
-import me.zeroeightsix.fiber.schema.ConvertibleType;
+import me.zeroeightsix.fiber.schema.ConfigType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -23,7 +23,7 @@ public class ConfigLeafImpl<T, T0> extends ConfigNodeImpl implements ConfigLeaf<
     @Nonnull
     private final Set<Constraint<? super T0>> constraints;
     @Nonnull
-    private final ConvertibleType<T, T0> type;
+    private final ConfigType<T, T0> type;
 
     /**
      * Creates a {@code ConfigLeaf}.
@@ -41,7 +41,7 @@ public class ConfigLeafImpl<T, T0> extends ConfigNodeImpl implements ConfigLeaf<
      * @see ConfigLeafBuilder
      * @see me.zeroeightsix.fiber.builder.ConfigAggregateBuilder
      */
-    public ConfigLeafImpl(@Nonnull String name, @Nullable String comment, @Nullable T defaultValue, @Nonnull BiConsumer<T, T> listener, @Nonnull Set<Constraint<? super T0>> constraints, @Nonnull ConvertibleType<T, T0> type) {
+    public ConfigLeafImpl(@Nonnull String name, @Nullable String comment, @Nullable T defaultValue, @Nonnull BiConsumer<T, T> listener, @Nonnull Set<Constraint<? super T0>> constraints, @Nonnull ConfigType<T, T0> type) {
         super(name, comment);
         this.defaultValue = defaultValue;
         this.listener = listener;
@@ -69,7 +69,7 @@ public class ConfigLeafImpl<T, T0> extends ConfigNodeImpl implements ConfigLeaf<
     }
 
     @Override
-    public ConvertibleType<T, T0> getConvertibleType() {
+    public ConfigType<T, T0> getConvertibleType() {
         return this.type;
     }
 

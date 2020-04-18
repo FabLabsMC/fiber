@@ -1,12 +1,12 @@
 package me.zeroeightsix.fiber.tree;
 
-import me.zeroeightsix.fiber.schema.ConvertibleType;
+import me.zeroeightsix.fiber.schema.ConfigType;
 
 public class ConfigAttributeImpl<T> implements ConfigAttribute<T> {
-    private final ConvertibleType<T, T> type;
+    private final ConfigType<T, T> type;
     private T value;
 
-    public ConfigAttributeImpl(ConvertibleType<T, T> type, T value) {
+    public ConfigAttributeImpl(ConfigType<T, T> type, T value) {
         this.type = type;
         this.value = value;
     }
@@ -28,7 +28,7 @@ public class ConfigAttributeImpl<T> implements ConfigAttribute<T> {
     }
 
     @Override
-    public ConvertibleType<T, T> getConvertibleType() {
+    public ConfigType<T, T> getConvertibleType() {
         return this.type;
     }
 }

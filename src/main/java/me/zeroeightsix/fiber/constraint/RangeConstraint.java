@@ -10,7 +10,7 @@ import java.math.BigDecimal;
  * @see ConstraintType#NUMERICAL_LOWER_BOUND
  * @see ConstraintType#NUMERICAL_UPPER_BOUND
  */
-public class RangeConstraint extends ValuedConstraint<NumberRange, BigDecimal> {
+public final class RangeConstraint extends ValuedConstraint<NumberRange, BigDecimal> {
 
 	public RangeConstraint(NumberRange value) throws RuntimeFiberException {
 		super(ConstraintType.RANGE, value);

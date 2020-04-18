@@ -3,7 +3,7 @@ package me.zeroeightsix.fiber.builder.constraint;
 import me.zeroeightsix.fiber.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.schema.ConvertibleType;
+import me.zeroeightsix.fiber.schema.ConfigType;
 
 import javax.annotation.Nullable;
 import java.util.Set;
@@ -27,7 +27,7 @@ public class ConstraintsBuilder<T, T0> extends AbstractConstraintsBuilder<Config
      * @param constraints the list of constraints this builder will add to
      * @param type        the class of the type of values checked by constraints built by this builder
      */
-    public ConstraintsBuilder(ConfigLeafBuilder<T, T0> source, Set<Constraint<? super T0>> constraints, ConvertibleType<T, T0> type) {
+    public ConstraintsBuilder(ConfigLeafBuilder<T, T0> source, Set<Constraint<? super T0>> constraints, ConfigType<T, T0> type) {
         super(source, constraints, type);
     }
 

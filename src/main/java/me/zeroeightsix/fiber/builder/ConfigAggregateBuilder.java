@@ -4,7 +4,7 @@ import me.zeroeightsix.fiber.FiberId;
 import me.zeroeightsix.fiber.annotation.AnnotatedSettings;
 import me.zeroeightsix.fiber.builder.constraint.AggregateConstraintsBuilder;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.schema.ConvertibleType;
+import me.zeroeightsix.fiber.schema.ConfigType;
 
 import javax.annotation.Nonnull;
 import java.util.Collection;
@@ -59,12 +59,12 @@ public final class ConfigAggregateBuilder<A, E, E0> extends ConfigLeafBuilder<A,
      * @param <E>            the type {@code componentType} represents. eg. {@code Integer}
      * @return the newly created builder
      */
-    public static <C, E, E0> ConfigAggregateBuilder<C, E, E0> create(ConfigTreeBuilder source, @Nonnull String name, @Nonnull ConvertibleType<C, List<E0>> type) {
+    public static <C, E, E0> ConfigAggregateBuilder<C, E, E0> create(ConfigTreeBuilder source, @Nonnull String name, @Nonnull ConfigType<C, List<E0>> type) {
         if (!type.isList()) throw new IllegalArgumentException(type + " is not a valid list type");
         return new ConfigAggregateBuilder<>(source, name, type);
     }
 
-    private ConfigAggregateBuilder(ConfigTreeBuilder source, @Nonnull String name, @Nonnull ConvertibleType<A, List<E0>> type) {
+    private ConfigAggregateBuilder(ConfigTreeBuilder source, @Nonnull String name, @Nonnull ConfigType<A, List<E0>> type) {
         super(source, name, type);
     }
 
@@ -81,7 +81,7 @@ public final class ConfigAggregateBuilder<A, E, E0> extends ConfigLeafBuilder<A,
     }
 
     @Override
-    public <A1> ConfigAggregateBuilder<A, E, E0> withAttribute(FiberId id, ConvertibleType<A1, A1> type, A1 defaultValue) {
+    public <A1> ConfigAggregateBuilder<A, E, E0> withAttribute(FiberId id, ConfigType<A1, A1> type, A1 defaultValue) {
         super.withAttribute(id, type, defaultValue);
         return this;
     }

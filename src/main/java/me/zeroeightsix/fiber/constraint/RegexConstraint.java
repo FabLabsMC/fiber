@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
  *
  * @see ConstraintType#STRING_MATCHING
  */
-public class RegexConstraint extends ValuedConstraint<Pattern, String> {
+public final class RegexConstraint extends ValuedConstraint<Pattern, String> {
     public RegexConstraint(Pattern value) {
         super(ConstraintType.STRING_MATCHING, value);
     }
