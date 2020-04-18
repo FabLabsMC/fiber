@@ -55,7 +55,7 @@ public final class ConfigQuery<T extends ConfigNode> {
      * @param more  additional node names forming the config path
      * @return a config query for leaves of existing trees
      */
-    public static <V> ConfigQuery<ConfigLeaf<V>> leaf(Class<? super V> propertyType, String first, String... more) {
+    public static <V> ConfigQuery<ConfigLeaf<V, ?>> leaf(Class<? super V> propertyType, String first, String... more) {
         return new ConfigQuery<>(ConfigLeaf.class, propertyType, first, more);
     }
 
@@ -118,7 +118,7 @@ public final class ConfigQuery<T extends ConfigNode> {
 
     private <N> N lookupChild(ConfigTree tree, String name, Class<N> nodeType, @Nullable Class<?> valueType) throws FiberQueryException {
         ConfigNode node = tree.lookup(name);
-        if (nodeType.isInstance(node) && (valueType == null || valueType == ((ConfigLeaf<?>) node).getType())) {
+        if (nodeType.isInstance(node) && (valueType == null || valueType == ((ConfigLeaf<?, ?>) node).getType())) {
             return nodeType.cast(node);
         } else if (node != null) {
             throw new FiberQueryException.WrongType(tree, node, nodeType, valueType);

@@ -1,12 +1,15 @@
 package me.zeroeightsix.fiber.builder.constraint;
 
-import me.zeroeightsix.fiber.constraint.*;
+import me.zeroeightsix.fiber.constraint.Constraint;
+import me.zeroeightsix.fiber.constraint.LengthConstraint;
+import me.zeroeightsix.fiber.constraint.RegexConstraint;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
+import me.zeroeightsix.fiber.schema.ConvertibleType;
 
 import javax.annotation.Nullable;
 import javax.annotation.RegEx;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 /**
@@ -15,15 +18,18 @@ import java.util.regex.Pattern;
  * @param <S> the type of this builder's source object (eg. {@code ConfigLeafBuilder} or {@code ConstraintsBuilder})
  * @param <T> the type of intermediary objects this builder's constraints should process. May be identical to {@code A}.
  */
-public abstract class AbstractConstraintsBuilder<S, A, T> {
+public abstract class AbstractConstraintsBuilder<S, A, A0, T, T0> {
 
     protected final S source;
-    protected final List<Constraint<? super A>> sourceConstraints;
-    /*MonotonicNonnull*/ @Nullable protected final Class<T> type;
+    protected T numberMin;
+    protected T numberMax;
+    protected T numberStep;
+    protected final Set<Constraint<? super A0>> sourceConstraints;
+    protected final ConvertibleType<T, T0> type;
 
-    final List<Constraint<? super T>> newConstraints = new ArrayList<>();
+    final Set<Constraint<? super T0>> newConstraints = new LinkedHashSet<>();
 
-    AbstractConstraintsBuilder(S source, List<Constraint<? super A>> sourceConstraints, @Nullable Class<T> type) {
+    AbstractConstraintsBuilder(S source, Set<Constraint<? super A0>> sourceConstraints, ConvertibleType<T, T0> type) {
         this.source = source;
         this.sourceConstraints = sourceConstraints;
         this.type = type;
@@ -31,37 +37,35 @@ public abstract class AbstractConstraintsBuilder<S, A, T> {
 
     @Nullable
     public final Class<T> getType() {
-        return type;
+        return type.getActualType();
     }
 
     /**
-     * Implies that any value must be bigger than <b>or equal</b> to <code>min</code>
+     * Implies that any value must be bigger than <strong>or equal</strong> to <code>min</code>
      *
      * @param min The minimum value
      * @return The builder
      * @throws IllegalArgumentException if {@code min} is not a {@link Number}
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public AbstractConstraintsBuilder<S, A, T> atLeast(T min) throws RuntimeFiberException {
+    public AbstractConstraintsBuilder<S, A, A0, T, T0> atLeast(T min) throws RuntimeFiberException {
         checkNumerical();
         checkNumerical(min);
-        newConstraints.add(new NumberConstraint(ConstraintType.NUMERICAL_LOWER_BOUND, (Number) min));
+        this.numberMin = min;
         return this;
     }
 
     /**
-     * Implies that any value must be smaller than <b>or equal</b> to <code>max</code>
+     * Implies that any value must be smaller than <strong>or equal</strong> to <code>max</code>
      *
      * @param max The maximum value
      * @return The builder
      * @throws UnsupportedOperationException if this builder is not for a numerical value
      * @throws IllegalArgumentException      if {@code max} is not a {@link Number}
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public AbstractConstraintsBuilder<S, A, T> atMost(T max) {
+    public AbstractConstraintsBuilder<S, A, A0, T, T0> atMost(T max) {
         checkNumerical();
         checkNumerical(max);
-        newConstraints.add(new NumberConstraint(ConstraintType.NUMERICAL_UPPER_BOUND, (Number) max));
+        this.numberMax = max;
         return this;
     }
 
@@ -76,44 +80,68 @@ public abstract class AbstractConstraintsBuilder<S, A, T> {
      * @throws UnsupportedOperationException if this builder is not for a numerical value
      * @throws IllegalArgumentException      if {@code min} or {@code max} is not a {@link Number}
      */
-    public AbstractConstraintsBuilder<S, A, T> range(T min, T max) {
-        atLeast(min);
-        atMost(max);
+    public AbstractConstraintsBuilder<S, A, A0, T, T0> range(T min, T max) {
+        checkNumerical();
+        checkNumerical(max);
+        return range(min, max, null);
+    }
+
+    /**
+     * Convenience method to specify a range of valid values a number can take.
+     *
+     * <p> This method behaves as if: {@code this.atLeast(min).atMost(max)}
+     *
+     * @param min The minimum value
+     * @param max The maximum value
+     * @param step
+     * @return This builder
+     * @throws UnsupportedOperationException if this builder is not for a numerical value
+     * @throws IllegalArgumentException      if {@code min} or {@code max} is not a {@link Number}
+     */
+    public AbstractConstraintsBuilder<S, A, A0, T, T0> range(T min, T max, @Nullable T step) {
+        checkNumerical();
+        checkNumerical(max);
+        this.atLeast(min);
+        this.atMost(max);
+        this.numberStep = step;
         return this;
     }
 
-    public AbstractConstraintsBuilder<S, A, T> minLength(int min) {
+    public AbstractConstraintsBuilder<S, A, A0, T, T0> minLength(int min) {
         if (min < 0) throw new RuntimeFiberException(min + " is not a valid length");
         newConstraints.add(LengthConstraint.min(type, min));
         return this;
     }
 
-    public AbstractConstraintsBuilder<S, A, T> maxLength(int max) {
+    public AbstractConstraintsBuilder<S, A, A0, T, T0> maxLength(int max) {
         if (max < 0) throw new RuntimeFiberException(max + " is not a valid length");
         newConstraints.add(LengthConstraint.max(type, max));
         return this;
     }
 
     @SuppressWarnings("unchecked")
-    public AbstractConstraintsBuilder<S, A, T> regex(@RegEx String regexPattern) {
+    public AbstractConstraintsBuilder<S, A, A0, T, T0> regex(@RegEx String regexPattern) {
         checkCharSequence();
-        newConstraints.add((Constraint<? super T>) new RegexConstraint(Pattern.compile(regexPattern)));
+        newConstraints.add((Constraint<? super T0>) new RegexConstraint(Pattern.compile(regexPattern)));
         return this;
     }
 
     private void checkNumerical() {
-        if (this.type != null && !Number.class.isAssignableFrom(this.type))
+        if (!this.type.isNumber()) {
             throw new RuntimeFiberException("Can't apply numerical constraint to non-numerical setting");
+        }
     }
 
     private void checkNumerical(T value) {
-        if (this.type != null && !Number.class.isAssignableFrom(value.getClass()))
+        if (!Number.class.isAssignableFrom(value.getClass())) {
             throw new RuntimeFiberException("'" + value + "' is not a number");
+        }
     }
 
     private void checkCharSequence() {
-        if (this.type != null && !CharSequence.class.isAssignableFrom(this.type))
+        if (!this.type.isString()) {
             throw new RuntimeFiberException("Can only apply regex pattern constraint to character sequences");
+        }
     }
 
 }

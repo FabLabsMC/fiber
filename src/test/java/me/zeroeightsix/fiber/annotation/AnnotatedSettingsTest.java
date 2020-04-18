@@ -41,7 +41,7 @@ class AnnotatedSettingsTest {
         ConfigNode item = node.lookup("a");
         assertNotNull(item, "Setting exists");
         assertTrue(ConfigLeaf.class.isAssignableFrom(item.getClass()), "Setting is a ConfigLeaf");
-        ConfigLeaf<?> leaf = (ConfigLeaf<?>) item;
+        ConfigLeaf<?, ?> leaf = (ConfigLeaf<?, ?>) item;
         assertNotNull(leaf.getValue(), "Setting value is non-null");
         assertEquals(Integer.class, leaf.getType(), "Setting type is correct");
         assertEquals(Integer.class, leaf.getValue().getClass(), "Setting value reflects correct type");
@@ -56,6 +56,7 @@ class AnnotatedSettingsTest {
         assertThrows(FiberException.class, () -> annotatedSettings.applyToNode(node, pojo));
     }
 
+    @SuppressWarnings("unchecked")
     @Test
     @DisplayName("Listener")
     void testListener() throws FiberException {
@@ -64,23 +65,22 @@ class AnnotatedSettingsTest {
 
         ConfigNode treeItem = node.lookup("a");
         assertNotNull(treeItem, "Setting A exists");
-        assertTrue(treeItem instanceof Property<?>, "Setting A is a property");
-        @SuppressWarnings("unchecked")
-        Property<Integer> property = (Property<Integer>) treeItem;
+        assertTrue(treeItem instanceof Property, "Setting A is a property");
+        Property<Integer, ?> property = (Property<Integer, ?>) treeItem;
         property.setValue(10);
         assertTrue(pojo.listenedA, "Listener for A was triggered");
 
         treeItem = node.lookup("b");
         assertNotNull(treeItem, "Setting B exists");
-        assertTrue(treeItem instanceof Property<?>, "Setting B is a property");
-        property = (Property<Integer>) treeItem;
+        assertTrue(treeItem instanceof Property, "Setting B is a property");
+        property = (Property<Integer, ?>) treeItem;
         property.setValue(10);
         assertTrue(pojo.listenedB, "Listener for B was triggered");
 
         treeItem = node.lookup("c");
         assertNotNull(treeItem, "Setting C exists");
-        assertTrue(treeItem instanceof Property<?>, "Setting C is a property");
-        property = (Property<Integer>) treeItem;
+        assertTrue(treeItem instanceof Property, "Setting C is a property");
+        property = (Property<Integer, ?>) treeItem;
         property.setValue(10);
         assertTrue(pojo.listenedC, "Listener for C was triggered");
     }
@@ -105,7 +105,7 @@ class AnnotatedSettingsTest {
         NumericalConstraintsPojo pojo = new NumericalConstraintsPojo();
         annotatedSettings.applyToNode(node, pojo);
         @SuppressWarnings("unchecked")
-        Property<Integer> value = (Property<Integer>) node.lookup("a");
+        Property<Integer, ?> value = (Property<Integer, ?>) node.lookup("a");
         assertNotNull(value, "Setting exists");
         assertFalse(value.setValue(-10));
         assertTrue(value.setValue(5));
@@ -118,7 +118,7 @@ class AnnotatedSettingsTest {
         StringConstraintsPojo pojo = new StringConstraintsPojo();
         annotatedSettings.applyToNode(node, pojo);
         @SuppressWarnings("unchecked")
-        Property<String> value = (Property<String>) node.lookup("a");
+        Property<String, ?> value = (Property<String, ?>) node.lookup("a");
         assertNotNull(value, "Setting exists");
         assertFalse(value.setValue("BAD STRING::"));
         assertTrue(value.setValue("good:string"));
@@ -132,13 +132,13 @@ class AnnotatedSettingsTest {
         ArrayConstraintsPojo pojo = new ArrayConstraintsPojo();
         annotatedSettings.applyToNode(node, pojo);
         @SuppressWarnings("unchecked")
-        Property<String[]> value1 = (Property<String[]>) node.lookup("nonEmptyArrayShortStrings");
+        Property<String[], ?> value1 = (Property<String[], ?>) node.lookup("nonEmptyArrayShortStrings");
         assertNotNull(value1, "Setting exists");
         assertTrue(value1.setValue(new String[]{"ab", "", "ba", ""}));
         assertFalse(value1.setValue(new String[0]), "Empty array");
         assertFalse(value1.setValue(new String[]{"aaaaaaaaaaaa"}), "Strings too long");
         @SuppressWarnings("unchecked")
-        Property<int[]> value2 = (Property<int[]>) node.lookup("numbers");
+        Property<int[], ?> value2 = (Property<int[], ?>) node.lookup("numbers");
         assertNotNull(value2, "Setting exists");
         assertTrue(value2.setValue(new int[]{3, 4, 5}));
         assertTrue(value2.setValue(new int[0]));
@@ -146,7 +146,7 @@ class AnnotatedSettingsTest {
         assertFalse(value2.setValue(new int[]{-1, 0, 1}), "Negative number not allowed");
         assertFalse(value2.setValue(new int[]{9, 10, 11}), "Numbers above 10 not allowed");
         @SuppressWarnings("unchecked")
-        Property<List<String>> value3 = (Property<List<String>>) node.lookup("shortArrayIdStrings");
+        Property<List<String>, ?> value3 = (Property<List<String>, ?>) node.lookup("shortArrayIdStrings");
         assertNotNull(value3, "Setting exists");
         assertTrue(value3.setValue(Arrays.asList("a:b", "fabric:test")));
         assertTrue(value3.setValue(Collections.emptyList()));
@@ -181,7 +181,7 @@ class AnnotatedSettingsTest {
     void testConstantSetting() throws FiberException {
         ConstantSettingPojo pojo = new ConstantSettingPojo();
         annotatedSettings.applyToNode(node, pojo);
-        assertFalse(((ConfigLeaf<Integer>) node.lookup("a")).setValue(0));
+        assertFalse(((ConfigLeaf<Integer, ?>) node.lookup("a")).setValue(0));
     }
 
     @Test
@@ -201,7 +201,7 @@ class AnnotatedSettingsTest {
     void testComment() throws FiberException {
         CommentPojo pojo = new CommentPojo();
         annotatedSettings.applyToNode(node, pojo);
-        assertEquals("comment", ((ConfigLeaf<Integer>) node.lookup("a")).getComment(), "Comment exists and is correct");
+        assertEquals("comment", ((ConfigLeaf<Integer, ?>) node.lookup("a")).getComment(), "Comment exists and is correct");
     }
 
     @Test

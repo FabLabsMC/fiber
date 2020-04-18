@@ -6,7 +6,6 @@ import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.JsonPrimitive;
 import blue.endless.jankson.impl.MarshallerImpl;
 import me.zeroeightsix.fiber.FiberId;
-import me.zeroeightsix.fiber.builder.constraint.CompositeConstraintsBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.ValuedConstraint;
 import me.zeroeightsix.fiber.serialization.Marshaller;
@@ -51,14 +50,14 @@ public class SchemaGenerator {
 			if (item instanceof ConfigBranch) {
 				object.put(item.getName(), createSchema((ConfigTree) item));
 			} else if (item instanceof ConfigLeaf) {
-				object.put(item.getName(), createSchema((ConfigLeaf<?>) item));
+				object.put(item.getName(), createSchema((ConfigLeaf<?, ?>) item));
 			}
 		});
 
 		return object;
 	}
 
-	private JsonObject createSchema(ConfigLeaf<?> item) {
+	private JsonObject createSchema(ConfigLeaf<?, ?> item) {
 		JsonObject object = new JsonObject();
 		if (item.getType() != null && classIdentifierHashMap.containsKey(item.getType())) {
 			object.put("type", new JsonPrimitive(classIdentifierHashMap.get(item.getType())));
@@ -82,10 +81,7 @@ public class SchemaGenerator {
 			JsonObject object = new JsonObject();
 			object.put("identifier", new JsonPrimitive(constraint.getType().getIdentifier().toString()));
 			if (constraint instanceof ValuedConstraint) {
-				object.put("value", new JsonPrimitive(((ValuedConstraint<?, ?>) constraint).getValue()));
-			}
-			if (constraint instanceof CompositeConstraintsBuilder.AbstractCompositeConstraint<?>) {
-				object.put("constraints", createSchema(((CompositeConstraintsBuilder.AbstractCompositeConstraint<?>) constraint).constraints));
+				object.put("value", new JsonPrimitive(((ValuedConstraint<?, ?>) constraint).getConstraintValue()));
 			}
 			array.add(object);
 		}

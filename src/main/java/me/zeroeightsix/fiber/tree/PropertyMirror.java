@@ -1,5 +1,7 @@
 package me.zeroeightsix.fiber.tree;
 
+import me.zeroeightsix.fiber.schema.ConvertibleType;
+
 /**
  * A {@code Property} that delegates all operations to another.
  *
@@ -17,8 +19,8 @@ package me.zeroeightsix.fiber.tree;
  *
  * @param <T> the type of value this property mirrors
  */
-public class PropertyMirror<T> implements Property<T> {
-    protected Property<T> delegate;
+public class PropertyMirror<T, T0> implements Property<T, T0> {
+    protected Property<T, T0> delegate;
 
     /**
      * Sets a property to mirror.
@@ -28,7 +30,7 @@ public class PropertyMirror<T> implements Property<T> {
      *
      * @param delegate a property to mirror
      */
-    public void mirror(Property<T> delegate) {
+    public void mirror(Property<T, T0> delegate) {
         this.delegate = delegate;
     }
 
@@ -49,8 +51,14 @@ public class PropertyMirror<T> implements Property<T> {
     }
 
     @Override
-    public Class<T> getType() {
+    public T0 getRawValue() {
         if (delegate == null) throw new IllegalStateException("No delegate property set for this mirror");
-        return delegate.getType();
+        return delegate.getRawValue();
+    }
+
+    @Override
+    public ConvertibleType<T, T0> getConvertibleType() {
+        if (delegate == null) throw new IllegalStateException("No delegate property set for this mirror");
+        return delegate.getConvertibleType();
     }
 }

@@ -6,7 +6,7 @@ package me.zeroeightsix.fiber.tree;
  * @param <T> the type of value this property holds
  * @see Property#setValue(Object)
  */
-public interface Property<T> extends HasValue<T> {
+public interface Property<T, T0> extends ConvertibleValue<T, T0> {
 
     /**
      * Sets the value of this property.

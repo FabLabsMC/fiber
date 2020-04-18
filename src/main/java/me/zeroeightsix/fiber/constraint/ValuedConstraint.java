@@ -1,24 +1,39 @@
 package me.zeroeightsix.fiber.constraint;
 
+import javax.annotation.Nonnull;
+import java.util.Objects;
+
 /**
  * A constraint that has a value attached to it.
  *
- * <p> For example, a {@link NumberConstraint} can have as value a minimum or maximum.
+ * <p> For example, a {@link RegexConstraint} has as value its regular expression pattern.
  *
- * @param <T> the value of this constraint
- * @param <A> the type of values this constraint checks
+ * @param <C> the value of this constraint
+ * @param <V> the type of values this constraint checks
  */
-public abstract class ValuedConstraint<T, A> extends Constraint<A> { // A is the type of values we're gonna check
+public abstract class ValuedConstraint<C, V> extends Constraint<V> {
 
-	private final T value;
+	private final C value;
 
-	public ValuedConstraint(ConstraintType type, T value) {
+	public ValuedConstraint(ConstraintType type, @Nonnull C value) {
 		super(type);
 		this.value = value;
 	}
 
-	public T getValue() {
+	public C getConstraintValue() {
 		return value;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+		ValuedConstraint<?, ?> that = (ValuedConstraint<?, ?>) o;
+		return value.equals(that.value);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(value);
+	}
 }

@@ -42,9 +42,9 @@ public interface SettingAnnotationProcessor<A extends Annotation, C> {
      * @see AnnotatedSettings#registerSettingProcessor(Class, Value) 
      */
     @FunctionalInterface
-    interface Value<A extends Annotation> extends SettingAnnotationProcessor<A, ConfigLeafBuilder<?>> {
+    interface Value<A extends Annotation> extends SettingAnnotationProcessor<A, ConfigLeafBuilder<?, ?>> {
         @Override
-        void apply(A annotation, Field field, Object pojo, ConfigLeafBuilder<?> builder);
+        void apply(A annotation, Field field, Object pojo, ConfigLeafBuilder<?, ?> builder);
     }
 
     /**

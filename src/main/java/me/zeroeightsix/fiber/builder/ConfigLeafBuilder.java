@@ -1,11 +1,10 @@
 package me.zeroeightsix.fiber.builder;
 
 import me.zeroeightsix.fiber.FiberId;
-import me.zeroeightsix.fiber.annotation.AnnotatedSettings;
 import me.zeroeightsix.fiber.builder.constraint.ConstraintsBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
-import me.zeroeightsix.fiber.constraint.FinalConstraint;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
+import me.zeroeightsix.fiber.schema.ConvertibleType;
 import me.zeroeightsix.fiber.tree.ConfigLeaf;
 import me.zeroeightsix.fiber.tree.ConfigLeafImpl;
 import me.zeroeightsix.fiber.tree.ConfigNode;
@@ -13,9 +12,9 @@ import me.zeroeightsix.fiber.tree.ConfigTree;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
@@ -28,32 +27,30 @@ import java.util.function.Consumer;
  * @param <T> the type of value the produced {@code ConfigLeaf} will hold
  * @see ConfigLeaf
  */
-public class ConfigLeafBuilder<T> extends ConfigNodeBuilder {
+public class ConfigLeafBuilder<T, T0> extends ConfigNodeBuilder {
 
     @Nonnull
-    protected final Class<T> type;
+    protected final ConvertibleType<T, T0> type;
 
     @Nullable
     private T defaultValue = null;
 
-    private boolean isFinal = false;
     private BiConsumer<T, T> consumer = (t, t2) -> { };
-    protected List<Constraint<? super T>> constraintList = new ArrayList<>();
+    protected Set<Constraint<? super T0>> constraints = new LinkedHashSet<>();
 
     /**
      * Creates a new scalar {@code ConfigLeafBuilder}.
-     *
-     * @param parentNode the {@code ConfigTreeBuilder} this builder originates from
+     *  @param parentNode the {@code ConfigTreeBuilder} this builder originates from
      * @param name the name of the {@code ConfigLeaf} produced by this builder
      * @param type       the class object representing the type of values this builder will create settings for
      */
-    public ConfigLeafBuilder(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull Class<T> type) {
+    public ConfigLeafBuilder(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull ConvertibleType<T, T0> type) {
         super(parentNode, name);
-        this.type = AnnotatedSettings.wrapPrimitive(type);
+        this.type = type;
     }
 
     @Nonnull
-    public Class<T> getType() {
+    public ConvertibleType<T, T0> getType() {
         return type;
     }
 
@@ -65,7 +62,7 @@ public class ConfigLeafBuilder<T> extends ConfigNodeBuilder {
      * @see ConfigTree#lookup
      */
     @Override
-    public ConfigLeafBuilder<T> withName(@Nonnull String name) {
+    public ConfigLeafBuilder<T, T0> withName(@Nonnull String name) {
         super.withName(name);
         return this;
     }
@@ -80,7 +77,7 @@ public class ConfigLeafBuilder<T> extends ConfigNodeBuilder {
      * @return {@code this} builder
      */
     @Override
-    public ConfigLeafBuilder<T> withComment(String comment) {
+    public ConfigLeafBuilder<T, T0> withComment(String comment) {
         super.withComment(comment);
         return this;
     }
@@ -96,7 +93,7 @@ public class ConfigLeafBuilder<T> extends ConfigNodeBuilder {
      * @see ConfigNode#getAttributes()
      */
     @Override
-    public <A> ConfigLeafBuilder<T> withAttribute(FiberId id, Class<A> type, A defaultValue) {
+    public <A> ConfigLeafBuilder<T, T0> withAttribute(FiberId id, ConvertibleType<A, A> type, A defaultValue) {
         super.withAttribute(id, type, defaultValue);
         return this;
     }
@@ -111,7 +108,7 @@ public class ConfigLeafBuilder<T> extends ConfigNodeBuilder {
      * @param consumer the listener
      * @return {@code this} builder
      */
-    public ConfigLeafBuilder<T> withListener(BiConsumer<T, T> consumer) {
+    public ConfigLeafBuilder<T, T0> withListener(BiConsumer<T, T> consumer) {
         final BiConsumer<T, T> prevConsumer = this.consumer; // to avoid confusion
         this.consumer = (t, t2) -> {
             prevConsumer.accept(t, t2);
@@ -131,37 +128,8 @@ public class ConfigLeafBuilder<T> extends ConfigNodeBuilder {
      * @param defaultValue the default value
      * @return {@code this} builder
      */
-    public ConfigLeafBuilder<T> withDefaultValue(T defaultValue) {
+    public ConfigLeafBuilder<T, T0> withDefaultValue(T defaultValue) {
         this.defaultValue = defaultValue;
-        return this;
-    }
-
-    /**
-     * Marks a setting as final.
-     *
-     * <p> As a result of this method, any attempt to update the value of the resulting setting will fail.
-     * This method behaves as if: {@code this.setFinal(true)}.
-     *
-     * @return {@code this} builder
-     * @see #withFinality(boolean)
-     */
-    public ConfigLeafBuilder<T> withFinality() {
-        this.isFinal = true;
-        return this;
-    }
-
-    /**
-     * Sets the finality.
-     *
-     * <p> If {@code true}, the produced setting can not be changed.
-     * It will be initialised with its default value, if there is one. Afterwards, it can not be changed again;
-     * {@link ConfigLeaf#setValue(Object)} will always return {@code false}.
-     *
-     * @param isFinal whether or not the value can be changed after building
-     * @return {@code this} builder
-     */
-    public ConfigLeafBuilder<T> withFinality(boolean isFinal) {
-        this.isFinal = isFinal;
         return this;
     }
 
@@ -171,8 +139,8 @@ public class ConfigLeafBuilder<T> extends ConfigNodeBuilder {
      * @return the created builder
      * @see ConstraintsBuilder
      */
-    public ConstraintsBuilder<T> beginConstraints() {
-        return new ConstraintsBuilder<>(this, constraintList, type);
+    public ConstraintsBuilder<T, T0> beginConstraints() {
+        return new ConstraintsBuilder<>(this, this.constraints, this.type);
     }
 
     /**
@@ -186,19 +154,22 @@ public class ConfigLeafBuilder<T> extends ConfigNodeBuilder {
      * @return the {@code ConfigLeaf}
      */
     @Override
-    public ConfigLeaf<T> build() {
+    public ConfigLeaf<T, T0> build() {
         if (defaultValue != null) {
-            for (Constraint<? super T> constraint : constraintList) {
-                if (!constraint.test(defaultValue)) {
-                    throw new RuntimeFiberException("Default value '" + defaultValue + "' does not satisfy constraints");
+            T0 convertedDefault = this.type.toRawType(this.defaultValue);
+            for (Constraint<? super T0> constraint : constraints) {
+                if (!constraint.test(convertedDefault).hasPassed()) {
+                    throw new RuntimeFiberException("Default value '" + defaultValue + "' does not satisfy type constraint " + constraint.getType().getIdentifier());
+                }
+            }
+            for (Constraint<? super T0> constraint : constraints) {
+                if (!constraint.test(convertedDefault).hasPassed()) {
+                    throw new RuntimeFiberException("Default value '" + defaultValue + "' does not satisfy custom constraint " + constraint.getType().getIdentifier());
                 }
             }
         }
-        List<Constraint<? super T>> constraints = new ArrayList<>(this.constraintList);
-        if (isFinal) {
-            constraints.add(0, FinalConstraint.instance());  // index 0 to avoid uselessly checking everything each time
-        }
-        ConfigLeaf<T> built = new ConfigLeafImpl<>(Objects.requireNonNull(name, "Cannot build a value without a name"), comment, defaultValue, consumer, constraints, type);
+        Set<Constraint<? super T0>> constraints = new LinkedHashSet<>(this.constraints);
+        ConfigLeaf<T, T0> built = new ConfigLeafImpl<>(Objects.requireNonNull(name, "Cannot build a value without a name"), comment, defaultValue, consumer, constraints, type);
         built.getAttributes().putAll(this.attributes);
 
         if (parent != null) {
@@ -219,7 +190,7 @@ public class ConfigLeafBuilder<T> extends ConfigNodeBuilder {
         return finishValue(n -> {});
     }
 
-    public ConfigTreeBuilder finishValue(Consumer<ConfigLeaf<T>> action) {
+    public ConfigTreeBuilder finishValue(Consumer<ConfigLeaf<T, T0>> action) {
         if (parent instanceof ConfigTreeBuilder) {
             action.accept(build());
             return (ConfigTreeBuilder) parent;

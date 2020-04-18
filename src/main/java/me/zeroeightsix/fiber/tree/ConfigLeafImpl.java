@@ -3,25 +3,27 @@ package me.zeroeightsix.fiber.tree;
 import me.zeroeightsix.fiber.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.ConstraintType;
-import me.zeroeightsix.fiber.constraint.FinalConstraint;
+import me.zeroeightsix.fiber.schema.ConvertibleType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
-public class ConfigLeafImpl<T> extends ConfigNodeImpl implements ConfigLeaf<T> {
+public class ConfigLeafImpl<T, T0> extends ConfigNodeImpl implements ConfigLeaf<T, T0> {
 
     @Nullable
     private T value;
+    @Nullable
+    private T0 rawValue;
     @Nullable
     private final T defaultValue;
     @Nonnull
     private final BiConsumer<T, T> listener;
     @Nonnull
-    private final List<Constraint<? super T>> constraints;
+    private final Set<Constraint<? super T0>> constraints;
     @Nonnull
-    private final Class<T> type;
+    private final ConvertibleType<T, T0> type;
 
     /**
      * Creates a {@code ConfigLeaf}.
@@ -39,30 +41,50 @@ public class ConfigLeafImpl<T> extends ConfigNodeImpl implements ConfigLeaf<T> {
      * @see ConfigLeafBuilder
      * @see me.zeroeightsix.fiber.builder.ConfigAggregateBuilder
      */
-    public ConfigLeafImpl(@Nonnull String name, @Nullable String comment, @Nullable T defaultValue, @Nonnull BiConsumer<T, T> listener, @Nonnull List<Constraint<? super T>> constraints, @Nonnull Class<T> type) {
+    public ConfigLeafImpl(@Nonnull String name, @Nullable String comment, @Nullable T defaultValue, @Nonnull BiConsumer<T, T> listener, @Nonnull Set<Constraint<? super T0>> constraints, @Nonnull ConvertibleType<T, T0> type) {
         super(name, comment);
-        this.value = defaultValue;
         this.defaultValue = defaultValue;
         this.listener = listener;
         this.constraints = constraints;
         this.type = type;
+        this.setValue(defaultValue);
     }
 
     @Override
     @Nullable
     public T getValue() {
-        return value;
+        return this.value;
+    }
+
+    @Override
+    @Nullable
+    public T0 getRawValue() {
+        return rawValue;
     }
 
     @Nonnull
     @Override
     public Class<T> getType() {
-        return type;
+        return this.type.getActualType();
+    }
+
+    @Override
+    public ConvertibleType<T, T0> getConvertibleType() {
+        return this.type;
     }
 
     @Override
     public boolean setValue(@Nullable T value) {
-        if (!this.accepts(value)) return false;
+        T0 convertedValue = this.type.toRawType(value);
+        for (Constraint<? super T0> constraint : this.constraints) {
+            @SuppressWarnings("unchecked") Constraint.TestResult<T0> result = (Constraint.TestResult<T0>) constraint.test(convertedValue);
+            if (!result.hasPassed()) {
+                if (!result.getCorrectedValue().isPresent()) {
+                    return false;
+                }
+                convertedValue = result.getCorrectedValue().get();
+            }
+        }
 
         T oldValue = this.value;
         this.value = value;
@@ -74,8 +96,7 @@ public class ConfigLeafImpl<T> extends ConfigNodeImpl implements ConfigLeaf<T> {
      * {@inheritDoc}
      *
      * <p> A value is accepted if it satisfies every constraint
-     * this setting has. Note that some constraints such as {@link FinalConstraint}
-     * will cause even the current {@linkplain #getValue() value} to be rejected.
+     * this setting has.
      *
      * @param value the value to check
      * @see #setValue(Object)
@@ -83,8 +104,9 @@ public class ConfigLeafImpl<T> extends ConfigNodeImpl implements ConfigLeaf<T> {
      */
     @Override
     public boolean accepts(@Nullable T value) {
-        for (Constraint<? super T> constraint : this.constraints) {
-            if (!constraint.test(value)) {
+        T0 converted = this.type.toRawType(value);
+        for (Constraint<? super T0> constraint : this.constraints) {
+            if (!constraint.test(converted).hasPassed()) {
                 return false;
             }
         }
@@ -105,7 +127,7 @@ public class ConfigLeafImpl<T> extends ConfigNodeImpl implements ConfigLeaf<T> {
 
     @Override
     @Nonnull
-    public List<Constraint<? super T>> getConstraints() {
+    public Set<Constraint<? super T0>> getConstraints() {
         return constraints;
     }
 

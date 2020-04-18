@@ -1,13 +1,14 @@
 package me.zeroeightsix.fiber.builder.constraint;
 
 import me.zeroeightsix.fiber.builder.ConfigAggregateBuilder;
-import me.zeroeightsix.fiber.constraint.CompositeType;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
+import me.zeroeightsix.fiber.schema.ConvertibleType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Set;
 
 /**
  * An implementation of {@code ConstraintsBuilder} for aggregate constraints.
@@ -19,63 +20,53 @@ import java.util.List;
  * @param <E> the type of the components in T
  * @see ConstraintsBuilder
  */
-public class AggregateConstraintsBuilder<A, E> extends ConstraintsBuilder<A> {
-
-    @Nullable
-    private final Class<E> componentType;
+public class AggregateConstraintsBuilder<A, E, E0> extends ConstraintsBuilder<A, List<E0>> {
 
     /**
      * Creates a new aggregate constraint builder
-     *
+     *  @param aggregateType the type of collection or array {@code source} holds
+     * @param componentType the type of all elements in {@code aggregateType}
      * @param source        the {@code ConfigLeafBuilder} this {@code ConstraintsBuilder} originates from
      * @param constraints   the list of constraints this builder will add to
-     * @param aggregateType the type of collection or array {@code source} holds
-     * @param componentType the type of all elements in {@code aggregateType}
      */
-    public AggregateConstraintsBuilder(ConfigAggregateBuilder<A, E> source, List<Constraint<? super A>> constraints, @Nonnull Class<A> aggregateType, @Nullable Class<E> componentType) {
-        super(source, constraints, aggregateType);
-        this.componentType = componentType;
+    public AggregateConstraintsBuilder(ConfigAggregateBuilder<A, E, E0> source, Set<Constraint<? super List<E0>>> constraints, @Nonnull ConvertibleType<A, List<E0>> type) {
+        super(source, constraints, type);
     }
 
     @Override
-    public AggregateConstraintsBuilder<A, E> atLeast(A min) throws RuntimeFiberException {
+    public AggregateConstraintsBuilder<A, E, E0> atLeast(A min) throws RuntimeFiberException {
         super.atLeast(min);
         return this;
     }
 
     @Override
-    public AggregateConstraintsBuilder<A, E> atMost(A max) {
+    public AggregateConstraintsBuilder<A, E, E0> atMost(A max) {
         super.atMost(max);
         return this;
     }
 
     @Override
-    public AggregateConstraintsBuilder<A, E> range(A min, A max) {
+    public AggregateConstraintsBuilder<A, E, E0> range(A min, A max, @Nullable A step) {
         super.range(min, max);
         return this;
     }
 
     @Override
-    public AggregateConstraintsBuilder<A, E> minLength(int min) {
+    public AggregateConstraintsBuilder<A, E, E0> minLength(int min) {
         super.minLength(min);
         return this;
     }
 
     @Override
-    public AggregateConstraintsBuilder<A, E> maxLength(int max) {
+    public AggregateConstraintsBuilder<A, E, E0> maxLength(int max) {
         super.maxLength(max);
         return this;
     }
 
     @Override
-    public AggregateConstraintsBuilder<A, E> regex(String regexPattern) {
+    public AggregateConstraintsBuilder<A, E, E0> regex(String regexPattern) {
         super.regex(regexPattern);
         return this;
-    }
-
-    @Override
-    public CompositeConstraintsBuilder<AggregateConstraintsBuilder<A, E>, A> composite(CompositeType type) {
-        return new CompositeConstraintsBuilder<>(this, type, sourceConstraints, this.type);
     }
 
     /**
@@ -85,12 +76,13 @@ public class AggregateConstraintsBuilder<A, E> extends ConstraintsBuilder<A> {
      *
      * @return the newly created builder
      */
-    public ComponentConstraintsBuilder<AggregateConstraintsBuilder<A, E>, A, E> component() {
-        return new ComponentConstraintsBuilder<>(this, sourceConstraints, this.type, this.componentType);
+    public ComponentConstraintsBuilder<AggregateConstraintsBuilder<A, E, E0>, A, E, E0> component() {
+        @SuppressWarnings("unchecked") ConvertibleType<E, E0> elementType = (ConvertibleType<E, E0>) this.type.getElementType();
+        return new ComponentConstraintsBuilder<>(this, sourceConstraints, elementType);
     }
 
     @Override
-    public ConfigAggregateBuilder<A, E> finishConstraints() {
-        return (ConfigAggregateBuilder<A, E>) super.finishConstraints();
+    public ConfigAggregateBuilder<A, E, E0> finishConstraints() {
+        return (ConfigAggregateBuilder<A, E, E0>) super.finishConstraints();
     }
 }

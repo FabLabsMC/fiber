@@ -2,6 +2,7 @@ package me.zeroeightsix.fiber;
 
 import me.zeroeightsix.fiber.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
+import me.zeroeightsix.fiber.schema.FiberTypes;
 import me.zeroeightsix.fiber.tree.ConfigLeaf;
 import me.zeroeightsix.fiber.tree.ConfigNode;
 import me.zeroeightsix.fiber.tree.ConfigTree;
@@ -31,7 +32,7 @@ class NodeOperationsTest {
     @DisplayName("Value -> Node")
     void moveNode() {
         ConfigTreeBuilder node = ConfigTree.builder();
-        ConfigLeaf<Integer> value = node.beginValue("A", Integer.class, 10).build();
+        ConfigLeaf<Integer, ?> value = node.beginValue("A", Integer.class, 10).build();
 
         NodeOperations.moveNode(value, node);
 
@@ -41,10 +42,10 @@ class NodeOperationsTest {
     @Test
     @DisplayName("Value -> Value")
     void copyValue() {
-        ConfigLeaf<Integer> valueOne = new ConfigLeafBuilder<>(null, "A", Integer.class)
+        ConfigLeaf<Integer, ?> valueOne = new ConfigLeafBuilder<>(null, "A", FiberTypes.INT)
                 .withDefaultValue(10)
                 .build();
-        ConfigLeaf<Integer> valueTwo = new ConfigLeafBuilder<>(null, "A", Integer.class)
+        ConfigLeaf<Integer, ?> valueTwo = new ConfigLeafBuilder<>(null, "A", FiberTypes.INT)
                 .withDefaultValue(20)
                 .build();
 
@@ -60,8 +61,8 @@ class NodeOperationsTest {
     static <T> void testItemFor(Class<T> type, T value, ConfigNode item) {
         assertNotNull(item, "Setting exists");
         assertTrue(item instanceof Property<?>, "Setting is a property");
-        Property<?> property = (Property<?>) item;
+        Property<?, ?> property = (Property<?, ?>) item;
         assertEquals(type, property.getType(), "Setting type is correct");
-        assertEquals(value, ((Property<?>) item).getValue(), "Setting value is correct");
+        assertEquals(value, ((Property<?, ?>) item).getValue(), "Setting value is correct");
     }
 }

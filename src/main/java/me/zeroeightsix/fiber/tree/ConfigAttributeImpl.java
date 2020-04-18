@@ -1,10 +1,12 @@
 package me.zeroeightsix.fiber.tree;
 
+import me.zeroeightsix.fiber.schema.ConvertibleType;
+
 public class ConfigAttributeImpl<T> implements ConfigAttribute<T> {
-    private final Class<T> type;
+    private final ConvertibleType<T, T> type;
     private T value;
 
-    public ConfigAttributeImpl(Class<T> type, T value) {
+    public ConfigAttributeImpl(ConvertibleType<T, T> type, T value) {
         this.type = type;
         this.value = value;
     }
@@ -21,7 +23,12 @@ public class ConfigAttributeImpl<T> implements ConfigAttribute<T> {
     }
 
     @Override
-    public Class<T> getType() {
+    public T getRawValue() {
+        return this.value;
+    }
+
+    @Override
+    public ConvertibleType<T, T> getConvertibleType() {
         return this.type;
     }
 }

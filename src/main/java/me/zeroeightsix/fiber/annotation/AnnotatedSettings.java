@@ -11,6 +11,7 @@ import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.builder.constraint.AbstractConstraintsBuilder;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
+import me.zeroeightsix.fiber.schema.FiberTypes;
 import me.zeroeightsix.fiber.tree.ConfigBranch;
 import me.zeroeightsix.fiber.tree.ConfigTree;
 
@@ -190,7 +191,7 @@ public class AnnotatedSettings {
     private <T> void fieldToItem(ConfigTreeBuilder node, Field field, Object pojo, String name, List<Member> listeners) throws FiberException {
         Class<T> type = getSettingTypeFromField(field);
 
-        ConfigLeafBuilder<T> builder = createConfigLeafBuilder(node, name, type, field, pojo)
+        ConfigLeafBuilder<T, ?> builder = createConfigLeafBuilder(node, name, type, field, pojo)
                 .withComment(findComment(field))
                 .withDefaultValue(findDefaultValue(field, pojo))
                 .withFinality(getSettingAnnotation(field).map(Setting::constant).orElse(false));
@@ -228,7 +229,7 @@ public class AnnotatedSettings {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Nonnull
-    private <T, E> ConfigLeafBuilder<T> createConfigLeafBuilder(ConfigTreeBuilder parent, String name, Class<T> type, Field field, Object pojo) {
+    private <T, E> ConfigLeafBuilder<T, ?> createConfigLeafBuilder(ConfigTreeBuilder parent, String name, Class<T> type, Field field, Object pojo) {
         AnnotatedType annotatedType = field.getAnnotatedType();
         if (ConfigAggregateBuilder.isAggregate(type)) {
             if (Collection.class.isAssignableFrom(type)) {
@@ -239,7 +240,7 @@ public class AnnotatedSettings {
                         Class<E> componentType = (Class<E>) TypeMagic.classForType(typeArg.getType());
                         if (componentType != null) {
                             // coerce to a collection class and configure as such
-                            ConfigAggregateBuilder<T, E> aggregate = ConfigAggregateBuilder.create(parent, name, (Class) type, componentType);
+                            ConfigAggregateBuilder<T, E> aggregate = ConfigAggregateBuilder.create(parent, name, FiberTypes.makeCollection());
                             // element constraints are on the type argument (eg. List<@Regex String>), so we setup constraints from it
                             constrain(aggregate.beginConstraints().component(), typeArg, pojo).finishComponent().finishConstraints();
                             return aggregate;
@@ -263,7 +264,7 @@ public class AnnotatedSettings {
     }
 
     @SuppressWarnings("unchecked")
-    private <T, B extends AbstractConstraintsBuilder<?, T, ?>> B constrain(B constraints, AnnotatedElement annotated, Object pojo) {
+    private <T, B extends AbstractConstraintsBuilder<?, T, T, ?, ?>> B constrain(B constraints, AnnotatedElement annotated, Object pojo) {
         for (Annotation annotation : annotated.getAnnotations()) {
             ConstraintProcessorEntry entry = this.constraintProcessors.get(annotation.annotationType());
             if (entry != null) {

@@ -24,7 +24,7 @@ class ConstraintsBuilderTest {
     @Test
     public void testNumericalConstraints() {
         List<Constraint<? super Integer>> constraintList = new ArrayList<>();
-        ConstraintsBuilder<Integer> constraintsBuilder = new ConstraintsBuilder<>(null, constraintList, Integer.class);
+        ConstraintsBuilder<Integer, ?> constraintsBuilder = new ConstraintsBuilder<>(null, constraintList, Integer.class);
         constraintsBuilder.atLeast(5)
                 .composite(CompositeType.OR)
                 .atLeast(20)
@@ -48,7 +48,7 @@ class ConstraintsBuilderTest {
     @DisplayName("Test array aggregate constraints")
     @Test
     public void testArrayConstraints() {
-        ConfigLeaf<Integer[]> config = ConfigAggregateBuilder.create(null, "foo", Integer[].class)
+        ConfigLeaf<Integer[], ?> config = ConfigAggregateBuilder.create(null, "foo", Integer[].class)
                 .beginConstraints().component()
                 .range(3, 10)
                 .finishComponent()
@@ -70,7 +70,7 @@ class ConstraintsBuilderTest {
         ConfigAggregateBuilder<List<Integer>, Integer> aggregateBuilder = builder.beginListValue("foo", Integer.class);
         assertThrows(RuntimeFiberException.class, () -> aggregateBuilder.beginConstraints().component().regex(""), "Invalid constraint type at build time");
 
-        ConfigLeaf<List<Integer>> config = aggregateBuilder
+        ConfigLeaf<List<Integer>, ?> config = aggregateBuilder
                 .beginConstraints().component()
                 .atLeast(3).atMost(10)
                 .finishComponent()
@@ -78,7 +78,7 @@ class ConstraintsBuilderTest {
                 .finishConstraints()
                 .build();
 
-        ConfigLeaf<List<Integer>> deferredConfig = builder.beginAggregateValue("deferred", List.class, null, Collections.<Integer>emptyList())
+        ConfigLeaf<List<Integer>, ?> deferredConfig = builder.beginAggregateValue("deferred", List.class, null, Collections.<Integer>emptyList())
                 .beginConstraints().component().regex("").finishComponent()
                 .finishConstraints().build();
         assertThrows(RuntimeException.class, () -> deferredConfig.setValue(Collections.singletonList(1)),

@@ -11,7 +11,7 @@ class ConfigQueryTest {
 
     @Test
     void run() throws FiberQueryException {
-        AtomicReference<ConfigLeaf<Integer>> a = new AtomicReference<>();
+        AtomicReference<ConfigLeaf<Integer, ?>> a = new AtomicReference<>();
         ConfigTree tree = ConfigTree.builder()
                 .fork("child")
                 .fork("stuff")

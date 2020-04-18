@@ -4,10 +4,11 @@ import me.zeroeightsix.fiber.FiberId;
 import me.zeroeightsix.fiber.annotation.AnnotatedSettings;
 import me.zeroeightsix.fiber.builder.constraint.AggregateConstraintsBuilder;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
+import me.zeroeightsix.fiber.schema.ConvertibleType;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.List;
 import java.util.function.BiConsumer;
 
 /**
@@ -20,7 +21,7 @@ import java.util.function.BiConsumer;
  * @param <E> the type of values held by {@code <A>}
  * @see #create
  */
-public final class ConfigAggregateBuilder<A, E> extends ConfigLeafBuilder<A> {
+public final class ConfigAggregateBuilder<A, E, E0> extends ConfigLeafBuilder<A, List<E0>> {
     /**
      * Determines if a {@code Class} object represents an aggregate type,
      * ie. if it is an {@linkplain Class#isArray() Array} or a {@linkplain Collection}.
@@ -30,6 +31,8 @@ public final class ConfigAggregateBuilder<A, E> extends ConfigLeafBuilder<A> {
      * {@code false} otherwise
      */
     public static boolean isAggregate(Class<?> type) {
+        // TODO replace with ConvertibleType.isAggregate
+        // TODO for annotation handling, add generic type processing (ParameterizedType -> ConvertibleType)
         return type.isArray() || Collection.class.isAssignableFrom(type);
     }
 
@@ -42,7 +45,7 @@ public final class ConfigAggregateBuilder<A, E> extends ConfigLeafBuilder<A> {
      * @see #isAggregate
      */
     @SuppressWarnings("unchecked")
-    public static <E> ConfigAggregateBuilder<E[], E> create(ConfigTreeBuilder source, @Nonnull String name, @Nonnull Class<E[]> arrayType) {
+    public static <E, E0> ConfigAggregateBuilder<E[], E> create(ConfigTreeBuilder source, @Nonnull String name, @Nonnull Class<E[]> arrayType) {
         if (!arrayType.isArray()) throw new RuntimeFiberException(arrayType + " is not a valid array type");
         return new ConfigAggregateBuilder<>(source, name, arrayType, (Class<E>) AnnotatedSettings.wrapPrimitive(arrayType.getComponentType()));
     }
@@ -56,66 +59,47 @@ public final class ConfigAggregateBuilder<A, E> extends ConfigLeafBuilder<A> {
      * @param <E>            the type {@code componentType} represents. eg. {@code Integer}
      * @return the newly created builder
      */
-    @SuppressWarnings("unchecked")
-    public static <C extends Collection<E>, E> ConfigAggregateBuilder<C, E> create(ConfigTreeBuilder source, @Nonnull String name, @Nonnull Class<? super C> collectionType, @Nullable Class<E> componentType) {
-        if (!Collection.class.isAssignableFrom(collectionType))
-            throw new RuntimeFiberException(collectionType + " is not a valid Collection type");
-        return new ConfigAggregateBuilder<>(source, name, (Class<C>) collectionType, componentType);
+    public static <C, E, E0> ConfigAggregateBuilder<C, E, E0> create(ConfigTreeBuilder source, @Nonnull String name, @Nonnull ConvertibleType<C, List<E0>> type) {
+        if (!type.isList()) throw new IllegalArgumentException(type + " is not a valid list type");
+        return new ConfigAggregateBuilder<>(source, name, type);
     }
 
-    @Nullable
-    private final Class<E> componentType;
-
-    private ConfigAggregateBuilder(ConfigTreeBuilder source, @Nonnull String name, @Nonnull Class<A> type, @Nullable Class<E> componentType) {
+    private ConfigAggregateBuilder(ConfigTreeBuilder source, @Nonnull String name, @Nonnull ConvertibleType<A, List<E0>> type) {
         super(source, name, type);
-        this.componentType = componentType;
     }
 
     @Override
-    public ConfigAggregateBuilder<A, E> withName(@Nonnull String name) {
+    public ConfigAggregateBuilder<A, E, E0> withName(@Nonnull String name) {
         super.withName(name);
         return this;
     }
 
     @Override
-    public ConfigAggregateBuilder<A, E> withComment(String comment) {
+    public ConfigAggregateBuilder<A, E, E0> withComment(String comment) {
         super.withComment(comment);
         return this;
     }
 
     @Override
-    public <A1> ConfigAggregateBuilder<A, E> withAttribute(FiberId id, Class<A1> type, A1 defaultValue) {
+    public <A1> ConfigAggregateBuilder<A, E, E0> withAttribute(FiberId id, ConvertibleType<A1, A1> type, A1 defaultValue) {
         super.withAttribute(id, type, defaultValue);
         return this;
     }
 
     @Override
-    public ConfigAggregateBuilder<A, E> withListener(BiConsumer<A, A> consumer) {
+    public ConfigAggregateBuilder<A, E, E0> withListener(BiConsumer<A, A> consumer) {
         super.withListener(consumer);
         return this;
     }
 
     @Override
-    public ConfigAggregateBuilder<A, E> withDefaultValue(A defaultValue) {
+    public ConfigAggregateBuilder<A, E, E0> withDefaultValue(A defaultValue) {
         super.withDefaultValue(defaultValue);
         return this;
     }
 
     @Override
-    public ConfigAggregateBuilder<A, E> withFinality() {
-        super.withFinality();
-        return this;
+    public AggregateConstraintsBuilder<A, E, E0> beginConstraints() {
+        return new AggregateConstraintsBuilder<>(this, constraints, type);
     }
-
-    @Override
-    public ConfigAggregateBuilder<A, E> withFinality(boolean isFinal) {
-        super.withFinality(isFinal);
-        return this;
-    }
-
-    @Override
-    public AggregateConstraintsBuilder<A, E> beginConstraints() {
-        return new AggregateConstraintsBuilder<>(this, constraintList, type, componentType);
-    }
-
 }

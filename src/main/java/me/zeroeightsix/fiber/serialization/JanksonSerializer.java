@@ -55,7 +55,7 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 			ConfigNode item = tree.lookup(key);
 			if (item != null) {
 				if (item instanceof Property) {
-					setPropertyValue((Property<?>) item, child);
+					setPropertyValue((Property<?, ?>) item, child);
 				} else if (item instanceof ConfigBranch && child instanceof JsonObject) {
 					JsonObject childLeftovers = deserialize((ConfigTree) item, (JsonObject) child);
 					if (!childLeftovers.isEmpty()) {
@@ -71,8 +71,8 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 		return leftovers;
 	}
 
-	private JsonElement serialize(HasValue<?> hasValue) {
-		return marshaller.marshall(hasValue.getValue());
+	private JsonElement serialize(ConvertibleValue<?, ?> convertibleValue) {
+		return marshaller.marshall(convertibleValue.getValue());
 	}
 
 	@Override
@@ -96,8 +96,8 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 				if (!subNode.isSerializedSeparately()) {
 					object.put((name = subNode.getName()), serialize(subNode));
 				}
-			} else if (treeItem instanceof HasValue) {
-				object.put((name = treeItem.getName()), serialize((HasValue<?>) treeItem));
+			} else if (treeItem instanceof ConvertibleValue) {
+				object.put((name = treeItem.getName()), serialize((ConvertibleValue<?, ?>) treeItem));
 			}
 
 			if (name != null && treeItem instanceof Commentable) {
@@ -112,7 +112,7 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 		return marshaller.marshallReverse(type, value);
 	}
 
-	private <T> void setPropertyValue(Property<T> property, JsonElement child) {
+	private <T> void setPropertyValue(Property<T, ?> property, JsonElement child) {
 		Class<T> type = property.getType();
 		property.setValue(marshall(type, child));
 	}

@@ -1,11 +1,12 @@
 package me.zeroeightsix.fiber.builder.constraint;
 
 import me.zeroeightsix.fiber.builder.ConfigLeafBuilder;
-import me.zeroeightsix.fiber.constraint.CompositeType;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
+import me.zeroeightsix.fiber.schema.ConvertibleType;
 
-import java.util.List;
+import javax.annotation.Nullable;
+import java.util.Set;
 
 /**
  * A builder for {@code Constraint}s.
@@ -17,7 +18,7 @@ import java.util.List;
  * @param <T> the type of {@link Constraint} this builder should output
  * @see AggregateConstraintsBuilder
  */
-public class ConstraintsBuilder<T> extends AbstractConstraintsBuilder<ConfigLeafBuilder<T>, T, T> {
+public class ConstraintsBuilder<T, T0> extends AbstractConstraintsBuilder<ConfigLeafBuilder<T, T0>, T, T0, T, T0> {
 
     /**
      * Creates a new scalar constraint builder
@@ -26,58 +27,44 @@ public class ConstraintsBuilder<T> extends AbstractConstraintsBuilder<ConfigLeaf
      * @param constraints the list of constraints this builder will add to
      * @param type        the class of the type of values checked by constraints built by this builder
      */
-    public ConstraintsBuilder(ConfigLeafBuilder<T> source, List<Constraint<? super T>> constraints, Class<T> type) {
+    public ConstraintsBuilder(ConfigLeafBuilder<T, T0> source, Set<Constraint<? super T0>> constraints, ConvertibleType<T, T0> type) {
         super(source, constraints, type);
     }
 
     @Override
-    public ConstraintsBuilder<T> atLeast(T min) throws RuntimeFiberException {
+    public ConstraintsBuilder<T, T0> atLeast(T min) throws RuntimeFiberException {
         super.atLeast(min);
         return this;
     }
 
     @Override
-    public ConstraintsBuilder<T> atMost(T max) {
+    public ConstraintsBuilder<T, T0> atMost(T max) {
         super.atMost(max);
         return this;
     }
 
     @Override
-    public ConstraintsBuilder<T> range(T min, T max) {
+    public ConstraintsBuilder<T, T0> range(T min, T max, @Nullable T step) {
         super.range(min, max);
         return this;
     }
 
     @Override
-    public ConstraintsBuilder<T> minLength(int min) {
+    public ConstraintsBuilder<T, T0> minLength(int min) {
         super.minLength(min);
         return this;
     }
 
     @Override
-    public ConstraintsBuilder<T> maxLength(int max) {
+    public ConstraintsBuilder<T, T0> maxLength(int max) {
         super.maxLength(max);
         return this;
     }
 
     @Override
-    public ConstraintsBuilder<T> regex(String regexPattern) {
+    public ConstraintsBuilder<T, T0> regex(String regexPattern) {
         super.regex(regexPattern);
         return this;
-    }
-
-    /**
-     * Creates a new {@code CompositeConstraintBuilder} from this {@code ConstraintsBuilder}.
-     *
-     * <p> Composite constraints are constraints that have 0 or more child constraints.
-     *
-     * <p> Whether or not a value satisfies a composite constraint is specified by the composite's {@link CompositeType}.
-     *
-     * @param type the type of composite to create
-     * @return the newly created builder
-     */
-    public CompositeConstraintsBuilder<? extends ConstraintsBuilder<T>, T> composite(CompositeType type) {
-        return new CompositeConstraintsBuilder<>(this, type, sourceConstraints, this.type);
     }
 
     /**
@@ -87,7 +74,7 @@ public class ConstraintsBuilder<T> extends AbstractConstraintsBuilder<ConfigLeaf
      *
      * @return the source builder
      */
-    public ConfigLeafBuilder<T> finishConstraints() {
+    public ConfigLeafBuilder<T, T0> finishConstraints() {
         sourceConstraints.addAll(newConstraints);
         return source;
     }

@@ -2,22 +2,23 @@ package me.zeroeightsix.fiber.tree;
 
 import me.zeroeightsix.fiber.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.constraint.Constraint;
-import me.zeroeightsix.fiber.constraint.FinalConstraint;
+import me.zeroeightsix.fiber.schema.ConvertibleType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
+import java.util.Set;
 import java.util.function.BiConsumer;
 
 /**
  * A {@code ConfigNode} with some value of type {@code T}.
  *
  * @param <T> The type of value this class holds
+ * @param <T0> The base type to which values can be converted
  * @see ConfigNodeImpl
  * @see ConfigLeafBuilder
  * @see me.zeroeightsix.fiber.builder.ConfigAggregateBuilder
  */
-public interface ConfigLeaf<T> extends ConfigNode, Property<T>, Commentable {
+public interface ConfigLeaf<T, T0> extends ConfigNode, Property<T, T0>, Commentable {
 
     /**
      * Sets the value held by this {@code ConfigLeaf}.
@@ -53,12 +54,13 @@ public interface ConfigLeaf<T> extends ConfigNode, Property<T>, Commentable {
     @Override
     Class<T> getType();
 
+    ConvertibleType<T, T0> getConvertibleType();
+
     /**
      * {@inheritDoc}
      *
      * <p> A value is accepted if it satisfies every constraint
-     * this setting has. Note that some constraints such as {@link FinalConstraint}
-     * will cause even the {@linkplain #getValue() current value} to be rejected.
+     * this setting has.
      *
      * @param value the value to check
      * @see #setValue(Object)
@@ -95,5 +97,5 @@ public interface ConfigLeaf<T> extends ConfigNode, Property<T>, Commentable {
      * @return the list of constraints
      */
     @Nonnull
-    List<Constraint<? super T>> getConstraints();
+    Set<Constraint<? super T0>> getConstraints();
 }

@@ -28,5 +28,5 @@ public interface ConstraintAnnotationProcessor<A extends Annotation, T> {
      * @param constraints the constraints builder being configured
      * @see AnnotatedSettings#applyToNode(ConfigTreeBuilder, Object)
      */
-    void apply(A annotation, AnnotatedElement annotated, Object pojo, AbstractConstraintsBuilder<?, ?, T> constraints);
+    void apply(A annotation, AnnotatedElement annotated, Object pojo, AbstractConstraintsBuilder<?, ?, ?, T, ?> constraints);
 }

@@ -7,13 +7,16 @@ import java.util.regex.Pattern;
  *
  * @see ConstraintType#STRING_MATCHING
  */
-public class RegexConstraint extends ValuedConstraint<Pattern, CharSequence> {
+public class RegexConstraint extends ValuedConstraint<Pattern, String> {
     public RegexConstraint(Pattern value) {
         super(ConstraintType.STRING_MATCHING, value);
     }
 
     @Override
-    public boolean test(CharSequence value) {
-        return this.getValue().matcher(value).matches();
+    public TestResult<String> test(String value) {
+        if (this.getConstraintValue().matcher(value).matches()) {
+            return new TestResult<>(true, value);
+        }
+        return TestResult.unrecoverable();
     }
 }

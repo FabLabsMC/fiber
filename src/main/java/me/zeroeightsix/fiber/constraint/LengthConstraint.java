@@ -1,12 +1,10 @@
 package me.zeroeightsix.fiber.constraint;
 
 import me.zeroeightsix.fiber.exception.RuntimeFiberException;
+import me.zeroeightsix.fiber.schema.ConvertibleType;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.lang.reflect.Array;
-import java.util.Collection;
-import java.util.Map;
+import java.util.List;
 import java.util.function.ToIntFunction;
 
 /**
@@ -17,29 +15,21 @@ import java.util.function.ToIntFunction;
  * @see ConstraintType#MAXIMUM_LENGTH
  */
 public class LengthConstraint<T> extends ValuedConstraint<Integer, T> {
-    public static <T> LengthConstraint<T> min(@Nullable Class<T> type, int min) {
+    public static <T> LengthConstraint<T> min(ConvertibleType<?, T> type, int min) {
         return new LengthConstraint<>(ConstraintType.MINIMUM_LENGTH, getLengthFunction(type), min);
     }
 
-    public static <T> LengthConstraint<T> max(@Nullable Class<T> type, int min) {
+    public static <T> LengthConstraint<T> max(ConvertibleType<?, T> type, int min) {
         return new LengthConstraint<>(ConstraintType.MAXIMUM_LENGTH, getLengthFunction(type), min);
     }
 
-    @SuppressWarnings("unchecked")
     @Nonnull
-    private static <T> ToIntFunction<T> getLengthFunction(@Nullable Class<T> type) {
+    private static <T> ToIntFunction<T> getLengthFunction(ConvertibleType<?, T> type) {
         ToIntFunction<T> length;
-        if (type == null) {
-            // deferred type resolution
-            length = t -> getLengthFunction((Class<T>) t.getClass()).applyAsInt(t);
-        } else if (type.isArray()) {
-            length = Array::getLength;
-        } else if (CharSequence.class.isAssignableFrom(type)) {
+        if (type.isList()) {
+            length = t -> ((List<?>) t).size();
+        } else if (type.isString()) {
             length = t -> ((CharSequence) t).length();
-        } else if (Collection.class.isAssignableFrom(type)) {
-            length = t -> ((Collection<?>) t).size();
-        } else if (Map.class.isAssignableFrom(type)) {
-            length = t -> ((Map<?, ?>) t).size();
         } else {
             throw new RuntimeFiberException("Instances of " + type + " do not have a known length or size");
         }
@@ -51,19 +41,25 @@ public class LengthConstraint<T> extends ValuedConstraint<Integer, T> {
     private LengthConstraint(ConstraintType type, ToIntFunction<T> lengthGetter, Integer value) {
         super(type, value);
         this.lengthGetter = lengthGetter;
+        if (type != ConstraintType.MINIMUM_LENGTH && type != ConstraintType.MAXIMUM_LENGTH) {
+            throw new IllegalArgumentException("Invalid constraint type " + type);
+        }
     }
 
     @Override
-    public boolean test(T value) {
+    public TestResult<T> test(T value) {
         if (value == null) throw new NullPointerException("Cannot test the length of a null value");
-
-        switch (getType()) {
+        int length = this.lengthGetter.applyAsInt(value);
+        switch (this.getType()) {
             case MINIMUM_LENGTH:
-                return lengthGetter.applyAsInt(value) >= this.getValue();
+                if (length >= this.getConstraintValue()) return TestResult.successful(value);
+                break;
             case MAXIMUM_LENGTH:
-                return lengthGetter.applyAsInt(value) <= this.getValue();
+                if (length <= this.getConstraintValue()) return TestResult.successful(value);
+                break;
             default:
-                throw new RuntimeFiberException("A StringLengthConstraint must be of type " + ConstraintType.MINIMUM_LENGTH + " or " + ConstraintType.MAXIMUM_LENGTH);
+                throw new AssertionError("Invalid constraint type");
         }
+        return TestResult.unrecoverable();
     }
 }

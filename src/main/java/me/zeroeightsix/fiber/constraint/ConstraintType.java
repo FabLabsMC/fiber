@@ -12,21 +12,23 @@ public enum ConstraintType {
 	/**
 	 * Indicates that the value can never be changed after initialization
 	 */
-	FINAL(false, identifier("final")),
+	FINAL(identifier("final")),
 
 	/**
 	 * Specifies a numerical lower bound.
 	 *
 	 * <p> Values must be equal to or greater than the constraint's value to satisfy the constraint.
 	 */
-	NUMERICAL_LOWER_BOUND(true, identifier("min")),
+	NUMERICAL_LOWER_BOUND(identifier("min")),
 
 	/**
 	 * Specifies a numerical upper bound.
 	 *
 	 * <p> Values must be equal to or lesser than the constraint's value to satisfy the constraint.
 	 */
-	NUMERICAL_UPPER_BOUND(true, identifier("max")),
+	NUMERICAL_UPPER_BOUND(identifier("max")),
+
+	NUMERICAL_STEP(identifier("multiple")),
 
 	/**
 	 * Specifies a minimum length. This constraint applies to {@link CharSequence}s, {@link Collection}s and arrays.
@@ -44,7 +46,7 @@ public enum ConstraintType {
 	 *
 	 * @see #MAXIMUM_LENGTH
 	 */
-	MINIMUM_LENGTH(true, identifier("min_length")),
+	MINIMUM_LENGTH(identifier("min_length")),
 
 	/**
 	 * Specifies a maximum length. This constraint applies to {@link CharSequence}s, {@link Collection}s and arrays.
@@ -62,46 +64,41 @@ public enum ConstraintType {
 	 *
 	 * @see #MINIMUM_LENGTH
 	 */
-	MAXIMUM_LENGTH(true, identifier("max_length")),
+	MAXIMUM_LENGTH(identifier("max_length")),
 
 	/**
 	 * Specifies a pattern that must match.
 	 *
 	 * <p> Values must match the constraint's value, which is a regular expression (regex).
 	 */
-	STRING_MATCHING(false, identifier("regex")),
+	STRING_MATCHING(identifier("regex")),
 
 	/**
 	 * Specifies that all elements of a collection or array must satisfy all of a constraint's child constraints in order to satisfy that constraint.
 	 */
-	COMPONENTS_MATCH(false, identifier("component")),
+	COMPONENTS_MATCH(identifier("component")),
 
 	/**
 	 * Specifies that a constraint is a composite constraint.
 	 *
 	 * <p> Whether or not a value satisfies a composite constraint is specified by the composite's {@link CompositeType}.
 	 */
-	COMPOSITE(false, identifier("composite"));
+	COMPOSITE(identifier("composite")),
 
-	private final boolean numerical;
+	RANGE(identifier("range")),
+
+	UNIQUE(identifier("unique")),
+
+	ONE_OF(identifier("enumeration"));
+
 	private final FiberId identifier;
 
-	ConstraintType(boolean numerical, FiberId identifier) {
-		this.numerical = numerical;
+	ConstraintType(FiberId identifier) {
 		this.identifier = identifier;
 	}
 
 	private static FiberId identifier(String name) {
 		return new FiberId("fiber", name);
-	}
-
-	/**
-	 * Returns whether or not this is a {@code ConstraintType} that operates only on numerical values
-	 *
-	 * @return {@code true} if this type is numerical
-	 */
-	public boolean isNumerical() {
-		return numerical;
 	}
 
 	/**
