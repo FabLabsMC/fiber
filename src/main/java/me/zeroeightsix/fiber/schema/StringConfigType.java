@@ -27,13 +27,11 @@ public final class StringConfigType<T> extends ConfigType<T, String> {
     }
 
     public StringConfigType<T> withMinLength(int min) {
-        EnumMap<ConstraintType, Constraint<? super String>> newConstraints = new EnumMap<>(this.indexedConstraints);
-        LengthConstraint<?> currentMin = (LengthConstraint<?>) newConstraints.remove(ConstraintType.MINIMUM_LENGTH);
-        if (currentMin != null && currentMin.getConstraintValue() > min) {
-            throw new IllegalArgumentException("Cannot widen an already constrained list type: " + currentMin.getConstraintValue() + " > " + min);
-        }
-        newConstraints.put(ConstraintType.MINIMUM_LENGTH, LengthConstraint.min(String::length, min));
-        return new StringConfigType<>(this.getActualType(), this::toRawType, this::toActualType, Collections.unmodifiableMap(newConstraints));
+        return this.withConstraints(LengthConstraint.min(String::length, min), (current, added) -> current < min);
+    }
+
+    public StringConfigType<T> withMaxLength(int max) {
+        return this.withConstraints(LengthConstraint.max(String::length, max), (current, added) -> current > max);
     }
 
     public StringConfigType<T> withPattern(String regex) {
