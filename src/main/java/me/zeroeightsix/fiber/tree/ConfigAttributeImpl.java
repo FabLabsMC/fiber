@@ -23,12 +23,7 @@ public class ConfigAttributeImpl<T> implements ConfigAttribute<T> {
     }
 
     @Override
-    public T getRawValue() {
-        return this.value;
-    }
-
-    @Override
-    public ConfigType<T, T> getConvertibleType() {
+    public ConfigType<T, T> getConfigType() {
         return this.type;
     }
 }

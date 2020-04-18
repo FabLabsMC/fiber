@@ -16,6 +16,11 @@ public final class StringConfigType<T> extends ConfigType<T, String> {
     }
 
     @Override
+    public Kind getKind() {
+        return Kind.STRING;
+    }
+
+    @Override
     public <T1> StringConfigType<T1> derive(Class<? super T1> actualType, Function<T1, T> f0, Function<T, T1> f) {
         @SuppressWarnings("unchecked") Class<T1> c = (Class<T1>) actualType;
         return new StringConfigType<>(c, v -> this.toRawType(f0.apply(v)), v -> f.apply(this.toActualType(v)), this.indexedConstraints);
@@ -29,6 +34,10 @@ public final class StringConfigType<T> extends ConfigType<T, String> {
         }
         newConstraints.put(ConstraintType.MINIMUM_LENGTH, LengthConstraint.min(String::length, min));
         return new StringConfigType<>(this.getActualType(), this::toRawType, this::toActualType, Collections.unmodifiableMap(newConstraints));
+    }
+
+    public StringConfigType<T> withPattern(String regex) {
+        return this.withPattern(Pattern.compile(regex));
     }
 
     public StringConfigType<T> withPattern(Pattern pattern) {

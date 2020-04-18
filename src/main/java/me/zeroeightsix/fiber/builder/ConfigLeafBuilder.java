@@ -155,7 +155,7 @@ public class ConfigLeafBuilder<T, T0> extends ConfigNodeBuilder {
             }
         }
         Set<Constraint<? super T0>> constraints = new LinkedHashSet<>(this.constraints);
-        ConfigLeaf<T, T0> built = new ConfigLeafImpl<>(Objects.requireNonNull(name, "Cannot build a value without a name"), comment, defaultValue, consumer, constraints, type);
+        ConfigLeaf<T, T0> built = new ConfigLeafImpl<>(Objects.requireNonNull(name, "Cannot build a value without a name"), type, comment, defaultValue, consumer);
         built.getAttributes().putAll(this.attributes);
 
         if (parent != null) {

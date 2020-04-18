@@ -59,8 +59,9 @@ public class SchemaGenerator {
 
 	private JsonObject createSchema(ConfigLeaf<?, ?> item) {
 		JsonObject object = new JsonObject();
-		if (item.getType() != null && classIdentifierHashMap.containsKey(item.getType())) {
-			object.put("type", new JsonPrimitive(classIdentifierHashMap.get(item.getType())));
+		Class<?> rawType = item.getConfigType().getRawType();
+		if (rawType != null && classIdentifierHashMap.containsKey(rawType)) {
+			object.put("type", new JsonPrimitive(classIdentifierHashMap.get(rawType)));
 		}
 		if (item.getComment() != null) {
 			object.put("comment", new JsonPrimitive(item.getComment()));

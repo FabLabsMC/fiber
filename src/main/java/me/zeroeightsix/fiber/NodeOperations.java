@@ -52,7 +52,7 @@ public class NodeOperations {
         }
     }
 
-    public static <T> void copyValue(Property<T, ?> from, Property<T, ?> to) {
+    public static <T> void copyValue(Property<T> from, Property<T> to) {
         to.setValue(from.getValue());
     }
 }

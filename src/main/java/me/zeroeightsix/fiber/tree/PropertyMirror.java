@@ -19,8 +19,8 @@ import me.zeroeightsix.fiber.schema.ConfigType;
  *
  * @param <T> the type of value this property mirrors
  */
-public class PropertyMirror<T, T0> implements Property<T, T0> {
-    protected Property<T, T0> delegate;
+public class PropertyMirror<T> implements Property<T> {
+    protected Property<T> delegate;
 
     /**
      * Sets a property to mirror.
@@ -30,35 +30,29 @@ public class PropertyMirror<T, T0> implements Property<T, T0> {
      *
      * @param delegate a property to mirror
      */
-    public void mirror(Property<T, T0> delegate) {
+    public void mirror(Property<T> delegate) {
         this.delegate = delegate;
     }
 
     @Override
     public boolean setValue(T value) {
-        return delegate != null && delegate.setValue(value);
+        return this.delegate != null && this.delegate.setValue(value);
     }
 
     @Override
-    public boolean accepts(T value) {
-        return delegate != null && delegate.accepts(value);
+    public boolean accepts(T rawValue) {
+        return this.delegate != null && this.delegate.accepts(rawValue);
     }
 
     @Override
     public T getValue() {
-        if (delegate == null) throw new IllegalStateException("No delegate property set for this mirror");
-        return delegate.getValue();
+        if (this.delegate == null) throw new IllegalStateException("No delegate property set for this mirror");
+        return this.delegate.getValue();
     }
 
     @Override
-    public T0 getRawValue() {
-        if (delegate == null) throw new IllegalStateException("No delegate property set for this mirror");
-        return delegate.getRawValue();
-    }
-
-    @Override
-    public ConfigType<T, T0> getConvertibleType() {
-        if (delegate == null) throw new IllegalStateException("No delegate property set for this mirror");
-        return delegate.getConvertibleType();
+    public ConfigType<T, ?> getConfigType() {
+        if (this.delegate == null) throw new IllegalStateException("No delegate property set for this mirror");
+        return this.delegate.getConfigType();
     }
 }

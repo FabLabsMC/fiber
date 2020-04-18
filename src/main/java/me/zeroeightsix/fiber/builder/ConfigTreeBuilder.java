@@ -14,7 +14,6 @@ import me.zeroeightsix.fiber.tree.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collections;
 import java.util.function.Consumer;
 
 /**
@@ -242,7 +241,7 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
      * @see ConfigTypes
      */
     public <T, T0> ConfigTreeBuilder withValue(@Nonnull String name, @Nonnull ConfigType<T, T0> type, @Nullable T defaultValue) {
-        this.items.add(new ConfigLeafImpl<>(name, null, defaultValue, (a, b) -> { }, Collections.emptySet(), type));
+        this.items.add(new ConfigLeafImpl<>(name, type, null, defaultValue, (a, b) -> { }));
         return this;
     }
 

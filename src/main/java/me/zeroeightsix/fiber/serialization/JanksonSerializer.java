@@ -6,6 +6,7 @@ import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.api.SyntaxError;
 import me.zeroeightsix.fiber.FiberId;
 import me.zeroeightsix.fiber.exception.FiberException;
+import me.zeroeightsix.fiber.schema.ConfigType;
 import me.zeroeightsix.fiber.tree.*;
 
 import javax.annotation.Nonnull;
@@ -42,7 +43,7 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 		} catch (SyntaxError syntaxError) {
 			throw new FiberException("Configuration file was malformed", syntaxError);
 		}
-		return deserialize(tree, object);
+		return this.deserialize(tree, object);
 	}
 
 	@Override
@@ -54,10 +55,10 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 
 			ConfigNode item = tree.lookup(key);
 			if (item != null) {
-				if (item instanceof Property) {
-					setPropertyValue((Property<?, ?>) item, child);
+				if (item instanceof ConfigLeaf) {
+					this.setPropertyValue((ConfigLeaf<?, ?>) item, child);
 				} else if (item instanceof ConfigBranch && child instanceof JsonObject) {
-					JsonObject childLeftovers = deserialize((ConfigTree) item, (JsonObject) child);
+					JsonObject childLeftovers = this.deserialize((ConfigTree) item, (JsonObject) child);
 					if (!childLeftovers.isEmpty()) {
 						leftovers.put(key, childLeftovers);
 					}
@@ -71,13 +72,13 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 		return leftovers;
 	}
 
-	private JsonElement serialize(ConvertibleValue<?, ?> convertibleValue) {
-		return marshaller.marshall(convertibleValue.getValue());
+	private JsonElement serialize(ConfigValue<?> configValue) {
+		return marshaller.marshall(configValue.getValue());
 	}
 
 	@Override
 	public void serialize(ConfigTree tree, @Nullable JsonObject additionalData, OutputStream out) throws IOException {
-		JsonObject object = serialize(tree);
+		JsonObject object = this.serialize(tree);
 		if (additionalData != null) {
 			object.putAll(additionalData);
 		}
@@ -94,10 +95,10 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 			if (treeItem instanceof ConfigBranch) {
 				ConfigBranch subNode = (ConfigBranch) treeItem;
 				if (!subNode.isSerializedSeparately()) {
-					object.put((name = subNode.getName()), serialize(subNode));
+					object.put((name = subNode.getName()), this.serialize(subNode));
 				}
-			} else if (treeItem instanceof ConvertibleValue) {
-				object.put((name = treeItem.getName()), serialize((ConvertibleValue<?, ?>) treeItem));
+			} else if (treeItem instanceof ConfigValue) {
+				object.put((name = treeItem.getName()), this.serialize((ConfigValue<?>) treeItem));
 			}
 
 			if (name != null && treeItem instanceof Commentable) {
@@ -112,9 +113,10 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 		return marshaller.marshallReverse(type, value);
 	}
 
-	private <T> void setPropertyValue(Property<T, ?> property, JsonElement child) {
-		Class<T> type = property.getType();
-		property.setValue(marshall(type, child));
+	private <T, T0> void setPropertyValue(ConfigLeaf<T, T0> property, JsonElement child) {
+		ConfigType<T, T0> configType = property.getConfigType();
+		Class<T0> type = configType.getRawType();
+		property.setValue(configType.toActualType(this.marshall(type, child)));
 	}
 
 	@Override

@@ -1,34 +1,36 @@
 package me.zeroeightsix.fiber.tree;
 
 import me.zeroeightsix.fiber.builder.ConfigLeafBuilder;
-import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.schema.ConfigType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Set;
 import java.util.function.BiConsumer;
 
 /**
  * A {@code ConfigNode} with some value of type {@code T}.
  *
- * @param <T> The type of value this class holds
+ * @param <T>  The type of value this class holds
  * @param <T0> The base type to which values can be converted
- * @see ConfigNodeImpl
+ * @see ConfigNode
  * @see ConfigLeafBuilder
- * @see me.zeroeightsix.fiber.builder.ConfigAggregateBuilder
  */
-public interface ConfigLeaf<T, T0> extends ConfigNode, Property<T, T0>, Commentable {
+public interface ConfigLeaf<T, T0> extends ConfigNode, Property<T>, Commentable {
 
     /**
      * Sets the value held by this {@code ConfigLeaf}.
      *
-     * <p> If the value does not satisfy this setting's {@linkplain #getConstraints() constraints},
-     * the current value is not updated and the method returns {@code false}.
+     * <p> If the provided value does not satisfy this setting's
+     * {@linkplain ConfigType#getConstraints() type constraints}:
+     * <ul>
+     *     <li> if a corrected value can be found, this setting is set to the corrected value
+     *          and this method returns {@code true}. </li>
+     *     <li> otherwise, the current value is not updated and the method returns {@code false}. </li>
+     * </ul>
      *
      * @param value the new value this {@code ConfigLeaf} should hold
      * @return {@code true} if this property changed as a result of the call, and {@code false} otherwise.
-     * @see #accepts(Object)
+     * @see Property#accepts(Object)
      */
     @Override
     boolean setValue(T value);
@@ -38,37 +40,28 @@ public interface ConfigLeaf<T, T0> extends ConfigNode, Property<T, T0>, Commenta
      *
      * <p> If no successful call to {@link #setValue(Object)} has been made,
      * this method returns this node's {@linkplain #getDefaultValue() default value}.
+     *
      * @return this node's value
      */
     @Override
     T getValue();
 
-    /**
-     * Returns a class object representing the type of values this node can hold.
-     *
-     * <p> The returned class object can be used for various runtime type checks,
-     * as well as constraint configuration.
-     *
-     * @return the class representing the type of this node's values
-     */
-    @Override
-    Class<T> getType();
-
-    ConfigType<T, T0> getConvertibleType();
+    ConfigType<T, T0> getConfigType();
 
     /**
-     * {@inheritDoc}
+     * Returns {@code true} if this property can be set to the given raw value.
      *
-     * <p> A value is accepted if it satisfies every constraint
-     * this setting has.
+     * <p> This method does not account for possible corrections offered by the type's constraints.
+     * In other words, it returns {@code true} if and only if every constraint of this property's
+     * {@linkplain #getConfigType() config type} accepts the given value as is.
      *
-     * @param value the value to check
-     * @see #setValue(Object)
-     * @see #getConstraints()
+     * @param rawValue the value to check
+     * @return {@code true} if this property accepts the given value, {@code false} otherwise.
+     * @see #setValueFrom(Object)
+     * @see ConfigType#getConstraints()
      */
-    @Override
-    default boolean accepts(T value) {
-        return false;
+    default boolean acceptsRaw(T0 rawValue) {
+        return true;
     }
 
     /**
@@ -90,12 +83,18 @@ public interface ConfigLeaf<T, T0> extends ConfigNode, Property<T, T0>, Commenta
     T getDefaultValue();
 
     /**
-     * Returns the list of constraints for this item.
+     * Sets the value of this property from a raw value.
      *
-     * <p> For a call to {@link #setValue} to pass (and such, return {@code true}), the value must satisfy all constraints in this list.
+     * <p> The provided value will be converted to this property's
+     * actual type using {@link ConfigType#toActualType(Object)}.
      *
-     * @return the list of constraints
+     * <p> This can fail and return {@code false} if, for example, the value did not satisfy the constraints of the property.
+     *
+     * @param rawValue the new value this property should receive
+     * @return {@code true} if this property changed as a result of the call
+     * @see #acceptsRaw(Object)
      */
-    @Nonnull
-    Set<Constraint<? super T0>> getConstraints();
+    boolean setValueFrom(T0 rawValue);
+
+    T0 getRawValue();
 }

@@ -16,6 +16,11 @@ public final class DecimalConfigType<T> extends ConfigType<T, BigDecimal> {
     }
 
     @Override
+    public Kind getKind() {
+        return Kind.DECIMAL;
+    }
+
+    @Override
     public <T1> DecimalConfigType<T1> derive(Class<? super T1> actualType, Function<T1, T> f0, Function<T, T1> f) {
         @SuppressWarnings("unchecked") Class<T1> c = (Class<T1>) actualType;
         return new DecimalConfigType<>(c, v -> this.toRawType(f0.apply(v)), v -> f.apply(this.toActualType(v)), this.indexedConstraints);

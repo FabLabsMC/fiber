@@ -4,7 +4,6 @@ import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.ConstraintType;
 import me.zeroeightsix.fiber.constraint.ValuedConstraint;
 
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
@@ -17,7 +16,6 @@ import java.util.function.Function;
 public abstract class ConfigType<T, T0> {
     private final Class<T> actualType;
     private final Class<T0> rawType;
-    private final Set<Constraint<? super T0>> typeConstraints;
     protected final Map<ConstraintType, Constraint<? super T0>> indexedConstraints;
     protected final Function<T, T0> f0;
     protected final Function<T0, T> f;
@@ -26,7 +24,6 @@ public abstract class ConfigType<T, T0> {
         this.actualType = actualType;
         this.rawType = rawType;
         this.indexedConstraints = typeConstraints;
-        this.typeConstraints = Collections.unmodifiableSet(new LinkedHashSet<>(typeConstraints.values()));
         this.f0 = f0;
         this.f = f;
     }
@@ -40,44 +37,39 @@ public abstract class ConfigType<T, T0> {
     }
 
     public T0 toRawType(T actualValue) {
-        return f0.apply(actualValue);
+        return this.f0.apply(actualValue);
     }
 
     public T toActualType(T0 rawValue) {
-        return f.apply(rawValue);
+        return this.f.apply(rawValue);
     }
 
-    public Set<Constraint<? super T0>> getTypeConstraints() {
-        return this.typeConstraints;
+    public Collection<Constraint<? super T0>> getConstraints() {
+        return this.indexedConstraints.values();
     }
 
-    public boolean isNumber() {
-        return this.rawType == BigDecimal.class;
-    }
-
-    public boolean isString() {
-        return this.rawType == String.class;
-    }
-
-    public boolean isList() {
-        return this.rawType == List.class;
-    }
+    public abstract Kind getKind();
 
     public abstract <T1> ConfigType<T1, T0> derive(Class<? super T1> actualType, Function<T1, T> f0, Function<T, T1> f);
 
     @Override
+    public String toString() {
+        return this.getActualType().toString() + "(" + this.getKind() + ")";
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || this.getClass() != o.getClass()) return false;
         ConfigType<?, ?> that = (ConfigType<?, ?>) o;
-        return Objects.equals(actualType, that.actualType) &&
-                Objects.equals(rawType, that.rawType) &&
-                Objects.equals(typeConstraints, that.typeConstraints);
+        return Objects.equals(this.actualType, that.actualType) &&
+                Objects.equals(this.rawType, that.rawType) &&
+                Objects.equals(this.indexedConstraints, that.indexedConstraints);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(actualType, rawType, typeConstraints);
+        return Objects.hash(this.actualType, this.rawType, this.indexedConstraints);
     }
 
     protected <V, C extends ValuedConstraint<V, ? super T0>> Map<ConstraintType, Constraint<? super T0>> updateConstraints(C added, BiPredicate<V, V> check) {
@@ -89,5 +81,9 @@ public abstract class ConfigType<T, T0> {
         }
         newConstraints.put(ConstraintType.MINIMUM_LENGTH, added);
         return Collections.unmodifiableMap(newConstraints);
+    }
+
+    public enum Kind {
+        DECIMAL, LIST, STRING
     }
 }

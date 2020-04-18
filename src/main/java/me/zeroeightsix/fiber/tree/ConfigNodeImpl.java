@@ -82,8 +82,8 @@ public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
     }
 
     private static <A> void checkAttributeType(ConfigType<A, A> expectedType, ConfigAttribute<?> attr) {
-        if (!expectedType.equals(attr.getConvertibleType())) {
-            throw new ClassCastException("Attempt to retrieve a value of type " + expectedType + " from attribute with type " + attr.getType());
+        if (!expectedType.equals(attr.getConfigType())) {
+            throw new ClassCastException("Attempt to retrieve a value of type " + expectedType + " from attribute with type " + attr.getConfigType());
         }
     }
 

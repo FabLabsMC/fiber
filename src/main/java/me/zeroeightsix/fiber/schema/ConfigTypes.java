@@ -43,19 +43,19 @@ public final class ConfigTypes {
 
     /* List-derived types */
 
-    public static final ListConfigType<List<String>, String, StringConfigType<String>> STRING_LIST = makeList(STRING);
-    public static final ListConfigType<Set<String>, String, StringConfigType<String>> STRING_SET = makeSet(STRING);
-    public static final ListConfigType<String[], String, StringConfigType<String>> STRING_ARRAY = makeArray(STRING);
+    public static final ListConfigType<List<String>> STRING_LIST = makeList(STRING);
+    public static final ListConfigType<Set<String>> STRING_SET = makeSet(STRING);
+    public static final ListConfigType<String[]> STRING_ARRAY = makeArray(STRING);
 
-    public static <E0, E, U extends ConfigType<E, E0>> ListConfigType<List<E>, E0, U> makeList(U elementType) {
+    public static <E0, E, U extends ConfigType<E, E0>> ListConfigType<List<E>> makeList(U elementType) {
         return ListConfigType.of(elementType);
     }
 
-    public static <E0, E, U extends ConfigType<E, E0>> ListConfigType<Set<E>, E0, U> makeSet(U elementType) {
+    public static <E0, E, U extends ConfigType<E, E0>> ListConfigType<Set<E>> makeSet(U elementType) {
         return ListConfigType.of(elementType).withUniqueElements().derive(Set.class, ArrayList::new, l -> Collections.unmodifiableSet(new LinkedHashSet<>(l)));
     }
 
-    public static <E0, E, U extends ConfigType<E, E0>> ListConfigType<E[], E0, U> makeArray(U elementType) {
+    public static <E0, E, U extends ConfigType<E, E0>> ListConfigType<E[]> makeArray(U elementType) {
         @SuppressWarnings("unchecked") E[] z = (E[]) Array.newInstance(elementType.getActualType(), 0);
         @SuppressWarnings("unchecked") Class<E[]> arrType = (Class<E[]>) z.getClass();
         return ListConfigType.of(elementType).derive(arrType, Arrays::asList, l -> l.toArray(z));
