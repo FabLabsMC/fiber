@@ -84,6 +84,6 @@ public abstract class ConfigType<T, T0> {
     }
 
     public enum Kind {
-        DECIMAL, LIST, STRING
+        BOOLEAN, DECIMAL, LIST, STRING
     }
 }
