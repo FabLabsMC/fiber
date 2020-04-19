@@ -90,7 +90,7 @@ class JanksonSerializerTest {
                 .beginValue("version", ConfigTypes.STRING.withPattern("\\d+\\.\\d+\\.\\d+"), "1.0.0")
                 .finishValue(versionTwo::mirror)
                 .fork("child")
-                .beginValue("A", INT_TYPE.withMinimum(0).withMaximum(20), 20)
+                .beginValue("A", INT_TYPE.withMinimum(-5).withMaximum(20), 20)
                 .finishValue(settingTwo::mirror)
                 .finishBranch()
                 .build();
@@ -109,7 +109,7 @@ class JanksonSerializerTest {
         settingOne.setValue(-5);
         jk.serialize(nodeOne, bos);
         jk.deserialize(nodeTwo, new ByteArrayInputStream(bos.toByteArray()));
-        assertEquals("1.0.0", versionTwo.getValue(), "Finality bypassed");
+        assertEquals("0.1.0", versionTwo.getValue(), "Valid value rejected");
         assertEquals(-5, settingTwo.getValue(), "Valid value rejected");
     }
 

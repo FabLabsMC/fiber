@@ -3,9 +3,11 @@ package me.zeroeightsix.fiber.serialization;
 import blue.endless.jankson.Jankson;
 import blue.endless.jankson.JsonElement;
 import blue.endless.jankson.JsonObject;
+import blue.endless.jankson.JsonPrimitive;
 import blue.endless.jankson.api.SyntaxError;
 import me.zeroeightsix.fiber.FiberId;
 import me.zeroeightsix.fiber.exception.FiberException;
+import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.schema.ConfigType;
 import me.zeroeightsix.fiber.tree.*;
 
@@ -14,6 +16,7 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
@@ -109,6 +112,7 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 		return object;
 	}
 
+	@Nullable
 	private <A> A marshall(Class<A> type, JsonElement value) {
 		return marshaller.marshallReverse(type, value);
 	}
@@ -116,7 +120,16 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 	private <T, T0> void setPropertyValue(ConfigLeaf<T, T0> property, JsonElement child) {
 		ConfigType<T, T0> configType = property.getConfigType();
 		Class<T0> type = configType.getRawType();
-		property.setValue(configType.toActualType(this.marshall(type, child)));
+		// TODO figure out how we want to handle null values
+		T0 deserialized = this.marshall(type, child);
+		try {
+			property.setValue(configType.toActualType(deserialized));
+		} catch (NullPointerException e) {
+			if (deserialized == null) {	// probably caused by the unexpected null input
+				throw new RuntimeFiberException("Failed to deserialize input '" + child + "' for " + property, e);
+			}
+			throw e;
+		}
 	}
 
 	@Override
@@ -138,6 +151,12 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 
 		@Override
 		public <A> A marshallReverse(Class<A> type, JsonElement value) {
+			if (type == BigDecimal.class) {
+				if (value instanceof JsonPrimitive) {
+					return type.cast(new BigDecimal(((JsonPrimitive) value).asString()));
+				}
+				return null;
+			}
 			return marshaller.marshall(type, value);
 		}
 	}
