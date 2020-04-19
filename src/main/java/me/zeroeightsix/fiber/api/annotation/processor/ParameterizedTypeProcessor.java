@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber.api.annotation;
+package me.zeroeightsix.fiber.api.annotation.processor;
 
 import me.zeroeightsix.fiber.api.schema.ConfigType;
 import me.zeroeightsix.fiber.api.schema.ListConfigType;

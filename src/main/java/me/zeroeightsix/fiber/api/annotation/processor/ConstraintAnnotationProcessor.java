@@ -1,5 +1,6 @@
-package me.zeroeightsix.fiber.api.annotation;
+package me.zeroeightsix.fiber.api.annotation.processor;
 
+import me.zeroeightsix.fiber.api.annotation.AnnotatedSettings;
 import me.zeroeightsix.fiber.api.schema.DecimalConfigType;
 import me.zeroeightsix.fiber.api.schema.ListConfigType;
 import me.zeroeightsix.fiber.api.schema.StringConfigType;

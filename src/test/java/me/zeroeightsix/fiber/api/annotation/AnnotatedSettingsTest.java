@@ -25,7 +25,7 @@ class AnnotatedSettingsTest {
 
     @BeforeEach
     void setup() {
-        this.annotatedSettings = new AnnotatedSettings();
+        this.annotatedSettings = AnnotatedSettings.create();
         this.node = ConfigTree.builder();
     }
 
