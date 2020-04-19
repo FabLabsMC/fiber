@@ -1,5 +1,6 @@
 package me.zeroeightsix.fiber.schema;
 
+import me.zeroeightsix.fiber.FiberId;
 import me.zeroeightsix.fiber.constraint.Constraint;
 import me.zeroeightsix.fiber.constraint.ConstraintType;
 import me.zeroeightsix.fiber.constraint.ValuedConstraint;
@@ -84,6 +85,16 @@ public abstract class ConfigType<T, T0> {
     }
 
     public enum Kind {
-        BOOLEAN, DECIMAL, LIST, STRING
+        BOOLEAN("boolean"), DECIMAL("number"), LIST("list"), STRING("string");
+
+        private final FiberId identifier;
+
+        Kind(String name) {
+            this.identifier = new FiberId("fiber", name);
+        }
+
+        public FiberId getIdentifier() {
+            return this.identifier;
+        }
     }
 }
