@@ -9,6 +9,7 @@ import me.zeroeightsix.fiber.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.exception.FiberException;
 import me.zeroeightsix.fiber.exception.FiberTypeProcessingException;
+import me.zeroeightsix.fiber.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.schema.*;
 import me.zeroeightsix.fiber.tree.ConfigBranch;
 import me.zeroeightsix.fiber.tree.ConfigTree;
@@ -199,7 +200,7 @@ public class AnnotatedSettings {
         if (pojoClass.isAnnotationPresent(Settings.class)) {
             Settings settingsAnnotation = pojoClass.getAnnotation(Settings.class);
             onlyAnnotated = settingsAnnotation.onlyAnnotated();
-            convention = this.createConvention(settingsAnnotation.namingConvention());
+            convention = createConvention(settingsAnnotation.namingConvention());
         } else { // Assume defaults
             onlyAnnotated = false;
             convention = new NoNamingConvention();
@@ -225,7 +226,7 @@ public class AnnotatedSettings {
                     this.fieldToItem(node, field, pojo, name, listenerMap.getOrDefault(name, defaultEmpty));
                 }
             } catch (FiberException e) {
-                throw new FiberException("Failed to process field '" + Modifier.toString(field.getModifiers()) + " " + field.getType().getSimpleName() + " " + field.getName() + "' in " + pojoClass, e);
+                throw new FiberException("Failed to process field '" + Modifier.toString(field.getModifiers()) + " " + field.getType().getSimpleName() + " " + field.getName() + "' in " + pojoClass.getSimpleName(), e);
             }
         }
 
@@ -331,28 +332,37 @@ public class AnnotatedSettings {
                     .filter(c -> c.isAssignableFrom(clazz))
                     .reduce((c1, c2) -> c1.isAssignableFrom(c2) ? c2 : c1);
             String closestParentSuggestion = closestParent.map(p -> "declaring the element as '" + p.getTypeName() + "', or ").orElse("");
-            throw new FiberTypeProcessingException("Unknown config type " + annotatedType.getType().getTypeName() + ". Consider marking as transient, or " + closestParentSuggestion + "registering a new Class -> ConfigType mapping.");
+            throw new FiberTypeProcessingException("Unknown config type " + annotatedType.getType().getTypeName() +
+                    ". Consider marking as transient, or " + closestParentSuggestion + "registering a new Class -> ConfigType mapping.");
         }
         return this.constrain(ret, annotatedType, pojo);
     }
 
-    private <T extends ConfigType<?, ?>> T constrain(T type, AnnotatedElement annotated, Object pojo) {
+    private <T extends ConfigType<?, ?>> T constrain(T type, AnnotatedElement annotated, Object pojo) throws FiberTypeProcessingException {
+        T ret = type;
         for (Annotation annotation : annotated.getAnnotations()) {
             @SuppressWarnings("unchecked") ConstraintAnnotationProcessor<Annotation> processor =
                     (ConstraintAnnotationProcessor<Annotation>) this.constraintProcessors.get(annotation.annotationType());
             if (processor != null) {
-                switch (type.getKind()) {
-                    case DECIMAL:
-                        processor.processDecimal(annotation, annotated, pojo, (DecimalConfigType<?>) type);
-                        break;
-                    case LIST:
-                        processor.processList(annotation, annotated, pojo, (ListConfigType<?>) type);
-                        break;
-                    case STRING:
-                        processor.processString(annotation, annotated, pojo, (StringConfigType<?>) type);
-                        break;
+                try {
+                    ret = this.constrain(processor, type, annotation, annotated, pojo);
+                } catch (UnsupportedOperationException e) {
+                    throw new FiberTypeProcessingException("Failed to constrain type " + type, e);
                 }
             }
+        }
+        return ret;
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T extends ConfigType<?, ?>> T constrain(ConstraintAnnotationProcessor<Annotation> processor, T type, Annotation annotation, AnnotatedElement annotated, Object pojo) {
+        switch (type.getKind()) {
+            case DECIMAL:
+                return (T) processor.processDecimal(annotation, annotated, pojo, (DecimalConfigType<?>) type);
+            case LIST:
+                return (T) processor.processList(annotation, annotated, pojo, (ListConfigType<?>) type);
+            case STRING:
+                return (T) processor.processString(annotation, annotated, pojo, (StringConfigType<?>) type);
         }
         return type;
     }
@@ -391,7 +401,7 @@ public class AnnotatedSettings {
                     try {
                         method.invoke(staticMethod ? null : pojo, newValue);
                     } catch (IllegalAccessException | InvocationTargetException e) {
-                        e.printStackTrace();
+                        throw new RuntimeFiberException("Failed to invoke listener " + method + " with argument " + newValue, e);
                     }
                 };
             case 2:
@@ -399,7 +409,7 @@ public class AnnotatedSettings {
                     try {
                         method.invoke(staticMethod ? null : pojo, oldValue, newValue);
                     } catch (IllegalAccessException | InvocationTargetException e) {
-                        e.printStackTrace();
+                        throw new RuntimeFiberException("Failed to invoke listener " + method + " with arguments " + oldValue + ", " + newValue, e);
                     }
                 };
             default:
@@ -424,7 +434,7 @@ public class AnnotatedSettings {
             @SuppressWarnings({ "unchecked", "unused" })
             BiConsumer<T, T> suppress = consumer = (BiConsumer<T, T>) field.get(pojo);
         } catch (IllegalAccessException e) {
-            throw new FiberException("Couldn't construct listener", e);
+            throw new FiberException("Could not construct listener", e);
         }
         field.setAccessible(isAccessible);
 
@@ -459,7 +469,7 @@ public class AnnotatedSettings {
                 .orElse(convention.name(field.getName()));
     }
 
-    private SettingNamingConvention createConvention(Class<? extends SettingNamingConvention> namingConvention) throws FiberException {
+    private static SettingNamingConvention createConvention(Class<? extends SettingNamingConvention> namingConvention) throws FiberException {
         try {
             return namingConvention.newInstance();
         } catch (InstantiationException | IllegalAccessException e) {

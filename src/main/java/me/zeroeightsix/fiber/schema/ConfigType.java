@@ -55,7 +55,7 @@ public abstract class ConfigType<T, T0> {
 
     @Override
     public String toString() {
-        return this.getActualType().toString() + "(" + this.getKind() + ")";
+        return this.getActualType().getTypeName() + "(" + this.getKind() + ")";
     }
 
     @Override

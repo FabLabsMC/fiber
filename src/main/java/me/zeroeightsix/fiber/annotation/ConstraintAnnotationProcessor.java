@@ -30,7 +30,7 @@ public interface ConstraintAnnotationProcessor<A extends Annotation> {
      * @see AnnotatedSettings#applyToNode(ConfigTree, Object)
      */
     default <T> DecimalConfigType<T> processDecimal(A annotation, AnnotatedElement annotated, Object pojo, DecimalConfigType<T> baseType) {
-        throw new UnsupportedOperationException("Invalid annotation " + annotation.annotationType() + " for type " + baseType);
+        throw new UnsupportedOperationException("Invalid annotation " + annotation.annotationType().getSimpleName() + " for type " + baseType);
     }
 
     /**
