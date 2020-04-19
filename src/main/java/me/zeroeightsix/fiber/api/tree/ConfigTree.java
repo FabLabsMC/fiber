@@ -18,9 +18,13 @@ public interface ConfigTree {
     /**
      * Creates a new non-root {@link ConfigTreeBuilder} with a name.
      *
-     * @param parent    the parent of the builder to create
-     * @param name      the name of the {@link ConfigTree} created by the builder
-     * @return          the newly created builder
+     * <p> The built subtree will be attached to {@code parent}, with the given {@code name}.
+     * To generate a whole tree from the root, use {@link ConfigTree#builder()} instead.
+     *
+     * @param parent the parent of the builder to create
+     * @param name   the name of the {@link ConfigTree} created by the builder
+     * @return a {@code ConfigTreeBuilder} for an intermediary config branch
+     * @see ConfigTree#builder()
      */
     static ConfigTreeBuilder builder(@Nullable ConfigTree parent, @Nullable String name) {
         return new ConfigTreeBuilder(parent, name);
