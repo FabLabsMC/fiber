@@ -1,7 +1,8 @@
 package me.zeroeightsix.fiber.schema;
 
-import me.zeroeightsix.fiber.constraint.Constraint;
-import me.zeroeightsix.fiber.constraint.ConstraintType;
+
+import me.zeroeightsix.fiber.api.constraint.Constraint;
+import me.zeroeightsix.fiber.api.constraint.ConstraintType;
 
 import java.util.Collections;
 import java.util.Map;

@@ -1,5 +1,8 @@
 package me.zeroeightsix.fiber.constraint;
 
+import me.zeroeightsix.fiber.api.constraint.Constraint;
+import me.zeroeightsix.fiber.api.constraint.ConstraintType;
+
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;

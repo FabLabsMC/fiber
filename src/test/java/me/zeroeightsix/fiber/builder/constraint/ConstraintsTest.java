@@ -1,12 +1,12 @@
 package me.zeroeightsix.fiber.builder.constraint;
 
-import me.zeroeightsix.fiber.builder.ConfigLeafBuilder;
-import me.zeroeightsix.fiber.builder.ConfigTreeBuilder;
+import me.zeroeightsix.fiber.api.builder.ConfigLeafBuilder;
+import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
+import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
+import me.zeroeightsix.fiber.api.tree.ConfigTree;
 import me.zeroeightsix.fiber.schema.ConfigTypes;
 import me.zeroeightsix.fiber.schema.DecimalConfigType;
 import me.zeroeightsix.fiber.schema.ListConfigType;
-import me.zeroeightsix.fiber.tree.ConfigLeaf;
-import me.zeroeightsix.fiber.tree.ConfigTree;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

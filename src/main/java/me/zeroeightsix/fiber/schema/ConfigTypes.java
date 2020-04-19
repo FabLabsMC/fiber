@@ -1,6 +1,7 @@
 package me.zeroeightsix.fiber.schema;
 
-import me.zeroeightsix.fiber.annotation.magic.TypeMagic;
+
+import me.zeroeightsix.fiber.impl.annotation.magic.TypeMagic;
 
 import java.lang.reflect.Array;
 import java.math.BigDecimal;

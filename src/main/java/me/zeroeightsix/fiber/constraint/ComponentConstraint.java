@@ -1,5 +1,9 @@
 package me.zeroeightsix.fiber.constraint;
 
+import me.zeroeightsix.fiber.api.constraint.Constraint;
+import me.zeroeightsix.fiber.api.constraint.ConstraintType;
+import me.zeroeightsix.fiber.impl.constraint.ValuedConstraint;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

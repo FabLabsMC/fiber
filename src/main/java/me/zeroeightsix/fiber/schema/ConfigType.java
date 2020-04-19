@@ -1,9 +1,9 @@
 package me.zeroeightsix.fiber.schema;
 
-import me.zeroeightsix.fiber.FiberId;
-import me.zeroeightsix.fiber.constraint.Constraint;
-import me.zeroeightsix.fiber.constraint.ConstraintType;
-import me.zeroeightsix.fiber.constraint.ValuedConstraint;
+import me.zeroeightsix.fiber.api.FiberId;
+import me.zeroeightsix.fiber.api.constraint.Constraint;
+import me.zeroeightsix.fiber.api.constraint.ConstraintType;
+import me.zeroeightsix.fiber.impl.constraint.ValuedConstraint;
 
 import java.util.*;
 import java.util.function.BiPredicate;
