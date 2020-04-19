@@ -23,7 +23,7 @@ public final class RangeConstraint extends ValuedConstraint<NumberRange, BigDeci
 			return TestResult.failed(range.min);
 		} else if (range.max != null && range.max.compareTo(value) < 0) {
 			return TestResult.failed(range.max);
-		} else if (range.step != null && value.remainder(range.step).intValue() == 0) {
+		} else if (range.step != null && value.remainder(range.step).intValue() != 0) {
 			if (range.min != null) {
 				return TestResult.failed(fit(value, range.min, range.step));
 			} else {

@@ -107,9 +107,15 @@ class AnnotatedSettingsTest {
         @SuppressWarnings("unchecked")
         Property<Integer> value = (Property<Integer>) this.node.lookup("a");
         assertNotNull(value, "Setting exists");
-        assertFalse(value.setValue(-10));
+        assertFalse(value.accepts(-10));
+        assertTrue(value.setValue(-10));
+        assertEquals(0, value.getValue());
+        assertTrue(value.accepts(5));
         assertTrue(value.setValue(5));
-        assertFalse(value.setValue(20));
+        assertEquals(5, value.getValue());
+        assertFalse(value.accepts(20));
+        assertTrue(value.setValue(20));
+        assertEquals(10, value.getValue());
     }
 
     @Test
@@ -141,10 +147,17 @@ class AnnotatedSettingsTest {
         Property<int[]> value2 = (Property<int[]>) this.node.lookup("numbers");
         assertNotNull(value2, "Setting exists");
         assertTrue(value2.setValue(new int[]{3, 4, 5}));
+        assertArrayEquals(new int[]{3, 4, 5}, value2.getValue());
         assertTrue(value2.setValue(new int[0]));
+        assertArrayEquals(new int [0], value2.getValue());
         assertFalse(value2.setValue(new int[]{1, 2, 3, 4, 5, 6, 7}), "Too many elements");
-        assertFalse(value2.setValue(new int[]{-1, 0, 1}), "Negative number not allowed");
-        assertFalse(value2.setValue(new int[]{9, 10, 11}), "Numbers above 10 not allowed");
+        assertArrayEquals(new int[0], value2.getValue(), "Value should not change after unrecoverable setValue");
+        assertFalse(value2.accepts(new int[]{-1, 0, 1}), "Negative number not allowed");
+        assertTrue(value2.setValue(new int[]{-1, 0, 1}), "Correction for out of bounds numbers available");
+        assertArrayEquals(new int[]{0, 0, 1}, value2.getValue(), "Negative number should be brought back into range");
+        assertFalse(value2.accepts(new int[]{9, 10, 11}), "Numbers above 10 not allowed");
+        assertTrue(value2.setValue(new int[]{9, 10, 11}), "Correction for out of bounds numbers available");
+        assertArrayEquals(new int[]{9, 10, 10}, value2.getValue(), ">10 number should be brought back into range");
         @SuppressWarnings("unchecked")
         Property<List<String>> value3 = (Property<List<String>>) this.node.lookup("shortArrayIdStrings");
         assertNotNull(value3, "Setting exists");

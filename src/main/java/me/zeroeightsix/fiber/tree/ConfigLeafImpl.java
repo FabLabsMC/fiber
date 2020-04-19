@@ -62,6 +62,11 @@ public class ConfigLeafImpl<T, T0> extends ConfigNodeImpl implements ConfigLeaf<
     }
 
     @Override
+    public boolean accepts(T value) {
+        return this.acceptsRaw(this.type.toRawType(value));
+    }
+
+    @Override
     public boolean setValue(@Nullable T value) {
         return this.setValueFrom(this.type.toRawType(value));
     }
