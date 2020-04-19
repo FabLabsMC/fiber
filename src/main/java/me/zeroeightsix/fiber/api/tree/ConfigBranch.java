@@ -1,7 +1,5 @@
 package me.zeroeightsix.fiber.api.tree;
 
-import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
-
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
@@ -14,10 +12,6 @@ import javax.annotation.Nullable;
  * @see me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder
  */
 public interface ConfigBranch extends ConfigTree, ConfigNode, Commentable {
-
-    static ConfigTreeBuilder builder(ConfigTree parent, String name) {
-        return new ConfigTreeBuilder(parent, name);
-    }
 
     /**
      * Returns this node's name.

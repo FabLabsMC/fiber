@@ -7,11 +7,23 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public interface ConfigTree {
+
     /**
      * @return a new builder for a root config node
      */
     static ConfigTreeBuilder builder() {
-        return new ConfigTreeBuilder(null, null);
+        return builder(null, null);
+    }
+
+    /**
+     * Creates a new non-root {@link ConfigTreeBuilder} with a name.
+     *
+     * @param parent    the parent of the builder to create
+     * @param name      the name of the {@link ConfigTree} created by the builder
+     * @return          the newly created builder
+     */
+    static ConfigTreeBuilder builder(@Nullable ConfigTree parent, @Nullable String name) {
+        return new ConfigTreeBuilder(parent, name);
     }
 
     /**
