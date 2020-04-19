@@ -11,14 +11,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+// TODO add tests for user-defined types and processors
+@SuppressWarnings({"unused", "FieldMayBeFinal"})
 class AnnotatedSettingsTest {
 
     private AnnotatedSettings annotatedSettings;
@@ -190,14 +189,6 @@ class AnnotatedSettingsTest {
     }
 
     @Test
-    @DisplayName("Constant setting")
-    void testConstantSetting() throws FiberException {
-        ConstantSettingPojo pojo = new ConstantSettingPojo();
-        this.annotatedSettings.applyToNode(this.node, pojo);
-        assertFalse(((ConfigLeaf<Integer, ?>) this.node.lookup("a")).setValue(0));
-    }
-
-    @Test
     @DisplayName("Subnodes")
     void testSubNodes() throws FiberException {
         SubNodePojo pojo = new SubNodePojo();
@@ -214,7 +205,7 @@ class AnnotatedSettingsTest {
     void testComment() throws FiberException {
         CommentPojo pojo = new CommentPojo();
         this.annotatedSettings.applyToNode(this.node, pojo);
-        assertEquals("comment", ((ConfigLeaf<Integer, ?>) this.node.lookup("a")).getComment(), "Comment exists and is correct");
+        assertEquals("comment", ((ConfigLeaf<Integer, ?>) Objects.requireNonNull(this.node.lookup("a"))).getComment(), "Comment exists and is correct");
     }
 
     @Test
@@ -312,11 +303,6 @@ class AnnotatedSettingsTest {
         private int a = 5;
     }
 
-    private static class ConstantSettingPojo {
-        @Setting(constant = true)
-        private int a = 5;
-    }
-
     private static class CommentPojo {
         @Setting(comment = "comment")
         private int a = 5;
@@ -333,6 +319,7 @@ class AnnotatedSettingsTest {
         @Setting.Group(name = "a")
         public SubNode node = new SubNode();
 
+        @SuppressWarnings("InnerClassMayBeStatic")  // we want to test this edge case
         class SubNode {
             private int b = 5;
         }
