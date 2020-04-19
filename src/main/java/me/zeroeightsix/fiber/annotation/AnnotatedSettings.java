@@ -345,7 +345,7 @@ public class AnnotatedSettings {
                     (ConstraintAnnotationProcessor<Annotation>) this.constraintProcessors.get(annotation.annotationType());
             if (processor != null) {
                 try {
-                    ret = this.constrain(processor, type, annotation, annotated, pojo);
+                    ret = this.constrain(processor, ret, annotation, annotated, pojo);
                 } catch (UnsupportedOperationException e) {
                     throw new FiberTypeProcessingException("Failed to constrain type " + type, e);
                 }
