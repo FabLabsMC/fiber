@@ -1,10 +1,10 @@
 package me.zeroeightsix.fiber.api.exception;
 
+import me.zeroeightsix.fiber.api.schema.ConfigType;
 import me.zeroeightsix.fiber.api.tree.ConfigBranch;
 import me.zeroeightsix.fiber.api.tree.ConfigNode;
 import me.zeroeightsix.fiber.api.tree.ConfigQuery;
 import me.zeroeightsix.fiber.api.tree.ConfigTree;
-import me.zeroeightsix.fiber.schema.ConfigType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

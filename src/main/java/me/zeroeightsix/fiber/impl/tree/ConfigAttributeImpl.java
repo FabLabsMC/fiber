@@ -1,8 +1,7 @@
 package me.zeroeightsix.fiber.impl.tree;
 
+import me.zeroeightsix.fiber.api.schema.ConfigType;
 import me.zeroeightsix.fiber.api.tree.ConfigAttribute;
-
-import me.zeroeightsix.fiber.schema.ConfigType;
 
 public class ConfigAttributeImpl<T> implements ConfigAttribute<T> {
     private final ConfigType<T, T> type;

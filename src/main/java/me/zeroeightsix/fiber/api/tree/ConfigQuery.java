@@ -1,7 +1,7 @@
 package me.zeroeightsix.fiber.api.tree;
 
 import me.zeroeightsix.fiber.api.exception.FiberQueryException;
-import me.zeroeightsix.fiber.schema.ConfigType;
+import me.zeroeightsix.fiber.api.schema.ConfigType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

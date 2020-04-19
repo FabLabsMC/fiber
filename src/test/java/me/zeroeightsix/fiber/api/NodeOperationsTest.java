@@ -1,14 +1,13 @@
 package me.zeroeightsix.fiber.api;
 
-import me.zeroeightsix.fiber.api.NodeOperations;
-import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.api.builder.ConfigLeafBuilder;
-import me.zeroeightsix.fiber.api.tree.ConfigTree;
+import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
+import me.zeroeightsix.fiber.api.schema.ConfigType;
+import me.zeroeightsix.fiber.api.schema.ConfigTypes;
 import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
-import me.zeroeightsix.fiber.api.tree.Property;
 import me.zeroeightsix.fiber.api.tree.ConfigNode;
-import me.zeroeightsix.fiber.schema.ConfigType;
-import me.zeroeightsix.fiber.schema.ConfigTypes;
+import me.zeroeightsix.fiber.api.tree.ConfigTree;
+import me.zeroeightsix.fiber.api.tree.Property;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

@@ -1,8 +1,7 @@
-package me.zeroeightsix.fiber.constraint;
+package me.zeroeightsix.fiber.impl.constraint;
 
 import me.zeroeightsix.fiber.api.constraint.ConstraintType;
 import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.impl.constraint.ValuedConstraint;
 
 import java.math.BigDecimal;
 

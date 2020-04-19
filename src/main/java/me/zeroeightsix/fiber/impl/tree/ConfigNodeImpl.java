@@ -1,13 +1,12 @@
 package me.zeroeightsix.fiber.impl.tree;
 
 import me.zeroeightsix.fiber.api.FiberId;
+import me.zeroeightsix.fiber.api.exception.IllegalTreeStateException;
+import me.zeroeightsix.fiber.api.schema.ConfigType;
 import me.zeroeightsix.fiber.api.tree.Commentable;
 import me.zeroeightsix.fiber.api.tree.ConfigAttribute;
 import me.zeroeightsix.fiber.api.tree.ConfigBranch;
 import me.zeroeightsix.fiber.api.tree.ConfigNode;
-
-import me.zeroeightsix.fiber.api.exception.IllegalTreeStateException;
-import me.zeroeightsix.fiber.schema.ConfigType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

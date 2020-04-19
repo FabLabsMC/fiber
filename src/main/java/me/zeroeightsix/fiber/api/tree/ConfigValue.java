@@ -1,6 +1,6 @@
-package me.zeroeightsix.fiber.tree;
+package me.zeroeightsix.fiber.api.tree;
 
-import me.zeroeightsix.fiber.schema.ConfigType;
+import me.zeroeightsix.fiber.api.schema.ConfigType;
 
 /**
  * Indicates that this class holds some nullable value.

@@ -1,19 +1,18 @@
 package me.zeroeightsix.fiber.api.annotation;
 
-import me.zeroeightsix.fiber.annotation.ParameterizedTypeProcessor;
 import me.zeroeightsix.fiber.api.NodeOperations;
 import me.zeroeightsix.fiber.api.annotation.convention.NoNamingConvention;
 import me.zeroeightsix.fiber.api.annotation.convention.SettingNamingConvention;
 import me.zeroeightsix.fiber.api.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.api.exception.FiberException;
+import me.zeroeightsix.fiber.api.exception.FiberTypeProcessingException;
 import me.zeroeightsix.fiber.api.exception.MalformedFieldException;
 import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
+import me.zeroeightsix.fiber.api.schema.*;
 import me.zeroeightsix.fiber.api.tree.ConfigBranch;
 import me.zeroeightsix.fiber.api.tree.ConfigTree;
-import me.zeroeightsix.fiber.exception.FiberTypeProcessingException;
 import me.zeroeightsix.fiber.impl.annotation.magic.TypeMagic;
-import me.zeroeightsix.fiber.schema.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;

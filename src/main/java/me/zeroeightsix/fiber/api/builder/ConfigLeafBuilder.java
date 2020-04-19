@@ -3,13 +3,13 @@ package me.zeroeightsix.fiber.api.builder;
 import me.zeroeightsix.fiber.api.FiberId;
 import me.zeroeightsix.fiber.api.constraint.Constraint;
 import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
+import me.zeroeightsix.fiber.api.schema.ConfigType;
 import me.zeroeightsix.fiber.api.tree.ConfigAttribute;
 import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
 import me.zeroeightsix.fiber.api.tree.ConfigNode;
 import me.zeroeightsix.fiber.api.tree.ConfigTree;
 import me.zeroeightsix.fiber.impl.builder.ConfigNodeBuilder;
 import me.zeroeightsix.fiber.impl.tree.ConfigLeafImpl;
-import me.zeroeightsix.fiber.schema.ConfigType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

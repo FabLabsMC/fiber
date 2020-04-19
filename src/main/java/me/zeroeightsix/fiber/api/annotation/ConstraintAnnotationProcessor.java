@@ -1,9 +1,9 @@
 package me.zeroeightsix.fiber.api.annotation;
 
+import me.zeroeightsix.fiber.api.schema.DecimalConfigType;
+import me.zeroeightsix.fiber.api.schema.ListConfigType;
+import me.zeroeightsix.fiber.api.schema.StringConfigType;
 import me.zeroeightsix.fiber.api.tree.ConfigTree;
-import me.zeroeightsix.fiber.schema.DecimalConfigType;
-import me.zeroeightsix.fiber.schema.ListConfigType;
-import me.zeroeightsix.fiber.schema.StringConfigType;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;

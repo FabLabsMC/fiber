@@ -1,11 +1,11 @@
 package me.zeroeightsix.fiber.impl.builder;
 
 import me.zeroeightsix.fiber.api.FiberId;
+import me.zeroeightsix.fiber.api.schema.ConfigType;
 import me.zeroeightsix.fiber.api.tree.ConfigAttribute;
 import me.zeroeightsix.fiber.api.tree.ConfigNode;
 import me.zeroeightsix.fiber.api.tree.ConfigTree;
 import me.zeroeightsix.fiber.impl.tree.ConfigAttributeImpl;
-import me.zeroeightsix.fiber.schema.ConfigType;
 
 import javax.annotation.Nullable;
 import java.util.HashMap;

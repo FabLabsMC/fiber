@@ -1,10 +1,10 @@
 package me.zeroeightsix.fiber.impl.tree;
 
 import me.zeroeightsix.fiber.api.exception.FiberQueryException;
+import me.zeroeightsix.fiber.api.schema.ConfigTypes;
 import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
 import me.zeroeightsix.fiber.api.tree.ConfigQuery;
 import me.zeroeightsix.fiber.api.tree.ConfigTree;
-import me.zeroeightsix.fiber.schema.ConfigTypes;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.atomic.AtomicReference;

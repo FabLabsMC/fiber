@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.api.tree;
 
-import me.zeroeightsix.fiber.schema.ConfigType;
+import me.zeroeightsix.fiber.api.schema.ConfigType;
 
 /**
  * A {@code Property} that delegates all operations to another.

@@ -3,7 +3,7 @@ package me.zeroeightsix.fiber.api.tree;
 import me.zeroeightsix.fiber.api.FiberId;
 import me.zeroeightsix.fiber.api.exception.DuplicateChildException;
 import me.zeroeightsix.fiber.api.exception.IllegalTreeStateException;
-import me.zeroeightsix.fiber.schema.ConfigType;
+import me.zeroeightsix.fiber.api.schema.ConfigType;
 
 import javax.annotation.Nullable;
 import java.util.Map;

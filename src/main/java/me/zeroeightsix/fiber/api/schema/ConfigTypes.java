@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber.schema;
+package me.zeroeightsix.fiber.api.schema;
 
 
 import me.zeroeightsix.fiber.impl.annotation.magic.TypeMagic;

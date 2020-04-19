@@ -1,7 +1,7 @@
-package me.zeroeightsix.fiber.annotation;
+package me.zeroeightsix.fiber.api.annotation;
 
-import me.zeroeightsix.fiber.schema.ConfigType;
-import me.zeroeightsix.fiber.schema.ListConfigType;
+import me.zeroeightsix.fiber.api.schema.ConfigType;
+import me.zeroeightsix.fiber.api.schema.ListConfigType;
 
 /**
  * A generic config type processor that can output different {@link ConfigType}s

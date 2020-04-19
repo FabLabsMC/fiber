@@ -1,8 +1,10 @@
-package me.zeroeightsix.fiber.schema;
+package me.zeroeightsix.fiber.api.schema;
 
 import me.zeroeightsix.fiber.api.constraint.Constraint;
 import me.zeroeightsix.fiber.api.constraint.ConstraintType;
-import me.zeroeightsix.fiber.constraint.*;
+import me.zeroeightsix.fiber.impl.constraint.EnumConstraint;
+import me.zeroeightsix.fiber.impl.constraint.NumberRange;
+import me.zeroeightsix.fiber.impl.constraint.RangeConstraint;
 import me.zeroeightsix.fiber.impl.constraint.ValuedConstraint;
 
 import java.math.BigDecimal;

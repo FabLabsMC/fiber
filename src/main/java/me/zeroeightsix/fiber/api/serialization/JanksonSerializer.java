@@ -5,11 +5,10 @@ import blue.endless.jankson.JsonElement;
 import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.JsonPrimitive;
 import blue.endless.jankson.api.SyntaxError;
-import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.schema.ConfigType;
-import me.zeroeightsix.fiber.tree.*;
 import me.zeroeightsix.fiber.api.FiberId;
 import me.zeroeightsix.fiber.api.exception.FiberException;
+import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
+import me.zeroeightsix.fiber.api.schema.ConfigType;
 import me.zeroeightsix.fiber.api.tree.*;
 
 import javax.annotation.Nonnull;
@@ -20,6 +19,7 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Objects;
 
 public class JanksonSerializer implements Serializer<JsonObject> {
 
@@ -99,7 +99,8 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 			if (treeItem instanceof ConfigBranch) {
 				ConfigBranch subNode = (ConfigBranch) treeItem;
 				if (!subNode.isSerializedSeparately()) {
-					object.put((name = subNode.getName()), this.serialize(subNode));
+					name = Objects.requireNonNull(subNode.getName());
+					object.put(name, this.serialize(subNode));
 				}
 			} else if (treeItem instanceof ConfigValue) {
 				object.put((name = treeItem.getName()), this.serialize((ConfigValue<?>) treeItem));

@@ -6,12 +6,12 @@ import blue.endless.jankson.JsonPrimitive;
 import me.zeroeightsix.fiber.api.NodeOperationsTest;
 import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.api.exception.FiberException;
+import me.zeroeightsix.fiber.api.schema.ConfigType;
+import me.zeroeightsix.fiber.api.schema.ConfigTypes;
+import me.zeroeightsix.fiber.api.schema.DecimalConfigType;
 import me.zeroeightsix.fiber.api.tree.ConfigTree;
+import me.zeroeightsix.fiber.api.tree.ConfigValue;
 import me.zeroeightsix.fiber.api.tree.PropertyMirror;
-import me.zeroeightsix.fiber.schema.ConfigType;
-import me.zeroeightsix.fiber.schema.ConfigTypes;
-import me.zeroeightsix.fiber.schema.DecimalConfigType;
-import me.zeroeightsix.fiber.tree.ConfigValue;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -22,6 +22,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class JanksonSerializerTest {
 
@@ -143,7 +144,7 @@ class JanksonSerializerTest {
 
     @Test
     @DisplayName("Extended marshaller")
-    void testExtendedMarshaller() throws IOException, FiberException {
+    void testExtendedMarshaller() {
         JanksonSerializer jk = new JanksonSerializer(
                 JanksonSerializer.extendDefaultMarshaller(new Marshaller<JsonElement>() {
                     @Override
@@ -161,10 +162,10 @@ class JanksonSerializerTest {
                     public <A> A marshallReverse(Class<A> type, JsonElement value) {
                         if (type.equals(SomeObject.class)) {
                             JsonObject object = (JsonObject) value;
-                            return (A) new SomeObject(
+                            return type.cast(new SomeObject(
                                     object.getInt("some_a", 0),
                                     object.get(String.class, "some_b")
-                            );
+                            ));
                         }
                         return null;
                     }
@@ -186,6 +187,7 @@ class JanksonSerializerTest {
         });
         SomeObject foo2 = jk.marshall(SomeObject.class, foo);
 
+        assertNotNull(foo2);
         assertEquals("foo", foo2.b);
     }
 

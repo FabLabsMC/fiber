@@ -3,8 +3,8 @@ package me.zeroeightsix.fiber.impl.tree;
 import me.zeroeightsix.fiber.api.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.api.constraint.Constraint;
 import me.zeroeightsix.fiber.api.constraint.ConstraintType;
+import me.zeroeightsix.fiber.api.schema.ConfigType;
 import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
-import me.zeroeightsix.fiber.schema.ConfigType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;

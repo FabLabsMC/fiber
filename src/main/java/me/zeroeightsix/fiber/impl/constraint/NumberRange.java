@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber.constraint;
+package me.zeroeightsix.fiber.impl.constraint;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
