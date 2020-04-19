@@ -74,7 +74,8 @@ public abstract class ConfigType<T, T0> {
     }
 
     protected <V, C extends ValuedConstraint<V, ? super T0>> Map<ConstraintType, Constraint<? super T0>> updateConstraints(C added, BiPredicate<V, V> check) {
-        Map<ConstraintType, Constraint<? super T0>> newConstraints = new EnumMap<>(this.indexedConstraints);
+        Map<ConstraintType, Constraint<? super T0>> newConstraints = new EnumMap<>(ConstraintType.class);
+        newConstraints.putAll(this.indexedConstraints);
         // Constraints can only be inserted by "trusted" code
         @SuppressWarnings("unchecked") C current = (C) newConstraints.remove(added.getType());
         if (current != null && !check.test(current.getConstraintValue(), added.getConstraintValue())) {

@@ -231,7 +231,7 @@ class AnnotatedSettingsTest {
         private int c = 5;
 
         @Listener("a")
-        private BiConsumer<Integer, Integer> aListener = (now, then) -> listenedA = true;
+        private transient BiConsumer<Integer, Integer> aListener = (now, then) -> listenedA = true;
 
         @Listener("b")
         private void bListener(Integer oldValue, Integer newValue) {

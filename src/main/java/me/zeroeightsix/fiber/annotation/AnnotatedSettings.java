@@ -225,7 +225,7 @@ public class AnnotatedSettings {
                     this.fieldToItem(node, field, pojo, name, listenerMap.getOrDefault(name, defaultEmpty));
                 }
             } catch (FiberException e) {
-                throw new FiberException("Failed to process field '" + Modifier.toString(field.getModifiers()) + field.getType().getSimpleName() + " " + field.getName() + "' in " + pojoClass);
+                throw new FiberException("Failed to process field '" + Modifier.toString(field.getModifiers()) + " " + field.getType().getSimpleName() + " " + field.getName() + "' in " + pojoClass, e);
             }
         }
 
@@ -331,7 +331,7 @@ public class AnnotatedSettings {
                     .filter(c -> c.isAssignableFrom(clazz))
                     .reduce((c1, c2) -> c1.isAssignableFrom(c2) ? c2 : c1);
             String closestParentSuggestion = closestParent.map(p -> "declaring the element as '" + p.getTypeName() + "', or ").orElse("");
-            throw new FiberTypeProcessingException("Unknown config type " + annotatedType.getType().getTypeName() + ". Consider " + closestParentSuggestion + "registering a new Class -> ConfigType mapping.");
+            throw new FiberTypeProcessingException("Unknown config type " + annotatedType.getType().getTypeName() + ". Consider marking as transient, or " + closestParentSuggestion + "registering a new Class -> ConfigType mapping.");
         }
         return this.constrain(ret, annotatedType, pojo);
     }

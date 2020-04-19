@@ -27,9 +27,9 @@ public final class ConfigTypes {
     public static final DecimalConfigType<Long> LONG =
             makeNumber(Long.class, BigDecimal::valueOf, BigDecimal::longValue, Long.MIN_VALUE, Long.MAX_VALUE, 1L);
     public static final DecimalConfigType<Float> FLOAT =
-            makeNumber(Float.class, BigDecimal::valueOf, BigDecimal::floatValue, Float.NEGATIVE_INFINITY, Float.MAX_VALUE, Float.POSITIVE_INFINITY);
+            UNBOUNDED_DECIMAL.withIncrement(BigDecimal.valueOf(Float.MIN_VALUE)).derive(Float.class, BigDecimal::valueOf, BigDecimal::floatValue);
     public static final DecimalConfigType<Double> DOUBLE =
-            makeNumber(Double.class, BigDecimal::valueOf, BigDecimal::doubleValue, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.MIN_VALUE);
+            UNBOUNDED_DECIMAL.withIncrement(BigDecimal.valueOf(Double.MIN_VALUE)).derive(Double.class, BigDecimal::valueOf, BigDecimal::doubleValue);
 
     public static <N> DecimalConfigType<N> makeNumber(Class<N> actualType, Function<N, BigDecimal> f0, Function<BigDecimal, N> f, N minValue, N maxValue, N precision) {
         return UNBOUNDED_DECIMAL.withValidRange(f0.apply(minValue), f0.apply(maxValue), f0.apply(precision)).derive(actualType, f0, f);
