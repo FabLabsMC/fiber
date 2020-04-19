@@ -81,7 +81,7 @@ public abstract class ConfigType<T, T0> {
         if (current != null && !check.test(current.getConstraintValue(), added.getConstraintValue())) {
             throw new IllegalArgumentException("Cannot widen an already constrained type (current: " + current.getConstraintValue() + ", added: " + added.getConstraintValue() + ")");
         }
-        newConstraints.put(ConstraintType.MINIMUM_LENGTH, added);
+        newConstraints.put(added.getType(), added);
         return Collections.unmodifiableMap(newConstraints);
     }
 

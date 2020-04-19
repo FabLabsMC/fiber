@@ -29,14 +29,14 @@ public final class DecimalConfigType<T> extends ConfigType<T, BigDecimal> {
     public DecimalConfigType<T> withMinimum(T min) {
         RangeConstraint current = (RangeConstraint) this.indexedConstraints.get(ConstraintType.RANGE);
         NumberRange currentRange = current == null ? NumberRange.UNBOUNDED : current.getConstraintValue();
-        NumberRange acceptedValues = new NumberRange(currentRange.min, currentRange.max, this.toRawType(min));
+        NumberRange acceptedValues = new NumberRange(this.toRawType(min), currentRange.max, currentRange.step);
         return this.withConstraints(new RangeConstraint(acceptedValues), NumberRange::contains);
     }
 
     public DecimalConfigType<T> withMaximum(T max) {
         RangeConstraint current = (RangeConstraint) this.indexedConstraints.get(ConstraintType.RANGE);
         NumberRange currentRange = current == null ? NumberRange.UNBOUNDED : current.getConstraintValue();
-        NumberRange acceptedValues = new NumberRange(currentRange.min, currentRange.max, this.toRawType(max));
+        NumberRange acceptedValues = new NumberRange(currentRange.min, this.toRawType(max), currentRange.step);
         return this.withConstraints(new RangeConstraint(acceptedValues), NumberRange::contains);
     }
 
