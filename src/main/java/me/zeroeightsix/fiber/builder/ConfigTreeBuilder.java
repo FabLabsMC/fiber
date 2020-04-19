@@ -20,7 +20,7 @@ import java.util.function.Consumer;
  *
  * <p> Usage example:
  * <pre>{@code
- * ConfigNode config = new ConfigTreeBuilder()
+ * ConfigBranch config = ConfigTree.builder()
  *         .beginValue("version", "1.0.0")
  *             .withFinality()
  *             .beginConstraints() // checks the default value
