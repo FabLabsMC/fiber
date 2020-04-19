@@ -1,5 +1,7 @@
 package me.zeroeightsix.fiber.schema;
 
+import me.zeroeightsix.fiber.annotation.magic.TypeMagic;
+
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -73,8 +75,9 @@ public final class ConfigTypes {
     @SuppressWarnings("unchecked")
     public static <E0, E, U extends ConfigType<E, E0>> ListConfigType<E[]> makeArray(U elementType) {
         if (elementType == STRING) return (ListConfigType<E[]>) (ListConfigType<?>) STRING_ARRAY;
-        @SuppressWarnings("unchecked") E[] z = (E[]) Array.newInstance(elementType.getActualType(), 0);
-        @SuppressWarnings("unchecked") Class<E[]> arrType = (Class<E[]>) z.getClass();
-        return ListConfigType.of(elementType).derive(arrType, Arrays::asList, l -> l.toArray(z));
+        E[] z = (E[]) Array.newInstance(elementType.getActualType(), 0);
+        Class<E[]> arrType = (Class<E[]>) z.getClass();
+        // big mess to account for arrays of primitives - we must avoid autocasting to Object[]
+        return (ListConfigType<E[]>) (ListConfigType<?>) ListConfigType.of(elementType).derive((Class<? super Object>)(Class<?>) arrType, a -> Arrays.asList((E[]) TypeMagic.box(a)), l -> TypeMagic.unbox(l.toArray(z)));
     }
 }
