@@ -1,5 +1,6 @@
 package me.zeroeightsix.fiber.annotation;
 
+import me.zeroeightsix.fiber.tree.ConfigAttribute;
 import me.zeroeightsix.fiber.tree.ConfigBranch;
 
 import javax.annotation.RegEx;
@@ -20,6 +21,8 @@ public @interface Setting {
      *
      * <p> Constant settings can not have their value changed after being initialised.
      * @return whether or not this setting is constant
+     * @deprecated constants should now be stored as schema {@link ConfigAttribute}s,
+     * not as values in an editable config tree.
      */
     @Deprecated boolean constant() default false;
 
