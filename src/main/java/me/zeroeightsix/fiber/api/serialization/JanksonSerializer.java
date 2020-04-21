@@ -121,7 +121,7 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 
 	private <T, T0> void setPropertyValue(ConfigLeaf<T, T0> property, JsonElement child) {
 		ConfigType<T, T0> configType = property.getConfigType();
-		Class<T0> type = configType.getRawType();
+		Class<T0> type = configType.getSerializedType();
 		// TODO figure out how we want to handle null values
 		T0 deserialized = this.marshall(type, child);
 		try {

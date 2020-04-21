@@ -144,7 +144,7 @@ public class ConfigLeafBuilder<T, T0> extends ConfigNodeBuilder {
     @Override
     public ConfigLeaf<T, T0> build() {
         if (defaultValue != null) {
-            T0 convertedDefault = this.type.toRawType(this.defaultValue);
+            T0 convertedDefault = this.type.toSerializedType(this.defaultValue);
             for (Constraint<? super T0> constraint : constraints) {
                 if (!constraint.test(convertedDefault).hasPassed()) {
                     throw new RuntimeFiberException("Default value '" + defaultValue + "' does not satisfy type constraint " + constraint.getType().getIdentifier());

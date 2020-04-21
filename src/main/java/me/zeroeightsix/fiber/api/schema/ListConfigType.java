@@ -22,13 +22,13 @@ public final class ListConfigType<T> extends ConfigType<T, List<?>> {
         return new ListConfigType<>(List.class, elementType, v -> {
             List<E0> ret = new ArrayList<>();
             for (E e : v) {
-                ret.add(elementType.toRawType(e));
+                ret.add(elementType.toSerializedType(e));
             }
             return Collections.unmodifiableList(ret);
         }, v0 -> {
             List<E> ret = new ArrayList<>();
             for (Object e : v0) {
-                ret.add(elementType.toActualType(elementType.getRawType().cast(e)));
+                ret.add(elementType.toActualType(elementType.getSerializedType().cast(e)));
             }
             return Collections.unmodifiableList(ret);
         }, Collections.singletonMap(ConstraintType.COMPONENTS_MATCH, componentConstraint));
@@ -52,7 +52,7 @@ public final class ListConfigType<T> extends ConfigType<T, List<?>> {
 
     @Override
     public <T1> ListConfigType<T1> derive(Class<? super T1> actualType, Function<T1, T> f0, Function<T, T1> f) {
-        return new ListConfigType<>(actualType, this.getElementType(), v -> this.toRawType(f0.apply(v)), v -> f.apply(this.toActualType(v)), this.indexedConstraints);
+        return new ListConfigType<>(actualType, this.getElementType(), v -> this.toSerializedType(f0.apply(v)), v -> f.apply(this.toActualType(v)), this.indexedConstraints);
     }
 
     public ListConfigType<T> withMinSize(int min) {

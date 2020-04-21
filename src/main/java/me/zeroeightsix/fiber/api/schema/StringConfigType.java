@@ -28,7 +28,7 @@ public final class StringConfigType<T> extends ConfigType<T, String> {
     @Override
     public <T1> StringConfigType<T1> derive(Class<? super T1> actualType, Function<T1, T> f0, Function<T, T1> f) {
         @SuppressWarnings("unchecked") Class<T1> c = (Class<T1>) actualType;
-        return new StringConfigType<>(c, v -> this.toRawType(f0.apply(v)), v -> f.apply(this.toActualType(v)), this.indexedConstraints);
+        return new StringConfigType<>(c, v -> this.toSerializedType(f0.apply(v)), v -> f.apply(this.toActualType(v)), this.indexedConstraints);
     }
 
     public StringConfigType<T> withMinLength(int min) {
@@ -55,7 +55,7 @@ public final class StringConfigType<T> extends ConfigType<T, String> {
     }
 
     public StringConfigType<T> withValidValues(Set<T> validValues) {
-        Set<String> rawValidValues = validValues.stream().map(this::toRawType).collect(Collectors.toSet());
+        Set<String> rawValidValues = validValues.stream().map(this::toSerializedType).collect(Collectors.toSet());
         return this.withConstraints(new EnumConstraint<>(rawValidValues), Set::containsAll);
     }
 

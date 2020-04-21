@@ -28,32 +28,32 @@ public final class DecimalConfigType<T> extends ConfigType<T, BigDecimal> {
     @Override
     public <T1> DecimalConfigType<T1> derive(Class<? super T1> actualType, Function<T1, T> f0, Function<T, T1> f) {
         @SuppressWarnings("unchecked") Class<T1> c = (Class<T1>) actualType;
-        return new DecimalConfigType<>(c, v -> this.toRawType(f0.apply(v)), v -> f.apply(this.toActualType(v)), this.indexedConstraints);
+        return new DecimalConfigType<>(c, v -> this.toSerializedType(f0.apply(v)), v -> f.apply(this.toActualType(v)), this.indexedConstraints);
     }
 
     public DecimalConfigType<T> withMinimum(T min) {
         RangeConstraint current = (RangeConstraint) this.indexedConstraints.get(ConstraintType.RANGE);
         NumberRange currentRange = current == null ? NumberRange.UNBOUNDED : current.getConstraintValue();
-        NumberRange acceptedValues = new NumberRange(this.toRawType(min), currentRange.max, currentRange.step);
+        NumberRange acceptedValues = new NumberRange(this.toSerializedType(min), currentRange.max, currentRange.step);
         return this.withConstraints(new RangeConstraint(acceptedValues), NumberRange::contains);
     }
 
     public DecimalConfigType<T> withMaximum(T max) {
         RangeConstraint current = (RangeConstraint) this.indexedConstraints.get(ConstraintType.RANGE);
         NumberRange currentRange = current == null ? NumberRange.UNBOUNDED : current.getConstraintValue();
-        NumberRange acceptedValues = new NumberRange(currentRange.min, this.toRawType(max), currentRange.step);
+        NumberRange acceptedValues = new NumberRange(currentRange.min, this.toSerializedType(max), currentRange.step);
         return this.withConstraints(new RangeConstraint(acceptedValues), NumberRange::contains);
     }
 
     public DecimalConfigType<T> withIncrement(T step) {
         RangeConstraint current = (RangeConstraint) this.indexedConstraints.get(ConstraintType.RANGE);
         NumberRange currentRange = current == null ? NumberRange.UNBOUNDED : current.getConstraintValue();
-        NumberRange acceptedValues = new NumberRange(currentRange.min, currentRange.max, this.toRawType(step));
+        NumberRange acceptedValues = new NumberRange(currentRange.min, currentRange.max, this.toSerializedType(step));
         return this.withConstraints(new RangeConstraint(acceptedValues), NumberRange::contains);
     }
 
     public DecimalConfigType<T> withValidRange(T min, T max, T step) {
-        NumberRange acceptedValues = new NumberRange(this.toRawType(min), this.toRawType(max), this.toRawType(step));
+        NumberRange acceptedValues = new NumberRange(this.toSerializedType(min), this.toSerializedType(max), this.toSerializedType(step));
         return this.withConstraints(new RangeConstraint(acceptedValues), NumberRange::contains);
     }
 
@@ -64,11 +64,11 @@ public final class DecimalConfigType<T> extends ConfigType<T, BigDecimal> {
     }
 
     public DecimalConfigType<T> withValidValues(Set<T> validValues) {
-        Set<BigDecimal> rawValidValues = validValues.stream().map(this::toRawType).collect(Collectors.toSet());
+        Set<BigDecimal> rawValidValues = validValues.stream().map(this::toSerializedType).collect(Collectors.toSet());
         return this.withConstraints(new EnumConstraint<>(rawValidValues), Set::containsAll);
     }
 
     private <V, C extends ValuedConstraint<V, ? super BigDecimal>> DecimalConfigType<T> withConstraints(C added, BiPredicate<V, V> check) {
-        return new DecimalConfigType<>(this.getActualType(), this::toRawType, this::toActualType, this.updateConstraints(added, check));
+        return new DecimalConfigType<>(this.getActualType(), this::toSerializedType, this::toActualType, this.updateConstraints(added, check));
     }
 }

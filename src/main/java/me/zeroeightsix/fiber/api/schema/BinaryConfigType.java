@@ -23,6 +23,6 @@ public final class BinaryConfigType<T> extends ConfigType<T, Boolean> {
     @Override
     public <T1> BinaryConfigType<T1> derive(Class<? super T1> actualType, Function<T1, T> f0, Function<T, T1> f) {
         @SuppressWarnings("unchecked") Class<T1> c = (Class<T1>) actualType;
-        return new BinaryConfigType<>(c, v -> this.toRawType(f0.apply(v)), v -> f.apply(this.toActualType(v)), this.indexedConstraints);
+        return new BinaryConfigType<>(c, v -> this.toSerializedType(f0.apply(v)), v -> f.apply(this.toActualType(v)), this.indexedConstraints);
     }
 }
