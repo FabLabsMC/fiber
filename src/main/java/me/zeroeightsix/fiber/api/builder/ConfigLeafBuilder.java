@@ -2,8 +2,8 @@ package me.zeroeightsix.fiber.api.builder;
 
 import me.zeroeightsix.fiber.api.FiberId;
 import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.api.schema.type.ConfigType;
-import me.zeroeightsix.fiber.api.schema.type.derived.DerivedType;
+import me.zeroeightsix.fiber.api.schema.type.SerializableType;
+import me.zeroeightsix.fiber.api.schema.type.derived.ConfigType;
 import me.zeroeightsix.fiber.api.tree.ConfigAttribute;
 import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
 import me.zeroeightsix.fiber.api.tree.ConfigNode;
@@ -26,16 +26,16 @@ import java.util.function.Function;
  */
 public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
 
-    public static <T, R> ConfigLeafBuilder<T, R> create(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull DerivedType<R, T, ?> type) {
+    public static <T, R> ConfigLeafBuilder<T, R> create(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull ConfigType<R, T, ?> type) {
         return new ConfigLeafBuilder<>(parentNode, name, type.getSerializedType(), type::toRuntimeType, type::toSerializedType);
     }
 
-    public static <T> ConfigLeafBuilder<T, T> create(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull ConfigType<T> type) {
+    public static <T> ConfigLeafBuilder<T, T> create(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull SerializableType<T> type) {
         return new ConfigLeafBuilder<>(parentNode, name, type, Function.identity(), Function.identity());
     }
 
     @Nonnull
-    protected final ConfigType<T> type;
+    protected final SerializableType<T> type;
     protected final Function<T, R> f;
     protected final Function<R, T> f0;
 
@@ -46,13 +46,14 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
 
     /**
      * Creates a new scalar {@code ConfigLeafBuilder}.
+     *
      * @param parentNode the {@code ConfigTreeBuilder} this builder originates from
-     * @param name the name of the {@code ConfigLeaf} produced by this builder
+     * @param name       the name of the {@code ConfigLeaf} produced by this builder
      * @param type       the class object representing the type of values this builder will create settings for
-     * @param f
-     * @param f0
+     * @param f          a deserializing function
+     * @param f0         a serializing function
      */
-    private ConfigLeafBuilder(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull ConfigType<T> type, Function<T, R> f, Function<R, T> f0) {
+    private ConfigLeafBuilder(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull SerializableType<T> type, Function<T, R> f, Function<R, T> f0) {
         super(parentNode, name);
         this.type = type;
         this.f = f;
@@ -60,7 +61,7 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
     }
 
     @Nonnull
-    public ConfigType<T> getType() {
+    public SerializableType<T> getType() {
         return type;
     }
 
@@ -103,7 +104,7 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
      * @see ConfigNode#getAttributes()
      */
     @Override
-    public <A> ConfigLeafBuilder<T, R> withAttribute(FiberId id, ConfigType<A> type, A defaultValue) {
+    public <A> ConfigLeafBuilder<T, R> withAttribute(FiberId id, SerializableType<A> type, A defaultValue) {
         super.withAttribute(id, type, defaultValue);
         return this;
     }

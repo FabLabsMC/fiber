@@ -1,17 +1,17 @@
 package me.zeroeightsix.fiber.impl.constraint;
 
-import me.zeroeightsix.fiber.api.constraint.TypeCheckResult;
 import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.api.schema.type.DecimalConfigType;
+import me.zeroeightsix.fiber.api.schema.type.DecimalSerializableType;
+import me.zeroeightsix.fiber.api.schema.type.TypeCheckResult;
 
 import java.math.BigDecimal;
 
 /**
  * Checks validity of serialized numbers based on a {@code DecimalConfigType}'s range constraint.
  */
-public final class DecimalTypeChecker extends Constraint<BigDecimal, DecimalConfigType> {
+public final class DecimalTypeChecker extends Constraint<BigDecimal, DecimalSerializableType> {
 
-	public DecimalTypeChecker(DecimalConfigType cfg) throws RuntimeFiberException {
+	public DecimalTypeChecker(DecimalSerializableType cfg) throws RuntimeFiberException {
 		super(cfg);
 	}
 
@@ -35,8 +35,8 @@ public final class DecimalTypeChecker extends Constraint<BigDecimal, DecimalConf
 	@Override
 	public boolean comprehends(Constraint<?, ?> constraint) {
 		if (constraint instanceof DecimalTypeChecker) {
-			DecimalConfigType value = this.cfg;
-			DecimalConfigType other = ((DecimalTypeChecker) constraint).cfg;
+			DecimalSerializableType value = this.cfg;
+			DecimalSerializableType other = ((DecimalTypeChecker) constraint).cfg;
 			return (value.getMinimum() == null || other.getMinimum() != null && value.getMinimum().compareTo(other.getMinimum()) <= 0) &&
 					(value.getMaximum() == null || other.getMaximum() != null && value.getMaximum().compareTo(other.getMaximum()) >= 0) &&
 					(value.getIncrement() == null || other.getIncrement() != null && other.getIncrement().remainder(value.getIncrement()).intValue() == 0);

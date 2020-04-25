@@ -11,12 +11,12 @@ import java.util.regex.Pattern;
 
 public class JsonTypeSerializer implements TypeSerializer<JsonObject> {
     @Override
-    public void serialize(BooleanConfigType type, JsonObject json) {
+    public void serialize(BooleanSerializableType type, JsonObject json) {
         json.put("type", new JsonPrimitive("boolean"));
     }
 
     @Override
-    public void serialize(DecimalConfigType type, JsonObject json) {
+    public void serialize(DecimalSerializableType type, JsonObject json) {
         json.put("type", new JsonPrimitive("number"));
         BigDecimal min = type.getMinimum();
         if (min != null) {
@@ -33,7 +33,7 @@ public class JsonTypeSerializer implements TypeSerializer<JsonObject> {
     }
 
     @Override
-    public void serialize(EnumConfigType type, JsonObject json) {
+    public void serialize(EnumSerializableType type, JsonObject json) {
         json.put("type", new JsonPrimitive("enum"));
         JsonArray values = new JsonArray();
         for (String value : type.getValidValues()) {
@@ -43,7 +43,7 @@ public class JsonTypeSerializer implements TypeSerializer<JsonObject> {
     }
 
     @Override
-    public void serialize(ListConfigType<?> type, JsonObject json) {
+    public void serialize(ListSerializableType<?> type, JsonObject json) {
         json.put("type", new JsonPrimitive("list"));
         JsonObject elementType = new JsonObject();
         type.getElementType().serialize(this, elementType);
@@ -54,7 +54,7 @@ public class JsonTypeSerializer implements TypeSerializer<JsonObject> {
     }
 
     @Override
-    public void serialize(MapConfigType<?> type, JsonObject json) {
+    public void serialize(MapSerializableType<?> type, JsonObject json) {
         json.put("type", new JsonPrimitive("map"));
         JsonObject valueType = new JsonObject();
         type.getValueType().serialize(this, valueType);
@@ -64,10 +64,10 @@ public class JsonTypeSerializer implements TypeSerializer<JsonObject> {
     }
 
     @Override
-    public void serialize(RecordConfigType type, JsonObject json) {
+    public void serialize(RecordSerializableType type, JsonObject json) {
         json.put("type", new JsonPrimitive("record"));
         JsonArray fields = new JsonArray();
-        for (Map.Entry<String, ConfigType<?>> entry : type.getFields().entrySet()) {
+        for (Map.Entry<String, SerializableType<?>> entry : type.getFields().entrySet()) {
             JsonObject field = new JsonObject();
             field.put("name", new JsonPrimitive(entry.getKey()));
             JsonObject fieldType = new JsonObject();
@@ -79,7 +79,7 @@ public class JsonTypeSerializer implements TypeSerializer<JsonObject> {
     }
 
     @Override
-    public void serialize(StringConfigType type, JsonObject json) {
+    public void serialize(StringSerializableType type, JsonObject json) {
         json.put("type", new JsonPrimitive("string"));
         json.put("minLength", new JsonPrimitive(type.getMinLength()));
         json.put("maxLength", new JsonPrimitive(type.getMaxLength()));

@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.api.tree;
 
-import me.zeroeightsix.fiber.api.schema.type.ConfigType;
+import me.zeroeightsix.fiber.api.schema.type.SerializableType;
 
 public interface ConfigAttribute<T> extends Property<T> {
 
@@ -9,5 +9,5 @@ public interface ConfigAttribute<T> extends Property<T> {
         return this.getConfigType().getPlatformType();
     }
 
-    ConfigType<T> getConfigType();
+    SerializableType<T> getConfigType();
 }

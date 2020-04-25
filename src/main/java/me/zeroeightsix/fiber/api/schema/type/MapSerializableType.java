@@ -6,14 +6,14 @@ import me.zeroeightsix.fiber.impl.constraint.MapTypeChecker;
 import java.util.Map;
 import java.util.Objects;
 
-public final class MapConfigType<V> extends ConfigType<Map<String, V>> {
-    private final ConfigType<V> valueType;
+public final class MapSerializableType<V> extends SerializableType<Map<String, V>> {
+    private final SerializableType<V> valueType;
     private final int minSize;
     private final int maxSize;
     private final MapTypeChecker<V> constraint;
 
     @SuppressWarnings("unchecked")
-    public MapConfigType(ConfigType<V> valueType, int minSize, int maxSize) {
+    public MapSerializableType(SerializableType<V> valueType, int minSize, int maxSize) {
         super((Class<Map<String, V>>) (Class<?>) Map.class);
         this.valueType = valueType;
         this.minSize = minSize;
@@ -21,7 +21,7 @@ public final class MapConfigType<V> extends ConfigType<Map<String, V>> {
         this.constraint = new MapTypeChecker<>(this);
     }
 
-    public ConfigType<V> getValueType() {
+    public SerializableType<V> getValueType() {
         return this.valueType;
     }
 
@@ -47,7 +47,7 @@ public final class MapConfigType<V> extends ConfigType<Map<String, V>> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || this.getClass() != o.getClass()) return false;
-        MapConfigType<?> that = (MapConfigType<?>) o;
+        MapSerializableType<?> that = (MapSerializableType<?>) o;
         return this.minSize == that.minSize &&
                 this.maxSize == that.maxSize &&
                 Objects.equals(this.valueType, that.valueType);

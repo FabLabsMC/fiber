@@ -8,9 +8,9 @@ import me.zeroeightsix.fiber.api.exception.DuplicateChildException;
 import me.zeroeightsix.fiber.api.exception.FiberException;
 import me.zeroeightsix.fiber.api.exception.IllegalTreeStateException;
 import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.api.schema.type.ConfigType;
+import me.zeroeightsix.fiber.api.schema.type.SerializableType;
+import me.zeroeightsix.fiber.api.schema.type.derived.ConfigType;
 import me.zeroeightsix.fiber.api.schema.type.derived.ConfigTypes;
-import me.zeroeightsix.fiber.api.schema.type.derived.DerivedType;
 import me.zeroeightsix.fiber.api.tree.*;
 import me.zeroeightsix.fiber.impl.builder.ConfigNodeBuilder;
 import me.zeroeightsix.fiber.impl.tree.ConfigBranchImpl;
@@ -99,7 +99,7 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
     @SuppressWarnings("unchecked")
     @Nullable
     @Override
-    public <T> ConfigLeaf<T> lookupLeaf(String name, ConfigType<T> type) {
+    public <T> ConfigLeaf<T> lookupLeaf(String name, SerializableType<T> type) {
         ConfigNode ret = this.lookup(name);
         if (ret instanceof ConfigLeaf<?> && type.isAssignableFrom(((ConfigLeaf<?>) ret).getConfigType()))
             return (ConfigLeaf<T>) ret;
@@ -162,7 +162,7 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
      * @see ConfigNode#getAttributes()
      */
     @Override
-    public <A> ConfigTreeBuilder withAttribute(FiberId id, ConfigType<A> type, A defaultValue) {
+    public <A> ConfigTreeBuilder withAttribute(FiberId id, SerializableType<A> type, A defaultValue) {
         super.withAttribute(id, type, defaultValue);
         return this;
     }
@@ -251,15 +251,15 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
      * @param type the class of the type of value the {@link ConfigLeaf} produced by the builder holds
      * @param <T>  the type {@code type} represents
      * @return the newly created builder
-     * @see #withValue(String, ConfigType, Object)
+     * @see #withValue(String, SerializableType, Object)
      * @see ConfigLeafBuilder
      * @see ConfigTypes
      */
-    public <T> ConfigLeafBuilder<T, T> beginValue(@Nonnull String name, @Nonnull ConfigType<T> type, @Nullable T defaultValue) {
+    public <T> ConfigLeafBuilder<T, T> beginValue(@Nonnull String name, @Nonnull SerializableType<T> type, @Nullable T defaultValue) {
         return ConfigLeafBuilder.create(this, name, type).withDefaultValue(defaultValue);
     }
 
-    public <T, R> ConfigLeafBuilder<T, R> beginValue(@Nonnull String name, @Nonnull DerivedType<R, T, ?> type, @Nullable R defaultValue) {
+    public <T, R> ConfigLeafBuilder<T, R> beginValue(@Nonnull String name, @Nonnull ConfigType<R, T, ?> type, @Nullable R defaultValue) {
         return ConfigLeafBuilder.create(this, name, type).withDefaultValue(defaultValue);
     }
 
@@ -274,10 +274,10 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
      * @param defaultValue the default value of the {@link ConfigLeaf} to create.
      * @param <T>          the type of value the {@link ConfigLeaf} holds.
      * @return {@code this}, for chaining
-     * @see #beginValue(String, ConfigType, Object)
+     * @see #beginValue(String, SerializableType, Object)
      * @see ConfigTypes
      */
-    public <T> ConfigTreeBuilder withValue(@Nonnull String name, @Nonnull ConfigType<T> type, @Nullable T defaultValue) {
+    public <T> ConfigTreeBuilder withValue(@Nonnull String name, @Nonnull SerializableType<T> type, @Nullable T defaultValue) {
         this.items.add(new ConfigLeafImpl<>(name, type, null, defaultValue, (a, b) -> { }));
         return this;
     }
@@ -286,7 +286,7 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
      * Adds a {@code ConfigLeaf} with a type and default value derived from another type.
      *
      * <p><strong>The built leaf will only accept values of {@code type}'s
-     * {@linkplain DerivedType#getSerializedType() serializable config type}</strong>.
+     * {@linkplain ConfigType#getSerializedType() serializable config type}</strong>.
      * The full derived type information is only used to convert the provided {@code defaultValue}
      * to a valid serialized form. {@linkplain PropertyMirror Property mirrors} can be used
      * to interact seamlessly with the leaf using runtime types.
@@ -300,15 +300,15 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
      * @param <R>          the runtime type of the {@code defaultValue} representation.
      * @param <S>          the type of value the {@link ConfigLeaf} holds.
      * @return {@code this}, for chaining
-     * @see #beginValue(String, ConfigType, Object)
+     * @see #beginValue(String, SerializableType, Object)
      * @see ConfigTypes
      */
-    public <R, S> ConfigTreeBuilder withValue(@Nonnull String name, @Nonnull DerivedType<R, S, ?> type, @Nullable R defaultValue) {
+    public <R, S> ConfigTreeBuilder withValue(@Nonnull String name, @Nonnull ConfigType<R, S, ?> type, @Nullable R defaultValue) {
         this.items.add(new ConfigLeafImpl<>(name, type.getSerializedType(), null, type.toSerializedType(defaultValue), (a, b) -> { }));
         return this;
     }
 
-    public <R, S> ConfigTreeBuilder withMirroredValue(@Nonnull String name, @Nonnull DerivedType<R, S, ?> type, @Nullable R defaultValue) {
+    public <R, S> ConfigTreeBuilder withMirroredValue(@Nonnull String name, @Nonnull ConfigType<R, S, ?> type, @Nullable R defaultValue) {
         this.items.add(new ConfigLeafImpl<>(name, type.getSerializedType(), null, type.toSerializedType(defaultValue), (a, b) -> { }));
         return this;
     }

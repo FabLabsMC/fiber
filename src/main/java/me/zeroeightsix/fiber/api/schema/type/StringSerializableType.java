@@ -7,8 +7,8 @@ import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
-public final class StringConfigType extends ConfigType<String> {
-    public static final StringConfigType DEFAULT_STRING = new StringConfigType(0, Integer.MAX_VALUE, null);
+public final class StringSerializableType extends SerializableType<String> {
+    public static final StringSerializableType DEFAULT_STRING = new StringSerializableType(0, Integer.MAX_VALUE, null);
 
     private final int minLength;
     private final int maxLength;
@@ -16,7 +16,7 @@ public final class StringConfigType extends ConfigType<String> {
     private final Pattern pattern;
     private final StringTypeChecker constraint;
 
-    public StringConfigType(int minLength, int maxLength, @Nullable Pattern pattern) {
+    public StringSerializableType(int minLength, int maxLength, @Nullable Pattern pattern) {
         super(String.class);
         this.minLength = minLength;
         this.maxLength = maxLength;
@@ -76,7 +76,7 @@ public final class StringConfigType extends ConfigType<String> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || this.getClass() != o.getClass()) return false;
-        StringConfigType that = (StringConfigType) o;
+        StringSerializableType that = (StringSerializableType) o;
         return this.minLength == that.minLength &&
                 this.maxLength == that.maxLength &&
                 Objects.equals(this.pattern, that.pattern);

@@ -7,7 +7,7 @@ import me.zeroeightsix.fiber.api.NodeOperationsTest;
 import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.api.exception.FiberException;
 import me.zeroeightsix.fiber.api.schema.type.derived.ConfigTypes;
-import me.zeroeightsix.fiber.api.schema.type.derived.NumberDerivedType;
+import me.zeroeightsix.fiber.api.schema.type.derived.NumberConfigType;
 import me.zeroeightsix.fiber.api.tree.ConfigTree;
 import me.zeroeightsix.fiber.api.tree.HasValue;
 import me.zeroeightsix.fiber.api.tree.PropertyMirror;
@@ -26,7 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class JanksonSerializerTest {
 
-    public static final NumberDerivedType<Integer> INT_TYPE = ConfigTypes.INTEGER.derive(int.class, Function.identity(), Function.identity());
+    public static final NumberConfigType<Integer> INT_TYPE = ConfigTypes.INTEGER.derive(int.class, Function.identity(), Function.identity());
 
     @Test
     @DisplayName("Node -> Node")

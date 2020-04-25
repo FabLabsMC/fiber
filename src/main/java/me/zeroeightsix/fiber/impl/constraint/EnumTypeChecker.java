@@ -1,16 +1,16 @@
 package me.zeroeightsix.fiber.impl.constraint;
 
-import me.zeroeightsix.fiber.api.constraint.TypeCheckResult;
-import me.zeroeightsix.fiber.api.schema.type.EnumConfigType;
+import me.zeroeightsix.fiber.api.schema.type.EnumSerializableType;
+import me.zeroeightsix.fiber.api.schema.type.TypeCheckResult;
 
 import javax.annotation.Nonnull;
 import java.util.Locale;
 
-public final class EnumTypeChecker extends Constraint<String, EnumConfigType> {
+public final class EnumTypeChecker extends Constraint<String, EnumSerializableType> {
     @Nonnull
-    private final EnumConfigType cfg;
+    private final EnumSerializableType cfg;
 
-    public EnumTypeChecker(@Nonnull EnumConfigType cfg) {
+    public EnumTypeChecker(@Nonnull EnumSerializableType cfg) {
         super(cfg);
         this.cfg = cfg;
     }

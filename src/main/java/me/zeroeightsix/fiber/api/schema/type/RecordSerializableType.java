@@ -7,17 +7,17 @@ import me.zeroeightsix.fiber.impl.constraint.RecordTypeChecker;
 import java.util.Map;
 import java.util.Objects;
 
-public final class RecordConfigType extends ConfigType<ConfigBranch> {
-    private final Map<String, ConfigType<?>> fields;
+public final class RecordSerializableType extends SerializableType<ConfigBranch> {
+    private final Map<String, SerializableType<?>> fields;
     private final RecordTypeChecker constraint;
 
-    public RecordConfigType(Map<String, ConfigType<?>> fields) {
+    public RecordSerializableType(Map<String, SerializableType<?>> fields) {
         super(ConfigBranch.class);
         this.fields = fields;
         this.constraint = new RecordTypeChecker(this);
     }
 
-    public Map<String, ConfigType<?>> getFields() {
+    public Map<String, SerializableType<?>> getFields() {
         return this.fields;
     }
 
@@ -35,7 +35,7 @@ public final class RecordConfigType extends ConfigType<ConfigBranch> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || this.getClass() != o.getClass()) return false;
-        RecordConfigType that = (RecordConfigType) o;
+        RecordSerializableType that = (RecordSerializableType) o;
         return Objects.equals(this.fields, that.fields);
     }
 

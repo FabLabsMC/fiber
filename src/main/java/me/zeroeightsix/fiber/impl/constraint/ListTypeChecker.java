@@ -1,7 +1,7 @@
 package me.zeroeightsix.fiber.impl.constraint;
 
-import me.zeroeightsix.fiber.api.constraint.TypeCheckResult;
-import me.zeroeightsix.fiber.api.schema.type.ListConfigType;
+import me.zeroeightsix.fiber.api.schema.type.ListSerializableType;
+import me.zeroeightsix.fiber.api.schema.type.TypeCheckResult;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,9 +13,9 @@ import java.util.List;
  *
  * @param <E> the type of elements {@code <A>} holds
  */
-public final class ListTypeChecker<E> extends Constraint<List<E>, ListConfigType<E>> {
+public final class ListTypeChecker<E> extends Constraint<List<E>, ListSerializableType<E>> {
 
-    public ListTypeChecker(ListConfigType<E> cfg) {
+    public ListTypeChecker(ListSerializableType<E> cfg) {
         super(cfg);
     }
 

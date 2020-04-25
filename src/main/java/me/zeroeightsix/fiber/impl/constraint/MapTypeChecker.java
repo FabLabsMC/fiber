@@ -1,15 +1,15 @@
 package me.zeroeightsix.fiber.impl.constraint;
 
-import me.zeroeightsix.fiber.api.constraint.TypeCheckResult;
-import me.zeroeightsix.fiber.api.schema.type.MapConfigType;
+import me.zeroeightsix.fiber.api.schema.type.MapSerializableType;
+import me.zeroeightsix.fiber.api.schema.type.TypeCheckResult;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class MapTypeChecker<V> extends Constraint<Map<String, V>, MapConfigType<V>> {
+public class MapTypeChecker<V> extends Constraint<Map<String, V>, MapSerializableType<V>> {
 
-    public MapTypeChecker(MapConfigType<V> cfg) {
+    public MapTypeChecker(MapSerializableType<V> cfg) {
         super(cfg);
     }
 

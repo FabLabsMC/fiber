@@ -1,8 +1,8 @@
 package me.zeroeightsix.fiber.impl.tree;
 
 import me.zeroeightsix.fiber.api.builder.ConfigLeafBuilder;
-import me.zeroeightsix.fiber.api.constraint.TypeCheckResult;
-import me.zeroeightsix.fiber.api.schema.type.ConfigType;
+import me.zeroeightsix.fiber.api.schema.type.SerializableType;
+import me.zeroeightsix.fiber.api.schema.type.TypeCheckResult;
 import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
 
 import javax.annotation.Nonnull;
@@ -18,7 +18,7 @@ public final class ConfigLeafImpl<T> extends ConfigNodeImpl implements ConfigLea
     @Nonnull
     private BiConsumer<T, T> listener;
     @Nonnull
-    private final ConfigType<T> type;
+    private final SerializableType<T> type;
 
     /**
      * Creates a {@code ConfigLeaf}.
@@ -30,7 +30,7 @@ public final class ConfigLeafImpl<T> extends ConfigNodeImpl implements ConfigLea
      * @param listener     the consumer or listener for this item. When this item's value changes, the consumer will be called with the old value as first argument and the new value as second argument.
      * @see ConfigLeafBuilder
      */
-    public ConfigLeafImpl(@Nonnull String name, @Nonnull ConfigType<T> type, @Nullable String comment, @Nullable T defaultValue, @Nonnull BiConsumer<T, T> listener) {
+    public ConfigLeafImpl(@Nonnull String name, @Nonnull SerializableType<T> type, @Nullable String comment, @Nullable T defaultValue, @Nonnull BiConsumer<T, T> listener) {
         super(name, comment);
         this.defaultValue = defaultValue;
         this.listener = listener;
@@ -47,7 +47,7 @@ public final class ConfigLeafImpl<T> extends ConfigNodeImpl implements ConfigLea
     }
 
     @Override
-    public ConfigType<T> getConfigType() {
+    public SerializableType<T> getConfigType() {
         return this.type;
     }
 

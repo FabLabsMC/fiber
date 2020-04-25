@@ -5,11 +5,11 @@ import me.zeroeightsix.fiber.api.serialization.TypeSerializer;
 import me.zeroeightsix.fiber.impl.constraint.BooleanTypeChecker;
 import me.zeroeightsix.fiber.impl.constraint.Constraint;
 
-public final class BooleanConfigType extends ConfigType<Boolean> {
-    public static final BooleanConfigType BOOLEAN = new BooleanConfigType();
+public final class BooleanSerializableType extends SerializableType<Boolean> {
+    public static final BooleanSerializableType BOOLEAN = new BooleanSerializableType();
     private final BooleanTypeChecker constraint;
 
-    private BooleanConfigType() {
+    private BooleanSerializableType() {
         super(Boolean.class);
         this.constraint = new BooleanTypeChecker(this);
     }
@@ -21,7 +21,7 @@ public final class BooleanConfigType extends ConfigType<Boolean> {
 
     @Override
     public boolean equals(Object o) {
-        return o instanceof BooleanConfigType;
+        return o instanceof BooleanSerializableType;
     }
 
     @Override

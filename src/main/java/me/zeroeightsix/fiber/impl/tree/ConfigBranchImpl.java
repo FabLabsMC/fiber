@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.impl.tree;
 
-import me.zeroeightsix.fiber.api.schema.type.ConfigType;
+import me.zeroeightsix.fiber.api.schema.type.SerializableType;
 import me.zeroeightsix.fiber.api.tree.*;
 
 import javax.annotation.Nonnull;
@@ -67,7 +67,7 @@ public class ConfigBranchImpl extends ConfigNodeImpl implements ConfigBranch {
 
     @Nullable
     @Override
-    public <T> ConfigLeaf<T> lookupLeaf(String name, ConfigType<T> type) {
+    public <T> ConfigLeaf<T> lookupLeaf(String name, SerializableType<T> type) {
         ConfigNode child = this.items.getByName(name);
         if (child instanceof ConfigLeaf && type.isAssignableFrom(((ConfigLeaf<?>) child).getConfigType())) {
             @SuppressWarnings("unchecked") ConfigLeaf<T> leaf = (ConfigLeaf<T>) child;

@@ -3,8 +3,8 @@ package me.zeroeightsix.fiber.builder.constraint;
 import me.zeroeightsix.fiber.api.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.api.schema.type.derived.ConfigTypes;
-import me.zeroeightsix.fiber.api.schema.type.derived.ListDerivedType;
-import me.zeroeightsix.fiber.api.schema.type.derived.NumberDerivedType;
+import me.zeroeightsix.fiber.api.schema.type.derived.ListConfigType;
+import me.zeroeightsix.fiber.api.schema.type.derived.NumberConfigType;
 import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
 import me.zeroeightsix.fiber.api.tree.ConfigTree;
 import me.zeroeightsix.fiber.api.tree.PropertyMirror;
@@ -24,7 +24,7 @@ class ConstraintsTest {
     @DisplayName("Test numerical constraints")
     @Test
     public void testNumericalConstraints() {
-        NumberDerivedType<Integer> type = ConfigTypes.INTEGER.withMinimum(5);
+        NumberConfigType<Integer> type = ConfigTypes.INTEGER.withMinimum(5);
 
         ConfigLeaf<BigDecimal> leaf = ConfigLeafBuilder.create(null, "", type.getSerializedType()).build();
 
@@ -38,7 +38,7 @@ class ConstraintsTest {
     @DisplayName("Test array aggregate constraints")
     @Test
     public void testArrayConstraints() {
-        ListDerivedType<Integer[], BigDecimal> type = ConfigTypes.makeArray(
+        ListConfigType<Integer[], BigDecimal> type = ConfigTypes.makeArray(
                 ConfigTypes.INTEGER.withValidRange(3, 10, 1)
         ).withMaxSize(3).withMinSize(1);
         ConfigLeaf<List<BigDecimal>> config = ConfigLeafBuilder.create(null, "foo", type).build();
@@ -62,7 +62,7 @@ class ConstraintsTest {
     public void testCollectionConstraints() {
         ConfigTreeBuilder builder = ConfigTree.builder();
 
-        ListDerivedType<List<Integer>, BigDecimal> type = ConfigTypes.makeList(ConfigTypes.INTEGER.withMinimum(3).withMaximum(10)).withMaxSize(3);
+        ListConfigType<List<Integer>, BigDecimal> type = ConfigTypes.makeList(ConfigTypes.INTEGER.withMinimum(3).withMaximum(10)).withMaxSize(3);
         ConfigLeaf<?> config = builder.beginValue(
                 "",
                 type,

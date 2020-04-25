@@ -1,16 +1,16 @@
 package me.zeroeightsix.fiber.impl.constraint;
 
-import me.zeroeightsix.fiber.api.constraint.TypeCheckResult;
-import me.zeroeightsix.fiber.api.schema.type.StringConfigType;
+import me.zeroeightsix.fiber.api.schema.type.StringSerializableType;
+import me.zeroeightsix.fiber.api.schema.type.TypeCheckResult;
 
 import java.util.regex.Pattern;
 
 /**
  * Checks validity of serialized strings based on a {@code StringConfigType}'s length range and pattern.
  */
-public final class StringTypeChecker extends Constraint<String, StringConfigType> {
+public final class StringTypeChecker extends Constraint<String, StringSerializableType> {
 
-    public StringTypeChecker(StringConfigType cfg) {
+    public StringTypeChecker(StringSerializableType cfg) {
         super(cfg);
     }
 

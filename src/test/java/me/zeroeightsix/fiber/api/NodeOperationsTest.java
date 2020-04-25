@@ -2,7 +2,7 @@ package me.zeroeightsix.fiber.api;
 
 import me.zeroeightsix.fiber.api.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
-import me.zeroeightsix.fiber.api.schema.type.ConfigType;
+import me.zeroeightsix.fiber.api.schema.type.SerializableType;
 import me.zeroeightsix.fiber.api.schema.type.derived.ConfigTypes;
 import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
 import me.zeroeightsix.fiber.api.tree.ConfigNode;
@@ -55,12 +55,12 @@ public class NodeOperationsTest {
         testItemFor(ConfigTypes.INTEGER.getSerializedType(), BigDecimal.TEN, valueTwo);
     }
 
-   public static <T> void testNodeFor(ConfigTree node, String name, ConfigType<T> type, T value) {
+   public static <T> void testNodeFor(ConfigTree node, String name, SerializableType<T> type, T value) {
         ConfigNode item = node.lookup(name);
         testItemFor(type, value, item);
     }
 
-    static <T> void testItemFor(ConfigType<T> type, T value, ConfigNode item) {
+    static <T> void testItemFor(SerializableType<T> type, T value, ConfigNode item) {
         assertNotNull(item, "Setting exists");
         assertTrue(item instanceof ConfigLeaf<?>, "Setting is a property");
         ConfigLeaf<?> property = (ConfigLeaf<?>) item;

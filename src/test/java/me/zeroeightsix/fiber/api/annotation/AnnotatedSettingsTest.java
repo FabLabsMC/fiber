@@ -1,10 +1,10 @@
 package me.zeroeightsix.fiber.api.annotation;
 
 import me.zeroeightsix.fiber.api.exception.FiberException;
-import me.zeroeightsix.fiber.api.schema.type.ListConfigType;
-import me.zeroeightsix.fiber.api.schema.type.StringConfigType;
+import me.zeroeightsix.fiber.api.schema.type.ListSerializableType;
+import me.zeroeightsix.fiber.api.schema.type.StringSerializableType;
 import me.zeroeightsix.fiber.api.schema.type.derived.ConfigTypes;
-import me.zeroeightsix.fiber.api.schema.type.derived.ListDerivedType;
+import me.zeroeightsix.fiber.api.schema.type.derived.ListConfigType;
 import me.zeroeightsix.fiber.api.tree.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -140,7 +140,7 @@ class AnnotatedSettingsTest {
     void testArrayConstraints() throws FiberException {
         ArrayConstraintsPojo pojo = new ArrayConstraintsPojo();
         this.annotatedSettings.applyToNode(this.node, pojo);
-        ListDerivedType<String[], String> type = ConfigTypes.makeArray(ConfigTypes.STRING);
+        ListConfigType<String[], String> type = ConfigTypes.makeArray(ConfigTypes.STRING);
         PropertyMirror<String[]> mirror1 = PropertyMirror.create(type);
         Property<List<String>> value1 = this.node.lookupLeaf("nonEmptyArrayShortStrings", type.getSerializedType());
         assertNotNull(value1, "Setting exists");
@@ -148,7 +148,7 @@ class AnnotatedSettingsTest {
         assertTrue(mirror1.setValue(new String[]{"ab", "", "ba", ""}));
         assertFalse(mirror1.setValue(new String[0]), "Empty array");
         assertFalse(mirror1.setValue(new String[]{"aaaaaaaaaaaa"}), "Strings too long");
-        ListDerivedType<Integer[], BigDecimal> type2 = ConfigTypes.makeArray(ConfigTypes.INTEGER);
+        ListConfigType<Integer[], BigDecimal> type2 = ConfigTypes.makeArray(ConfigTypes.INTEGER);
         @SuppressWarnings("unchecked") PropertyMirror<int[]> mirror2 = (PropertyMirror<int[]>) ((PropertyMirror<?>) PropertyMirror.create(type2));
         this.node.lookupAndBind("numbers", mirror2);
         assertNotNull(mirror2, "Setting exists");
@@ -168,7 +168,7 @@ class AnnotatedSettingsTest {
         assertFalse(mirror2.accepts(new int[]{9, 10, 11}), "Numbers above 10 not allowed");
         assertTrue(mirror2.setValue(new int[]{9, 10, 11}), "Correction for out of bounds numbers available");
         assertArrayEquals(new int[]{9, 10, 10}, mirror2.getValue(), ">10 number should be brought back into range");
-        Property<List<String>> value3 = this.node.lookupLeaf("shortArrayIdStrings", ListConfigType.of(StringConfigType.DEFAULT_STRING));
+        Property<List<String>> value3 = this.node.lookupLeaf("shortArrayIdStrings", ListSerializableType.of(StringSerializableType.DEFAULT_STRING));
         assertNotNull(value3, "Setting exists");
         assertTrue(value3.accepts(Arrays.asList("a:b", "fabric:test")));
         assertTrue(value3.setValue(Arrays.asList("a:b", "fabric:test")));

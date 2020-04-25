@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.impl.tree;
 
-import me.zeroeightsix.fiber.api.schema.type.derived.DerivedType;
+import me.zeroeightsix.fiber.api.schema.type.derived.ConfigType;
 import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
 import me.zeroeightsix.fiber.api.tree.Property;
 import me.zeroeightsix.fiber.api.tree.PropertyMirror;
@@ -10,13 +10,13 @@ import java.util.Objects;
 
 public final class PropertyMirrorImpl<R, S> implements PropertyMirror<R> {
     protected Property<S> delegate;
-    protected DerivedType<R, S, ?> converter;
+    protected ConfigType<R, S, ?> converter;
     @Nullable
     private S lastSerializedValue;
     @Nullable
     private R cachedValue;
 
-    public PropertyMirrorImpl(DerivedType<R, S, ?> converter) {
+    public PropertyMirrorImpl(ConfigType<R, S, ?> converter) {
         this.converter = converter;
     }
 
@@ -81,7 +81,7 @@ public final class PropertyMirrorImpl<R, S> implements PropertyMirror<R> {
     }
 
     @Override
-    public DerivedType<R, S, ?> getConverter() {
+    public ConfigType<R, S, ?> getConverter() {
         return this.converter;
     }
 }

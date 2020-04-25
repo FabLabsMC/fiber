@@ -1,7 +1,7 @@
 package me.zeroeightsix.fiber.api.tree;
 
 import me.zeroeightsix.fiber.api.builder.ConfigLeafBuilder;
-import me.zeroeightsix.fiber.api.schema.type.ConfigType;
+import me.zeroeightsix.fiber.api.schema.type.SerializableType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -20,7 +20,7 @@ public interface ConfigLeaf<T> extends ConfigNode, Property<T>, Commentable {
      * Sets the value held by this {@code ConfigLeaf}.
      *
      * <p> If the provided value does not satisfy this setting's
-     * {@linkplain ConfigType#test(Object) type constraints}:
+     * {@linkplain SerializableType#test(Object) type constraints}:
      * <ul>
      *     <li> if a corrected value can be found, this setting is set to the corrected value
      *          and this method returns {@code true}. </li>
@@ -43,7 +43,7 @@ public interface ConfigLeaf<T> extends ConfigNode, Property<T>, Commentable {
      *
      * @param rawValue the value to check
      * @return {@code true} if this property accepts the given value, {@code false} otherwise.
-     * @see ConfigType#accepts(Object)
+     * @see SerializableType#accepts(Object)
      */
     default boolean accepts(T rawValue) {
         return true;
@@ -60,7 +60,7 @@ public interface ConfigLeaf<T> extends ConfigNode, Property<T>, Commentable {
     @Override
     T getValue();
 
-    ConfigType<T> getConfigType();
+    SerializableType<T> getConfigType();
 
     @Override
     default Class<T> getType() {

@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.Objects;
 
-public final class DecimalConfigType extends ConfigType<BigDecimal> {
+public final class DecimalSerializableType extends SerializableType<BigDecimal> {
     /**
      * Specifies a numerical lower bound.
      *
@@ -26,7 +26,7 @@ public final class DecimalConfigType extends ConfigType<BigDecimal> {
     private final BigDecimal increment;
     private final DecimalTypeChecker constraint;
 
-    public DecimalConfigType(@Nullable BigDecimal min, @Nullable BigDecimal max, @Nullable BigDecimal increment) {
+    public DecimalSerializableType(@Nullable BigDecimal min, @Nullable BigDecimal max, @Nullable BigDecimal increment) {
         super(BigDecimal.class);
         if (min != null && max != null) {
             if (min.compareTo(max) > 0) throw new IllegalArgumentException("Provided minimum " + min + " is greater than provided maximum " + max);
@@ -62,7 +62,7 @@ public final class DecimalConfigType extends ConfigType<BigDecimal> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || this.getClass() != o.getClass()) return false;
-        DecimalConfigType that = (DecimalConfigType) o;
+        DecimalSerializableType that = (DecimalSerializableType) o;
         return Objects.equals(this.minimum, that.minimum) &&
                 Objects.equals(this.maximum, that.maximum) &&
                 Objects.equals(this.increment, that.increment);

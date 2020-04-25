@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.api.exception;
 
-import me.zeroeightsix.fiber.api.schema.type.ConfigType;
+import me.zeroeightsix.fiber.api.schema.type.SerializableType;
 import me.zeroeightsix.fiber.api.tree.ConfigBranch;
 import me.zeroeightsix.fiber.api.tree.ConfigNode;
 import me.zeroeightsix.fiber.api.tree.ConfigQuery;
@@ -72,9 +72,9 @@ public class FiberQueryException extends FiberException {
         private final ConfigNode invalidItem;
         private final Class<?> expectedNodeType;
         @Nullable
-        private final ConfigType<?> expectedValueType;
+        private final SerializableType<?> expectedValueType;
 
-        public WrongType(ConfigTree invalidTree, ConfigNode invalidItem, Class<?> expectedNodeType, @Nullable ConfigType<?> expectedValueType) {
+        public WrongType(ConfigTree invalidTree, ConfigNode invalidItem, Class<?> expectedNodeType, @Nullable SerializableType<?> expectedValueType) {
             super("Expected node of type " + expectedNodeType.getSimpleName()
                     + (expectedValueType == null ? "" : "<" + expectedValueType + ">")
                     + ", got " + invalidItem, invalidTree);
@@ -99,7 +99,7 @@ public class FiberQueryException extends FiberException {
          * @return the expected value type, or {@code null} if the query did not expect a property
          */
         @Nullable
-        public ConfigType<?> getExpectedValueType() {
+        public SerializableType<?> getExpectedValueType() {
             return this.expectedValueType;
         }
     }

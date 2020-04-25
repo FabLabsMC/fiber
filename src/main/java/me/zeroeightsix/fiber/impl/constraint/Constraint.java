@@ -1,7 +1,7 @@
 package me.zeroeightsix.fiber.impl.constraint;
 
-import me.zeroeightsix.fiber.api.constraint.TypeCheckResult;
-import me.zeroeightsix.fiber.api.schema.type.ConfigType;
+import me.zeroeightsix.fiber.api.schema.type.SerializableType;
+import me.zeroeightsix.fiber.api.schema.type.TypeCheckResult;
 import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
 
 /**
@@ -10,7 +10,7 @@ import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
  * @param <V> the type of values this constraint checks
  * @see ConfigLeaf
  */
-public abstract class Constraint<V, T extends ConfigType<V>> {
+public abstract class Constraint<V, T extends SerializableType<V>> {
 
 	protected final T cfg;
 

@@ -3,7 +3,7 @@ package me.zeroeightsix.fiber.api.tree;
 import me.zeroeightsix.fiber.api.FiberId;
 import me.zeroeightsix.fiber.api.exception.DuplicateChildException;
 import me.zeroeightsix.fiber.api.exception.IllegalTreeStateException;
-import me.zeroeightsix.fiber.api.schema.type.ConfigType;
+import me.zeroeightsix.fiber.api.schema.type.SerializableType;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -45,7 +45,7 @@ public interface ConfigNode {
      * or an empty {@code Optional} if the attribute does not exist
      * @throws ClassCastException if the attribute exists but has a type that is not assignable to {@code expectedType}
      */
-    <A> Optional<A> getAttributeValue(FiberId id, ConfigType<A> expectedType);
+    <A> Optional<A> getAttributeValue(FiberId id, SerializableType<A> expectedType);
 
     /**
      * Retrieves the attribute with the given id. If it does not exist, one is created with the given type and default value.
@@ -57,7 +57,7 @@ public interface ConfigNode {
      * @return the current (existing or computed) attribute associated with the given id
      * @see #getAttributes()
      */
-    <A> ConfigAttribute<A> getOrCreateAttribute(FiberId id, ConfigType<A> attributeType, @Nullable A defaultValue);
+    <A> ConfigAttribute<A> getOrCreateAttribute(FiberId id, SerializableType<A> attributeType, @Nullable A defaultValue);
 
     /**
      * Returns this node's parent, if any.

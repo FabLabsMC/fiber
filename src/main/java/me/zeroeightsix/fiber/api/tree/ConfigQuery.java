@@ -1,7 +1,7 @@
 package me.zeroeightsix.fiber.api.tree;
 
 import me.zeroeightsix.fiber.api.exception.FiberQueryException;
-import me.zeroeightsix.fiber.api.schema.type.ConfigType;
+import me.zeroeightsix.fiber.api.schema.type.SerializableType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -56,16 +56,16 @@ public final class ConfigQuery<T extends ConfigNode> {
      * @param more  additional node names forming the config path
      * @return a config query for leaves of existing trees
      */
-    public static <V> ConfigQuery<ConfigLeaf<V>> leaf(ConfigType<V> propertyType, String first, String... more) {
+    public static <V> ConfigQuery<ConfigLeaf<V>> leaf(SerializableType<V> propertyType, String first, String... more) {
         return new ConfigQuery<>(ConfigLeaf.class, propertyType, first, more);
     }
 
     private final List<String> path;
     private final Class<? super T> nodeType;
     @Nullable
-    private final ConfigType<?> valueType;
+    private final SerializableType<?> valueType;
 
-    private ConfigQuery(Class<? super T> nodeType, @Nullable ConfigType<?> valueType, String first, String[] path) {
+    private ConfigQuery(Class<? super T> nodeType, @Nullable SerializableType<?> valueType, String first, String[] path) {
         this.nodeType = nodeType;
         this.valueType = valueType;
         this.path = new ArrayList<>();
@@ -117,7 +117,7 @@ public final class ConfigQuery<T extends ConfigNode> {
         return result;
     }
 
-    private <N> N lookupChild(ConfigTree tree, String name, Class<N> nodeType, @Nullable ConfigType<?> valueType) throws FiberQueryException {
+    private <N> N lookupChild(ConfigTree tree, String name, Class<N> nodeType, @Nullable SerializableType<?> valueType) throws FiberQueryException {
         ConfigNode node = tree.lookup(name);
         if (nodeType.isInstance(node) && (valueType == null || valueType.equals(((ConfigLeaf<?>) node).getConfigType()))) {
             return nodeType.cast(node);

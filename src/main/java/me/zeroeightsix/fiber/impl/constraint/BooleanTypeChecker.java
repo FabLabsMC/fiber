@@ -1,10 +1,10 @@
 package me.zeroeightsix.fiber.impl.constraint;
 
-import me.zeroeightsix.fiber.api.constraint.TypeCheckResult;
-import me.zeroeightsix.fiber.api.schema.type.BooleanConfigType;
+import me.zeroeightsix.fiber.api.schema.type.BooleanSerializableType;
+import me.zeroeightsix.fiber.api.schema.type.TypeCheckResult;
 
-public class BooleanTypeChecker extends Constraint<Boolean, BooleanConfigType> {
-    public BooleanTypeChecker(BooleanConfigType cfg) {
+public class BooleanTypeChecker extends Constraint<Boolean, BooleanSerializableType> {
+    public BooleanTypeChecker(BooleanSerializableType cfg) {
         super(cfg);
     }
 

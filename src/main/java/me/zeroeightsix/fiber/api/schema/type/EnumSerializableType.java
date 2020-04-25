@@ -5,16 +5,16 @@ import me.zeroeightsix.fiber.impl.constraint.EnumTypeChecker;
 
 import java.util.*;
 
-public final class EnumConfigType extends ConfigType<String> {
+public final class EnumSerializableType extends SerializableType<String> {
 
     private final Set<String> validValues;
     private final EnumTypeChecker constraint;
 
-    public EnumConfigType(String... validValues) {
+    public EnumSerializableType(String... validValues) {
         this(new HashSet<>(Arrays.asList(validValues)));
     }
 
-    public EnumConfigType(Set<String> validValues) {
+    public EnumSerializableType(Set<String> validValues) {
         super(String.class);
         this.validValues = Collections.unmodifiableSet(validValues);
         this.constraint = new EnumTypeChecker(this);
@@ -38,7 +38,7 @@ public final class EnumConfigType extends ConfigType<String> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || this.getClass() != o.getClass()) return false;
-        EnumConfigType that = (EnumConfigType) o;
+        EnumSerializableType that = (EnumSerializableType) o;
         return Objects.equals(this.validValues, that.validValues);
     }
 

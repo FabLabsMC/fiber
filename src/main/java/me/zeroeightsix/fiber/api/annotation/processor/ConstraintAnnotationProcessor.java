@@ -27,7 +27,7 @@ public interface ConstraintAnnotationProcessor<A extends Annotation> {
      * @param annotated  an annotated type use site declared in {@code pojo}'s class
      * @see AnnotatedSettings#applyToNode(ConfigTree, Object)
      */
-    default <T> NumberDerivedType<T> processDecimal(NumberDerivedType<T> baseType, A annotation, AnnotatedElement annotated) {
+    default <T> NumberConfigType<T> processDecimal(NumberConfigType<T> baseType, A annotation, AnnotatedElement annotated) {
         throw new UnsupportedOperationException("Invalid annotation " + annotation.annotationType().getSimpleName() + " for type " + baseType);
     }
 
@@ -40,7 +40,7 @@ public interface ConstraintAnnotationProcessor<A extends Annotation> {
      * @param annotated  an annotated type use site declared in {@code pojo}'s class
      * @see AnnotatedSettings#applyToNode(ConfigTree, Object)
      */
-    default <T> StringDerivedType<T> processString(StringDerivedType<T> baseType, A annotation, AnnotatedElement annotated) {
+    default <T> StringConfigType<T> processString(StringConfigType<T> baseType, A annotation, AnnotatedElement annotated) {
         throw new UnsupportedOperationException("Invalid annotation " + annotation.annotationType() + " for type " + baseType);
     }
 
@@ -53,23 +53,23 @@ public interface ConstraintAnnotationProcessor<A extends Annotation> {
      * @param annotated  an annotated type use site declared in {@code pojo}'s class
      * @see AnnotatedSettings#applyToNode(ConfigTree, Object)
      */
-    default <T, E> ListDerivedType<T, E> processList(ListDerivedType<T, E> baseType, A annotation, AnnotatedElement annotated) {
+    default <T, E> ListConfigType<T, E> processList(ListConfigType<T, E> baseType, A annotation, AnnotatedElement annotated) {
         throw new UnsupportedOperationException("Invalid annotation " + annotation.annotationType() + " for type " + baseType);
     }
 
-    default <T> EnumDerivedType<T> processEnum(EnumDerivedType<T> baseType, A annotation, AnnotatedElement annotated) {
+    default <T> EnumConfigType<T> processEnum(EnumConfigType<T> baseType, A annotation, AnnotatedElement annotated) {
         throw new UnsupportedOperationException("Invalid annotation " + annotation.annotationType() + " for type " + baseType);
     }
 
-    default <R, E> RecordDerivedType<R, E> processRecord(RecordDerivedType<R, E> baseType, A annotation, AnnotatedElement annotated) {
+    default <R, E> RecordConfigType<R, E> processRecord(RecordConfigType<R, E> baseType, A annotation, AnnotatedElement annotated) {
         throw new UnsupportedOperationException("Invalid annotation " + annotation.annotationType() + " for type " + baseType);
     }
 
-    default <T> BooleanDerivedType<T> processBoolean(BooleanDerivedType<T> baseType, A annotation, AnnotatedElement annotated) {
+    default <T> BooleanConfigType<T> processBoolean(BooleanConfigType<T> baseType, A annotation, AnnotatedElement annotated) {
         throw new UnsupportedOperationException("Invalid annotation " + annotation.annotationType() + " for type " + baseType);
     }
 
-    default <R, V> MapDerivedType<R,V> processMap(MapDerivedType<R, V> baseType, A annotation, AnnotatedElement annotated) {
+    default <R, V> MapConfigType<R,V> processMap(MapConfigType<R, V> baseType, A annotation, AnnotatedElement annotated) {
         throw new UnsupportedOperationException("Invalid annotation " + annotation.annotationType() + " for type " + baseType);
     }
 }

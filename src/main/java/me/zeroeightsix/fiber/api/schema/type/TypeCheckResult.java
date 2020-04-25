@@ -1,4 +1,4 @@
-package me.zeroeightsix.fiber.api.constraint;
+package me.zeroeightsix.fiber.api.schema.type;
 
 import javax.annotation.Nullable;
 import java.util.Optional;

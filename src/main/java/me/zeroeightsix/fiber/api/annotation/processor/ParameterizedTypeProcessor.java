@@ -1,18 +1,18 @@
 package me.zeroeightsix.fiber.api.annotation.processor;
 
-import me.zeroeightsix.fiber.api.schema.type.ConfigType;
-import me.zeroeightsix.fiber.api.schema.type.ListConfigType;
-import me.zeroeightsix.fiber.api.schema.type.derived.DerivedType;
+import me.zeroeightsix.fiber.api.schema.type.ListSerializableType;
+import me.zeroeightsix.fiber.api.schema.type.SerializableType;
+import me.zeroeightsix.fiber.api.schema.type.derived.ConfigType;
 
 /**
- * A generic config type processor that can output different {@link ConfigType}s
+ * A generic config type processor that can output different {@link SerializableType}s
  * for a single class, based on generic type parameters.
  *
  * <p> Example implementation for a {@code List} type processor:
  * <pre>{@code (typeArguments) -> ConfigTypes.makeList(typeArguments[0])}</pre>
  *
  * @param <T> the bare type being processed, eg. {@code List<?>}.
- * @see ListConfigType
+ * @see ListSerializableType
  */
 @FunctionalInterface
 public interface ParameterizedTypeProcessor<T> {
@@ -23,5 +23,5 @@ public interface ParameterizedTypeProcessor<T> {
      * @param typeArguments the generic type parameters
      * @return a ConfigType representing the parameterized type
      */
-    DerivedType<? extends T, ?, ?> process(DerivedType<?, ?, ?>[] typeArguments);
+    ConfigType<? extends T, ?, ?> process(ConfigType<?, ?, ?>[] typeArguments);
 }

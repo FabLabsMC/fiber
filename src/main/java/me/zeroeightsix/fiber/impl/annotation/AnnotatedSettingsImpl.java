@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 
     private final Map<Class<?>, ParameterizedTypeProcessor<?>> registeredGenericTypes = new HashMap<>();
-    private final Map<Class<?>, DerivedType<?, ?, ?>> registeredTypes = new HashMap<>();
+    private final Map<Class<?>, ConfigType<?, ?, ?>> registeredTypes = new HashMap<>();
     private final Map<Class<? extends Annotation>, LeafAnnotationProcessor<?>> valueSettingProcessors = new HashMap<>();
     private final Map<Class<? extends Annotation>, BranchAnnotationProcessor<?>> groupSettingProcessors = new HashMap<>();
     private final Map<Class<? extends Annotation>, ConstraintAnnotationProcessor<?>> constraintProcessors = new HashMap<>();
@@ -61,8 +61,8 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
         this.registerGroupProcessor(Setting.Group.class, (annotation, field, pojo, node) -> {});
         this.registerConstraintProcessor(Setting.Constrain.Range.class, new ConstraintAnnotationProcessor<Setting.Constrain.Range>() {
             @Override
-            public <T> NumberDerivedType<T> processDecimal(NumberDerivedType<T> baseType, Setting.Constrain.Range annotation, AnnotatedElement annotated) {
-                NumberDerivedType<T> ret = baseType;
+            public <T> NumberConfigType<T> processDecimal(NumberConfigType<T> baseType, Setting.Constrain.Range annotation, AnnotatedElement annotated) {
+                NumberConfigType<T> ret = baseType;
                 if (annotation.min() > Double.NEGATIVE_INFINITY) {
                     ret = ret.withMinimum(annotation.min());
                 }
@@ -77,8 +77,8 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
         });
         this.registerConstraintProcessor(Setting.Constrain.BigRange.class, new ConstraintAnnotationProcessor<Setting.Constrain.BigRange>() {
             @Override
-            public <T> NumberDerivedType<T> processDecimal(NumberDerivedType<T> baseType, Setting.Constrain.BigRange annotation, AnnotatedElement annotated) {
-                NumberDerivedType<T> ret = baseType;
+            public <T> NumberConfigType<T> processDecimal(NumberConfigType<T> baseType, Setting.Constrain.BigRange annotation, AnnotatedElement annotated) {
+                NumberConfigType<T> ret = baseType;
                 if (!annotation.min().isEmpty()) {
                     ret = ret.withMinimum(new BigDecimal(annotation.min()));
                 }
@@ -93,36 +93,36 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
         });
         this.registerConstraintProcessor(Setting.Constrain.MinLength.class, new ConstraintAnnotationProcessor<Setting.Constrain.MinLength>() {
             @Override
-            public <T> StringDerivedType<T> processString(StringDerivedType<T> baseType, Setting.Constrain.MinLength annotation, AnnotatedElement annotated) {
+            public <T> StringConfigType<T> processString(StringConfigType<T> baseType, Setting.Constrain.MinLength annotation, AnnotatedElement annotated) {
                 return baseType.withMinLength(annotation.value());
             }
 
             @Override
-            public <T, E> ListDerivedType<T, E> processList(ListDerivedType<T, E> baseType, Setting.Constrain.MinLength annotation, AnnotatedElement annotated) {
+            public <T, E> ListConfigType<T, E> processList(ListConfigType<T, E> baseType, Setting.Constrain.MinLength annotation, AnnotatedElement annotated) {
                 return baseType.withMinSize(annotation.value());
             }
         });
         this.registerConstraintProcessor(Setting.Constrain.MaxLength.class, new ConstraintAnnotationProcessor<Setting.Constrain.MaxLength>() {
             @Override
-            public <T> StringDerivedType<T> processString(StringDerivedType<T> baseType, Setting.Constrain.MaxLength annotation, AnnotatedElement annotated) {
+            public <T> StringConfigType<T> processString(StringConfigType<T> baseType, Setting.Constrain.MaxLength annotation, AnnotatedElement annotated) {
                 return baseType.withMaxLength(annotation.value());
             }
 
             @Override
-            public <T, E> ListDerivedType<T, E> processList(ListDerivedType<T, E> baseType, Setting.Constrain.MaxLength annotation, AnnotatedElement annotated) {
+            public <T, E> ListConfigType<T, E> processList(ListConfigType<T, E> baseType, Setting.Constrain.MaxLength annotation, AnnotatedElement annotated) {
                 return baseType.withMaxSize(annotation.value());
             }
         });
         this.registerConstraintProcessor(Setting.Constrain.Regex.class, new ConstraintAnnotationProcessor<Setting.Constrain.Regex>() {
             @Override
-            public <T> StringDerivedType<T> processString(StringDerivedType<T> baseType, Setting.Constrain.Regex annotation, AnnotatedElement annotated) {
+            public <T> StringConfigType<T> processString(StringConfigType<T> baseType, Setting.Constrain.Regex annotation, AnnotatedElement annotated) {
                 return baseType.withPattern(annotation.value());
             }
         });
     }
 
     @Override
-    public <T> AnnotatedSettings registerTypeMapping(Class<? super T> clazz, DerivedType<T, ?, ?> type) {
+    public <T> AnnotatedSettings registerTypeMapping(Class<? super T> clazz, ConfigType<T, ?, ?> type) {
         if (clazz.isArray()) throw new IllegalArgumentException("Cannot register custom mappings for arrays");
         if (this.registeredTypes.containsKey(clazz)) {
             throw new IllegalStateException(clazz + " is already linked with " + this.registeredTypes.get(clazz));
@@ -277,7 +277,7 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
     }
 
     private <S, R> void fieldToItem(ConfigTreeBuilder node, Field field, Object pojo, String name, List<Member> listeners) throws FiberException {
-        @SuppressWarnings("unchecked") DerivedType<R, S, ?> type = (DerivedType<R, S, ?>) this.toConfigType(field.getAnnotatedType());
+        @SuppressWarnings("unchecked") ConfigType<R, S, ?> type = (ConfigType<R, S, ?>) this.toConfigType(field.getAnnotatedType());
 
         ConfigLeafBuilder<S, R> builder = node.beginValue(name, type, this.findDefaultValue(field, pojo))
                 .withComment(findComment(field));
@@ -311,14 +311,14 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
         }
     }
 
-    private DerivedType<?, ?, ?> toConfigType(AnnotatedType annotatedType) throws FiberTypeProcessingException {
+    private ConfigType<?, ?, ?> toConfigType(AnnotatedType annotatedType) throws FiberTypeProcessingException {
         Class<?> clazz = TypeMagic.classForType(annotatedType.getType());
         if (clazz == null) {
             throw new FiberTypeProcessingException("Unknown type " + annotatedType.getType().getTypeName());
         }
-        DerivedType<?, ?, ?> ret;
+        ConfigType<?, ?, ?> ret;
         if (annotatedType instanceof AnnotatedArrayType) {
-            DerivedType<?, ?, ?> componentType = this.toConfigType(((AnnotatedArrayType) annotatedType).getAnnotatedGenericComponentType());
+            ConfigType<?, ?, ?> componentType = this.toConfigType(((AnnotatedArrayType) annotatedType).getAnnotatedGenericComponentType());
             ret = ConfigTypes.makeArray(componentType);
         } else if (this.registeredGenericTypes.containsKey(clazz)) {
             ParameterizedTypeProcessor<?> parameterizedTypeProcessor = this.registeredGenericTypes.get(clazz);
@@ -326,7 +326,7 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
                 throw new FiberTypeProcessingException("Expected type parameters for " + clazz);
             }
             AnnotatedType[] annotatedTypeArgs = ((AnnotatedParameterizedType) annotatedType).getAnnotatedActualTypeArguments();
-            DerivedType<?, ?, ?>[] typeArguments = new DerivedType[annotatedTypeArgs.length];
+            ConfigType<?, ?, ?>[] typeArguments = new ConfigType[annotatedTypeArgs.length];
             for (int i = 0; i < annotatedTypeArgs.length; i++) {
                 typeArguments[i] = this.toConfigType(annotatedTypeArgs[i]);
             }
@@ -345,7 +345,7 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
         return this.constrain(ret, annotatedType);
     }
 
-    private <T extends DerivedType<?, ?, ?>> T constrain(T type, AnnotatedElement annotated) throws FiberTypeProcessingException {
+    private <T extends ConfigType<?, ?, ?>> T constrain(T type, AnnotatedElement annotated) throws FiberTypeProcessingException {
         T ret = type;
         for (Annotation annotation : annotated.getAnnotations()) {
             @SuppressWarnings("unchecked") ConstraintAnnotationProcessor<Annotation> processor =
@@ -362,7 +362,7 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
     }
 
     @SuppressWarnings("unchecked")
-    private <T extends DerivedType<?, ?, ?>> T constrain(T type, ConstraintAnnotationProcessor<Annotation> processor, Annotation annotation, AnnotatedElement annotated) {
+    private <T extends ConfigType<?, ?, ?>> T constrain(T type, ConstraintAnnotationProcessor<Annotation> processor, Annotation annotation, AnnotatedElement annotated) {
         return (T) type.constrain(processor, annotation, annotated);
     }
 

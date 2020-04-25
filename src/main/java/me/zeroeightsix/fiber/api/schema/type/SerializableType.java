@@ -1,6 +1,5 @@
 package me.zeroeightsix.fiber.api.schema.type;
 
-import me.zeroeightsix.fiber.api.constraint.TypeCheckResult;
 import me.zeroeightsix.fiber.api.serialization.TypeSerializer;
 import me.zeroeightsix.fiber.impl.constraint.Constraint;
 
@@ -8,10 +7,10 @@ import me.zeroeightsix.fiber.impl.constraint.Constraint;
  * A configuration type, convertible to a config primitive.
  * @param <T>
  */
-public abstract class ConfigType<T> {
+public abstract class SerializableType<T> {
     private final Class<T> platformType;
 
-    ConfigType(Class<T> platformType) {
+    SerializableType(Class<T> platformType) {
         this.platformType = platformType;
     }
 
@@ -19,7 +18,7 @@ public abstract class ConfigType<T> {
         return this.platformType;
     }
 
-    public final boolean isAssignableFrom(ConfigType<?> type) {
+    public final boolean isAssignableFrom(SerializableType<?> type) {
         if (this.getClass() != type.getClass()) {
             return false;
         }

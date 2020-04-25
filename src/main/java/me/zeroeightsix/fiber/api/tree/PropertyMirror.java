@@ -1,6 +1,6 @@
 package me.zeroeightsix.fiber.api.tree;
 
-import me.zeroeightsix.fiber.api.schema.type.derived.DerivedType;
+import me.zeroeightsix.fiber.api.schema.type.derived.ConfigType;
 import me.zeroeightsix.fiber.impl.tree.PropertyMirrorImpl;
 
 /**
@@ -21,7 +21,7 @@ import me.zeroeightsix.fiber.impl.tree.PropertyMirrorImpl;
  * @param <T> the type of value this property mirrors
  */
 public interface PropertyMirror<T> extends Property<T> {
-    static <T> PropertyMirror<T> create(DerivedType<T, ?, ?> converter) {
+    static <T> PropertyMirror<T> create(ConfigType<T, ?, ?> converter) {
         return new PropertyMirrorImpl<>(converter);
     }
 
@@ -37,5 +37,5 @@ public interface PropertyMirror<T> extends Property<T> {
 
     Property<?> getMirrored();
 
-    DerivedType<T, ?, ?> getConverter();
+    ConfigType<T, ?, ?> getConverter();
 }
