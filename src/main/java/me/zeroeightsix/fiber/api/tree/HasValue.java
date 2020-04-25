@@ -1,12 +1,10 @@
 package me.zeroeightsix.fiber.api.tree;
 
-import me.zeroeightsix.fiber.api.schema.ConfigType;
-
 /**
  * Indicates that this class holds some nullable value.
  * @param <T> The type of the value being held.
  */
-public interface ConfigValue<T> {
+public interface HasValue<T> {
 
     /**
      * Returns the value being held
@@ -14,5 +12,5 @@ public interface ConfigValue<T> {
      */
     T getValue();
 
-    ConfigType<T, ?> getConfigType();
+    Class<T> getType();
 }

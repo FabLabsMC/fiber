@@ -2,7 +2,7 @@ package me.zeroeightsix.fiber.impl.tree;
 
 import me.zeroeightsix.fiber.api.FiberId;
 import me.zeroeightsix.fiber.api.exception.IllegalTreeStateException;
-import me.zeroeightsix.fiber.api.schema.ConfigType;
+import me.zeroeightsix.fiber.api.schema.type.ConfigType;
 import me.zeroeightsix.fiber.api.tree.Commentable;
 import me.zeroeightsix.fiber.api.tree.ConfigAttribute;
 import me.zeroeightsix.fiber.api.tree.ConfigBranch;
@@ -69,23 +69,23 @@ public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <A> ConfigAttribute<A> getOrCreateAttribute(FiberId id, ConfigType<A, A> attributeType, @Nullable A defaultValue) {
+    public <A> ConfigAttribute<A> getOrCreateAttribute(FiberId id, ConfigType<A> attributeType, @Nullable A defaultValue) {
         ConfigAttribute<?> attr = getAttributes().computeIfAbsent(id, i -> new ConfigAttributeImpl<>(attributeType, defaultValue));
         checkAttributeType(attributeType, attr);
         return (ConfigAttribute<A>) attr;
     }
 
     @Override
-    public <A> Optional<A> getAttributeValue(FiberId id, ConfigType<A, A> expectedType) {
+    public <A> Optional<A> getAttributeValue(FiberId id, ConfigType<A> expectedType) {
         ConfigAttribute<?> attr = this.attributes.get(id);
         if (attr != null) {
             checkAttributeType(expectedType, attr);
-            return Optional.ofNullable(expectedType.getActualType().cast(attr.getValue()));
+            return Optional.ofNullable(expectedType.getPlatformType().cast(attr.getValue()));
         }
         return Optional.empty();
     }
 
-    private static <A> void checkAttributeType(ConfigType<A, A> expectedType, ConfigAttribute<?> attr) {
+    private static <A> void checkAttributeType(ConfigType<A> expectedType, ConfigAttribute<?> attr) {
         if (!expectedType.equals(attr.getConfigType())) {
             throw new ClassCastException("Attempt to retrieve a value of type " + expectedType + " from attribute with type " + attr.getConfigType());
         }

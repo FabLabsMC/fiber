@@ -1,7 +1,8 @@
 package me.zeroeightsix.fiber.api.annotation.processor;
 
-import me.zeroeightsix.fiber.api.schema.ConfigType;
-import me.zeroeightsix.fiber.api.schema.ListConfigType;
+import me.zeroeightsix.fiber.api.schema.type.ConfigType;
+import me.zeroeightsix.fiber.api.schema.type.ListConfigType;
+import me.zeroeightsix.fiber.api.schema.type.derived.DerivedType;
 
 /**
  * A generic config type processor that can output different {@link ConfigType}s
@@ -22,5 +23,5 @@ public interface ParameterizedTypeProcessor<T> {
      * @param typeArguments the generic type parameters
      * @return a ConfigType representing the parameterized type
      */
-    ConfigType<T, ?> process(ConfigType<?, ?>[] typeArguments);
+    DerivedType<? extends T, ?, ?> process(DerivedType<?, ?, ?>[] typeArguments);
 }

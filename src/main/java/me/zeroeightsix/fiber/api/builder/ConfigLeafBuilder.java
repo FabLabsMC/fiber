@@ -1,9 +1,9 @@
 package me.zeroeightsix.fiber.api.builder;
 
 import me.zeroeightsix.fiber.api.FiberId;
-import me.zeroeightsix.fiber.api.constraint.Constraint;
 import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.api.schema.ConfigType;
+import me.zeroeightsix.fiber.api.schema.type.ConfigType;
+import me.zeroeightsix.fiber.api.schema.type.derived.DerivedType;
 import me.zeroeightsix.fiber.api.tree.ConfigAttribute;
 import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
 import me.zeroeightsix.fiber.api.tree.ConfigNode;
@@ -13,11 +13,10 @@ import me.zeroeightsix.fiber.impl.tree.ConfigLeafImpl;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.LinkedHashSet;
 import java.util.Objects;
-import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * A builder for {@code ConfigLeaf}s.
@@ -25,30 +24,43 @@ import java.util.function.Consumer;
  * @param <T> the type of value the produced {@code ConfigLeaf} will hold
  * @see ConfigLeaf
  */
-public class ConfigLeafBuilder<T, T0> extends ConfigNodeBuilder {
+public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
+
+    public static <T, R> ConfigLeafBuilder<T, R> create(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull DerivedType<R, T, ?> type) {
+        return new ConfigLeafBuilder<>(parentNode, name, type.getSerializedType(), type::toRuntimeType, type::toSerializedType);
+    }
+
+    public static <T> ConfigLeafBuilder<T, T> create(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull ConfigType<T> type) {
+        return new ConfigLeafBuilder<>(parentNode, name, type, Function.identity(), Function.identity());
+    }
 
     @Nonnull
-    protected final ConfigType<T, T0> type;
+    protected final ConfigType<T> type;
+    protected final Function<T, R> f;
+    protected final Function<R, T> f0;
 
     @Nullable
     private T defaultValue = null;
 
     private BiConsumer<T, T> consumer = (t, t2) -> { };
-    protected Set<Constraint<? super T0>> constraints = new LinkedHashSet<>();
 
     /**
      * Creates a new scalar {@code ConfigLeafBuilder}.
-     *  @param parentNode the {@code ConfigTreeBuilder} this builder originates from
+     * @param parentNode the {@code ConfigTreeBuilder} this builder originates from
      * @param name the name of the {@code ConfigLeaf} produced by this builder
      * @param type       the class object representing the type of values this builder will create settings for
+     * @param f
+     * @param f0
      */
-    public ConfigLeafBuilder(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull ConfigType<T, T0> type) {
+    private ConfigLeafBuilder(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull ConfigType<T> type, Function<T, R> f, Function<R, T> f0) {
         super(parentNode, name);
         this.type = type;
+        this.f = f;
+        this.f0 = f0;
     }
 
     @Nonnull
-    public ConfigType<T, T0> getType() {
+    public ConfigType<T> getType() {
         return type;
     }
 
@@ -57,10 +69,10 @@ public class ConfigLeafBuilder<T, T0> extends ConfigNodeBuilder {
      *
      * @param name the name
      * @return {@code this} builder
-     * @see ConfigTree#lookup
+     * @see ConfigTree#lookupLeaf
      */
     @Override
-    public ConfigLeafBuilder<T, T0> withName(@Nonnull String name) {
+    public ConfigLeafBuilder<T, R> withName(@Nonnull String name) {
         super.withName(name);
         return this;
     }
@@ -75,7 +87,7 @@ public class ConfigLeafBuilder<T, T0> extends ConfigNodeBuilder {
      * @return {@code this} builder
      */
     @Override
-    public ConfigLeafBuilder<T, T0> withComment(String comment) {
+    public ConfigLeafBuilder<T, R> withComment(String comment) {
         super.withComment(comment);
         return this;
     }
@@ -91,7 +103,7 @@ public class ConfigLeafBuilder<T, T0> extends ConfigNodeBuilder {
      * @see ConfigNode#getAttributes()
      */
     @Override
-    public <A> ConfigLeafBuilder<T, T0> withAttribute(FiberId id, ConfigType<A, A> type, A defaultValue) {
+    public <A> ConfigLeafBuilder<T, R> withAttribute(FiberId id, ConfigType<A> type, A defaultValue) {
         super.withAttribute(id, type, defaultValue);
         return this;
     }
@@ -106,12 +118,9 @@ public class ConfigLeafBuilder<T, T0> extends ConfigNodeBuilder {
      * @param consumer the listener
      * @return {@code this} builder
      */
-    public ConfigLeafBuilder<T, T0> withListener(BiConsumer<T, T> consumer) {
-        final BiConsumer<T, T> prevConsumer = this.consumer; // to avoid confusion
-        this.consumer = (t, t2) -> {
-            prevConsumer.accept(t, t2);
-            consumer.accept(t, t2); // The newest consumer is called last -> listeners are called in the order they are added
-        };
+    public ConfigLeafBuilder<T, R> withListener(BiConsumer<R, R> consumer) {
+        // The newest consumer is called last -> listeners are called in the order they are added
+        this.consumer = this.consumer.andThen((t, t2) -> consumer.accept(t == null ? null : this.f.apply(t), t2 == null ? null : this.f.apply(t2)));
         return this;
     }
 
@@ -126,8 +135,8 @@ public class ConfigLeafBuilder<T, T0> extends ConfigNodeBuilder {
      * @param defaultValue the default value
      * @return {@code this} builder
      */
-    public ConfigLeafBuilder<T, T0> withDefaultValue(T defaultValue) {
-        this.defaultValue = defaultValue;
+    public ConfigLeafBuilder<T, R> withDefaultValue(R defaultValue) {
+        this.defaultValue = this.f0.apply(defaultValue);
         return this;
     }
 
@@ -142,22 +151,13 @@ public class ConfigLeafBuilder<T, T0> extends ConfigNodeBuilder {
      * @return the {@code ConfigLeaf}
      */
     @Override
-    public ConfigLeaf<T, T0> build() {
-        if (defaultValue != null) {
-            T0 convertedDefault = this.type.toRawType(this.defaultValue);
-            for (Constraint<? super T0> constraint : constraints) {
-                if (!constraint.test(convertedDefault).hasPassed()) {
-                    throw new RuntimeFiberException("Default value '" + defaultValue + "' does not satisfy type constraint " + constraint.getType().getIdentifier());
-                }
-            }
-            for (Constraint<? super T0> constraint : constraints) {
-                if (!constraint.test(convertedDefault).hasPassed()) {
-                    throw new RuntimeFiberException("Default value '" + defaultValue + "' does not satisfy custom constraint " + constraint.getType().getIdentifier());
-                }
+    public ConfigLeaf<T> build() {
+        if (this.defaultValue != null) {
+            if (!this.type.accepts(this.defaultValue)) {
+                throw new RuntimeFiberException("Default value '" + this.defaultValue + "' does not satisfy constraints on type " + this.type);
             }
         }
-        Set<Constraint<? super T0>> constraints = new LinkedHashSet<>(this.constraints);
-        ConfigLeaf<T, T0> built = new ConfigLeafImpl<>(Objects.requireNonNull(name, "Cannot build a value without a name"), type, comment, defaultValue, consumer);
+        ConfigLeaf<T> built = new ConfigLeafImpl<>(Objects.requireNonNull(name, "Cannot build a value without a name"), type, comment, defaultValue, consumer);
         built.getAttributes().putAll(this.attributes);
 
         if (parent != null) {
@@ -178,7 +178,7 @@ public class ConfigLeafBuilder<T, T0> extends ConfigNodeBuilder {
         return finishValue(n -> {});
     }
 
-    public ConfigTreeBuilder finishValue(Consumer<ConfigLeaf<T, T0>> action) {
+    public ConfigTreeBuilder finishValue(Consumer<ConfigLeaf<T>> action) {
         if (parent instanceof ConfigTreeBuilder) {
             action.accept(build());
             return (ConfigTreeBuilder) parent;

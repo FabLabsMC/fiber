@@ -1,7 +1,7 @@
 package me.zeroeightsix.fiber.impl.builder;
 
 import me.zeroeightsix.fiber.api.FiberId;
-import me.zeroeightsix.fiber.api.schema.ConfigType;
+import me.zeroeightsix.fiber.api.schema.type.ConfigType;
 import me.zeroeightsix.fiber.api.tree.ConfigAttribute;
 import me.zeroeightsix.fiber.api.tree.ConfigNode;
 import me.zeroeightsix.fiber.api.tree.ConfigTree;
@@ -32,7 +32,7 @@ public abstract class ConfigNodeBuilder {
      *
      * @param name the name
      * @return {@code this} builder
-     * @see ConfigTree#lookup
+     * @see ConfigTree#lookupLeaf
      */
     public ConfigNodeBuilder withName(String name) {
         this.name = name;
@@ -53,7 +53,7 @@ public abstract class ConfigNodeBuilder {
         return this;
     }
 
-    public <A> ConfigNodeBuilder withAttribute(FiberId attribute, ConfigType<A, A> type, A defaultValue) {
+    public <A> ConfigNodeBuilder withAttribute(FiberId attribute, ConfigType<A> type, A defaultValue) {
         this.attributes.put(attribute, new ConfigAttributeImpl<>(type, defaultValue));
         return this;
     }

@@ -8,8 +8,9 @@ import me.zeroeightsix.fiber.api.exception.DuplicateChildException;
 import me.zeroeightsix.fiber.api.exception.FiberException;
 import me.zeroeightsix.fiber.api.exception.IllegalTreeStateException;
 import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.api.schema.ConfigType;
-import me.zeroeightsix.fiber.api.schema.ConfigTypes;
+import me.zeroeightsix.fiber.api.schema.type.ConfigType;
+import me.zeroeightsix.fiber.api.schema.type.derived.ConfigTypes;
+import me.zeroeightsix.fiber.api.schema.type.derived.DerivedType;
 import me.zeroeightsix.fiber.api.tree.*;
 import me.zeroeightsix.fiber.impl.builder.ConfigNodeBuilder;
 import me.zeroeightsix.fiber.impl.tree.ConfigBranchImpl;
@@ -87,6 +88,34 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
         return items.getByName(name);
     }
 
+    @Nullable
+    @Override
+    public ConfigBranch lookupBranch(String name) {
+        ConfigNode ret = this.lookup(name);
+        if (ret instanceof ConfigBranch) return (ConfigBranch) ret;
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Nullable
+    @Override
+    public <T> ConfigLeaf<T> lookupLeaf(String name, ConfigType<T> type) {
+        ConfigNode ret = this.lookup(name);
+        if (ret instanceof ConfigLeaf<?> && type.isAssignableFrom(((ConfigLeaf<?>) ret).getConfigType()))
+            return (ConfigLeaf<T>) ret;
+        return null;
+    }
+
+    @Override
+    public boolean lookupAndBind(String name, PropertyMirror<?> mirror) {
+        ConfigLeaf<?> leaf = this.lookupLeaf(name, mirror.getConverter().getSerializedType());
+        if (leaf != null) {
+            mirror.mirror(leaf);
+            return true;
+        }
+        return false;
+    }
+
     public ConfigTreeBuilder withParent(ConfigTreeBuilder parent) {
         if (name == null && parent != null) throw new IllegalStateException("A child node needs a name");
         this.parent = parent;
@@ -98,7 +127,7 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
      *
      * @param name the name
      * @return {@code this} builder
-     * @see ConfigTree#lookup
+     * @see ConfigTree#lookupLeaf
      */
     @Override
     public ConfigTreeBuilder withName(String name) {
@@ -133,7 +162,7 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
      * @see ConfigNode#getAttributes()
      */
     @Override
-    public <A> ConfigTreeBuilder withAttribute(FiberId id, ConfigType<A, A> type, A defaultValue) {
+    public <A> ConfigTreeBuilder withAttribute(FiberId id, ConfigType<A> type, A defaultValue) {
         super.withAttribute(id, type, defaultValue);
         return this;
     }
@@ -226,15 +255,19 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
      * @see ConfigLeafBuilder
      * @see ConfigTypes
      */
-    public <T, T0> ConfigLeafBuilder<T, T0> beginValue(@Nonnull String name, @Nonnull ConfigType<T, T0> type, @Nullable T defaultValue) {
-        return new ConfigLeafBuilder<>(this, name, type).withDefaultValue(defaultValue);
+    public <T> ConfigLeafBuilder<T, T> beginValue(@Nonnull String name, @Nonnull ConfigType<T> type, @Nullable T defaultValue) {
+        return ConfigLeafBuilder.create(this, name, type).withDefaultValue(defaultValue);
+    }
+
+    public <T, R> ConfigLeafBuilder<T, R> beginValue(@Nonnull String name, @Nonnull DerivedType<R, T, ?> type, @Nullable R defaultValue) {
+        return ConfigLeafBuilder.create(this, name, type).withDefaultValue(defaultValue);
     }
 
     /**
      * Adds a {@code ConfigLeaf} with the given type and default value to the tree.
      *
      * <p> This method allows only basic configuration of the created leaf.
-     * For more flexibility, one of the {@code begin*Value} methods can be used.
+     * For more flexibility, {@link #beginValue} can be used.
      *
      * @param name         the name of the child leaf
      * @param type         the type of values held by the leaf
@@ -244,8 +277,39 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
      * @see #beginValue(String, ConfigType, Object)
      * @see ConfigTypes
      */
-    public <T, T0> ConfigTreeBuilder withValue(@Nonnull String name, @Nonnull ConfigType<T, T0> type, @Nullable T defaultValue) {
+    public <T> ConfigTreeBuilder withValue(@Nonnull String name, @Nonnull ConfigType<T> type, @Nullable T defaultValue) {
         this.items.add(new ConfigLeafImpl<>(name, type, null, defaultValue, (a, b) -> { }));
+        return this;
+    }
+
+    /**
+     * Adds a {@code ConfigLeaf} with a type and default value derived from another type.
+     *
+     * <p><strong>The built leaf will only accept values of {@code type}'s
+     * {@linkplain DerivedType#getSerializedType() serializable config type}</strong>.
+     * The full derived type information is only used to convert the provided {@code defaultValue}
+     * to a valid serialized form. {@linkplain PropertyMirror Property mirrors} can be used
+     * to interact seamlessly with the leaf using runtime types.
+     *
+     * <p> This method allows only basic configuration of the created leaf.
+     * For more flexibility, {@link #beginValue} can be used.
+     *
+     * @param name         the name of the child leaf
+     * @param type         the type of values held by the leaf
+     * @param defaultValue the runtime representation of the default value of the {@link ConfigLeaf} to create.
+     * @param <R>          the runtime type of the {@code defaultValue} representation.
+     * @param <S>          the type of value the {@link ConfigLeaf} holds.
+     * @return {@code this}, for chaining
+     * @see #beginValue(String, ConfigType, Object)
+     * @see ConfigTypes
+     */
+    public <R, S> ConfigTreeBuilder withValue(@Nonnull String name, @Nonnull DerivedType<R, S, ?> type, @Nullable R defaultValue) {
+        this.items.add(new ConfigLeafImpl<>(name, type.getSerializedType(), null, type.toSerializedType(defaultValue), (a, b) -> { }));
+        return this;
+    }
+
+    public <R, S> ConfigTreeBuilder withMirroredValue(@Nonnull String name, @Nonnull DerivedType<R, S, ?> type, @Nullable R defaultValue) {
+        this.items.add(new ConfigLeafImpl<>(name, type.getSerializedType(), null, type.toSerializedType(defaultValue), (a, b) -> { }));
         return this;
     }
 

@@ -1,7 +1,7 @@
 package me.zeroeightsix.fiber.api.tree;
 
 import me.zeroeightsix.fiber.api.exception.FiberQueryException;
-import me.zeroeightsix.fiber.api.schema.ConfigType;
+import me.zeroeightsix.fiber.api.schema.type.ConfigType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -48,7 +48,7 @@ public final class ConfigQuery<T extends ConfigNode> {
      * matches a node at depth <em>n</em>, starting from the supplied tree.
      * The last name should be the name of the leaf to retrieve.
      *
-     * <p> The returned query will only match a leaf with a {@linkplain Property#getConfigType() property type}
+     * <p> The returned query will only match a leaf with a {@linkplain ConfigLeaf#getConfigType() config type}
      * that is identical to the given {@code propertyType}.
      *
      * @param propertyType a class object representing the type of values held by queried properties
@@ -56,16 +56,16 @@ public final class ConfigQuery<T extends ConfigNode> {
      * @param more  additional node names forming the config path
      * @return a config query for leaves of existing trees
      */
-    public static <V, V0> ConfigQuery<ConfigLeaf<V, V0>> leaf(ConfigType<V, V0> propertyType, String first, String... more) {
+    public static <V> ConfigQuery<ConfigLeaf<V>> leaf(ConfigType<V> propertyType, String first, String... more) {
         return new ConfigQuery<>(ConfigLeaf.class, propertyType, first, more);
     }
 
     private final List<String> path;
     private final Class<? super T> nodeType;
     @Nullable
-    private final ConfigType<?, ?> valueType;
+    private final ConfigType<?> valueType;
 
-    private ConfigQuery(Class<? super T> nodeType, @Nullable ConfigType<?, ?> valueType, String first, String[] path) {
+    private ConfigQuery(Class<? super T> nodeType, @Nullable ConfigType<?> valueType, String first, String[] path) {
         this.nodeType = nodeType;
         this.valueType = valueType;
         this.path = new ArrayList<>();
@@ -117,9 +117,9 @@ public final class ConfigQuery<T extends ConfigNode> {
         return result;
     }
 
-    private <N> N lookupChild(ConfigTree tree, String name, Class<N> nodeType, @Nullable ConfigType<?, ?> valueType) throws FiberQueryException {
+    private <N> N lookupChild(ConfigTree tree, String name, Class<N> nodeType, @Nullable ConfigType<?> valueType) throws FiberQueryException {
         ConfigNode node = tree.lookup(name);
-        if (nodeType.isInstance(node) && (valueType == null || valueType.equals(((ConfigLeaf<?, ?>) node).getConfigType()))) {
+        if (nodeType.isInstance(node) && (valueType == null || valueType.equals(((ConfigLeaf<?>) node).getConfigType()))) {
             return nodeType.cast(node);
         } else if (node != null) {
             throw new FiberQueryException.WrongType(tree, node, nodeType, valueType);

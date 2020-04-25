@@ -1,16 +1,16 @@
 package me.zeroeightsix.fiber.api.annotation;
 
-import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.api.exception.FiberException;
-import me.zeroeightsix.fiber.api.schema.ConfigTypes;
-import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
-import me.zeroeightsix.fiber.api.tree.ConfigNode;
-import me.zeroeightsix.fiber.api.tree.ConfigTree;
-import me.zeroeightsix.fiber.api.tree.Property;
+import me.zeroeightsix.fiber.api.schema.type.ListConfigType;
+import me.zeroeightsix.fiber.api.schema.type.StringConfigType;
+import me.zeroeightsix.fiber.api.schema.type.derived.ConfigTypes;
+import me.zeroeightsix.fiber.api.schema.type.derived.ListDerivedType;
+import me.zeroeightsix.fiber.api.tree.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.BiConsumer;
 
@@ -21,12 +21,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class AnnotatedSettingsTest {
 
     private AnnotatedSettings annotatedSettings;
-    private ConfigTreeBuilder node;
+    private ConfigTree node;
 
     @BeforeEach
     void setup() {
         this.annotatedSettings = AnnotatedSettings.create();
-        this.node = ConfigTree.builder();
+        this.node = ConfigTree.builder().build();
     }
 
     @Test
@@ -35,16 +35,20 @@ class AnnotatedSettingsTest {
         OneFieldPojo pojo = new OneFieldPojo();
         this.annotatedSettings.applyToNode(this.node, pojo);
 
-        Collection<ConfigNode> items = this.node.build().getItems();
+        Collection<ConfigNode> items = this.node.getItems();
         assertEquals(1, items.size(), "Setting map is 1 entry large");
         ConfigNode item = this.node.lookup("a");
         assertNotNull(item, "Setting exists");
         assertTrue(ConfigLeaf.class.isAssignableFrom(item.getClass()), "Setting is a ConfigLeaf");
-        ConfigLeaf<?, ?> leaf = (ConfigLeaf<?, ?>) item;
+        ConfigLeaf<?> leaf = (ConfigLeaf<?>) item;
         assertNotNull(leaf.getValue(), "Setting value is non-null");
-        assertEquals(ConfigTypes.INTEGER, leaf.getConfigType(), "Setting type is correct");
-        assertEquals(Integer.class, leaf.getValue().getClass(), "Setting value reflects correct type");
-        Integer integer = (Integer) leaf.getValue();
+        assertEquals(ConfigTypes.INTEGER.getSerializedType(), leaf.getConfigType(), "Setting type is correct");
+        assertEquals(BigDecimal.class, leaf.getValue().getClass(), "Setting value reflects correct type");
+        BigDecimal decimal = (BigDecimal) leaf.getValue();
+        assertEquals(decimal, BigDecimal.valueOf(5), "Setting value is correct");
+        PropertyMirror<Integer> converted = PropertyMirror.create(ConfigTypes.INTEGER);
+        converted.mirror(leaf);
+        Integer integer = converted.getValue();
         assertEquals(integer, 5, "Setting value is correct");
     }
 
@@ -55,7 +59,6 @@ class AnnotatedSettingsTest {
         assertThrows(FiberException.class, () -> this.annotatedSettings.applyToNode(this.node, pojo));
     }
 
-    @SuppressWarnings("unchecked")
     @Test
     @DisplayName("Listener")
     void testListener() throws FiberException {
@@ -65,21 +68,22 @@ class AnnotatedSettingsTest {
         ConfigNode treeItem = this.node.lookup("a");
         assertNotNull(treeItem, "Setting A exists");
         assertTrue(treeItem instanceof Property, "Setting A is a property");
-        Property<Integer> property = (Property<Integer>) treeItem;
+        PropertyMirror<Integer> property = PropertyMirror.create(ConfigTypes.INTEGER);
+        property.mirror((Property<?>) treeItem);
         property.setValue(10);
         assertTrue(pojo.listenedA, "Listener for A was triggered");
 
         treeItem = this.node.lookup("b");
         assertNotNull(treeItem, "Setting B exists");
         assertTrue(treeItem instanceof Property, "Setting B is a property");
-        property = (Property<Integer>) treeItem;
+        property.mirror((Property<?>) treeItem);
         property.setValue(10);
         assertTrue(pojo.listenedB, "Listener for B was triggered");
 
         treeItem = this.node.lookup("c");
         assertNotNull(treeItem, "Setting C exists");
         assertTrue(treeItem instanceof Property, "Setting C is a property");
-        property = (Property<Integer>) treeItem;
+        property.mirror((Property<?>) treeItem);
         property.setValue(10);
         assertTrue(pojo.listenedC, "Listener for C was triggered");
     }
@@ -103,8 +107,8 @@ class AnnotatedSettingsTest {
     void testNumericalConstraints() throws FiberException {
         NumericalConstraintsPojo pojo = new NumericalConstraintsPojo();
         this.annotatedSettings.applyToNode(this.node, pojo);
-        @SuppressWarnings("unchecked")
-        Property<Integer> value = (Property<Integer>) this.node.lookup("a");
+        PropertyMirror<Integer> value = PropertyMirror.create(ConfigTypes.INTEGER);
+        assertTrue(this.node.lookupAndBind("a", value));
         assertNotNull(value, "Setting exists");
         assertFalse(value.accepts(-10));
         assertTrue(value.setValue(-10));
@@ -136,34 +140,46 @@ class AnnotatedSettingsTest {
     void testArrayConstraints() throws FiberException {
         ArrayConstraintsPojo pojo = new ArrayConstraintsPojo();
         this.annotatedSettings.applyToNode(this.node, pojo);
-        @SuppressWarnings("unchecked")
-        Property<String[]> value1 = (Property<String[]>) this.node.lookup("nonEmptyArrayShortStrings");
+        ListDerivedType<String[], String> type = ConfigTypes.makeArray(ConfigTypes.STRING);
+        PropertyMirror<String[]> mirror1 = PropertyMirror.create(type);
+        Property<List<String>> value1 = this.node.lookupLeaf("nonEmptyArrayShortStrings", type.getSerializedType());
         assertNotNull(value1, "Setting exists");
-        assertTrue(value1.setValue(new String[]{"ab", "", "ba", ""}));
-        assertFalse(value1.setValue(new String[0]), "Empty array");
-        assertFalse(value1.setValue(new String[]{"aaaaaaaaaaaa"}), "Strings too long");
-        @SuppressWarnings("unchecked")
-        Property<int[]> value2 = (Property<int[]>) this.node.lookup("numbers");
-        assertNotNull(value2, "Setting exists");
-        assertTrue(value2.setValue(new int[]{3, 4, 5}));
-        assertArrayEquals(new int[]{3, 4, 5}, value2.getValue());
-        assertTrue(value2.setValue(new int[0]));
-        assertArrayEquals(new int [0], value2.getValue());
-        assertFalse(value2.setValue(new int[]{1, 2, 3, 4, 5, 6, 7}), "Too many elements");
-        assertArrayEquals(new int[0], value2.getValue(), "Value should not change after unrecoverable setValue");
-        assertFalse(value2.accepts(new int[]{-1, 0, 1}), "Negative number not allowed");
-        assertTrue(value2.setValue(new int[]{-1, 0, 1}), "Correction for out of bounds numbers available");
-        assertArrayEquals(new int[]{0, 0, 1}, value2.getValue(), "Negative number should be brought back into range");
-        assertFalse(value2.accepts(new int[]{9, 10, 11}), "Numbers above 10 not allowed");
-        assertTrue(value2.setValue(new int[]{9, 10, 11}), "Correction for out of bounds numbers available");
-        assertArrayEquals(new int[]{9, 10, 10}, value2.getValue(), ">10 number should be brought back into range");
-        @SuppressWarnings("unchecked")
-        Property<List<String>> value3 = (Property<List<String>>) this.node.lookup("shortArrayIdStrings");
+        mirror1.mirror(value1);
+        assertTrue(mirror1.setValue(new String[]{"ab", "", "ba", ""}));
+        assertFalse(mirror1.setValue(new String[0]), "Empty array");
+        assertFalse(mirror1.setValue(new String[]{"aaaaaaaaaaaa"}), "Strings too long");
+        ListDerivedType<Integer[], BigDecimal> type2 = ConfigTypes.makeArray(ConfigTypes.INTEGER);
+        @SuppressWarnings("unchecked") PropertyMirror<int[]> mirror2 = (PropertyMirror<int[]>) ((PropertyMirror<?>) PropertyMirror.create(type2));
+        this.node.lookupAndBind("numbers", mirror2);
+        assertNotNull(mirror2, "Setting exists");
+        assertTrue(mirror2.setValue(new int[]{3, 4, 5}));
+        assertArrayEquals(new int[]{3, 4, 5}, mirror2.getValue());
+        assertTrue(mirror2.setValue(new int[0]));
+        assertArrayEquals(new int[0], mirror2.getValue(), "Value should not change after unrecoverable setValue");
+        assertFalse(mirror2.accepts(new int[]{1, 2, 3, 4, 5, 6, 7}), "Too many elements");
+        assertTrue(mirror2.setValue(new int[]{1, 2, 3, 4, 5, 6, 7}), "Recoverable length issue");
+        assertArrayEquals(new int[]{1, 2, 3}, mirror2.getValue(), "Value not properly trimmed");
+        assertFalse(mirror2.accepts(new int[]{1, 11, 3, 4, 5, 6, 7}), "Too many elements and element out of range");
+        assertTrue(mirror2.setValue(new int[]{1, 11, 3, 4, 5, 6, 7}), "Recoverable length issue");
+        assertArrayEquals(new int[]{1, 10, 3}, mirror2.getValue(), "Value not properly trimmed or corrected");
+        assertFalse(mirror2.accepts(new int[]{-1, 0, 1}), "Negative number not allowed");
+        assertTrue(mirror2.setValue(new int[]{-1, 0, 1}), "Correction for out of bounds numbers available");
+        assertArrayEquals(new int[]{0, 0, 1}, mirror2.getValue(), "Negative number should be brought back into range");
+        assertFalse(mirror2.accepts(new int[]{9, 10, 11}), "Numbers above 10 not allowed");
+        assertTrue(mirror2.setValue(new int[]{9, 10, 11}), "Correction for out of bounds numbers available");
+        assertArrayEquals(new int[]{9, 10, 10}, mirror2.getValue(), ">10 number should be brought back into range");
+        Property<List<String>> value3 = this.node.lookupLeaf("shortArrayIdStrings", ListConfigType.of(StringConfigType.DEFAULT_STRING));
         assertNotNull(value3, "Setting exists");
+        assertTrue(value3.accepts(Arrays.asList("a:b", "fabric:test")));
         assertTrue(value3.setValue(Arrays.asList("a:b", "fabric:test")));
+        assertTrue(value3.accepts(Collections.emptyList()));
         assertTrue(value3.setValue(Collections.emptyList()));
-        assertFalse(value3.setValue(Arrays.asList("a:b", "b:c", "c:d", "d:e")), "Too many elements");
-        assertFalse(value3.setValue(Collections.singletonList("aaaaaaaaaaaa")), "Bad regex");
+        assertFalse(value3.accepts(Arrays.asList("a:b", "b:c", "c:d", "d:e")), "Too many elements");
+        assertTrue(value3.setValue(Arrays.asList("a:b", "b:c", "c:d", "d:e")), "Too many elements");
+        assertEquals(Arrays.asList("a:b", "b:c", "c:d"), value3.getValue());
+        assertFalse(value3.accepts(Collections.singletonList("aaaaaaaaaaaa")), "Bad regex");
+        assertTrue(value3.setValue(Collections.singletonList("aaaaaaaaaaaa")), "Bad regex");
+        assertTrue(value3.getValue().isEmpty());
     }
 
     @Test
@@ -201,11 +217,10 @@ class AnnotatedSettingsTest {
 
     @Test
     @DisplayName("Commented setting")
-    @SuppressWarnings("unchecked")
     void testComment() throws FiberException {
         CommentPojo pojo = new CommentPojo();
         this.annotatedSettings.applyToNode(this.node, pojo);
-        assertEquals("comment", ((ConfigLeaf<Integer, ?>) Objects.requireNonNull(this.node.lookup("a"))).getComment(), "Comment exists and is correct");
+        assertEquals("comment", ((ConfigLeaf<?>) Objects.requireNonNull(this.node.lookup("a"))).getComment(), "Comment exists and is correct");
     }
 
     @Test

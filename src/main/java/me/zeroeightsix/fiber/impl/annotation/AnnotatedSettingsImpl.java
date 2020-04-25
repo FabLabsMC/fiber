@@ -14,7 +14,7 @@ import me.zeroeightsix.fiber.api.exception.FiberException;
 import me.zeroeightsix.fiber.api.exception.FiberTypeProcessingException;
 import me.zeroeightsix.fiber.api.exception.MalformedFieldException;
 import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.api.schema.*;
+import me.zeroeightsix.fiber.api.schema.type.derived.*;
 import me.zeroeightsix.fiber.api.tree.ConfigBranch;
 import me.zeroeightsix.fiber.api.tree.ConfigTree;
 import me.zeroeightsix.fiber.impl.annotation.magic.TypeMagic;
@@ -31,7 +31,7 @@ import java.util.stream.Stream;
 public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 
     private final Map<Class<?>, ParameterizedTypeProcessor<?>> registeredGenericTypes = new HashMap<>();
-    private final Map<Class<?>, ConfigType<?, ?>> registeredTypes = new HashMap<>();
+    private final Map<Class<?>, DerivedType<?, ?, ?>> registeredTypes = new HashMap<>();
     private final Map<Class<? extends Annotation>, LeafAnnotationProcessor<?>> valueSettingProcessors = new HashMap<>();
     private final Map<Class<? extends Annotation>, BranchAnnotationProcessor<?>> groupSettingProcessors = new HashMap<>();
     private final Map<Class<? extends Annotation>, ConstraintAnnotationProcessor<?>> constraintProcessors = new HashMap<>();
@@ -61,68 +61,68 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
         this.registerGroupProcessor(Setting.Group.class, (annotation, field, pojo, node) -> {});
         this.registerConstraintProcessor(Setting.Constrain.Range.class, new ConstraintAnnotationProcessor<Setting.Constrain.Range>() {
             @Override
-            public <T> DecimalConfigType<T> processDecimal(Setting.Constrain.Range annotation, AnnotatedElement annotated, Object pojo, DecimalConfigType<T> baseType) {
-                DecimalConfigType<T> ret = baseType;
+            public <T> NumberDerivedType<T> processDecimal(NumberDerivedType<T> baseType, Setting.Constrain.Range annotation, AnnotatedElement annotated) {
+                NumberDerivedType<T> ret = baseType;
                 if (annotation.min() > Double.NEGATIVE_INFINITY) {
-                    ret = ret.withMinimum(ret.toActualType(BigDecimal.valueOf(annotation.min())));
+                    ret = ret.withMinimum(annotation.min());
                 }
                 if (annotation.max() < Double.POSITIVE_INFINITY) {
-                    ret = ret.withMaximum(ret.toActualType(BigDecimal.valueOf(annotation.max())));
+                    ret = ret.withMaximum(annotation.max());
                 }
                 if (annotation.step() > Double.MIN_VALUE) {
-                    ret = ret.withIncrement(ret.toActualType(BigDecimal.valueOf(annotation.step())));
+                    ret = ret.withIncrement(annotation.step());
                 }
                 return ret;
             }
         });
         this.registerConstraintProcessor(Setting.Constrain.BigRange.class, new ConstraintAnnotationProcessor<Setting.Constrain.BigRange>() {
             @Override
-            public <T> DecimalConfigType<T> processDecimal(Setting.Constrain.BigRange annotation, AnnotatedElement annotated, Object pojo, DecimalConfigType<T> baseType) {
-                DecimalConfigType<T> ret = baseType;
+            public <T> NumberDerivedType<T> processDecimal(NumberDerivedType<T> baseType, Setting.Constrain.BigRange annotation, AnnotatedElement annotated) {
+                NumberDerivedType<T> ret = baseType;
                 if (!annotation.min().isEmpty()) {
-                    ret = ret.withMinimum(ret.toActualType(new BigDecimal(annotation.min())));
+                    ret = ret.withMinimum(new BigDecimal(annotation.min()));
                 }
                 if (!annotation.max().isEmpty()) {
-                    ret = ret.withMaximum(ret.toActualType(new BigDecimal(annotation.max())));
+                    ret = ret.withMaximum(new BigDecimal(annotation.max()));
                 }
                 if (!annotation.step().isEmpty()) {
-                    ret = ret.withIncrement(ret.toActualType(new BigDecimal(annotation.step())));
+                    ret = ret.withIncrement(new BigDecimal(annotation.step()));
                 }
                 return ret;
             }
         });
         this.registerConstraintProcessor(Setting.Constrain.MinLength.class, new ConstraintAnnotationProcessor<Setting.Constrain.MinLength>() {
             @Override
-            public <T> StringConfigType<T> processString(Setting.Constrain.MinLength annotation, AnnotatedElement annotated, Object pojo, StringConfigType<T> baseType) {
+            public <T> StringDerivedType<T> processString(StringDerivedType<T> baseType, Setting.Constrain.MinLength annotation, AnnotatedElement annotated) {
                 return baseType.withMinLength(annotation.value());
             }
 
             @Override
-            public <T> ListConfigType<T> processList(Setting.Constrain.MinLength annotation, AnnotatedElement annotated, Object pojo, ListConfigType<T> baseType) {
+            public <T, E> ListDerivedType<T, E> processList(ListDerivedType<T, E> baseType, Setting.Constrain.MinLength annotation, AnnotatedElement annotated) {
                 return baseType.withMinSize(annotation.value());
             }
         });
         this.registerConstraintProcessor(Setting.Constrain.MaxLength.class, new ConstraintAnnotationProcessor<Setting.Constrain.MaxLength>() {
             @Override
-            public <T> StringConfigType<T> processString(Setting.Constrain.MaxLength annotation, AnnotatedElement annotated, Object pojo, StringConfigType<T> baseType) {
+            public <T> StringDerivedType<T> processString(StringDerivedType<T> baseType, Setting.Constrain.MaxLength annotation, AnnotatedElement annotated) {
                 return baseType.withMaxLength(annotation.value());
             }
 
             @Override
-            public <T> ListConfigType<T> processList(Setting.Constrain.MaxLength annotation, AnnotatedElement annotated, Object pojo, ListConfigType<T> baseType) {
+            public <T, E> ListDerivedType<T, E> processList(ListDerivedType<T, E> baseType, Setting.Constrain.MaxLength annotation, AnnotatedElement annotated) {
                 return baseType.withMaxSize(annotation.value());
             }
         });
         this.registerConstraintProcessor(Setting.Constrain.Regex.class, new ConstraintAnnotationProcessor<Setting.Constrain.Regex>() {
             @Override
-            public <T> StringConfigType<T> processString(Setting.Constrain.Regex annotation, AnnotatedElement annotated, Object pojo, StringConfigType<T> baseType) {
+            public <T> StringDerivedType<T> processString(StringDerivedType<T> baseType, Setting.Constrain.Regex annotation, AnnotatedElement annotated) {
                 return baseType.withPattern(annotation.value());
             }
         });
     }
 
     @Override
-    public <T> AnnotatedSettings registerTypeMapping(Class<T> clazz, ConfigType<T, ?> type) {
+    public <T> AnnotatedSettings registerTypeMapping(Class<? super T> clazz, DerivedType<T, ?, ?> type) {
         if (clazz.isArray()) throw new IllegalArgumentException("Cannot register custom mappings for arrays");
         if (this.registeredTypes.containsKey(clazz)) {
             throw new IllegalStateException(clazz + " is already linked with " + this.registeredTypes.get(clazz));
@@ -276,15 +276,14 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
         }
     }
 
-    private <T> void fieldToItem(ConfigTreeBuilder node, Field field, Object pojo, String name, List<Member> listeners) throws FiberException {
-        @SuppressWarnings("unchecked") ConfigType<T, ?> type = (ConfigType<T, ?>) this.toConfigType(field.getAnnotatedType(), pojo);
+    private <S, R> void fieldToItem(ConfigTreeBuilder node, Field field, Object pojo, String name, List<Member> listeners) throws FiberException {
+        @SuppressWarnings("unchecked") DerivedType<R, S, ?> type = (DerivedType<R, S, ?>) this.toConfigType(field.getAnnotatedType());
 
-        ConfigLeafBuilder<T, ?> builder = new ConfigLeafBuilder<>(node, name, type)
-                .withComment(findComment(field))
-                .withDefaultValue(this.findDefaultValue(field, pojo));
+        ConfigLeafBuilder<S, R> builder = node.beginValue(name, type, this.findDefaultValue(field, pojo))
+                .withComment(findComment(field));
 
         for (Member listener : listeners) {
-            BiConsumer<T, T> consumer = this.constructListener(listener, pojo, type.getActualType());
+            BiConsumer<R, R> consumer = this.constructListener(listener, pojo, type.getRuntimeType());
             if (consumer == null) continue;
             builder.withListener(consumer);
         }
@@ -294,7 +293,7 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
                 field.setAccessible(true);
                 field.set(pojo, newValue);
             } catch (IllegalAccessException e) {
-                e.printStackTrace();
+                throw new RuntimeFiberException("Failed to update field value", e);
             }
         });
 
@@ -312,14 +311,14 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
         }
     }
 
-    private ConfigType<?, ?> toConfigType(AnnotatedType annotatedType, Object pojo) throws FiberTypeProcessingException {
+    private DerivedType<?, ?, ?> toConfigType(AnnotatedType annotatedType) throws FiberTypeProcessingException {
         Class<?> clazz = TypeMagic.classForType(annotatedType.getType());
         if (clazz == null) {
             throw new FiberTypeProcessingException("Unknown type " + annotatedType.getType().getTypeName());
         }
-        ConfigType<?, ?> ret;
+        DerivedType<?, ?, ?> ret;
         if (annotatedType instanceof AnnotatedArrayType) {
-            ConfigType<?, ?> componentType = this.toConfigType(((AnnotatedArrayType) annotatedType).getAnnotatedGenericComponentType(), pojo);
+            DerivedType<?, ?, ?> componentType = this.toConfigType(((AnnotatedArrayType) annotatedType).getAnnotatedGenericComponentType());
             ret = ConfigTypes.makeArray(componentType);
         } else if (this.registeredGenericTypes.containsKey(clazz)) {
             ParameterizedTypeProcessor<?> parameterizedTypeProcessor = this.registeredGenericTypes.get(clazz);
@@ -327,9 +326,9 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
                 throw new FiberTypeProcessingException("Expected type parameters for " + clazz);
             }
             AnnotatedType[] annotatedTypeArgs = ((AnnotatedParameterizedType) annotatedType).getAnnotatedActualTypeArguments();
-            ConfigType<?, ?>[] typeArguments = new ConfigType[annotatedTypeArgs.length];
+            DerivedType<?, ?, ?>[] typeArguments = new DerivedType[annotatedTypeArgs.length];
             for (int i = 0; i < annotatedTypeArgs.length; i++) {
-                typeArguments[i] = this.toConfigType(annotatedTypeArgs[i], pojo);
+                typeArguments[i] = this.toConfigType(annotatedTypeArgs[i]);
             }
             ret = parameterizedTypeProcessor.process(typeArguments);
         } else {
@@ -343,17 +342,17 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
             throw new FiberTypeProcessingException("Unknown config type " + annotatedType.getType().getTypeName() +
                     ". Consider marking as transient, or " + closestParentSuggestion + "registering a new Class -> ConfigType mapping.");
         }
-        return this.constrain(ret, annotatedType, pojo);
+        return this.constrain(ret, annotatedType);
     }
 
-    private <T extends ConfigType<?, ?>> T constrain(T type, AnnotatedElement annotated, Object pojo) throws FiberTypeProcessingException {
+    private <T extends DerivedType<?, ?, ?>> T constrain(T type, AnnotatedElement annotated) throws FiberTypeProcessingException {
         T ret = type;
         for (Annotation annotation : annotated.getAnnotations()) {
             @SuppressWarnings("unchecked") ConstraintAnnotationProcessor<Annotation> processor =
                     (ConstraintAnnotationProcessor<Annotation>) this.constraintProcessors.get(annotation.annotationType());
             if (processor != null) {
                 try {
-                    ret = this.constrain(processor, ret, annotation, annotated, pojo);
+                    ret = this.constrain(ret, processor, annotation, annotated);
                 } catch (UnsupportedOperationException e) {
                     throw new FiberTypeProcessingException("Failed to constrain type " + type, e);
                 }
@@ -363,16 +362,8 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
     }
 
     @SuppressWarnings("unchecked")
-    private <T extends ConfigType<?, ?>> T constrain(ConstraintAnnotationProcessor<Annotation> processor, T type, Annotation annotation, AnnotatedElement annotated, Object pojo) {
-        switch (type.getKind()) {
-            case DECIMAL:
-                return (T) processor.processDecimal(annotation, annotated, pojo, (DecimalConfigType<?>) type);
-            case LIST:
-                return (T) processor.processList(annotation, annotated, pojo, (ListConfigType<?>) type);
-            case STRING:
-                return (T) processor.processString(annotation, annotated, pojo, (StringConfigType<?>) type);
-        }
-        return type;
+    private <T extends DerivedType<?, ?, ?>> T constrain(T type, ConstraintAnnotationProcessor<Annotation> processor, Annotation annotation, AnnotatedElement annotated) {
+        return (T) type.constrain(processor, annotation, annotated);
     }
 
     @SuppressWarnings("unchecked")
@@ -389,14 +380,17 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
         return value;
     }
 
-    private <T, P, A> BiConsumer<T,T> constructListener(Member listener, P pojo, Class<A> wantedType) throws FiberException {
+    private <T> BiConsumer<T, T> constructListener(Member listener, Object pojo, Class<T> wantedType) throws FiberException {
+        BiConsumer<T, T> result;
         if (listener instanceof Field) {
-            return this.constructListenerFromField((Field) listener, pojo, wantedType);
+            result = this.constructListenerFromField((Field) listener, pojo, wantedType);
         } else if (listener instanceof Method) {
-            return this.constructListenerFromMethod((Method) listener, pojo, wantedType);
+            result = this.constructListenerFromMethod((Method) listener, pojo, wantedType);
         } else {
             throw new FiberException("Cannot create listener from " + listener + ": must be a field or method");
         }
+        // note: we assume that a value coming from the IR is valid
+        return result;
     }
 
     private <T, P, A> BiConsumer<T,T> constructListenerFromMethod(Method method, P pojo, Class<A> wantedType) throws FiberException {
@@ -435,18 +429,13 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
     private <T, P, A> BiConsumer<T,T> constructListenerFromField(Field field, P pojo, Class<A> wantedType) throws FiberException {
         this.checkListenerField(field, wantedType);
 
-        boolean isAccessible = field.isAccessible();
         field.setAccessible(true);
-        BiConsumer<T, T> consumer;
         try {
-            @SuppressWarnings({ "unchecked", "unused" })
-            BiConsumer<T, T> suppress = consumer = (BiConsumer<T, T>) field.get(pojo);
+            @SuppressWarnings("unchecked") BiConsumer<T, T> consumer = (BiConsumer<T, T>) field.get(pojo);
+            return consumer;
         } catch (IllegalAccessException e) {
             throw new FiberException("Could not construct listener", e);
         }
-        field.setAccessible(isAccessible);
-
-        return consumer;
     }
 
     private <A> void checkListenerField(Field field, Class<A> wantedType) throws MalformedFieldException {

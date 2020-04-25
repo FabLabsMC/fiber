@@ -5,7 +5,7 @@ import me.zeroeightsix.fiber.api.annotation.processor.ConstraintAnnotationProces
 import me.zeroeightsix.fiber.api.annotation.processor.LeafAnnotationProcessor;
 import me.zeroeightsix.fiber.api.annotation.processor.ParameterizedTypeProcessor;
 import me.zeroeightsix.fiber.api.exception.FiberException;
-import me.zeroeightsix.fiber.api.schema.ConfigType;
+import me.zeroeightsix.fiber.api.schema.type.derived.DerivedType;
 import me.zeroeightsix.fiber.api.tree.ConfigBranch;
 import me.zeroeightsix.fiber.api.tree.ConfigTree;
 import me.zeroeightsix.fiber.impl.annotation.AnnotatedSettingsImpl;
@@ -27,7 +27,7 @@ public interface AnnotatedSettings {
 
     /* configuration methods */
 
-    <T> AnnotatedSettings registerTypeMapping(Class<T> clazz, ConfigType<T, ?> type);
+    <T> AnnotatedSettings registerTypeMapping(Class<? super T> clazz, DerivedType<T, ?, ?> type);
 
     <T> AnnotatedSettings registerTypeMapping(Class<? super T> clazz, ParameterizedTypeProcessor<T> processor);
 

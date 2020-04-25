@@ -1,9 +1,7 @@
 package me.zeroeightsix.fiber.api.annotation.processor;
 
 import me.zeroeightsix.fiber.api.annotation.AnnotatedSettings;
-import me.zeroeightsix.fiber.api.schema.DecimalConfigType;
-import me.zeroeightsix.fiber.api.schema.ListConfigType;
-import me.zeroeightsix.fiber.api.schema.StringConfigType;
+import me.zeroeightsix.fiber.api.schema.type.derived.*;
 import me.zeroeightsix.fiber.api.tree.ConfigTree;
 
 import java.lang.annotation.Annotation;
@@ -23,42 +21,55 @@ public interface ConstraintAnnotationProcessor<A extends Annotation> {
     /**
      * Called for every type use site (field or generics) that has an annotation of type {@code A}.
      *
-     * @param <T> the type of values processed
+     * @param <T>        the type of values processed
+     * @param baseType   the type being constrained
      * @param annotation the annotation present on the {@code annotated} element
-     * @param annotated an annotated type use site declared in {@code pojo}'s class
-     * @param pojo the <em>plain old java object</em> being processed
-     * @param baseType the type being constrained
+     * @param annotated  an annotated type use site declared in {@code pojo}'s class
      * @see AnnotatedSettings#applyToNode(ConfigTree, Object)
      */
-    default <T> DecimalConfigType<T> processDecimal(A annotation, AnnotatedElement annotated, Object pojo, DecimalConfigType<T> baseType) {
+    default <T> NumberDerivedType<T> processDecimal(NumberDerivedType<T> baseType, A annotation, AnnotatedElement annotated) {
         throw new UnsupportedOperationException("Invalid annotation " + annotation.annotationType().getSimpleName() + " for type " + baseType);
     }
 
     /**
      * Called for every type use site (field or generics) that has an annotation of type {@code A}.
      *
-     * @param <T> the type of values processed
+     * @param <T>        the type of values processed
+     * @param baseType   the type being constrained
      * @param annotation the annotation present on the {@code annotated} element
-     * @param annotated an annotated type use site declared in {@code pojo}'s class
-     * @param pojo the <em>plain old java object</em> being processed
-     * @param baseType the type being constrained
+     * @param annotated  an annotated type use site declared in {@code pojo}'s class
      * @see AnnotatedSettings#applyToNode(ConfigTree, Object)
      */
-    default <T> StringConfigType<T> processString(A annotation, AnnotatedElement annotated, Object pojo, StringConfigType<T> baseType) {
+    default <T> StringDerivedType<T> processString(StringDerivedType<T> baseType, A annotation, AnnotatedElement annotated) {
         throw new UnsupportedOperationException("Invalid annotation " + annotation.annotationType() + " for type " + baseType);
     }
 
     /**
      * Called for every type use site (field or generics) that has an annotation of type {@code A}.
      *
+     * @param <T>        the type of values processed
+     * @param baseType   the type being constrained
      * @param annotation the annotation present on the {@code annotated} element
-     * @param annotated an annotated type use site declared in {@code pojo}'s class
-     * @param pojo the <em>plain old java object</em> being processed
-     * @param baseType the type being constrained
-     * @param <T> the type of values processed
+     * @param annotated  an annotated type use site declared in {@code pojo}'s class
      * @see AnnotatedSettings#applyToNode(ConfigTree, Object)
      */
-    default <T> ListConfigType<T> processList(A annotation, AnnotatedElement annotated, Object pojo, ListConfigType<T> baseType) {
+    default <T, E> ListDerivedType<T, E> processList(ListDerivedType<T, E> baseType, A annotation, AnnotatedElement annotated) {
+        throw new UnsupportedOperationException("Invalid annotation " + annotation.annotationType() + " for type " + baseType);
+    }
+
+    default <T> EnumDerivedType<T> processEnum(EnumDerivedType<T> baseType, A annotation, AnnotatedElement annotated) {
+        throw new UnsupportedOperationException("Invalid annotation " + annotation.annotationType() + " for type " + baseType);
+    }
+
+    default <R, E> RecordDerivedType<R, E> processRecord(RecordDerivedType<R, E> baseType, A annotation, AnnotatedElement annotated) {
+        throw new UnsupportedOperationException("Invalid annotation " + annotation.annotationType() + " for type " + baseType);
+    }
+
+    default <T> BooleanDerivedType<T> processBoolean(BooleanDerivedType<T> baseType, A annotation, AnnotatedElement annotated) {
+        throw new UnsupportedOperationException("Invalid annotation " + annotation.annotationType() + " for type " + baseType);
+    }
+
+    default <R, V> MapDerivedType<R,V> processMap(MapDerivedType<R, V> baseType, A annotation, AnnotatedElement annotated) {
         throw new UnsupportedOperationException("Invalid annotation " + annotation.annotationType() + " for type " + baseType);
     }
 }
