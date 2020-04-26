@@ -2,17 +2,13 @@ package me.zeroeightsix.fiber.api.schema.type;
 
 
 import me.zeroeightsix.fiber.api.serialization.TypeSerializer;
-import me.zeroeightsix.fiber.impl.constraint.BooleanTypeChecker;
-import me.zeroeightsix.fiber.impl.constraint.Constraint;
+import me.zeroeightsix.fiber.impl.constraint.BooleanConstraintChecker;
 
 public final class BooleanSerializableType extends SerializableType<Boolean> {
     public static final BooleanSerializableType BOOLEAN = new BooleanSerializableType();
 
-    private final BooleanTypeChecker constraint;
-
     private BooleanSerializableType() {
-        super(Boolean.class);
-        this.constraint = new BooleanTypeChecker(this);
+        super(Boolean.class, BooleanConstraintChecker.instance());
     }
 
     @Override
@@ -28,11 +24,6 @@ public final class BooleanSerializableType extends SerializableType<Boolean> {
     @Override
     public int hashCode() {
         return 1337;
-    }
-
-    @Override
-    protected Constraint<Boolean, ?> getConstraint() {
-        return this.constraint;
     }
 
     @Override

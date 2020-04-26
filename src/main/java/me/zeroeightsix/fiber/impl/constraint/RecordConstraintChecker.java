@@ -9,15 +9,19 @@ import me.zeroeightsix.fiber.api.tree.ConfigNode;
 
 import java.util.Map;
 
-public class RecordTypeChecker extends Constraint<ConfigBranch, RecordSerializableType> {
+public class RecordConstraintChecker extends ConstraintChecker<ConfigBranch, RecordSerializableType> {
 
-    public RecordTypeChecker(RecordSerializableType cfg) {
-        super(cfg);
+    private static final RecordConstraintChecker INSTANCE = new RecordConstraintChecker();
+
+    public static RecordConstraintChecker instance() {
+        return INSTANCE;
     }
 
+    private RecordConstraintChecker() { }
+
     @Override
-    public TypeCheckResult<ConfigBranch> test(ConfigBranch value) {
-        for (Map.Entry<String, SerializableType<?>> field : this.cfg.getFields().entrySet()) {
+    public TypeCheckResult<ConfigBranch> test(RecordSerializableType cfg, ConfigBranch value) {
+        for (Map.Entry<String, SerializableType<?>> field : cfg.getFields().entrySet()) {
             ConfigNode child = value.lookup(field.getKey());
             if (!(child instanceof ConfigLeaf)) {
                 return TypeCheckResult.unrecoverable();
@@ -32,11 +36,9 @@ public class RecordTypeChecker extends Constraint<ConfigBranch, RecordSerializab
     }
 
     @Override
-    public boolean comprehends(Constraint<?, ?> constraint) {
-        if (!(constraint instanceof RecordTypeChecker)) return false;
-        RecordTypeChecker that = (RecordTypeChecker) constraint;
-        for (Map.Entry<String, SerializableType<?>> entry : this.cfg.getFields().entrySet()) {
-            SerializableType<?> other = that.cfg.getFields().get(entry.getKey());
+    public boolean comprehends(RecordSerializableType cfg, RecordSerializableType cfg2) {
+        for (Map.Entry<String, SerializableType<?>> entry : cfg.getFields().entrySet()) {
+            SerializableType<?> other = cfg2.getFields().get(entry.getKey());
             if (!entry.getValue().equals(other)) {
                 return false;
             }

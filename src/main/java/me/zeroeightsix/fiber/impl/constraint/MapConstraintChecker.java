@@ -7,16 +7,21 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class MapTypeChecker<V> extends Constraint<Map<String, V>, MapSerializableType<V>> {
+public class MapConstraintChecker<V> extends ConstraintChecker<Map<String, V>, MapSerializableType<V>> {
 
-    public MapTypeChecker(MapSerializableType<V> cfg) {
-        super(cfg);
+    private static final MapConstraintChecker<?> INSTANCE = new MapConstraintChecker<>();
+
+    public static <V> MapConstraintChecker<V> instance() {
+        @SuppressWarnings("unchecked") MapConstraintChecker<V> t = (MapConstraintChecker<V>) INSTANCE;
+        return t;
     }
 
+    private MapConstraintChecker() { }
+
     @Override
-    public TypeCheckResult<Map<String, V>> test(Map<String, V> values) {
+    public TypeCheckResult<Map<String, V>> test(MapSerializableType<V> cfg, Map<String, V> values) {
         boolean valid = true;
-        int maxSize = this.cfg.getMaxSize();
+        int maxSize = cfg.getMaxSize();
         Map<String, V> corrected = new LinkedHashMap<>();
 
         for (Map.Entry<String, V> entry : values.entrySet()) {
@@ -24,8 +29,8 @@ public class MapTypeChecker<V> extends Constraint<Map<String, V>, MapSerializabl
                 valid = false;
                 break;
             }
-            TypeCheckResult<String> keyTestResult = this.cfg.getKeyType().test(entry.getKey());
-            TypeCheckResult<V> valueTestResult = this.cfg.getValueType().test(entry.getValue());
+            TypeCheckResult<String> keyTestResult = cfg.getKeyType().test(entry.getKey());
+            TypeCheckResult<V> valueTestResult = cfg.getValueType().test(entry.getValue());
             if (keyTestResult.hasPassed() && valueTestResult.hasPassed()) {
                 corrected.put(entry.getKey(), entry.getValue());
             } else {
@@ -38,7 +43,7 @@ public class MapTypeChecker<V> extends Constraint<Map<String, V>, MapSerializabl
                 // if key or value missing, just skip the entry
             }
         }
-        if (corrected.size() < this.cfg.getMinSize()) {
+        if (corrected.size() < cfg.getMinSize()) {
             return TypeCheckResult.unrecoverable();
         } else if (!valid) {
             return TypeCheckResult.failed(corrected);
@@ -48,15 +53,13 @@ public class MapTypeChecker<V> extends Constraint<Map<String, V>, MapSerializabl
     }
 
     @Override
-    public boolean comprehends(Constraint<?, ?> constraint) {
-        if (!(constraint instanceof MapTypeChecker)) return false;
-        MapTypeChecker<?> that = (MapTypeChecker<?>) constraint;
-        if (this.cfg.getMinSize() > that.cfg.getMinSize()) {
+    public boolean comprehends(MapSerializableType<V> cfg, MapSerializableType<V> cfg2) {
+        if (cfg.getMinSize() > cfg2.getMinSize()) {
             return false;
         }
-        if (this.cfg.getMaxSize() < that.cfg.getMaxSize()) {
+        if (cfg.getMaxSize() < cfg2.getMaxSize()) {
             return false;
         }
-        return this.cfg.getValueType().isAssignableFrom(that.cfg.getValueType());
+        return cfg.getValueType().isAssignableFrom(cfg2.getValueType());
     }
 }

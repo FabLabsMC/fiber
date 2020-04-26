@@ -1,7 +1,7 @@
 package me.zeroeightsix.fiber.api.schema.type;
 
 import me.zeroeightsix.fiber.api.serialization.TypeSerializer;
-import me.zeroeightsix.fiber.impl.constraint.StringTypeChecker;
+import me.zeroeightsix.fiber.impl.constraint.StringConstraintChecker;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -15,14 +15,12 @@ public final class StringSerializableType extends SerializableType<String> {
     private final int maxLength;
     @Nullable
     private final Pattern pattern;
-    private final StringTypeChecker constraint;
 
     public StringSerializableType(int minLength, int maxLength, @Nullable Pattern pattern) {
-        super(String.class);
+        super(String.class, StringConstraintChecker.instance());
         this.minLength = minLength;
         this.maxLength = maxLength;
         this.pattern = pattern;
-        this.constraint = new StringTypeChecker(this);
     }
 
     /**
@@ -66,11 +64,6 @@ public final class StringSerializableType extends SerializableType<String> {
     @Override
     public <S> void serialize(TypeSerializer<S> serializer, S target) {
         serializer.serialize(this, target);
-    }
-
-    @Override
-    protected StringTypeChecker getConstraint() {
-        return this.constraint;
     }
 
     @Override

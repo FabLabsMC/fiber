@@ -10,24 +10,28 @@ import java.util.*;
  *
  * @param <E> the type of elements {@code <A>} holds
  */
-public final class ListTypeChecker<E> extends Constraint<List<E>, ListSerializableType<E>> {
+public final class ListConstraintChecker<E> extends ConstraintChecker<List<E>, ListSerializableType<E>> {
+    private static final ListConstraintChecker<?> INSTANCE = new ListConstraintChecker<>();
 
-    public ListTypeChecker(ListSerializableType<E> cfg) {
-        super(cfg);
+    public static <E> ListConstraintChecker<E> instance() {
+        @SuppressWarnings("unchecked") ListConstraintChecker<E> t = (ListConstraintChecker<E>) INSTANCE;
+        return t;
     }
 
+    private ListConstraintChecker() { }
+
     @Override
-    public TypeCheckResult<List<E>> test(List<E> values) {
+    public TypeCheckResult<List<E>> test(ListSerializableType<E> cfg, List<E> values) {
         boolean valid = true;
-        int maxSize = this.cfg.getMaxSize();
-        Collection<E> corrected = this.cfg.hasUniqueElements() ? new LinkedHashSet<>(values.size()) : new ArrayList<>(values.size());
+        int maxSize = cfg.getMaxSize();
+        Collection<E> corrected = cfg.hasUniqueElements() ? new LinkedHashSet<>(values.size()) : new ArrayList<>(values.size());
 
         for (E e : values) {
             if (corrected.size() >= maxSize) {
                 valid = false;
                 break;
             }
-            TypeCheckResult<E> testResult = this.cfg.getElementType().test(e);
+            TypeCheckResult<E> testResult = cfg.getElementType().test(e);
             if (testResult.hasPassed()) {
                 valid &= corrected.add(e);  // UNIQUE check
             } else {
@@ -37,7 +41,7 @@ public final class ListTypeChecker<E> extends Constraint<List<E>, ListSerializab
                 // if not present, just skip it
             }
         }
-        if (corrected.size() < this.cfg.getMinSize()) {
+        if (corrected.size() < cfg.getMinSize()) {
             return TypeCheckResult.unrecoverable();
         }
 
@@ -45,19 +49,17 @@ public final class ListTypeChecker<E> extends Constraint<List<E>, ListSerializab
     }
 
     @Override
-    public boolean comprehends(Constraint<?, ?> constraint) {
-        if (!(constraint instanceof ListTypeChecker)) return false;
-        ListTypeChecker<?> that = (ListTypeChecker<?>) constraint;
-        if (this.cfg.getMinSize() > that.cfg.getMinSize()) {
+    public boolean comprehends(ListSerializableType<E> cfg, ListSerializableType<E> cfg2) {
+        if (cfg.getMinSize() > cfg2.getMinSize()) {
             return false;
         }
-        if (this.cfg.getMaxSize() < that.cfg.getMaxSize()) {
+        if (cfg.getMaxSize() < cfg2.getMaxSize()) {
             return false;
         }
-        if (!this.cfg.getElementType().isAssignableFrom(that.cfg.getElementType())) {
+        if (!cfg.getElementType().isAssignableFrom(cfg2.getElementType())) {
             return false;
         }
         // "not unique" comprehends unique
-        return !this.cfg.hasUniqueElements() || that.cfg.hasUniqueElements();
+        return !cfg.hasUniqueElements() || cfg2.hasUniqueElements();
     }
 }

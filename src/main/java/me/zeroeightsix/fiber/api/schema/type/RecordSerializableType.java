@@ -2,7 +2,7 @@ package me.zeroeightsix.fiber.api.schema.type;
 
 import me.zeroeightsix.fiber.api.serialization.TypeSerializer;
 import me.zeroeightsix.fiber.api.tree.ConfigBranch;
-import me.zeroeightsix.fiber.impl.constraint.RecordTypeChecker;
+import me.zeroeightsix.fiber.impl.constraint.RecordConstraintChecker;
 
 import java.util.Map;
 import java.util.Objects;
@@ -11,12 +11,10 @@ import java.util.stream.Collectors;
 
 public final class RecordSerializableType extends SerializableType<ConfigBranch> {
     private final Map<String, SerializableType<?>> fields;
-    private final RecordTypeChecker constraint;
 
     public RecordSerializableType(Map<String, SerializableType<?>> fields) {
-        super(ConfigBranch.class);
+        super(ConfigBranch.class, RecordConstraintChecker.instance());
         this.fields = fields;
-        this.constraint = new RecordTypeChecker(this);
     }
 
     public Map<String, SerializableType<?>> getFields() {
@@ -26,11 +24,6 @@ public final class RecordSerializableType extends SerializableType<ConfigBranch>
     @Override
     public <S> void serialize(TypeSerializer<S> serializer, S target) {
         serializer.serialize(this, target);
-    }
-
-    @Override
-    protected RecordTypeChecker getConstraint() {
-        return this.constraint;
     }
 
     @Override

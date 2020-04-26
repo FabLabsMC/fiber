@@ -2,7 +2,7 @@ package me.zeroeightsix.fiber.api.schema.type;
 
 import me.zeroeightsix.fiber.api.schema.type.derived.ConfigType;
 import me.zeroeightsix.fiber.api.serialization.TypeSerializer;
-import me.zeroeightsix.fiber.impl.constraint.Constraint;
+import me.zeroeightsix.fiber.impl.constraint.ConstraintChecker;
 
 import java.math.BigDecimal;
 
@@ -29,9 +29,12 @@ import java.math.BigDecimal;
  */
 public abstract class SerializableType<T> {
     private final Class<T> platformType;
+    private final ConstraintChecker<T, SerializableType<T>> checker;
 
-    SerializableType(Class<T> platformType) {
+    @SuppressWarnings("unchecked")
+    SerializableType(Class<T> platformType, ConstraintChecker<T, ? extends SerializableType<T>> checker) {
         this.platformType = platformType;
+        this.checker = (ConstraintChecker<T, SerializableType<T>>) checker;
     }
 
     public Class<T> getPlatformType() {
@@ -42,7 +45,8 @@ public abstract class SerializableType<T> {
         if (this.getClass() != type.getClass()) {
             return false;
         }
-        return this.getConstraint().comprehends(type.getConstraint());
+        @SuppressWarnings("unchecked") SerializableType<T> that = (SerializableType<T>) type;
+        return this.checker.comprehends(this, that);
     }
 
     public final boolean accepts(T serializedValue) {
@@ -50,7 +54,7 @@ public abstract class SerializableType<T> {
     }
 
     public final TypeCheckResult<T> test(T serializedValue) {
-        return this.getConstraint().test(serializedValue);
+        return this.checker.test(this, serializedValue);
     }
 
     public abstract <S> void serialize(TypeSerializer<S> serializer, S target);
@@ -64,5 +68,4 @@ public abstract class SerializableType<T> {
     @Override
     public abstract int hashCode();
 
-    protected abstract Constraint<T, ?> getConstraint();
 }

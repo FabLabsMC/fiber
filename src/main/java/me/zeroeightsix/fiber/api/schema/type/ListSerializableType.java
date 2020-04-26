@@ -1,7 +1,7 @@
 package me.zeroeightsix.fiber.api.schema.type;
 
 import me.zeroeightsix.fiber.api.serialization.TypeSerializer;
-import me.zeroeightsix.fiber.impl.constraint.ListTypeChecker;
+import me.zeroeightsix.fiber.impl.constraint.ListConstraintChecker;
 
 import java.util.List;
 import java.util.Objects;
@@ -17,7 +17,6 @@ public final class ListSerializableType<E> extends SerializableType<List<E>> {
         return new ListSerializableType<>(elementType, 0, Integer.MAX_VALUE, false);
     }
 
-    private final ListTypeChecker<E> constraint;
     private final SerializableType<E> elementType;
     private final boolean unique;
     private final int minSize;
@@ -25,12 +24,11 @@ public final class ListSerializableType<E> extends SerializableType<List<E>> {
 
     @SuppressWarnings("unchecked")
     public ListSerializableType(SerializableType<E> elementType, int minSize, int maxSize, boolean unique) {
-        super((Class<List<E>>) (Class<?>) List.class);
+        super((Class<List<E>>) (Class<?>) List.class, ListConstraintChecker.instance());
         this.elementType = elementType;
         this.minSize = minSize;
         this.maxSize = maxSize;
         this.unique = unique;
-        this.constraint = new ListTypeChecker<>(this);
     }
 
     public SerializableType<E> getElementType() {
@@ -52,11 +50,6 @@ public final class ListSerializableType<E> extends SerializableType<List<E>> {
     @Override
     public <S> void serialize(TypeSerializer<S> serializer, S target) {
         serializer.serialize(this, target);
-    }
-
-    @Override
-    protected ListTypeChecker<E> getConstraint() {
-        return this.constraint;
     }
 
     @Override

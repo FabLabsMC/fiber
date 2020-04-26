@@ -1,7 +1,7 @@
 package me.zeroeightsix.fiber.api.schema.type;
 
 import me.zeroeightsix.fiber.api.serialization.TypeSerializer;
-import me.zeroeightsix.fiber.impl.constraint.DecimalTypeChecker;
+import me.zeroeightsix.fiber.impl.constraint.DecimalConstraintChecker;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
@@ -25,10 +25,9 @@ public final class DecimalSerializableType extends SerializableType<BigDecimal> 
     private final BigDecimal maximum;
     @Nullable
     private final BigDecimal increment;
-    private final DecimalTypeChecker constraint;
 
     public DecimalSerializableType(@Nullable BigDecimal min, @Nullable BigDecimal max, @Nullable BigDecimal increment) {
-        super(BigDecimal.class);
+        super(BigDecimal.class, DecimalConstraintChecker.instance());
         if (min != null && max != null) {
             if (min.compareTo(max) > 0) throw new IllegalArgumentException("Provided minimum " + min + " is greater than provided maximum " + max);
             if (increment != null && max.subtract(min).compareTo(increment) < 0) throw new IllegalArgumentException("Provided step " + increment + " is bigger than range [" + min + ", " + max + "]");
@@ -36,7 +35,6 @@ public final class DecimalSerializableType extends SerializableType<BigDecimal> 
         this.minimum = min;
         this.maximum = max;
         this.increment = increment;
-        this.constraint = new DecimalTypeChecker(this);
     }
 
     @Nullable
@@ -81,10 +79,5 @@ public final class DecimalSerializableType extends SerializableType<BigDecimal> 
                 .add("maximum=" + maximum)
                 .add("increment=" + increment)
                 .toString();
-    }
-
-    @Override
-    protected DecimalTypeChecker getConstraint() {
-        return this.constraint;
     }
 }
