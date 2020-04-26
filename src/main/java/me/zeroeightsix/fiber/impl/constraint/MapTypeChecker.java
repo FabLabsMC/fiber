@@ -25,10 +25,14 @@ public class MapTypeChecker<V> extends Constraint<Map<String, V>, MapSerializabl
 
         int size = 0;
         for (Map.Entry<String, V> entry : values.entrySet()) {
-            TypeCheckResult<V> testResult = this.cfg.getValueType().test(entry.getValue());
-            if (testResult.hasPassed()) {
+            if (corrected.size() >= maxSize) {
+                valid = false;
+                break;
+            }
+            TypeCheckResult<String> keyTestResult = this.cfg.getKeyType().test(entry.getKey());
+            TypeCheckResult<V> valueTestResult = this.cfg.getValueType().test(entry.getValue());
+            if (keyTestResult.hasPassed() && valueTestResult.hasPassed()) {
                 corrected.put(entry.getKey(), entry.getValue());
-                size++;
             } else {
                 valid = false;
                 Optional<V> correctedValue = testResult.getCorrectedValue();
@@ -43,7 +47,13 @@ public class MapTypeChecker<V> extends Constraint<Map<String, V>, MapSerializabl
                 break;
             }
         }
-        return valid ? TypeCheckResult.successful(values) : TypeCheckResult.failed(corrected);
+        if (corrected.size() < this.cfg.getMinSize()) {
+            return TypeCheckResult.unrecoverable();
+        } else if (!valid) {
+            return TypeCheckResult.failed(corrected);
+        } else {
+            return TypeCheckResult.successful(values);
+        }
     }
 
     @Override

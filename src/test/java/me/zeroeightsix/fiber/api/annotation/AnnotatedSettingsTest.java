@@ -180,6 +180,9 @@ class AnnotatedSettingsTest {
         assertFalse(value3.accepts(Collections.singletonList("aaaaaaaaaaaa")), "Bad regex");
         assertTrue(value3.setValue(Collections.singletonList("aaaaaaaaaaaa")), "Bad regex");
         assertTrue(value3.getValue().isEmpty());
+        assertFalse(value3.accepts(Arrays.asList("do", "do", "do", "while:true")), "Bad regex");
+        assertTrue(value3.setValue(Arrays.asList("do", "do", "do", "while:true")), "Bad regex");
+        assertEquals(Collections.singletonList("while:true"), value3.getValue());
     }
 
     @Test

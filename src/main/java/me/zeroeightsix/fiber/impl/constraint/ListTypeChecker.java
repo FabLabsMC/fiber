@@ -3,10 +3,7 @@ package me.zeroeightsix.fiber.impl.constraint;
 import me.zeroeightsix.fiber.api.schema.type.ListSerializableType;
 import me.zeroeightsix.fiber.api.schema.type.TypeCheckResult;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.*;
 
 /**
  * A component constraints is satisfied only if all elements in the aggregate type it checks satisfy the constraint.
@@ -21,18 +18,22 @@ public final class ListTypeChecker<E> extends Constraint<List<E>, ListSerializab
 
     @Override
     public TypeCheckResult<List<E>> test(List<E> values) {
-        int correctedSize = Math.min(this.cfg.getMaxSize(), values.size());
-        boolean valid = values.size() == correctedSize;
-        Collection<E> corrected = this.cfg.hasUniqueElements() ? new LinkedHashSet<>(correctedSize) : new ArrayList<>(correctedSize);
+        boolean valid = true;
+        int maxSize = this.cfg.getMaxSize();
+        Collection<E> corrected = this.cfg.hasUniqueElements() ? new LinkedHashSet<>(values.size()) : new ArrayList<>(values.size());
 
-        for (int i = 0; i < correctedSize; i++) {
-            E e = values.get(i);
+        for (E e : values) {
+            if (corrected.size() >= maxSize) {
+                valid = false;
+                break;
+            }
             TypeCheckResult<E> testResult = this.cfg.getElementType().test(e);
             if (testResult.hasPassed()) {
                 valid &= corrected.add(e);  // UNIQUE check
             } else {
                 valid = false;
-                testResult.getCorrectedValue().ifPresent(corrected::add);
+                Optional<E> correctedValue = testResult.getCorrectedValue();
+                correctedValue.ifPresent(corrected::add);
                 // if not present, just skip it
             }
         }
