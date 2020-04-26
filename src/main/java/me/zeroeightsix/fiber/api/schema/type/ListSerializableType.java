@@ -5,6 +5,7 @@ import me.zeroeightsix.fiber.impl.constraint.ListTypeChecker;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 /**
  *
@@ -72,5 +73,14 @@ public final class ListSerializableType<E> extends SerializableType<List<E>> {
     @Override
     public int hashCode() {
         return Objects.hash(this.elementType, this.unique, this.minSize, this.maxSize);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ListSerializableType.class.getSimpleName() + "<" + this.elementType + ">" + "[", "]")
+                .add("unique=" + unique)
+                .add("minSize=" + minSize)
+                .add("maxSize=" + maxSize)
+                .toString();
     }
 }

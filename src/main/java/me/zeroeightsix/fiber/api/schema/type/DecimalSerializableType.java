@@ -6,6 +6,7 @@ import me.zeroeightsix.fiber.impl.constraint.DecimalTypeChecker;
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 public final class DecimalSerializableType extends SerializableType<BigDecimal> {
     /**
@@ -71,6 +72,15 @@ public final class DecimalSerializableType extends SerializableType<BigDecimal> 
     @Override
     public int hashCode() {
         return Objects.hash(this.minimum, this.maximum, this.increment);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", DecimalSerializableType.class.getSimpleName() + "[", "]")
+                .add("minimum=" + minimum)
+                .add("maximum=" + maximum)
+                .add("increment=" + increment)
+                .toString();
     }
 
     @Override

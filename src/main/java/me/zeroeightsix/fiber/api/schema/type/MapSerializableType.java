@@ -73,4 +73,12 @@ public final class MapSerializableType<V> extends SerializableType<Map<String, V
     public int hashCode() {
         return Objects.hash(this.valueType, this.minSize, this.maxSize);
     }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", MapSerializableType.class.getSimpleName() + "[", "]")
+                .add("minSize=" + minSize)
+                .add("maxSize=" + maxSize)
+                .toString();
+    }
 }

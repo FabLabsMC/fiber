@@ -36,13 +36,12 @@ public abstract class SerializableType<T> {
     public abstract <S> void serialize(TypeSerializer<S> serializer, S target);
 
     @Override
-    public String toString() {
-        return this.getClass().getSimpleName() + "(" + this.getPlatformType().getSimpleName() + ")";
-    }
+    public abstract String toString();
 
     @Override
     public abstract boolean equals(Object o);
 
+    @Override
     public abstract int hashCode();
 
     protected abstract Constraint<T, ?> getConstraint();

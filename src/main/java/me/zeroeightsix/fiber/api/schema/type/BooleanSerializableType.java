@@ -7,6 +7,7 @@ import me.zeroeightsix.fiber.impl.constraint.Constraint;
 
 public final class BooleanSerializableType extends SerializableType<Boolean> {
     public static final BooleanSerializableType BOOLEAN = new BooleanSerializableType();
+
     private final BooleanTypeChecker constraint;
 
     private BooleanSerializableType() {
@@ -32,5 +33,10 @@ public final class BooleanSerializableType extends SerializableType<Boolean> {
     @Override
     protected Constraint<Boolean, ?> getConstraint() {
         return this.constraint;
+    }
+
+    @Override
+    public String toString() {
+        return BooleanSerializableType.class.getSimpleName();
     }
 }

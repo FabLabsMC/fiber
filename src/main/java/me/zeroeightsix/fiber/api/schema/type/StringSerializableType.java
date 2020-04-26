@@ -5,6 +5,7 @@ import me.zeroeightsix.fiber.impl.constraint.StringTypeChecker;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
+import java.util.StringJoiner;
 import java.util.regex.Pattern;
 
 public final class StringSerializableType extends SerializableType<String> {
@@ -85,5 +86,14 @@ public final class StringSerializableType extends SerializableType<String> {
     @Override
     public int hashCode() {
         return Objects.hash(this.minLength, this.maxLength, this.pattern);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", StringSerializableType.class.getSimpleName() + "[", "]")
+                .add("minLength=" + this.minLength)
+                .add("maxLength=" + this.maxLength)
+                .add("pattern=" + this.pattern)
+                .toString();
     }
 }

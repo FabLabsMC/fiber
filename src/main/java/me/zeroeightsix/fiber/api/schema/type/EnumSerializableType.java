@@ -46,4 +46,11 @@ public final class EnumSerializableType extends SerializableType<String> {
     public int hashCode() {
         return Objects.hash(this.validValues);
     }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", EnumSerializableType.class.getSimpleName() + "[", "]")
+                .add("validValues=" + validValues)
+                .toString();
+    }
 }
