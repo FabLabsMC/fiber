@@ -45,14 +45,4 @@ public final class ListConfigType<R, E> extends ConfigType<R, List<E>, ListSeria
         ListSerializableType<E> current = this.getSerializedType();
         return this.withType(new ListSerializableType<>(current.getElementType(), current.getMinSize(), current.getMaxSize(), true));
     }
-
-    @Override
-    public String toString() {
-        return this.getClass().getSimpleName() +
-                "(" +
-                this.getSerializedType().getPlatformType().getSimpleName() +
-                "<" + this.getSerializedType().getElementType().getPlatformType().getSimpleName() + ">" +
-                " : " + this.getRuntimeType().getSimpleName() +
-                ")";
-    }
 }

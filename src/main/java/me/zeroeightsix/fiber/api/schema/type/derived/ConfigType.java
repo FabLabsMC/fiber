@@ -6,6 +6,7 @@ import me.zeroeightsix.fiber.api.schema.type.SerializableType;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.util.StringJoiner;
 import java.util.function.Function;
 
 public abstract class ConfigType<R, S, T extends SerializableType<S>> {
@@ -49,6 +50,14 @@ public abstract class ConfigType<R, S, T extends SerializableType<S>> {
 
     public T getSerializedType() {
         return this.serializedType;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", this.getClass().getSimpleName() + "[", "]")
+                .add("serializedType=" + this.serializedType)
+                .add("runtimeType=" + this.runtimeType)
+                .toString();
     }
 
     public abstract ConfigType<R, S, T> constrain(ConstraintAnnotationProcessor<Annotation> processor, Annotation annotation, AnnotatedElement annotated);

@@ -41,14 +41,4 @@ public final class MapConfigType<R, V> extends ConfigType<R, Map<String, V>, Map
     public MapConfigType<R, V> constrain(ConstraintAnnotationProcessor<Annotation> processor, Annotation annotation, AnnotatedElement annotated) {
         return processor.processMap(this, annotation, annotated);
     }
-
-    @Override
-    public String toString() {
-        return this.getClass().getSimpleName() +
-                "(" +
-                this.getSerializedType().getPlatformType().getSimpleName() +
-                "<String, " + this.getSerializedType().getValueType().getPlatformType().getSimpleName() + ">" +
-                " : " + this.getRuntimeType().getSimpleName() +
-                ")";
-    }
 }
