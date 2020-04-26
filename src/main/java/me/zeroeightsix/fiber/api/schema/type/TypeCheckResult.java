@@ -3,6 +3,11 @@ package me.zeroeightsix.fiber.api.schema.type;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
+/**
+ * The result of type checking a serialized value
+ * @param <V> the actual type of the tested value
+ * @see SerializableType#test(Object)
+ */
 public final class TypeCheckResult<V> {
     private static final TypeCheckResult<?> UNRECOVERABLE = new TypeCheckResult<>(false, null);
 
@@ -28,10 +33,28 @@ public final class TypeCheckResult<V> {
         this.correctedValue = correctedValue;
     }
 
+    /**
+     * Returns {@code true} if the tested value passed the type check.
+     *
+     * <p> A value passes if it matches every attribute set on
+     * the {@link SerializableType}. If at least one constraint check failed,
+     * this method returns {@code false}.
+     *
+     * @return {@code true} if the test passed, {@code false} otherwise.
+     */
     public boolean hasPassed() {
         return this.passed;
     }
 
+    /**
+     * Returns a possible corrected value based on the tested value.
+     *
+     * <p> If the test passes, this method returns an {@code Optional} describing
+     * the tested value.
+     *
+     * @return an {@code Optional} describing a possible corrected value,
+     * or an empty {@code Optional} if the test was unrecoverable.
+     */
     public Optional<V> getCorrectedValue() {
         return Optional.ofNullable(this.correctedValue);
     }
