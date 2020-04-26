@@ -15,15 +15,10 @@ public class MapTypeChecker<V> extends Constraint<Map<String, V>, MapSerializabl
 
     @Override
     public TypeCheckResult<Map<String, V>> test(Map<String, V> values) {
-        if (values.size() < this.cfg.getMinSize()) {
-            return TypeCheckResult.unrecoverable();
-        }
-
         boolean valid = true;
         int maxSize = this.cfg.getMaxSize();
         Map<String, V> corrected = new LinkedHashMap<>();
 
-        int size = 0;
         for (Map.Entry<String, V> entry : values.entrySet()) {
             if (corrected.size() >= maxSize) {
                 valid = false;
@@ -35,16 +30,12 @@ public class MapTypeChecker<V> extends Constraint<Map<String, V>, MapSerializabl
                 corrected.put(entry.getKey(), entry.getValue());
             } else {
                 valid = false;
-                Optional<V> correctedValue = testResult.getCorrectedValue();
-                if (correctedValue.isPresent()) {
-                    corrected.put(entry.getKey(), correctedValue.get());
-                    size++;
+                Optional<String> correctedKey = keyTestResult.getCorrectedValue();
+                Optional<V> correctedValue = valueTestResult.getCorrectedValue();
+                if (correctedKey.isPresent() && correctedValue.isPresent()) {
+                    corrected.put(correctedKey.get(), correctedValue.get());
                 }
-                // if not present, just skip it
-            }
-            if (size >= maxSize) {
-                valid = false;
-                break;
+                // if key or value missing, just skip the entry
             }
         }
         if (corrected.size() < this.cfg.getMinSize()) {

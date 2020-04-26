@@ -5,20 +5,36 @@ import me.zeroeightsix.fiber.impl.constraint.MapTypeChecker;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 public final class MapSerializableType<V> extends SerializableType<Map<String, V>> {
+
+    private final StringSerializableType keyType;
     private final SerializableType<V> valueType;
     private final int minSize;
     private final int maxSize;
     private final MapTypeChecker<V> constraint;
 
+    public MapSerializableType(SerializableType<V> valueType) {
+        this(StringSerializableType.DEFAULT_STRING, valueType);
+    }
+
+    public MapSerializableType(StringSerializableType keyType, SerializableType<V> valueType) {
+        this(keyType, valueType, 0, Integer.MAX_VALUE);
+    }
+
     @SuppressWarnings("unchecked")
-    public MapSerializableType(SerializableType<V> valueType, int minSize, int maxSize) {
+    public MapSerializableType(StringSerializableType keyType, SerializableType<V> valueType, int minSize, int maxSize) {
         super((Class<Map<String, V>>) (Class<?>) Map.class);
+        this.keyType = keyType;
         this.valueType = valueType;
         this.minSize = minSize;
         this.maxSize = maxSize;
         this.constraint = new MapTypeChecker<>(this);
+    }
+
+    public StringSerializableType getKeyType() {
+        return this.keyType;
     }
 
     public SerializableType<V> getValueType() {

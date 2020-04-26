@@ -98,7 +98,7 @@ public final class ConfigTypes {
 
     public static <K, V, S> MapConfigType<Map<K, V>, S> makeMap(StringConfigType<K> keyConverter, ConfigType<V, S, ?> valueConverter) {
         return new MapConfigType<>(
-                new MapSerializableType<>(valueConverter.getSerializedType(), 0, Integer.MAX_VALUE),
+                new MapSerializableType<>(keyConverter.getSerializedType(), valueConverter.getSerializedType()),
                 Map.class,
                 map -> {
                     Map<K, V> ret = new HashMap<>();

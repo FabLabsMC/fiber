@@ -2,6 +2,7 @@ package me.zeroeightsix.fiber.api.schema.type.derived;
 
 import me.zeroeightsix.fiber.api.annotation.processor.ConstraintAnnotationProcessor;
 import me.zeroeightsix.fiber.api.schema.type.MapSerializableType;
+import me.zeroeightsix.fiber.api.schema.type.StringSerializableType;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
@@ -28,12 +29,12 @@ public final class MapConfigType<R, V> extends ConfigType<R, Map<String, V>, Map
 
     public MapConfigType<R, V> withMinSize(int min) {
         MapSerializableType<V> current = this.getSerializedType();
-        return this.withType(new MapSerializableType<>(current.getValueType(), min, current.getMaxSize()));
+        return this.withType(new MapSerializableType<>(StringSerializableType.DEFAULT_STRING, current.getValueType(), min, current.getMaxSize()));
     }
 
     public MapConfigType<R, V> withMaxSize(int max) {
         MapSerializableType<V> current = this.getSerializedType();
-        return this.withType(new MapSerializableType<>(current.getValueType(), current.getMinSize(), max));
+        return this.withType(new MapSerializableType<>(StringSerializableType.DEFAULT_STRING, current.getValueType(), current.getMinSize(), max));
     }
 
     @Override
