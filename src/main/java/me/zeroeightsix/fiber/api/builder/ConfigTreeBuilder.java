@@ -29,7 +29,7 @@ import java.util.function.Consumer;
  * ConfigBranch config = ConfigTree.builder()
  *         .withValue("A", ConfigTypes.INTEGER, 10)
  *         .fork("child")
- *             .beginValue("drops", ConfigTypes.STRING_SET, new HashSet<>(Arrays.asList("diamond", "cactus"))
+ *             .beginValue("drops", ConfigTypes.makeSet(ConfigTypes.STRING)), new HashSet<>(Arrays.asList("diamond", "cactus"))
  *             .withComment("List of things to drop")
  *             .finishValue()
  *         .finishNode()
