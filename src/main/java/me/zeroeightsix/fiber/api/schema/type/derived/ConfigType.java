@@ -63,10 +63,15 @@ public abstract class ConfigType<R, S, T extends SerializableType<S>> {
      *
      * @param runtimeValue the value to convert to serializable form
      * @return a serializable equivalent of the runtime value
+     * @throws FiberConversionException if the value does not fit this converter's constraint
      * @see SerializableType#getPlatformType()
      */
-    public S toSerializedType(R runtimeValue) {
-        return this.f0.apply(runtimeValue);
+    public S toSerializedType(R runtimeValue) throws FiberConversionException {
+        S s = this.serializer.apply(runtimeValue);
+        if (!this.serializedType.accepts(s)) {
+            throw new FiberConversionException("Invalid value " + runtimeValue);
+        }
+        return s;
     }
 
     /**
