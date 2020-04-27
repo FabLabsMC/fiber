@@ -13,14 +13,14 @@ import java.util.StringJoiner;
  */
 public final class ListSerializableType<E> extends SerializableType<List<E>> {
 
-    public static <E0> ListSerializableType<E0> of(SerializableType<E0> elementType) {
-        return new ListSerializableType<>(elementType, 0, Integer.MAX_VALUE, false);
-    }
-
     private final SerializableType<E> elementType;
     private final boolean unique;
     private final int minSize;
     private final int maxSize;
+
+    public ListSerializableType(SerializableType<E> elementType) {
+        this(elementType, 0, Integer.MAX_VALUE, false);
+    }
 
     @SuppressWarnings("unchecked")
     public ListSerializableType(SerializableType<E> elementType, int minSize, int maxSize, boolean unique) {

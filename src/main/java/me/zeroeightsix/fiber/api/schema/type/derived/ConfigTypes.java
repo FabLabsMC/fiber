@@ -2,7 +2,6 @@ package me.zeroeightsix.fiber.api.schema.type.derived;
 
 
 import me.zeroeightsix.fiber.api.schema.type.*;
-import me.zeroeightsix.fiber.impl.annotation.magic.TypeMagic;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Array;
@@ -64,7 +63,7 @@ public final class ConfigTypes {
 
     public static <E0, E, U extends ConfigType<E, E0, ?>> ListConfigType<List<E>, E0> makeList(U elementType) {
         return new ListConfigType<>(
-                ListSerializableType.of(elementType.getSerializedType()), List.class,
+                new ListSerializableType<>(elementType.getSerializedType()), List.class,
                 l -> {
                     List<E> ret = new ArrayList<>();
                     for (E0 e0 : l) {
@@ -75,7 +74,7 @@ public final class ConfigTypes {
                 l -> {
                     List<E0> ret = new ArrayList<>();
                     for (E e : l) {
-                        ret.add(elementType.toSerializedType(e));
+                        ret.add(elementType.toPlatformType(e));
                     }
                     return Collections.unmodifiableList(ret);
                 }
@@ -83,19 +82,46 @@ public final class ConfigTypes {
     }
 
     public static <E0, E, U extends ConfigType<E, E0, ?>> ListConfigType<Set<E>, E0> makeSet(U elementType) {
-        return makeList(elementType).withUniqueElements().derive(
+        return new ListConfigType<>(
+                new ListSerializableType<>(elementType.getSerializedType(), 0, Integer.MAX_VALUE, true),
                 Set.class,
-                c -> Collections.unmodifiableSet(new HashSet<>(c)),
-                c -> Collections.unmodifiableList(new ArrayList<>(c))
+                l -> {
+                    Set<E> ret = new HashSet<>();
+                    for (E0 e0 : l) {
+                        ret.add(elementType.toRuntimeType(e0));
+                    }
+                    return Collections.unmodifiableSet(ret);
+                },
+                l -> {
+                    List<E0> ret = new ArrayList<>();
+                    for (E e : l) {
+                        ret.add(elementType.toPlatformType(e));
+                    }
+                    return Collections.unmodifiableList(ret);
+                }
         );
     }
 
-    @SuppressWarnings("unchecked")
     public static <E0, E, U extends ConfigType<E, E0, ? extends SerializableType<E0>>> ListConfigType<E[], E0> makeArray(U elementType) {
-        E[] z = (E[]) Array.newInstance(elementType.getRuntimeType(), 0);
-        Class<E[]> arrType = (Class<E[]>) z.getClass();
-        // account for arrays of primitives - we must avoid autocasting to Object[]
-        return (ListConfigType<E[], E0>) (ListConfigType<?, ?>) makeList((ConfigType<Object, Object, ?>) elementType).derive((Class<? super Object>) (Class<?>) arrType, l -> TypeMagic.unbox(l.toArray((Object[]) z)), a -> Arrays.asList((E[]) TypeMagic.box(a)));
+        @SuppressWarnings("unchecked") Class<E[]> arrType = (Class<E[]>) Array.newInstance(elementType.getRuntimeType(), 0).getClass();
+        return new ListConfigType<>(
+                new ListSerializableType<>(elementType.getSerializedType()),
+                arrType,
+                l -> {
+                    @SuppressWarnings("unchecked") E[] ret = (E[]) Array.newInstance(elementType.getRuntimeType(), l.size());
+                    for (int i = 0; i < l.size(); i++) {
+                        ret[i] = elementType.toRuntimeType(l.get(i));
+                    }
+                    return ret;
+                },
+                arr -> {
+                    List<E0> ret = new ArrayList<>();
+                    for (E e : arr) {
+                        ret.add(elementType.toPlatformType(e));
+                    }
+                    return Collections.unmodifiableList(ret);
+                }
+        );
     }
 
     /* Record-derived config types */
@@ -111,7 +137,7 @@ public final class ConfigTypes {
                 },
                 map -> {
                     Map<String, S> ret = new HashMap<>();
-                    map.forEach((k, v) -> ret.put(keyConverter.toSerializedType(k), valueConverter.toSerializedType(v)));
+                    map.forEach((k, v) -> ret.put(keyConverter.toPlatformType(k), valueConverter.toPlatformType(v)));
                     return ret;
                 }
         );

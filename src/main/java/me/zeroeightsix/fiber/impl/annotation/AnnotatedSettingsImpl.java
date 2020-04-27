@@ -319,7 +319,12 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
         ConfigType<?, ?, ?> ret;
         if (annotatedType instanceof AnnotatedArrayType) {
             ConfigType<?, ?, ?> componentType = this.toConfigType(((AnnotatedArrayType) annotatedType).getAnnotatedGenericComponentType());
-            ret = ConfigTypes.makeArray(componentType);
+            Class<?> componentClass = clazz.getComponentType();
+            assert componentClass != null;
+            // workaround for arrays of primitives being special snowflakes
+            @SuppressWarnings("unchecked") Class<Object> arrClass = (Class<Object>) clazz;
+            @SuppressWarnings("unchecked") ConfigType<Object, Object, ?> arrType = (ConfigType<Object, Object, ?>) (ConfigType<?, ?, ?>) ConfigTypes.makeArray(componentType);
+            ret = componentClass.isPrimitive() ? arrType.derive(arrClass, TypeMagic::unbox, TypeMagic::box) : arrType;
         } else if (this.registeredGenericTypes.containsKey(clazz)) {
             ParameterizedTypeProcessor<?> parameterizedTypeProcessor = this.registeredGenericTypes.get(clazz);
             if (!(annotatedType instanceof AnnotatedParameterizedType)) {
