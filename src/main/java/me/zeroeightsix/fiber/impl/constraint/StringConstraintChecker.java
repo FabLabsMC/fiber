@@ -30,7 +30,7 @@ public final class StringConstraintChecker extends ConstraintChecker<String, Str
         if (pattern != null && !pattern.matcher(value).matches()) {
             return TypeCheckResult.unrecoverable();
         }
-        return new TypeCheckResult<>(true, value);
+        return TypeCheckResult.successful(value);
     }
 
     @Override

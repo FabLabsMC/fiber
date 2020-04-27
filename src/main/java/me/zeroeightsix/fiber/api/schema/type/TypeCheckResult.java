@@ -28,7 +28,7 @@ public final class TypeCheckResult<V> {
     @Nullable
     private final V correctedValue;
 
-    public TypeCheckResult(boolean passed, @Nullable V correctedValue) {
+    private TypeCheckResult(boolean passed, @Nullable V correctedValue) {
         this.passed = passed;
         this.correctedValue = correctedValue;
     }
