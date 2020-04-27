@@ -36,12 +36,12 @@ public final class ConfigTypes {
     public static final NumberConfigType<Double> DOUBLE =
             makeNumber(Double.class, BigDecimal::valueOf, BigDecimal::doubleValue, null, null, null);
 
-    public static <N> NumberConfigType<N> makeNumber(Class<N> actualType, Function<N, BigDecimal> f0, Function<BigDecimal, N> f, @Nullable N minValue, @Nullable N maxValue, @Nullable N precision) {
+    public static <N> NumberConfigType<N> makeNumber(Class<N> actualType, Function<N, BigDecimal> serializer, Function<BigDecimal, N> deserializer, @Nullable N minValue, @Nullable N maxValue, @Nullable N precision) {
         return new NumberConfigType<>(
-                new DecimalSerializableType(minValue == null ? null : f0.apply(minValue), maxValue == null ? null : f0.apply(maxValue), precision == null ? null : f0.apply(precision)),
+                new DecimalSerializableType(minValue == null ? null : serializer.apply(minValue), maxValue == null ? null : serializer.apply(maxValue), precision == null ? null : serializer.apply(precision)),
                 actualType,
-                f,
-                f0
+                deserializer,
+                serializer
         );
     }
 

@@ -61,7 +61,7 @@ public interface ConstraintAnnotationProcessor<A extends Annotation> {
         throw new UnsupportedOperationException("Invalid annotation " + annotation.annotationType() + " for type " + baseType);
     }
 
-    default <R, E> RecordConfigType<R, E> processRecord(RecordConfigType<R, E> baseType, A annotation, AnnotatedElement annotated) {
+    default <R> RecordConfigType<R> processRecord(RecordConfigType<R> baseType, A annotation, AnnotatedElement annotated) {
         throw new UnsupportedOperationException("Invalid annotation " + annotation.annotationType() + " for type " + baseType);
     }
 

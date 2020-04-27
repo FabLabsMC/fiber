@@ -8,7 +8,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.function.Function;
 
-public final class RecordConfigType<R, E> extends ConfigType<R, ConfigBranch, RecordSerializableType> {
+public final class RecordConfigType<R> extends ConfigType<R, ConfigBranch, RecordSerializableType> {
 
     @SuppressWarnings("unchecked")
     public RecordConfigType(RecordSerializableType serializedType, Class<? super R> runtimeType, Function<ConfigBranch, R> f, Function<R, ConfigBranch> f0) {
@@ -16,18 +16,18 @@ public final class RecordConfigType<R, E> extends ConfigType<R, ConfigBranch, Re
     }
 
     @Override
-    public <U> RecordConfigType<U, E> derive(Class<? super U> runtimeType, Function<R, U> g, Function<U, R> g0) {
-        return new RecordConfigType<>(this.getSerializedType(), runtimeType, s -> g.apply(this.f.apply(s)), u -> this.f0.apply(g0.apply(u)));
+    public <U> RecordConfigType<U> derive(Class<? super U> runtimeType, Function<R, U> partialDeserializer, Function<U, R> partialSerializer) {
+        return new RecordConfigType<>(this.getSerializedType(), runtimeType, s -> partialDeserializer.apply(this.deserializer.apply(s)), u -> this.serializer.apply(partialSerializer.apply(u)));
     }
 
     @Override
-    public RecordConfigType<R, E> withType(RecordSerializableType newSpec) {
+    public RecordConfigType<R> withType(RecordSerializableType newSpec) {
         this.checkTypeNarrowing(newSpec);
-        return new RecordConfigType<>(newSpec, this.getRuntimeType(), this.f, this.f0);
+        return new RecordConfigType<>(newSpec, this.getRuntimeType(), this.deserializer, this.serializer);
     }
 
     @Override
-    public RecordConfigType<R, E> constrain(ConstraintAnnotationProcessor<Annotation> processor, Annotation annotation, AnnotatedElement annotated) {
+    public RecordConfigType<R> constrain(ConstraintAnnotationProcessor<Annotation> processor, Annotation annotation, AnnotatedElement annotated) {
         return processor.processRecord(this, annotation, annotated);
     }
 

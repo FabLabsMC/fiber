@@ -9,14 +9,14 @@ import java.lang.reflect.AnnotatedElement;
 import java.util.function.Function;
 
 public final class BooleanConfigType<T> extends ConfigType<T, Boolean, BooleanSerializableType> {
-    public BooleanConfigType(Class<T> actualType, Function<Boolean, T> f, Function<T, Boolean> f0) {
-        super(BooleanSerializableType.BOOLEAN, actualType, f, f0);
+    public BooleanConfigType(Class<T> actualType, Function<Boolean, T> deserializer, Function<T, Boolean> serializer) {
+        super(BooleanSerializableType.BOOLEAN, actualType, deserializer, serializer);
     }
 
     @Override
-    public <U> BooleanConfigType<U> derive(Class<? super U> runtimeType, Function<T, U> g, Function<U, T> g0) {
+    public <U> BooleanConfigType<U> derive(Class<? super U> runtimeType, Function<T, U> partialDeserializer, Function<U, T> partialSerializer) {
         @SuppressWarnings("unchecked") Class<U> c = (Class<U>) runtimeType;
-        return new BooleanConfigType<>(c, s -> g.apply(this.f.apply(s)), u -> this.f0.apply(g0.apply(u)));
+        return new BooleanConfigType<>(c, s -> partialDeserializer.apply(this.deserializer.apply(s)), u -> this.serializer.apply(partialSerializer.apply(u)));
     }
 
     @Override

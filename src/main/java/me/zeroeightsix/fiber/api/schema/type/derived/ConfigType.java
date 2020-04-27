@@ -29,14 +29,14 @@ import java.util.function.Function;
 public abstract class ConfigType<R, S, T extends SerializableType<S>> {
     private final T serializedType;
     private final Class<R> runtimeType;
-    protected final Function<S, R> f;
-    protected final Function<R, S> f0;
+    protected final Function<S, R> deserializer;
+    protected final Function<R, S> serializer;
 
-    ConfigType(T serializedType, Class<R> runtimeType, Function<S, R> f, Function<R, S> f0) {
+    ConfigType(T serializedType, Class<R> runtimeType, Function<S, R> deserializer, Function<R, S> serializer) {
         this.runtimeType = runtimeType;
         this.serializedType = serializedType;
-        this.f = f;
-        this.f0 = f0;
+        this.deserializer = deserializer;
+        this.serializer = serializer;
     }
 
     /**
@@ -44,16 +44,16 @@ public abstract class ConfigType<R, S, T extends SerializableType<S>> {
      *
      * <p> The new {@code ConfigType} will have the same serialized type (with the same constraints),
      * but a different runtime type. Values will be converted between the two
-     * types using composed functions: {@code toSerializedType(x) = this.toSerializedType(g0(x))}
-     * and {@code toRuntimeType(y) = g(this.toRuntimeType(y))}.
+     * types using composed functions: {@code toSerializedType(x) = this.toSerializedType(partialSerializer(x))}
+     * and {@code toRuntimeType(y) = partialDeserializer(this.toRuntimeType(y))}.
      *
-     * @param runtimeType a class object representing the runtime type of the new {@code ConfigType}
-     * @param g           a partial deserialization function
-     * @param g0          a partial serialization function
-     * @param <U>         the runtime type of the new {@code ConfigType}
+     * @param runtimeType         a class object representing the runtime type of the new {@code ConfigType}
+     * @param partialDeserializer a partial deserialization function
+     * @param partialSerializer   a partial serialization function
+     * @param <U>                 the runtime type of the new {@code ConfigType}
      * @return a derived {@code ConfigType} with the given {@code runtimeType}
      */
-    public abstract <U> ConfigType<U, S, T> derive(Class<? super U> runtimeType, Function<R, U> g, Function<U, R> g0);
+    public abstract <U> ConfigType<U, S, T> derive(Class<? super U> runtimeType, Function<R, U> partialDeserializer, Function<U, R> partialSerializer);
 
     public abstract ConfigType<R, S, T> withType(T newSpec);
 
@@ -85,7 +85,7 @@ public abstract class ConfigType<R, S, T extends SerializableType<S>> {
         if (!this.serializedType.accepts(serializedValue)) {
             throw new FiberConversionException("Invalid serialized value " + serializedValue);
         }
-        return this.f.apply(serializedValue);
+        return this.deserializer.apply(serializedValue);
     }
 
     public Class<R> getRuntimeType() {

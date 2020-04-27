@@ -14,15 +14,15 @@ public final class StringConfigType<T> extends ConfigType<T, String, StringSeria
     }
 
     @Override
-    public <U> StringConfigType<U> derive(Class<? super U> runtimeType, Function<T, U> g, Function<U, T> g0) {
+    public <U> StringConfigType<U> derive(Class<? super U> runtimeType, Function<T, U> partialDeserializer, Function<U, T> partialSerializer) {
         @SuppressWarnings("unchecked") Class<U> c = (Class<U>) runtimeType;
-        return new StringConfigType<>(this.getSerializedType(), c, s -> g.apply(this.f.apply(s)), u -> this.f0.apply(g0.apply(u)));
+        return new StringConfigType<>(this.getSerializedType(), c, s -> partialDeserializer.apply(this.deserializer.apply(s)), u -> this.serializer.apply(partialSerializer.apply(u)));
     }
 
     @Override
     public StringConfigType<T> withType(StringSerializableType newSpec) {
         this.checkTypeNarrowing(newSpec);
-        return new StringConfigType<>(newSpec, this.getRuntimeType(), this.f, this.f0);
+        return new StringConfigType<>(newSpec, this.getRuntimeType(), this.deserializer, this.serializer);
     }
 
     @Override

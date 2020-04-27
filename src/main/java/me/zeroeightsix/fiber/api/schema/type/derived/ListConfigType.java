@@ -16,14 +16,14 @@ public final class ListConfigType<R, E> extends ConfigType<R, List<E>, ListSeria
     }
 
     @Override
-    public <U> ListConfigType<U, E> derive(Class<? super U> runtimeType, Function<R, U> g, Function<U, R> g0) {
-        return new ListConfigType<>(this.getSerializedType(), runtimeType, s -> g.apply(this.f.apply(s)), u -> this.f0.apply(g0.apply(u)));
+    public <U> ListConfigType<U, E> derive(Class<? super U> runtimeType, Function<R, U> partialDeserializer, Function<U, R> partialSerializer) {
+        return new ListConfigType<>(this.getSerializedType(), runtimeType, s -> partialDeserializer.apply(this.deserializer.apply(s)), u -> this.serializer.apply(partialSerializer.apply(u)));
     }
 
     @Override
     public ListConfigType<R, E> withType(ListSerializableType<E> newSpec) {
         this.checkTypeNarrowing(newSpec);
-        return new ListConfigType<>(newSpec, this.getRuntimeType(), this.f, this.f0);
+        return new ListConfigType<>(newSpec, this.getRuntimeType(), this.deserializer, this.serializer);
     }
 
     @Override

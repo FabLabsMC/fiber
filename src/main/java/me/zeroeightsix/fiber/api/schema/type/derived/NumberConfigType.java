@@ -15,15 +15,15 @@ public final class NumberConfigType<T> extends ConfigType<T, BigDecimal, Decimal
     }
 
     @Override
-    public <U> NumberConfigType<U> derive(Class<? super U> runtimeType, Function<T, U> g, Function<U, T> g0) {
+    public <U> NumberConfigType<U> derive(Class<? super U> runtimeType, Function<T, U> partialDeserializer, Function<U, T> partialSerializer) {
         @SuppressWarnings("unchecked") Class<U> c = (Class<U>) runtimeType;
-        return new NumberConfigType<>(this.getSerializedType(), c, s -> g.apply(this.f.apply(s)), u -> this.f0.apply(g0.apply(u)));
+        return new NumberConfigType<>(this.getSerializedType(), c, s -> partialDeserializer.apply(this.deserializer.apply(s)), u -> this.serializer.apply(partialSerializer.apply(u)));
     }
 
     @Override
     public NumberConfigType<T> withType(DecimalSerializableType newSpec) {
         this.checkTypeNarrowing(newSpec);
-        return new NumberConfigType<>(newSpec, this.getRuntimeType(), this.f, this.f0);
+        return new NumberConfigType<>(newSpec, this.getRuntimeType(), this.deserializer, this.serializer);
     }
 
     @Override

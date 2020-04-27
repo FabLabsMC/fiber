@@ -17,14 +17,14 @@ public final class MapConfigType<R, V> extends ConfigType<R, Map<String, V>, Map
     }
 
     @Override
-    public <U> MapConfigType<U, V> derive(Class<? super U> runtimeType, Function<R, U> g, Function<U, R> g0) {
-        return new MapConfigType<>(this.getSerializedType(), runtimeType, s -> g.apply(this.f.apply(s)), u -> this.f0.apply(g0.apply(u)));
+    public <U> MapConfigType<U, V> derive(Class<? super U> runtimeType, Function<R, U> partialDeserializer, Function<U, R> partialSerializer) {
+        return new MapConfigType<>(this.getSerializedType(), runtimeType, s -> partialDeserializer.apply(this.deserializer.apply(s)), u -> this.serializer.apply(partialSerializer.apply(u)));
     }
 
     @Override
     public MapConfigType<R, V> withType(MapSerializableType<V> newSpec) {
         this.checkTypeNarrowing(newSpec);
-        return new MapConfigType<>(newSpec, this.getRuntimeType(), this.f, this.f0);
+        return new MapConfigType<>(newSpec, this.getRuntimeType(), this.deserializer, this.serializer);
     }
 
     public MapConfigType<R, V> withMinSize(int min) {
