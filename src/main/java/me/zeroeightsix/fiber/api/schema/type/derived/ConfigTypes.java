@@ -103,27 +103,151 @@ public final class ConfigTypes {
         );
     }
 
-    public static <E0, E, U extends ConfigType<E, E0, ? extends SerializableType<E0>>> ListConfigType<E[], E0> makeArray(U elementType) {
+    /**
+     * Creates a {@link ListConfigType} representing an array of primitive type {@code boolean}. If {@code elementType}
+     * represents the type {@link Boolean}, then the element values are unboxed before being stored in the array.
+     *
+     * @param elementType The config type of the array components.
+     * @param <S> The backing serialized type.
+     * @return A {@link ListConfigType} holding a {@code boolean[]}.
+     */
+    public static <S> ListConfigType<boolean[], S> makeBooleanArray(ConfigType<Boolean, S, ?> elementType) {
+        return makeArray(boolean[].class, elementType);
+    }
+
+    /**
+     * Creates a {@link ListConfigType} representing an array of primitive type {@code byte}. If {@code elementType}
+     * represents the type {@link Byte}, then the element values are unboxed before being stored in the array.
+     *
+     * @param elementType The config type of the array components.
+     * @param <S> The backing serialized type.
+     * @return A {@link ListConfigType} holding a {@code byte[]}.
+     */
+    public static <S> ListConfigType<byte[], S> makeByteArray(ConfigType<Byte, S, ?> elementType) {
+        return makeArray(byte[].class, elementType);
+    }
+
+    /**
+     * Creates a {@link ListConfigType} representing an array of primitive type {@code short}. If {@code elementType}
+     * represents the type {@link Short}, then the element values are unboxed before being stored in the array.
+     *
+     * @param elementType The config type of the array components.
+     * @param <S> The backing serialized type.
+     * @return A {@link ListConfigType} holding a {@code short[]}.
+     */
+    public static <S> ListConfigType<short[], S> makeShortArray(ConfigType<Short, S, ?> elementType) {
+        return makeArray(short[].class, elementType);
+    }
+
+    /**
+     * Creates a {@link ListConfigType} representing an array of primitive type {@code int}. If {@code elementType}
+     * represents the type {@link Integer}, then the element values are unboxed before being stored in the array.
+     *
+     * @param elementType The config type of the array components.
+     * @param <S> The backing serialized type.
+     * @return A {@link ListConfigType} holding an {@code int[]}.
+     */
+    public static <S> ListConfigType<int[], S> makeIntArray(ConfigType<Integer, S, ?> elementType) {
+        return makeArray(int[].class, elementType);
+    }
+
+    /**
+     * Creates a {@link ListConfigType} representing an array of primitive type {@code long}. If {@code elementType}
+     * represents the type {@link Long}, then the element values are unboxed before being stored in the array.
+     *
+     * @param elementType The config type of the array components.
+     * @param <S> The backing serialized type.
+     * @return A {@link ListConfigType} holding a {@code long[]}.
+     */
+    public static <S> ListConfigType<long[], S> makeLongArray(ConfigType<Long, S, ?> elementType) {
+        return makeArray(long[].class, elementType);
+    }
+
+    /**
+     * Creates a {@link ListConfigType} representing an array of primitive type {@code float}. If {@code elementType}
+     * represents the type {@link Float}, then the element values are unboxed before being stored in the array.
+     *
+     * @param elementType The config type of the array components.
+     * @param <S> The backing serialized type.
+     * @return A {@link ListConfigType} holding a {@code float[]}.
+     */
+    public static <S> ListConfigType<float[], S> makeFloatArray(ConfigType<Float, S, ?> elementType) {
+        return makeArray(float[].class, elementType);
+    }
+
+    /**
+     * Creates a {@link ListConfigType} representing an array of primitive type {@code double}. If {@code elementType}
+     * represents the type {@link Double}, then the element values are unboxed before being stored in the array.
+     *
+     * @param elementType The config type of the array components.
+     * @param <S> The backing serialized type.
+     * @return A {@link ListConfigType} holding a {@code double[]}.
+     */
+    public static <S> ListConfigType<double[], S> makeDoubleArray(ConfigType<Double, S, ?> elementType) {
+        return makeArray(double[].class, elementType);
+    }
+
+    /**
+     * Creates a {@link ListConfigType} representing an array of primitive type {@code char}. If {@code elementType}
+     * represents the type {@link Character}, then the element values are unboxed before being stored in the array.
+     *
+     * @param elementType The config type of the array components.
+     * @param <S> The backing serialized type.
+     * @return A {@link ListConfigType} holding a {@code char[]}.
+     */
+    public static <S> ListConfigType<char[], S> makeCharArray(ConfigType<Character, S, ?> elementType) {
+        return makeArray(char[].class, elementType);
+    }
+
+    /**
+     * Creates a {@link ListConfigType} representing an array of reference type. If {@code elementType} represents
+     * a primitive type, then the element values are boxed before being stored in the array.
+     *
+     * @param elementType The config type of the array components.
+     * @param <S> The backing serialized type.
+     * @param <E> The (possibly boxed) array component type.
+     * @return A {@link ListConfigType} holding an {@code E[]}.
+     */
+    public static <S, E> ListConfigType<E[], S> makeArray(ConfigType<E, S, ?> elementType) {
         // need to explicitly wrap the runtime type to avoid sneaky ClassCastException (Class<Integer> could be int.class)
-        // possible improvement: make an internal method that works on primitive arrays, then offer 9 overloads (primitives + generic)
         Class<E> componentType = TypeMagic.wrapPrimitive(elementType.getRuntimeType());
-        @SuppressWarnings("unchecked") Class<E[]> arrType = (Class<E[]>) Array.newInstance(componentType, 0).getClass();
+        @SuppressWarnings("unchecked") Class<E[]> arrayType = (Class<E[]>) Array.newInstance(componentType, 0).getClass();
+        return makeArray(arrayType, elementType);
+    }
+
+    /**
+     * Creates a {@link ListConfigType} representing an array type.
+     * <p>
+     * This internal method is called by the eight primitive array specializations and the object array
+     * specialization in order to provide a type-safe interface to this implementation.
+     *
+     * @param arrayType The type of the array. This component type of the array must be either exactly the runtime
+     *                  type of the element type, or the (un)boxed variant of the runtime type of the element type.
+     * @param elementType The element type of the result list type.
+     * @param <S> The backing serialized type.
+     * @param <E> The (possibly boxed) array component type.
+     * @param <A> The array type.
+     * @return A {@link ListConfigType} that holds an array of elements of the config type elementType.
+     */
+    private static <S, E, A> ListConfigType<A, S> makeArray(Class<A> arrayType, ConfigType<E, S, ?> elementType) {
+        @SuppressWarnings("unchecked") Class<E> componentType = (Class<E>) arrayType.getComponentType();
+        Class<E> boxedComponentType = TypeMagic.wrapPrimitive(componentType);
+        // assert that the unchecked cast above is in fact valid
+        assert boxedComponentType == TypeMagic.wrapPrimitive(elementType.getRuntimeType()) : "Array component type does not match element type modulo boxing";
         return new ListConfigType<>(
                 new ListSerializableType<>(elementType.getSerializedType()),
-                arrType,
+                arrayType,
                 l -> {
-                    Object arr = Array.newInstance(componentType, l.size());
-                    for (int i = 0; i < Array.getLength(l); i++) {
+                    A arr = arrayType.cast(Array.newInstance(componentType, l.size()));
+                    for (int i = 0; i < Array.getLength(arr); i++) {
                         Array.set(arr, i, elementType.toRuntimeType(l.get(i)));
                     }
-                    // remove this cast if working on primitives
-                    @SuppressWarnings("unchecked") E[] ret = (E[]) arr;
-                    return ret;
+                    return arr;
                 },
                 arr -> {
-                    List<E0> ret = new ArrayList<>();
+                    List<S> ret = new ArrayList<>(Array.getLength(arr));
                     for (int i = 0; i < Array.getLength(arr); i++) {
-                        E e = arr[i];
+                        E e = boxedComponentType.cast(Array.get(arr, i));
                         ret.add(elementType.toPlatformType(e));
                     }
                     return Collections.unmodifiableList(ret);
