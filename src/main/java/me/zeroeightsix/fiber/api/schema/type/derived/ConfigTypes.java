@@ -83,7 +83,11 @@ public final class ConfigTypes {
     }
 
     public static <E0, E, U extends ConfigType<E, E0, ?>> ListConfigType<Set<E>, E0> makeSet(U elementType) {
-        return makeList(elementType).withUniqueElements().derive(Set.class, HashSet::new, ArrayList::new);
+        return makeList(elementType).withUniqueElements().derive(
+                Set.class,
+                c -> Collections.unmodifiableSet(new HashSet<>(c)),
+                c -> Collections.unmodifiableList(new ArrayList<>(c))
+        );
     }
 
     @SuppressWarnings("unchecked")
