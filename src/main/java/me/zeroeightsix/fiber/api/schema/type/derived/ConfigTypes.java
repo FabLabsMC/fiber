@@ -2,6 +2,7 @@ package me.zeroeightsix.fiber.api.schema.type.derived;
 
 
 import me.zeroeightsix.fiber.api.schema.type.*;
+import me.zeroeightsix.fiber.impl.annotation.magic.TypeMagic;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Array;
@@ -103,20 +104,26 @@ public final class ConfigTypes {
     }
 
     public static <E0, E, U extends ConfigType<E, E0, ? extends SerializableType<E0>>> ListConfigType<E[], E0> makeArray(U elementType) {
-        @SuppressWarnings("unchecked") Class<E[]> arrType = (Class<E[]>) Array.newInstance(elementType.getRuntimeType(), 0).getClass();
+        // need to explicitly wrap the runtime type to avoid sneaky ClassCastException (Class<Integer> could be int.class)
+        // possible improvement: make an internal method that works on primitive arrays, then offer 9 overloads (primitives + generic)
+        Class<E> componentType = TypeMagic.wrapPrimitive(elementType.getRuntimeType());
+        @SuppressWarnings("unchecked") Class<E[]> arrType = (Class<E[]>) Array.newInstance(componentType, 0).getClass();
         return new ListConfigType<>(
                 new ListSerializableType<>(elementType.getSerializedType()),
                 arrType,
                 l -> {
-                    @SuppressWarnings("unchecked") E[] ret = (E[]) Array.newInstance(elementType.getRuntimeType(), l.size());
-                    for (int i = 0; i < l.size(); i++) {
-                        ret[i] = elementType.toRuntimeType(l.get(i));
+                    Object arr = Array.newInstance(componentType, l.size());
+                    for (int i = 0; i < Array.getLength(l); i++) {
+                        Array.set(arr, i, elementType.toRuntimeType(l.get(i)));
                     }
+                    // remove this cast if working on primitives
+                    @SuppressWarnings("unchecked") E[] ret = (E[]) arr;
                     return ret;
                 },
                 arr -> {
                     List<E0> ret = new ArrayList<>();
-                    for (E e : arr) {
+                    for (int i = 0; i < Array.getLength(arr); i++) {
+                        E e = arr[i];
                         ret.add(elementType.toPlatformType(e));
                     }
                     return Collections.unmodifiableList(ret);
