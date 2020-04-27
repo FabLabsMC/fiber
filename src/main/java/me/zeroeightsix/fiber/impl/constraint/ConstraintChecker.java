@@ -27,6 +27,19 @@ public abstract class ConstraintChecker<V, T extends SerializableType<V>> {
 	 */
 	public abstract TypeCheckResult<V> test(T cfg, V value);
 
+    /**
+     * Returns {@code true} if {@code cfg} comprehends {@code cfg2}.
+     *
+     * <p> A type configuration comprehends another if it accepts every
+     * value that the other does.
+     * <pre>forall x, cfg2.accepts(x) => cfg.accepts(x)</pre>
+     *
+     * @param cfg the tested comprehensive type configuration
+     * @param cfg2 the tested comprehended type configuration
+     * @return {@code true} if {@code cfg} comprehends {@code cfg2},
+     * otherwise {@code false}.
+     * @see SerializableType#isAssignableFrom(SerializableType)
+     */
 	public abstract boolean comprehends(T cfg, T cfg2);
 
 }

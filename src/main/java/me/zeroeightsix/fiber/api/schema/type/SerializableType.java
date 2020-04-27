@@ -41,6 +41,18 @@ public abstract class SerializableType<T> {
         return this.platformType;
     }
 
+    /**
+     * Determines if the data type represented by this {@code SerializableType}
+     * object is either the same as, or is a more general description of, the data
+     * type represented by the specified {@code type} parameter.
+     *
+     * <p> Specifically, this checks whether every value assignable to {@code type}
+     * can also be assigned to this {@code SerializableType}.
+     * <pre>forall x, type.accepts(x) => this.accepts(x)</pre>
+     *
+     * @param type the type to be checked
+     * @return {@code true} if properties of {@code this} type are assignable from values of {@code type}.
+     */
     public final boolean isAssignableFrom(SerializableType<?> type) {
         if (this.getClass() != type.getClass()) {
             return false;
