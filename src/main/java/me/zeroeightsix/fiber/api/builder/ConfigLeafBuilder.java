@@ -16,6 +16,7 @@ import me.zeroeightsix.fiber.impl.tree.ConfigLeafImpl;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -100,6 +101,18 @@ public class ConfigLeafBuilder<T> extends ConfigNodeBuilder {
     @Override
     public <A> ConfigLeafBuilder<T> withAttribute(FiberId id, Class<A> type, A defaultValue) {
         super.withAttribute(id, type, defaultValue);
+        return this;
+    }
+
+    @Override
+    public ConfigLeafBuilder<T> withAttributes(Collection<ConfigAttribute<?>> attributes) {
+        super.withAttributes(attributes);
+        return this;
+    }
+
+    @Override
+    public ConfigLeafBuilder<T> withAttribute(ConfigAttribute<?> attribute) {
+        super.withAttribute(attribute);
         return this;
     }
 

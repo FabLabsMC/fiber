@@ -4,6 +4,7 @@ import me.zeroeightsix.fiber.api.FiberId;
 import me.zeroeightsix.fiber.api.annotation.AnnotatedSettings;
 import me.zeroeightsix.fiber.api.builder.constraint.AggregateConstraintsBuilder;
 import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
+import me.zeroeightsix.fiber.api.tree.ConfigAttribute;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -86,6 +87,18 @@ public final class ConfigAggregateBuilder<A, E> extends ConfigLeafBuilder<A> {
     @Override
     public <A1> ConfigAggregateBuilder<A, E> withAttribute(FiberId id, Class<A1> type, A1 defaultValue) {
         super.withAttribute(id, type, defaultValue);
+        return this;
+    }
+
+    @Override
+    public ConfigAggregateBuilder<A, E> withAttributes(Collection<ConfigAttribute<?>> attributes) {
+        super.withAttributes(attributes);
+        return this;
+    }
+
+    @Override
+    public ConfigAggregateBuilder<A, E> withAttribute(ConfigAttribute<?> attribute) {
+        super.withAttribute(attribute);
         return this;
     }
 

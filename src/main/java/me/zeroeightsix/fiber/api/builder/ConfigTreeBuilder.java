@@ -147,6 +147,18 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
         return this;
     }
 
+    @Override
+    public ConfigTreeBuilder withAttributes(Collection<ConfigAttribute<?>> attributes) {
+        super.withAttributes(attributes);
+        return this;
+    }
+
+    @Override
+    public ConfigTreeBuilder withAttribute(ConfigAttribute<?> attribute) {
+        super.withAttribute(attribute);
+        return this;
+    }
+
     /**
      * Marks the built subtree as being serialized separately.
      *
