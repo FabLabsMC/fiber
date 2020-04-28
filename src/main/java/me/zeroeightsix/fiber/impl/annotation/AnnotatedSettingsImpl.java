@@ -321,10 +321,7 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
             ConfigType<?, ?, ?> componentType = this.toConfigType(((AnnotatedArrayType) annotatedType).getAnnotatedGenericComponentType());
             Class<?> componentClass = clazz.getComponentType();
             assert componentClass != null;
-            // workaround for arrays of primitives being special snowflakes
-            @SuppressWarnings("unchecked") Class<Object> arrClass = (Class<Object>) clazz;
-            @SuppressWarnings("unchecked") ConfigType<Object, Object, ?> arrType = (ConfigType<Object, Object, ?>) (ConfigType<?, ?, ?>) ConfigTypes.makeArray(componentType);
-            ret = componentClass.isPrimitive() ? arrType.derive(arrClass, TypeMagic::unbox, TypeMagic::box) : arrType;
+            ret = makeArrayConfigType(componentClass, componentType);
         } else if (this.registeredGenericTypes.containsKey(clazz)) {
             ParameterizedTypeProcessor<?> parameterizedTypeProcessor = this.registeredGenericTypes.get(clazz);
             if (!(annotatedType instanceof AnnotatedParameterizedType)) {
@@ -348,6 +345,31 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
                     ". Consider marking as transient, or " + closestParentSuggestion + "registering a new Class -> ConfigType mapping.");
         }
         return this.constrain(ret, annotatedType);
+    }
+
+    @SuppressWarnings("unchecked")
+    private ConfigType<?,?,?> makeArrayConfigType(Class<?> componentClass, ConfigType<?, ?, ?> componentType) {
+        assert TypeMagic.wrapPrimitive(componentClass) == TypeMagic.wrapPrimitive(componentType.getRuntimeType()) : "Class=" + componentClass + ", ConfigType=" + componentType;
+        if(componentClass == boolean.class) {
+            return ConfigTypes.makeBooleanArray((ConfigType<Boolean, ?, ?>)componentType);
+        } else if(componentClass == byte.class) {
+            return ConfigTypes.makeByteArray((ConfigType<Byte, ?, ?>)componentType);
+        } else if(componentClass == short.class) {
+            return ConfigTypes.makeShortArray((ConfigType<Short, ?, ?>)componentType);
+        } else if(componentClass == int.class) {
+            return ConfigTypes.makeIntArray((ConfigType<Integer, ?, ?>)componentType);
+        } else if(componentClass == long.class) {
+            return ConfigTypes.makeLongArray((ConfigType<Long, ?, ?>)componentType);
+        } else if(componentClass == float.class) {
+            return ConfigTypes.makeFloatArray((ConfigType<Float, ?, ?>)componentType);
+        } else if(componentClass == double.class) {
+            return ConfigTypes.makeDoubleArray((ConfigType<Double, ?, ?>)componentType);
+        } else if(componentClass == char.class) {
+            return ConfigTypes.makeCharArray((ConfigType<Character, ?, ?>)componentType);
+        } else {
+            assert !componentClass.isPrimitive() : "Primitive component type: " + componentClass;
+            return ConfigTypes.makeArray(componentType);
+        }
     }
 
     private <T extends ConfigType<?, ?, ?>> T constrain(T type, AnnotatedElement annotated) throws FiberTypeProcessingException {
