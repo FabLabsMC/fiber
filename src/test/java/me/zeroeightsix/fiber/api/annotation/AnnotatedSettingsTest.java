@@ -148,11 +148,7 @@ class AnnotatedSettingsTest {
         assertTrue(mirror1.setValue(new String[]{"ab", "", "ba", ""}));
         assertFalse(mirror1.setValue(new String[0]), "Empty array");
         assertFalse(mirror1.setValue(new String[]{"aaaaaaaaaaaa"}), "Strings too long");
-        ListConfigType<int[], BigDecimal> type2 = ConfigTypes.makeArray(ConfigTypes.INTEGER).derive(
-                int[].class,
-                a -> Arrays.stream(a).mapToInt(Integer::intValue).toArray(),
-                a -> Arrays.stream(a).boxed().toArray(Integer[]::new)
-        );
+        ListConfigType<int[], BigDecimal> type2 = ConfigTypes.makeIntArray(ConfigTypes.INTEGER);
         PropertyMirror<int[]> mirror2 = PropertyMirror.create(type2);
         this.node.lookupAndBind("numbers", mirror2);
         assertNotNull(mirror2, "Setting exists");
