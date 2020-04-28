@@ -4,9 +4,9 @@ import me.zeroeightsix.fiber.api.FiberId;
 import me.zeroeightsix.fiber.api.tree.ConfigAttribute;
 import me.zeroeightsix.fiber.api.tree.ConfigNode;
 import me.zeroeightsix.fiber.api.tree.ConfigTree;
-import me.zeroeightsix.fiber.impl.tree.ConfigAttributeImpl;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,8 +52,19 @@ public abstract class ConfigNodeBuilder {
         return this;
     }
 
-    public <A> ConfigNodeBuilder withAttribute(FiberId attribute, Class<A> type, A defaultValue) {
-        this.attributes.put(attribute, new ConfigAttributeImpl<>(type, defaultValue));
+    public <A> ConfigNodeBuilder withAttribute(FiberId id, Class<A> type, A defaultValue) {
+        return this.withAttribute(ConfigAttribute.create(id, type, defaultValue));
+    }
+
+    public ConfigNodeBuilder withAttributes(Collection<ConfigAttribute<?>> attributes) {
+        for (ConfigAttribute<?> attribute : attributes) {
+            this.withAttribute(attribute);
+        }
+        return this;
+    }
+
+    public ConfigNodeBuilder withAttribute(ConfigAttribute<?> attribute) {
+        this.attributes.put(attribute.getIdentifier(), attribute);
         return this;
     }
 

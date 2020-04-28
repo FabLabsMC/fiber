@@ -1,12 +1,11 @@
 package me.zeroeightsix.fiber.impl.tree;
 
 import me.zeroeightsix.fiber.api.FiberId;
+import me.zeroeightsix.fiber.api.exception.IllegalTreeStateException;
 import me.zeroeightsix.fiber.api.tree.Commentable;
 import me.zeroeightsix.fiber.api.tree.ConfigAttribute;
 import me.zeroeightsix.fiber.api.tree.ConfigBranch;
 import me.zeroeightsix.fiber.api.tree.ConfigNode;
-
-import me.zeroeightsix.fiber.api.exception.IllegalTreeStateException;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -70,7 +69,7 @@ public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
     @SuppressWarnings("unchecked")
     @Override
     public <A> ConfigAttribute<A> getOrCreateAttribute(FiberId id, Class<A> attributeType, @Nullable A defaultValue) {
-        ConfigAttribute<?> attr = getAttributes().computeIfAbsent(id, i -> new ConfigAttributeImpl<>(attributeType, defaultValue));
+        ConfigAttribute<?> attr = this.getAttributes().computeIfAbsent(id, i -> ConfigAttribute.create(i, attributeType, defaultValue));
         checkAttributeType(attributeType, attr);
         return (ConfigAttribute<A>) attr;
     }
