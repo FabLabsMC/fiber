@@ -12,5 +12,9 @@ public interface HasValue<T> {
      */
     T getValue();
 
+    /**
+     * Returns the class of the type of the value being held
+     * @return the class of the type of the value
+     */
     Class<T> getType();
 }
