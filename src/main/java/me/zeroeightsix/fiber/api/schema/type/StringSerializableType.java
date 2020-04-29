@@ -43,7 +43,7 @@ public final class StringSerializableType extends SerializableType<String> {
      * <p> Values must be of equal or shorter length than the returned value to satisfy the constraint.
      * For example: if the max length is 3.
      * <ul>
-     *     <li> {@code "AB"} and {@code "ABC} would satisfy the constraint</li>
+     *     <li> {@code "AB"} and {@code "ABC"} would satisfy the constraint</li>
      *     <li>{@code "ABCD"} would not satisfy the constraint</li>
      * </ul>
      */
