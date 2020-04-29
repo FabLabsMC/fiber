@@ -40,6 +40,8 @@ public final class ConfigTypes {
     public static final NumberConfigType<Double> DOUBLE =
             makeNumber(Double.class, BigDecimal::valueOf, BigDecimal::doubleValue, null, null, null);
 
+    public static final NumberConfigType<Integer> NATURAL = INTEGER.withMinimum(0);
+
     /**
      * Creates a {@link NumberConfigType} representing a value of {@code numberType}.
      *
