@@ -1,14 +1,5 @@
 package me.zeroeightsix.fiber.api.builder;
 
-import java.util.Collection;
-import java.util.Objects;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import me.zeroeightsix.fiber.api.FiberId;
 import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.api.schema.type.SerializableType;
@@ -19,6 +10,14 @@ import me.zeroeightsix.fiber.api.tree.ConfigNode;
 import me.zeroeightsix.fiber.api.tree.ConfigTree;
 import me.zeroeightsix.fiber.impl.builder.ConfigNodeBuilder;
 import me.zeroeightsix.fiber.impl.tree.ConfigLeafImpl;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.Objects;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * A builder for {@code ConfigLeaf}s.
@@ -38,8 +37,8 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
 
     @Nonnull
     protected final SerializableType<T> type;
-    protected final Function<T, R> f;
-    protected final Function<R, T> f0;
+    protected final Function<T, R> deserializer;
+    protected final Function<R, T> serializer;
 
     @Nullable
     private T defaultValue = null;
@@ -52,14 +51,14 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
      * @param parentNode the {@code ConfigTreeBuilder} this builder originates from
      * @param name       the name of the {@code ConfigLeaf} produced by this builder
      * @param type       the class object representing the type of values this builder will create settings for
-     * @param f          a deserializing function
-     * @param f0         a serializing function
+     * @param deserializer          a deserializing function
+     * @param serializer         a serializing function
      */
-    private ConfigLeafBuilder(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull SerializableType<T> type, Function<T, R> f, Function<R, T> f0) {
+    private ConfigLeafBuilder(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull SerializableType<T> type, Function<T, R> deserializer, Function<R, T> serializer) {
         super(parentNode, name);
         this.type = type;
-        this.f = f;
-        this.f0 = f0;
+        this.deserializer = deserializer;
+        this.serializer = serializer;
     }
 
     @Nonnull
@@ -135,7 +134,7 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
      */
     public ConfigLeafBuilder<T, R> withListener(BiConsumer<R, R> consumer) {
         // The newest consumer is called last -> listeners are called in the order they are added
-        this.consumer = this.consumer.andThen((t, t2) -> consumer.accept(t == null ? null : this.f.apply(t), t2 == null ? null : this.f.apply(t2)));
+        this.consumer = this.consumer.andThen((t, t2) -> consumer.accept(t == null ? null : this.deserializer.apply(t), t2 == null ? null : this.deserializer.apply(t2)));
         return this;
     }
 
@@ -151,7 +150,7 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
      * @return {@code this} builder
      */
     public ConfigLeafBuilder<T, R> withDefaultValue(R defaultValue) {
-        this.defaultValue = this.f0.apply(defaultValue);
+        this.defaultValue = this.serializer.apply(defaultValue);
         return this;
     }
 
