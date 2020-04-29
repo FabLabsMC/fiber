@@ -27,7 +27,7 @@ public class NodeOperationsTest {
 
         NodeOperations.moveChildren(treeOne, nodeTwo);
 
-        testNodeFor(nodeTwo, "A", ConfigTypes.INTEGER.getSerializedType(), BigDecimal.valueOf(10));
+        testNodeFor(nodeTwo, "A", ConfigTypes.INTEGER.getSerializedType(), BigDecimal.TEN);
     }
 
     @Test
@@ -45,7 +45,7 @@ public class NodeOperationsTest {
     @DisplayName("Value -> Value")
     void copyValue() {
         ConfigLeaf<BigDecimal> valueOne = ConfigLeafBuilder.create(null, "A", ConfigTypes.INTEGER.getSerializedType())
-                .withDefaultValue(BigDecimal.valueOf(10))
+                .withDefaultValue(BigDecimal.TEN)
                 .build();
         ConfigLeaf<BigDecimal> valueTwo = ConfigLeafBuilder.create(null, "A", ConfigTypes.INTEGER.getSerializedType())
                 .withDefaultValue(BigDecimal.valueOf(20))
