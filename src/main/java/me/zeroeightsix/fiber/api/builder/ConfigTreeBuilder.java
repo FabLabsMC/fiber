@@ -19,6 +19,8 @@ import me.zeroeightsix.fiber.impl.tree.IndexedNodeCollection;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import java.util.Collection;
 import java.util.function.Consumer;
 
 /**
@@ -164,6 +166,18 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
     @Override
     public <A> ConfigTreeBuilder withAttribute(FiberId id, SerializableType<A> type, A defaultValue) {
         super.withAttribute(id, type, defaultValue);
+        return this;
+    }
+
+    @Override
+    public ConfigTreeBuilder withAttributes(Collection<ConfigAttribute<?>> attributes) {
+        super.withAttributes(attributes);
+        return this;
+    }
+
+    @Override
+    public ConfigTreeBuilder withAttribute(ConfigAttribute<?> attribute) {
+        super.withAttribute(attribute);
         return this;
     }
 

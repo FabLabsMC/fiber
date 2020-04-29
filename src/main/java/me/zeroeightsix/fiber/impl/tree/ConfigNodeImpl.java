@@ -70,7 +70,7 @@ public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
     @SuppressWarnings("unchecked")
     @Override
     public <A> ConfigAttribute<A> getOrCreateAttribute(FiberId id, SerializableType<A> attributeType, @Nullable A defaultValue) {
-        ConfigAttribute<?> attr = getAttributes().computeIfAbsent(id, i -> new ConfigAttributeImpl<>(attributeType, defaultValue));
+        ConfigAttribute<?> attr = getAttributes().computeIfAbsent(id, i -> ConfigAttribute.create(i, attributeType, defaultValue));
         checkAttributeType(attributeType, attr);
         return (ConfigAttribute<A>) attr;
     }

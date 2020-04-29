@@ -1,5 +1,14 @@
 package me.zeroeightsix.fiber.api.builder;
 
+import java.util.Collection;
+import java.util.Objects;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import me.zeroeightsix.fiber.api.FiberId;
 import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.api.schema.type.SerializableType;
@@ -10,13 +19,6 @@ import me.zeroeightsix.fiber.api.tree.ConfigNode;
 import me.zeroeightsix.fiber.api.tree.ConfigTree;
 import me.zeroeightsix.fiber.impl.builder.ConfigNodeBuilder;
 import me.zeroeightsix.fiber.impl.tree.ConfigLeafImpl;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.Objects;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * A builder for {@code ConfigLeaf}s.
@@ -106,6 +108,18 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
     @Override
     public <A> ConfigLeafBuilder<T, R> withAttribute(FiberId id, SerializableType<A> type, A defaultValue) {
         super.withAttribute(id, type, defaultValue);
+        return this;
+    }
+
+    @Override
+    public ConfigLeafBuilder<T, R> withAttributes(Collection<ConfigAttribute<?>> attributes) {
+        super.withAttributes(attributes);
+        return this;
+    }
+
+    @Override
+    public ConfigLeafBuilder<T, R> withAttribute(ConfigAttribute<?> attribute) {
+        super.withAttribute(attribute);
         return this;
     }
 
