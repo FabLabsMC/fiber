@@ -3,9 +3,9 @@ package io.github.fablabsmc.fablabs.api.fiber.v1.tree;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import io.github.fablabsmc.fablabs.api.fiber.v1.NodeOperations;
 import io.github.fablabsmc.fablabs.api.fiber.v1.builder.ConfigTreeBuilder;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.SerializableType;
-import io.github.fablabsmc.fablabs.api.fiber.v1.NodeOperations;
 
 public interface ConfigTree {
 	/**

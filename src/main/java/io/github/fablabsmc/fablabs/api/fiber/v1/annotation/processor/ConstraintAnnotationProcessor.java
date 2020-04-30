@@ -4,6 +4,7 @@ import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.reflect.AnnotatedElement;
 
+import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.AnnotatedSettings;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.BooleanConfigType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.EnumConfigType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ListConfigType;
@@ -11,7 +12,6 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.MapConfigTyp
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.NumberConfigType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.RecordConfigType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.StringConfigType;
-import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.AnnotatedSettings;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;
 
 /**

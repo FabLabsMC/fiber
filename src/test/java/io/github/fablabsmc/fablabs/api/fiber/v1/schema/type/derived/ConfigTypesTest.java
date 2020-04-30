@@ -13,10 +13,10 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import io.github.fablabsmc.fablabs.api.fiber.v1.builder.ConfigLeafBuilder;
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.FiberConversionException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.DecimalSerializableType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.ListSerializableType;
-import io.github.fablabsmc.fablabs.api.fiber.v1.builder.ConfigLeafBuilder;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigLeaf;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.PropertyMirror;
 import org.junit.jupiter.api.Assertions;

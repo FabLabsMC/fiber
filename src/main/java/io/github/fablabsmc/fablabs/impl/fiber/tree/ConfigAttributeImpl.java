@@ -1,7 +1,7 @@
 package io.github.fablabsmc.fablabs.impl.fiber.tree;
 
-import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.SerializableType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.FiberId;
+import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.SerializableType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigAttribute;
 
 public class ConfigAttributeImpl<T> implements ConfigAttribute<T> {

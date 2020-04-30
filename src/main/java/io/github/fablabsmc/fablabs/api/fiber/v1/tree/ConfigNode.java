@@ -5,11 +5,11 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
+import io.github.fablabsmc.fablabs.api.fiber.v1.FiberId;
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.DuplicateChildException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.IllegalTreeStateException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.SerializableType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigType;
-import io.github.fablabsmc.fablabs.api.fiber.v1.FiberId;
 
 /**
  * The building block of a tree: every node implement this interface.

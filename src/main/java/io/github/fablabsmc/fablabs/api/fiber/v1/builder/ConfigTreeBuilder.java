@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import io.github.fablabsmc.fablabs.api.fiber.v1.FiberId;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.AnnotatedSettings;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.Setting;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.Settings;
@@ -16,11 +17,6 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.exception.RuntimeFiberException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.SerializableType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigTypes;
-import io.github.fablabsmc.fablabs.impl.fiber.builder.ConfigNodeBuilder;
-import io.github.fablabsmc.fablabs.impl.fiber.tree.ConfigBranchImpl;
-import io.github.fablabsmc.fablabs.impl.fiber.tree.ConfigLeafImpl;
-import io.github.fablabsmc.fablabs.impl.fiber.tree.IndexedNodeCollection;
-import io.github.fablabsmc.fablabs.api.fiber.v1.FiberId;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigAttribute;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigBranch;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigLeaf;
@@ -29,6 +25,10 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.NodeCollection;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.Property;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.PropertyMirror;
+import io.github.fablabsmc.fablabs.impl.fiber.builder.ConfigNodeBuilder;
+import io.github.fablabsmc.fablabs.impl.fiber.tree.ConfigBranchImpl;
+import io.github.fablabsmc.fablabs.impl.fiber.tree.ConfigLeafImpl;
+import io.github.fablabsmc.fablabs.impl.fiber.tree.IndexedNodeCollection;
 
 /**
  * A builder for configuration trees/branches.
