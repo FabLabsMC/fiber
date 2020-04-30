@@ -33,6 +33,62 @@ import java.lang.reflect.*;
  */
 public final class TypeMagic {
 
+    public static Object box(Object t) {
+        if (t.getClass().isArray()) {
+            Class<?> c = t.getClass().getComponentType();
+            Class<?> wc = wrapPrimitive(c);
+            if (c != wc) {
+                Object arr = Array.newInstance(wc, Array.getLength(t));
+                for (int i = 0; i < Array.getLength(t); i++) {
+                    Array.set(arr, i, Array.get(t, i));
+                }
+                return arr;
+            }
+        }
+        return t;
+    }
+
+    public static Object unbox(Object t) {
+        if (t.getClass().isArray()) {
+            Class<?> wc = t.getClass().getComponentType();
+            Class<?> c = unwrapPrimitive(wc);
+            if (wc != c) {
+                Object arr = Array.newInstance(c, Array.getLength(t));
+                for (int i = 0; i < Array.getLength(t); i++) {
+                    Array.set(arr, i, Array.get(t, i));
+                }
+                return arr;
+            }
+        }
+        return t;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> Class<T> wrapPrimitive(Class<T> type) {
+        if (type.equals(boolean.class)) return (Class<T>) Boolean.class;
+        if (type.equals(byte.class))    return (Class<T>) Byte.class;
+        if (type.equals(char.class))    return (Class<T>) Character.class;
+        if (type.equals(short.class))   return (Class<T>) Short.class;
+        if (type.equals(int.class))     return (Class<T>) Integer.class;
+        if (type.equals(double.class))  return (Class<T>) Double.class;
+        if (type.equals(float.class))   return (Class<T>) Float.class;
+        if (type.equals(long.class))    return (Class<T>) Long.class;
+        return type;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> Class<T> unwrapPrimitive(Class<T> type) {
+        if (type.equals(Boolean.class))     return (Class<T>) boolean.class;
+        if (type.equals(Byte.class))        return (Class<T>) byte.class;
+        if (type.equals(Character.class))   return (Class<T>) char.class;
+        if (type.equals(Short.class))       return (Class<T>) short.class;
+        if (type.equals(Integer.class))     return (Class<T>) int.class;
+        if (type.equals(Double.class))      return (Class<T>) double.class;
+        if (type.equals(Float.class))       return (Class<T>) float.class;
+        if (type.equals(Long.class))        return (Class<T>) long.class;
+        return type;
+    }
+
     /**
      * This is a surprisingly intractable problem in Java: "Type" pretty much represents all possible states of reified
      * and unreified type information, and each kind of Type has different, mutually exclusive, and often unintended

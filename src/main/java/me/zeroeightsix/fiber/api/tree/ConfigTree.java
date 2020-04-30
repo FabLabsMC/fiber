@@ -2,6 +2,7 @@ package me.zeroeightsix.fiber.api.tree;
 
 import me.zeroeightsix.fiber.api.NodeOperations;
 import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
+import me.zeroeightsix.fiber.api.schema.type.SerializableType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -51,4 +52,28 @@ public interface ConfigTree {
     @Nullable
     ConfigNode lookup(String name);
 
+    @Nullable
+    ConfigBranch lookupBranch(String name);
+
+    /**
+     * Tries to find a child leaf in this node by name.
+     * If a child with the right type is found, it will be returned.
+     *
+     * @param name the name of the leaf to look for
+     * @param type a {@link SerializableType} object representing the type of values held by the leaf
+     * @param <T> the type of values held by the leaf
+     * @return the leaf if found, otherwise {@code null}
+     */
+    @Nullable   // should we throw an exception on wrong type instead ?
+    <T> ConfigLeaf<T> lookupLeaf(String name, SerializableType<T> type);
+
+    /**
+     * Tries to find a child leaf in this node by name.
+     * If a child with the right type is found, the mirror will be bound to it.
+     *
+     * @param name the name of the leaf to mirror
+     * @param mirror the mirror to bind to the leaf
+     * @return {@code true} if the operation succeeded
+     */
+    boolean lookupAndBind(String name, PropertyMirror<?> mirror);
 }

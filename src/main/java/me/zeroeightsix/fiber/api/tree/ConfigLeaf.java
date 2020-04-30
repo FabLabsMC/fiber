@@ -1,73 +1,70 @@
 package me.zeroeightsix.fiber.api.tree;
 
 import me.zeroeightsix.fiber.api.builder.ConfigLeafBuilder;
-import me.zeroeightsix.fiber.api.constraint.Constraint;
-import me.zeroeightsix.fiber.impl.constraint.FinalConstraint;
-import me.zeroeightsix.fiber.impl.tree.ConfigNodeImpl;
+import me.zeroeightsix.fiber.api.schema.type.SerializableType;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.function.BiConsumer;
 
 /**
  * A {@code ConfigNode} with some value of type {@code T}.
  *
- * @param <T> The type of value this class holds
- * @see ConfigNodeImpl
+ * @param <T>  The type of value this class holds
+ * @see ConfigNode
  * @see ConfigLeafBuilder
- * @see me.zeroeightsix.fiber.api.builder.ConfigAggregateBuilder
  */
 public interface ConfigLeaf<T> extends ConfigNode, Property<T>, Commentable {
 
     /**
      * Sets the value held by this {@code ConfigLeaf}.
      *
-     * <p> If the value does not satisfy this setting's {@linkplain #getConstraints() constraints},
-     * the current value is not updated and the method returns {@code false}.
+     * <p> If the provided value does not satisfy this setting's
+     * {@linkplain SerializableType#test(Object) type constraints}:
+     * <ul>
+     *     <li> if a corrected value can be found, this setting is set to the corrected value
+     *          and this method returns {@code true}. </li>
+     *     <li> otherwise, the current value is not updated and the method returns {@code false}. </li>
+     * </ul>
      *
      * @param value the new value this {@code ConfigLeaf} should hold
      * @return {@code true} if this property changed as a result of the call, and {@code false} otherwise.
-     * @see #accepts(Object)
+     * @see ConfigLeaf#accepts(Object)
      */
     @Override
     boolean setValue(T value);
+
+    /**
+     * Returns {@code true} if this property can be set to the given raw value.
+     *
+     * <p> This method does not account for possible corrections offered by the type's constraints.
+     * In other words, it returns {@code true} if and only if every constraint of this property's
+     * {@linkplain #getConfigType() config type} accepts the given value as is.
+     *
+     * @param rawValue the value to check
+     * @return {@code true} if this property accepts the given value, {@code false} otherwise.
+     * @see SerializableType#accepts(Object)
+     */
+    default boolean accepts(T rawValue) {
+        return true;
+    }
 
     /**
      * Returns this {@code ConfigLeaf}'s current value.
      *
      * <p> If no successful call to {@link #setValue(Object)} has been made,
      * this method returns this node's {@linkplain #getDefaultValue() default value}.
+     *
      * @return this node's value
      */
     @Override
     T getValue();
 
-    /**
-     * Returns a class object representing the type of values this node can hold.
-     *
-     * <p> The returned class object can be used for various runtime type checks,
-     * as well as constraint configuration.
-     *
-     * @return the class representing the type of this node's values
-     */
-    @Override
-    Class<T> getType();
+    SerializableType<T> getConfigType();
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p> A value is accepted if it satisfies every constraint
-     * this setting has. Note that some constraints such as {@link FinalConstraint}
-     * will cause even the {@linkplain #getValue() current value} to be rejected.
-     *
-     * @param value the value to check
-     * @see #setValue(Object)
-     * @see #getConstraints()
-     */
     @Override
-    default boolean accepts(T value) {
-        return false;
+    default Class<T> getType() {
+        return this.getConfigType().getPlatformType();
     }
 
     /**
@@ -80,6 +77,8 @@ public interface ConfigLeaf<T> extends ConfigNode, Property<T>, Commentable {
     @Nonnull
     BiConsumer<T, T> getListener();
 
+    void addChangeListener(BiConsumer<T, T> listener);
+
     /**
      * Returns the default value for this item.
      *
@@ -88,13 +87,4 @@ public interface ConfigLeaf<T> extends ConfigNode, Property<T>, Commentable {
     @Nullable
     T getDefaultValue();
 
-    /**
-     * Returns the list of constraints for this item.
-     *
-     * <p> For a call to {@link #setValue} to pass (and such, return {@code true}), the value must satisfy all constraints in this list.
-     *
-     * @return the list of constraints
-     */
-    @Nonnull
-    List<Constraint<? super T>> getConstraints();
 }

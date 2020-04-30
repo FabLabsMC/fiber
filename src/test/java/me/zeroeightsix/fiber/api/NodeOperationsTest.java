@@ -1,14 +1,16 @@
 package me.zeroeightsix.fiber.api;
 
-import me.zeroeightsix.fiber.api.NodeOperations;
-import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.api.builder.ConfigLeafBuilder;
-import me.zeroeightsix.fiber.api.tree.ConfigTree;
+import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
+import me.zeroeightsix.fiber.api.schema.type.SerializableType;
+import me.zeroeightsix.fiber.api.schema.type.derived.ConfigTypes;
 import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
-import me.zeroeightsix.fiber.api.tree.Property;
 import me.zeroeightsix.fiber.api.tree.ConfigNode;
+import me.zeroeightsix.fiber.api.tree.ConfigTree;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.math.BigDecimal;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -18,51 +20,51 @@ public class NodeOperationsTest {
     @DisplayName("Node -> Node")
     void moveChildren() {
         ConfigTree treeOne = ConfigTree.builder()
-                .withValue("A", Integer.class, 10)
+                .withValue("A", ConfigTypes.INTEGER, 10)
                 .build();
 
         ConfigTreeBuilder nodeTwo = ConfigTree.builder();
 
         NodeOperations.moveChildren(treeOne, nodeTwo);
 
-        testNodeFor(nodeTwo, "A", Integer.class, 10);
+        testNodeFor(nodeTwo, "A", ConfigTypes.INTEGER.getSerializedType(), BigDecimal.TEN);
     }
 
     @Test
     @DisplayName("Value -> Node")
     void moveNode() {
         ConfigTreeBuilder node = ConfigTree.builder();
-        ConfigLeaf<Integer> value = node.beginValue("A", Integer.class, 10).build();
+        ConfigLeaf<?> value = node.beginValue("A", ConfigTypes.INTEGER.getSerializedType(), BigDecimal.TEN).build();
 
         NodeOperations.moveNode(value, node);
 
-        testNodeFor(node, "A", Integer.class, 10);
+        testNodeFor(node, "A", ConfigTypes.INTEGER.getSerializedType(), BigDecimal.TEN);
     }
 
     @Test
     @DisplayName("Value -> Value")
     void copyValue() {
-        ConfigLeaf<Integer> valueOne = new ConfigLeafBuilder<>(null, "A", Integer.class)
-                .withDefaultValue(10)
+        ConfigLeaf<BigDecimal> valueOne = ConfigLeafBuilder.create(null, "A", ConfigTypes.INTEGER.getSerializedType())
+                .withDefaultValue(BigDecimal.TEN)
                 .build();
-        ConfigLeaf<Integer> valueTwo = new ConfigLeafBuilder<>(null, "A", Integer.class)
-                .withDefaultValue(20)
+        ConfigLeaf<BigDecimal> valueTwo = ConfigLeafBuilder.create(null, "A", ConfigTypes.INTEGER.getSerializedType())
+                .withDefaultValue(BigDecimal.valueOf(20))
                 .build();
 
         NodeOperations.copyValue(valueOne, valueTwo);
-        testItemFor(Integer.class, 10, valueTwo);
+        testItemFor(ConfigTypes.INTEGER.getSerializedType(), BigDecimal.TEN, valueTwo);
     }
 
-    public static <T> void testNodeFor(ConfigTree node, String name, Class<T> type, T value) {
+   public static <T> void testNodeFor(ConfigTree node, String name, SerializableType<T> type, T value) {
         ConfigNode item = node.lookup(name);
         testItemFor(type, value, item);
     }
 
-    static <T> void testItemFor(Class<T> type, T value, ConfigNode item) {
+    static <T> void testItemFor(SerializableType<T> type, T value, ConfigNode item) {
         assertNotNull(item, "Setting exists");
-        assertTrue(item instanceof Property<?>, "Setting is a property");
-        Property<?> property = (Property<?>) item;
-        assertEquals(type, property.getType(), "Setting type is correct");
-        assertEquals(value, ((Property<?>) item).getValue(), "Setting value is correct");
+        assertTrue(item instanceof ConfigLeaf<?>, "Setting is a property");
+        ConfigLeaf<?> property = (ConfigLeaf<?>) item;
+        assertEquals(type, property.getConfigType(), "Setting type is correct");
+        assertEquals(value, property.getValue(), "Setting value is correct");
     }
 }

@@ -5,10 +5,11 @@ import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.JsonPrimitive;
 import me.zeroeightsix.fiber.api.NodeOperationsTest;
 import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
-import me.zeroeightsix.fiber.api.constraint.CompositeType;
 import me.zeroeightsix.fiber.api.exception.FiberException;
-import me.zeroeightsix.fiber.api.tree.ConfigBranch;
+import me.zeroeightsix.fiber.api.schema.type.derived.ConfigTypes;
+import me.zeroeightsix.fiber.api.schema.type.derived.NumberConfigType;
 import me.zeroeightsix.fiber.api.tree.ConfigTree;
+import me.zeroeightsix.fiber.api.tree.HasValue;
 import me.zeroeightsix.fiber.api.tree.PropertyMirror;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,11 +17,16 @@ import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.Objects;
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class JanksonSerializerTest {
+
+    public static final NumberConfigType<Integer> INT_TYPE = ConfigTypes.INTEGER.derive(int.class, Function.identity(), Function.identity());
 
     @Test
     @DisplayName("Node -> Node")
@@ -28,19 +34,18 @@ class JanksonSerializerTest {
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         JanksonSerializer jk = new JanksonSerializer();
         ConfigTree nodeOne = ConfigTree.builder()
-                .beginValue("A", Integer.class, null)
-                .withDefaultValue(10)
+                .beginValue("A", ConfigTypes.INTEGER.getSerializedType(), null)
+                .withDefaultValue(BigDecimal.TEN)
                 .finishValue()
                 .build();
 
         ConfigTree nodeTwo = ConfigTree.builder()
-                .beginValue("A", Integer.class, 20)
-                .finishValue()
+                .withValue("A", ConfigTypes.INTEGER, 20)
                 .build();
 
         jk.serialize(nodeOne, bos);
         jk.deserialize(nodeTwo, new ByteArrayInputStream(bos.toByteArray()));
-        NodeOperationsTest.testNodeFor(nodeTwo, "A", Integer.class, 10);
+        NodeOperationsTest.testNodeFor(nodeTwo, "A", ConfigTypes.INTEGER.getSerializedType(), BigDecimal.TEN);
     }
 
     @Test
@@ -50,58 +55,45 @@ class JanksonSerializerTest {
         JanksonSerializer jk = new JanksonSerializer();
         ConfigTree nodeOne = ConfigTree.builder()
                 .fork("child")
-                    .beginValue("A", Integer.class, 10)
-                    .finishValue()
+                    .withValue("A", ConfigTypes.INTEGER, 10)
                 .finishBranch()
                 .build();
 
         ConfigTreeBuilder builderTwo = ConfigTree.builder();
         ConfigTree childTwo = builderTwo
                 .fork("child")
-                    .beginValue("A", Integer.class, 20)
-                    .finishValue()
+                    .withValue("A", ConfigTypes.INTEGER, 20)
                 .build();
         ConfigTree nodeTwo = builderTwo.build();
 
         jk.serialize(nodeOne, bos);
         jk.deserialize(nodeTwo, new ByteArrayInputStream(bos.toByteArray()));
-        NodeOperationsTest.testNodeFor(childTwo, "A", Integer.class, 10);
+        NodeOperationsTest.testNodeFor(childTwo, "A", ConfigTypes.INTEGER.getSerializedType(), BigDecimal.TEN);
     }
 
     @Test
     @DisplayName("Constraints")
     void nodeSerializationConstrains() throws IOException, FiberException {
-        PropertyMirror<String> versionOne = new PropertyMirror<>();
-        PropertyMirror<Integer> settingOne = new PropertyMirror<>();
+        PropertyMirror<String> versionOne = PropertyMirror.create(ConfigTypes.STRING);
+        PropertyMirror<Integer> settingOne = PropertyMirror.create(ConfigTypes.INTEGER);
 
         ConfigTree nodeOne = ConfigTree.builder()
-                .beginValue("version", String.class, "0.1")
-                    .withFinality()
+                .beginValue("version", ConfigTypes.STRING.getSerializedType(), "0.1")
                 .finishValue(versionOne::mirror)
                 .fork("child")
-                    .beginValue("A", Integer.class, 10)
+                    .beginValue("A", ConfigTypes.INTEGER, 30)
                     .finishValue(settingOne::mirror)
                 .finishBranch()
                 .build();
 
-        PropertyMirror<String> versionTwo = new PropertyMirror<>();
-        PropertyMirror<Integer> settingTwo = new PropertyMirror<>();
+        PropertyMirror<String> versionTwo = PropertyMirror.create(ConfigTypes.STRING);
+        PropertyMirror<Integer> settingTwo = PropertyMirror.create(ConfigTypes.INTEGER);
 
         ConfigTree nodeTwo = ConfigTree.builder()
-                .beginValue("version", String.class, "1.0.0")
-                .withFinality()
-                .beginConstraints() // technically redundant with final, but checks the default value
-                    .regex("\\d+\\.\\d+\\.\\d+")
-                .finishConstraints()
+                .beginValue("version", ConfigTypes.STRING.withPattern("\\d+\\.\\d+\\.\\d+"), "1.0.0")
                 .finishValue(versionTwo::mirror)
                 .fork("child")
-                .beginValue("A", int.class, 20)
-                    .beginConstraints()
-                    .composite(CompositeType.OR)
-                        .atMost(0)
-                        .atLeast(20)
-                    .finishComposite()
-                    .finishConstraints()
+                .beginValue("A", INT_TYPE.withMinimum(-5).withMaximum(20), 20)
                 .finishValue(settingTwo::mirror)
                 .finishBranch()
                 .build();
@@ -111,7 +103,7 @@ class JanksonSerializerTest {
 
         jk.serialize(nodeOne, bos);
         jk.deserialize(nodeTwo, new ByteArrayInputStream(bos.toByteArray()));
-        assertEquals("1.0.0", versionTwo.getValue(), "RegEx and finality constraints bypassed");
+        assertEquals("1.0.0", versionTwo.getValue(), "RegEx constraint bypassed");
         assertEquals(20, settingTwo.getValue(), "Range constraint bypassed");
 
         bos.reset();
@@ -120,7 +112,7 @@ class JanksonSerializerTest {
         settingOne.setValue(-5);
         jk.serialize(nodeOne, bos);
         jk.deserialize(nodeTwo, new ByteArrayInputStream(bos.toByteArray()));
-        assertEquals("1.0.0", versionTwo.getValue(), "Finality bypassed");
+        assertEquals("0.1.0", versionTwo.getValue(), "Valid value rejected");
         assertEquals(-5, settingTwo.getValue(), "Valid value rejected");
     }
 
@@ -131,12 +123,12 @@ class JanksonSerializerTest {
         JanksonSerializer jk = new JanksonSerializer();
         ConfigTree parentOne = ConfigTree.builder()
                 .fork("child").withSeparateSerialization()
-                .beginValue("A", int.class, 10)
+                .beginValue("A", INT_TYPE, 10)
                 .finishValue()
                 .build();
         ConfigTreeBuilder builderTwo = ConfigTree.builder();
         ConfigTree childTwo = builderTwo.fork("child").withSeparateSerialization()
-                .beginValue("A", Integer.class, 20)
+                .beginValue("A", ConfigTypes.INTEGER, 20)
                 .finishValue()
                 .build();
         ConfigTree parentTwo = builderTwo.build();
@@ -144,12 +136,12 @@ class JanksonSerializerTest {
         jk.serialize(parentOne, bos);
         jk.deserialize(parentTwo, new ByteArrayInputStream(bos.toByteArray()));
         // the child data should not have been saved -> default value
-        NodeOperationsTest.testNodeFor(childTwo, "A", Integer.class, 20);
+        NodeOperationsTest.testNodeFor(childTwo, "A", ConfigTypes.INTEGER.getSerializedType(), BigDecimal.valueOf(20));
     }
 
     @Test
     @DisplayName("Extended marshaller")
-    void testExtendedMarshaller() throws IOException, FiberException {
+    void testExtendedMarshaller() {
         JanksonSerializer jk = new JanksonSerializer(
                 JanksonSerializer.extendDefaultMarshaller(new Marshaller<JsonElement>() {
                     @Override
@@ -167,31 +159,33 @@ class JanksonSerializerTest {
                     public <A> A marshallReverse(Class<A> type, JsonElement value) {
                         if (type.equals(SomeObject.class)) {
                             JsonObject object = (JsonObject) value;
-                            return (A) new SomeObject(
+                            return type.cast(new SomeObject(
                                     object.getInt("some_a", 0),
                                     object.get(String.class, "some_b")
-                            );
+                            ));
                         }
                         return null;
                     }
                 }), false
         );
 
-        SomeObject so = new SomeObject(0, "foo");
+        JsonElement foo = jk.serialize(new HasValue<SomeObject>() {
+            final SomeObject so = new SomeObject(0, "foo");
 
-        ConfigBranch branch = ConfigTree.builder()
-                .withValue("some", SomeObject.class, so)
-                .build();
+            @Override
+            public SomeObject getValue() {
+                return this.so;
+            }
 
-        ConfigBranch branch2 = ConfigTree.builder()
-                .withValue("some", SomeObject.class, null)
-                .build();
+            @Override
+            public Class<SomeObject> getType() {
+                return SomeObject.class;
+            }
+        });
+        SomeObject foo2 = jk.marshall(SomeObject.class, foo);
 
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        jk.serialize(branch, bos);
-        jk.deserialize(branch2, new ByteArrayInputStream(bos.toByteArray()));
-
-        NodeOperationsTest.testNodeFor(branch2, "some", SomeObject.class, so);
+        assertNotNull(foo2);
+        assertEquals("foo", foo2.b);
     }
 
     private class SomeObject {

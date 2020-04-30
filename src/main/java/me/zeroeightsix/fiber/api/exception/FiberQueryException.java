@@ -1,5 +1,6 @@
 package me.zeroeightsix.fiber.api.exception;
 
+import me.zeroeightsix.fiber.api.schema.type.SerializableType;
 import me.zeroeightsix.fiber.api.tree.ConfigBranch;
 import me.zeroeightsix.fiber.api.tree.ConfigNode;
 import me.zeroeightsix.fiber.api.tree.ConfigQuery;
@@ -37,7 +38,7 @@ public class FiberQueryException extends FiberException {
      * @return the parent of the erroring node.
      */
     public ConfigTree getErrorParent() {
-        return invalidTree;
+        return this.invalidTree;
     }
 
     /**
@@ -59,7 +60,7 @@ public class FiberQueryException extends FiberException {
          */
         @Nonnull
         public String getMissingChildName() {
-            return missingNodeName;
+            return this.missingNodeName;
         }
     }
 
@@ -71,11 +72,11 @@ public class FiberQueryException extends FiberException {
         private final ConfigNode invalidItem;
         private final Class<?> expectedNodeType;
         @Nullable
-        private final Class<?> expectedValueType;
+        private final SerializableType<?> expectedValueType;
 
-        public WrongType(ConfigTree invalidTree, ConfigNode invalidItem, Class<?> expectedNodeType, @Nullable Class<?> expectedValueType) {
+        public WrongType(ConfigTree invalidTree, ConfigNode invalidItem, Class<?> expectedNodeType, @Nullable SerializableType<?> expectedValueType) {
             super("Expected node of type " + expectedNodeType.getSimpleName()
-                    + (expectedValueType == null ? "" : "<" + expectedValueType.getSimpleName() + ">")
+                    + (expectedValueType == null ? "" : "<" + expectedValueType + ">")
                     + ", got " + invalidItem, invalidTree);
             this.invalidItem = invalidItem;
             this.expectedNodeType = expectedNodeType;
@@ -83,11 +84,11 @@ public class FiberQueryException extends FiberException {
         }
 
         public ConfigNode getInvalidNode() {
-            return invalidItem;
+            return this.invalidItem;
         }
 
         public Class<?> getExpectedNodeType() {
-            return expectedNodeType;
+            return this.expectedNodeType;
         }
 
         /**
@@ -98,8 +99,8 @@ public class FiberQueryException extends FiberException {
          * @return the expected value type, or {@code null} if the query did not expect a property
          */
         @Nullable
-        public Class<?> getExpectedValueType() {
-            return expectedValueType;
+        public SerializableType<?> getExpectedValueType() {
+            return this.expectedValueType;
         }
     }
 }

@@ -2,6 +2,8 @@ package me.zeroeightsix.fiber.impl.tree;
 
 import me.zeroeightsix.fiber.api.FiberId;
 import me.zeroeightsix.fiber.api.exception.IllegalTreeStateException;
+import me.zeroeightsix.fiber.api.schema.type.SerializableType;
+import me.zeroeightsix.fiber.api.schema.type.derived.ConfigType;
 import me.zeroeightsix.fiber.api.tree.Commentable;
 import me.zeroeightsix.fiber.api.tree.ConfigAttribute;
 import me.zeroeightsix.fiber.api.tree.ConfigBranch;
@@ -68,25 +70,30 @@ public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <A> ConfigAttribute<A> getOrCreateAttribute(FiberId id, Class<A> attributeType, @Nullable A defaultValue) {
+    public <A> ConfigAttribute<A> getOrCreateAttribute(FiberId id, SerializableType<A> attributeType, @Nullable A defaultValue) {
         ConfigAttribute<?> attr = this.getAttributes().computeIfAbsent(id, i -> ConfigAttribute.create(i, attributeType, defaultValue));
         checkAttributeType(attributeType, attr);
         return (ConfigAttribute<A>) attr;
     }
 
     @Override
-    public <A> Optional<A> getAttributeValue(FiberId id, Class<A> expectedType) {
+    public <A> Optional<A> getAttributeValue(FiberId id, SerializableType<A> expectedType) {
         ConfigAttribute<?> attr = this.attributes.get(id);
         if (attr != null) {
             checkAttributeType(expectedType, attr);
-            return Optional.ofNullable(expectedType.cast(attr.getValue()));
+            return Optional.ofNullable(expectedType.getPlatformType().cast(attr.getValue()));
         }
         return Optional.empty();
     }
 
-    private static <A> void checkAttributeType(Class<A> expectedType, ConfigAttribute<?> attr) {
-        if (!expectedType.isAssignableFrom(attr.getType())) {
-            throw new ClassCastException("Attempt to retrieve a value of type " + expectedType + " from attribute with type " + attr.getType());
+    @Override
+    public <R, A> Optional<R> getAttributeValue(FiberId id, ConfigType<R, A, ?> type) {
+        return this.getAttributeValue(id, type.getSerializedType()).map(type::toRuntimeType);
+    }
+
+    private static <A> void checkAttributeType(SerializableType<A> expectedType, ConfigAttribute<?> attr) {
+        if (!expectedType.equals(attr.getConfigType())) {
+            throw new ClassCastException("Attempt to retrieve a value of type " + expectedType + " from attribute with type " + attr.getConfigType());
         }
     }
 

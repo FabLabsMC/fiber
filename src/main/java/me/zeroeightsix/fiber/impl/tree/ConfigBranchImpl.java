@@ -1,8 +1,7 @@
 package me.zeroeightsix.fiber.impl.tree;
 
-import me.zeroeightsix.fiber.api.tree.ConfigBranch;
-import me.zeroeightsix.fiber.api.tree.ConfigNode;
-import me.zeroeightsix.fiber.api.tree.NodeCollection;
+import me.zeroeightsix.fiber.api.schema.type.SerializableType;
+import me.zeroeightsix.fiber.api.tree.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -63,7 +62,38 @@ public class ConfigBranchImpl extends ConfigNodeImpl implements ConfigBranch {
     @Nullable
     @Override
     public ConfigNode lookup(String name) {
-        return items.getByName(name);
+        return this.items.getByName(name);
+    }
+
+    @Nullable
+    @Override
+    public <T> ConfigLeaf<T> lookupLeaf(String name, SerializableType<T> type) {
+        ConfigNode child = this.items.getByName(name);
+        if (child instanceof ConfigLeaf && type.isAssignableFrom(((ConfigLeaf<?>) child).getConfigType())) {
+            @SuppressWarnings("unchecked") ConfigLeaf<T> leaf = (ConfigLeaf<T>) child;
+            return leaf;
+        }
+        return null;
+    }
+
+    @Override
+    public boolean lookupAndBind(String name, PropertyMirror<?> mirror) {
+        ConfigLeaf<?> leaf = this.lookupLeaf(name, mirror.getConverter().getSerializedType());
+        if (leaf != null) {
+            mirror.mirror(leaf);
+            return true;
+        }
+        return false;
+    }
+
+    @Nullable
+    @Override
+    public ConfigBranch lookupBranch(String name) {
+        ConfigNode child = this.items.getByName(name);
+        if (child instanceof ConfigBranch) {
+            return (ConfigBranch) child;
+        }
+        return null;
     }
 
     @Override

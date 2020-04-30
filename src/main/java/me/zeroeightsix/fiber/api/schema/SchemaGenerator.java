@@ -1,42 +1,28 @@
 package me.zeroeightsix.fiber.api.schema;
 
-import blue.endless.jankson.JsonArray;
 import blue.endless.jankson.JsonElement;
 import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.JsonPrimitive;
 import blue.endless.jankson.impl.MarshallerImpl;
-import me.zeroeightsix.fiber.api.FiberId;
-import me.zeroeightsix.fiber.api.builder.constraint.CompositeConstraintsBuilder;
-import me.zeroeightsix.fiber.api.constraint.Constraint;
-import me.zeroeightsix.fiber.impl.constraint.ValuedConstraint;
+import me.zeroeightsix.fiber.api.serialization.JsonTypeSerializer;
 import me.zeroeightsix.fiber.api.serialization.Marshaller;
 import me.zeroeightsix.fiber.api.tree.ConfigBranch;
 import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
+import me.zeroeightsix.fiber.api.tree.ConfigNode;
 import me.zeroeightsix.fiber.api.tree.ConfigTree;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Optional;
 
 public class SchemaGenerator {
 
-	private HashMap<Class<?>, FiberId> classIdentifierHashMap = new HashMap<>();
-
 	@Nullable
-	private Marshaller<JsonElement> marshaller;
+	private final Marshaller<JsonElement> marshaller;
+	private final JsonTypeSerializer typeSerializer;
 
 	public SchemaGenerator(@Nullable Marshaller<JsonElement> marshaller) {
 		this.marshaller = marshaller;
-
-		classIdentifierHashMap.put(Boolean.class, identifier("boolean"));
-		classIdentifierHashMap.put(Byte.class, identifier("byte"));
-		classIdentifierHashMap.put(Short.class, identifier("short"));
-		classIdentifierHashMap.put(Integer.class, identifier("int"));
-		classIdentifierHashMap.put(Long.class, identifier("long"));
-		classIdentifierHashMap.put(Float.class, identifier("float"));
-		classIdentifierHashMap.put(Double.class, identifier("double"));
-		classIdentifierHashMap.put(String.class, identifier("string"));
+		this.typeSerializer = new JsonTypeSerializer();
 	}
 
 	public SchemaGenerator() {
@@ -46,54 +32,30 @@ public class SchemaGenerator {
 	public JsonObject createSchema(ConfigTree tree) {
 		JsonObject object = new JsonObject();
 
-		tree.getItems().forEach(item -> {
-			// TODO: Maybe allow for custom schema deserialisers? / generic metadata
+		for (ConfigNode item : tree.getItems()) {// TODO: Maybe allow for custom schema deserializers? / generic metadata
 			if (item instanceof ConfigBranch) {
-				object.put(item.getName(), createSchema((ConfigTree) item));
+				object.put(item.getName(), this.createSchema((ConfigTree) item));
 			} else if (item instanceof ConfigLeaf) {
-				object.put(item.getName(), createSchema((ConfigLeaf<?>) item));
+				object.put(item.getName(), this.createSchema((ConfigLeaf<?>) item));
 			}
-		});
+			// TODO attributes
+		}
 
 		return object;
 	}
 
 	private JsonObject createSchema(ConfigLeaf<?> item) {
 		JsonObject object = new JsonObject();
-		if (item.getType() != null && classIdentifierHashMap.containsKey(item.getType())) {
-			object.put("type", new JsonPrimitive(classIdentifierHashMap.get(item.getType())));
-		}
+		JsonObject type = new JsonObject();
+		this.typeSerializer.serializeType(item.getConfigType(), type);
+		object.put("type", type);
 		if (item.getComment() != null) {
 			object.put("comment", new JsonPrimitive(item.getComment()));
 		}
 		if (item.getDefaultValue() != null) {
 			Object o = item.getDefaultValue();
-			object.put("defaultValue", Optional.ofNullable(marshaller != null ? marshaller.marshall(o) : null).orElse(MarshallerImpl.getFallback().serialize(o)));
-		}
-		if (!item.getConstraints().isEmpty()) {
-			object.put("constraints", createSchema(item.getConstraints()));
+			object.put("defaultValue", Optional.ofNullable(this.marshaller != null ? this.marshaller.marshall(o) : null).orElse(MarshallerImpl.getFallback().serialize(o)));
 		}
 		return object;
 	}
-
-	private JsonElement createSchema(List<? extends Constraint<?>> constraintList) {
-		JsonArray array = new JsonArray();
-		for (Constraint<?> constraint : constraintList) {
-			JsonObject object = new JsonObject();
-			object.put("identifier", new JsonPrimitive(constraint.getType().getIdentifier().toString()));
-			if (constraint instanceof ValuedConstraint) {
-				object.put("value", new JsonPrimitive(((ValuedConstraint<?, ?>) constraint).getValue()));
-			}
-			if (constraint instanceof CompositeConstraintsBuilder.AbstractCompositeConstraint<?>) {
-				object.put("constraints", createSchema(((CompositeConstraintsBuilder.AbstractCompositeConstraint<?>) constraint).constraints));
-			}
-			array.add(object);
-		}
-		return array;
-	}
-
-	private FiberId identifier(String name) {
-		return new FiberId("fiber", name);
-	}
-
 }

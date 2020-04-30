@@ -1,5 +1,8 @@
 package me.zeroeightsix.fiber.api.tree;
 
+import me.zeroeightsix.fiber.api.schema.type.derived.ConfigType;
+import me.zeroeightsix.fiber.impl.tree.PropertyMirrorImpl;
+
 /**
  * A {@code Property} that delegates all operations to another.
  *
@@ -17,8 +20,10 @@ package me.zeroeightsix.fiber.api.tree;
  *
  * @param <T> the type of value this property mirrors
  */
-public class PropertyMirror<T> implements Property<T> {
-    protected Property<T> delegate;
+public interface PropertyMirror<T> extends Property<T> {
+    static <T> PropertyMirror<T> create(ConfigType<T, ?, ?> converter) {
+        return new PropertyMirrorImpl<>(converter);
+    }
 
     /**
      * Sets a property to mirror.
@@ -28,29 +33,9 @@ public class PropertyMirror<T> implements Property<T> {
      *
      * @param delegate a property to mirror
      */
-    public void mirror(Property<T> delegate) {
-        this.delegate = delegate;
-    }
+    void mirror(Property<?> delegate);
 
-    @Override
-    public boolean setValue(T value) {
-        return delegate != null && delegate.setValue(value);
-    }
+    Property<?> getMirrored();
 
-    @Override
-    public boolean accepts(T value) {
-        return delegate != null && delegate.accepts(value);
-    }
-
-    @Override
-    public T getValue() {
-        if (delegate == null) throw new IllegalStateException("No delegate property set for this mirror");
-        return delegate.getValue();
-    }
-
-    @Override
-    public Class<T> getType() {
-        if (delegate == null) throw new IllegalStateException("No delegate property set for this mirror");
-        return delegate.getType();
-    }
+    ConfigType<T, ?, ?> getConverter();
 }

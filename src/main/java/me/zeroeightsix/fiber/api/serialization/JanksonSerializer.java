@@ -3,9 +3,11 @@ package me.zeroeightsix.fiber.api.serialization;
 import blue.endless.jankson.Jankson;
 import blue.endless.jankson.JsonElement;
 import blue.endless.jankson.JsonObject;
+import blue.endless.jankson.JsonPrimitive;
 import blue.endless.jankson.api.SyntaxError;
 import me.zeroeightsix.fiber.api.FiberId;
 import me.zeroeightsix.fiber.api.exception.FiberException;
+import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.api.tree.*;
 
 import javax.annotation.Nonnull;
@@ -13,8 +15,10 @@ import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
+import java.util.Objects;
 
 public class JanksonSerializer implements Serializer<JsonObject> {
 
@@ -42,7 +46,7 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 		} catch (SyntaxError syntaxError) {
 			throw new FiberException("Configuration file was malformed", syntaxError);
 		}
-		return deserialize(tree, object);
+		return this.deserialize(tree, object);
 	}
 
 	@Override
@@ -54,10 +58,10 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 
 			ConfigNode item = tree.lookup(key);
 			if (item != null) {
-				if (item instanceof Property) {
-					setPropertyValue((Property<?>) item, child);
+				if (item instanceof ConfigLeaf) {
+					this.setPropertyValue((ConfigLeaf<?>) item, child);
 				} else if (item instanceof ConfigBranch && child instanceof JsonObject) {
-					JsonObject childLeftovers = deserialize((ConfigTree) item, (JsonObject) child);
+					JsonObject childLeftovers = this.deserialize((ConfigTree) item, (JsonObject) child);
 					if (!childLeftovers.isEmpty()) {
 						leftovers.put(key, childLeftovers);
 					}
@@ -71,13 +75,13 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 		return leftovers;
 	}
 
-	private JsonElement serialize(HasValue<?> hasValue) {
-		return marshaller.marshall(hasValue.getValue());
+	JsonElement serialize(HasValue<?> configValue) {
+		return marshaller.marshall(configValue.getValue());
 	}
 
 	@Override
 	public void serialize(ConfigTree tree, @Nullable JsonObject additionalData, OutputStream out) throws IOException {
-		JsonObject object = serialize(tree);
+		JsonObject object = this.serialize(tree);
 		if (additionalData != null) {
 			object.putAll(additionalData);
 		}
@@ -94,10 +98,11 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 			if (treeItem instanceof ConfigBranch) {
 				ConfigBranch subNode = (ConfigBranch) treeItem;
 				if (!subNode.isSerializedSeparately()) {
-					object.put((name = subNode.getName()), serialize(subNode));
+					name = Objects.requireNonNull(subNode.getName());
+					object.put(name, this.serialize(subNode));
 				}
 			} else if (treeItem instanceof HasValue) {
-				object.put((name = treeItem.getName()), serialize((HasValue<?>) treeItem));
+				object.put((name = treeItem.getName()), this.serialize((HasValue<?>) treeItem));
 			}
 
 			if (name != null && treeItem instanceof Commentable) {
@@ -108,13 +113,23 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 		return object;
 	}
 
-	private <A> A marshall(Class<A> type, JsonElement value) {
+	@Nullable
+	<A> A marshall(Class<A> type, JsonElement value) {
 		return marshaller.marshallReverse(type, value);
 	}
 
-	private <T> void setPropertyValue(Property<T> property, JsonElement child) {
+	private <T> void setPropertyValue(ConfigLeaf<T> property, JsonElement child) {
 		Class<T> type = property.getType();
-		property.setValue(marshall(type, child));
+		// TODO figure out how we want to handle null values
+		T deserialized = this.marshall(type, child);
+		try {
+			property.setValue(deserialized);
+		} catch (NullPointerException e) {
+			if (deserialized == null) {	// probably caused by the unexpected null input
+				throw new RuntimeFiberException("Failed to deserialize input '" + child + "' for " + property, e);
+			}
+			throw e;
+		}
 	}
 
 	@Override
@@ -149,11 +164,20 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 
 		@Override
 		public JsonElement marshall(Object value) {
-			return marshaller.serialize(value);
+			if (value instanceof BigDecimal) {
+				return new JsonPrimitive(value);
+			}
+			return this.marshaller.serialize(value);
 		}
 
 		@Override
 		public <A> A marshallReverse(Class<A> type, JsonElement value) {
+			if (type == BigDecimal.class) {
+				if (value instanceof JsonPrimitive) {
+					return type.cast(new BigDecimal(((JsonPrimitive) value).asString()));
+				}
+				return null;
+			}
 			return marshaller.marshall(type, value);
 		}
 	}

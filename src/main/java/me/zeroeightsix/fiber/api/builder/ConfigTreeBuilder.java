@@ -8,6 +8,9 @@ import me.zeroeightsix.fiber.api.exception.DuplicateChildException;
 import me.zeroeightsix.fiber.api.exception.FiberException;
 import me.zeroeightsix.fiber.api.exception.IllegalTreeStateException;
 import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
+import me.zeroeightsix.fiber.api.schema.type.SerializableType;
+import me.zeroeightsix.fiber.api.schema.type.derived.ConfigType;
+import me.zeroeightsix.fiber.api.schema.type.derived.ConfigTypes;
 import me.zeroeightsix.fiber.api.tree.*;
 import me.zeroeightsix.fiber.impl.builder.ConfigNodeBuilder;
 import me.zeroeightsix.fiber.impl.tree.ConfigBranchImpl;
@@ -16,7 +19,8 @@ import me.zeroeightsix.fiber.impl.tree.IndexedNodeCollection;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+
+import java.util.Collection;
 import java.util.function.Consumer;
 
 /**
@@ -25,20 +29,10 @@ import java.util.function.Consumer;
  * <p> Usage example:
  * <pre>{@code
  * ConfigBranch config = ConfigTree.builder()
- *         .beginValue("version", "1.0.0")
- *             .withFinality()
- *             .beginConstraints() // checks the default value
- *                 .regex("\\d+\\.\\d+\\.\\d+")
- *             .finishConstraints()
- *         .finishValue()
+ *         .withValue("A", ConfigTypes.INTEGER, 10)
  *         .fork("child")
- *             .beginValue("A", 10)
- *                 .beginConstraints()
- *                     .composite(CompositeType.OR)
- *                         .atLeast(3)
- *                         .atMost(0)
- *                     .finishComposite()
- *                 .finishConstraints()
+ *             .beginValue("drops", ConfigTypes.makeSet(ConfigTypes.STRING)), new HashSet<>(Arrays.asList("diamond", "cactus"))
+ *             .withComment("List of things to drop")
  *             .finishValue()
  *         .finishNode()
  *         .build();
@@ -96,6 +90,34 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
         return items.getByName(name);
     }
 
+    @Nullable
+    @Override
+    public ConfigBranch lookupBranch(String name) {
+        ConfigNode ret = this.lookup(name);
+        if (ret instanceof ConfigBranch) return (ConfigBranch) ret;
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Nullable
+    @Override
+    public <T> ConfigLeaf<T> lookupLeaf(String name, SerializableType<T> type) {
+        ConfigNode ret = this.lookup(name);
+        if (ret instanceof ConfigLeaf<?> && type.isAssignableFrom(((ConfigLeaf<?>) ret).getConfigType()))
+            return (ConfigLeaf<T>) ret;
+        return null;
+    }
+
+    @Override
+    public boolean lookupAndBind(String name, PropertyMirror<?> mirror) {
+        ConfigLeaf<?> leaf = this.lookupLeaf(name, mirror.getConverter().getSerializedType());
+        if (leaf != null) {
+            mirror.mirror(leaf);
+            return true;
+        }
+        return false;
+    }
+
     public ConfigTreeBuilder withParent(ConfigTreeBuilder parent) {
         if (name == null && parent != null) throw new IllegalStateException("A child node needs a name");
         this.parent = parent;
@@ -107,7 +129,7 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
      *
      * @param name the name
      * @return {@code this} builder
-     * @see ConfigTree#lookup
+     * @see ConfigTree#lookupLeaf
      */
     @Override
     public ConfigTreeBuilder withName(String name) {
@@ -142,7 +164,7 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
      * @see ConfigNode#getAttributes()
      */
     @Override
-    public <A> ConfigTreeBuilder withAttribute(FiberId id, Class<A> type, A defaultValue) {
+    public <A> ConfigTreeBuilder withAttribute(FiberId id, SerializableType<A> type, A defaultValue) {
         super.withAttribute(id, type, defaultValue);
         return this;
     }
@@ -243,93 +265,66 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
      * @param type the class of the type of value the {@link ConfigLeaf} produced by the builder holds
      * @param <T>  the type {@code type} represents
      * @return the newly created builder
-     * @see ConfigLeafBuilder ConfigLeafBuilder
-     * @see #withValue(String, Class, Object)
-     * @see #beginAggregateValue(String, Object[])
-     * @see #beginAggregateValue(String, Class, Class, Collection)
-     * @see #beginListValue(String, Class, Object[])
-     * @see #beginSetValue(String, Class, Object[])
+     * @see #withValue(String, SerializableType, Object)
+     * @see ConfigLeafBuilder
+     * @see ConfigTypes
      */
-    public <T> ConfigLeafBuilder<T> beginValue(@Nonnull String name, @Nonnull Class<T> type, @Nullable T defaultValue) {
-        return new ConfigLeafBuilder<>(this, name, type).withDefaultValue(defaultValue);
+    public <T> ConfigLeafBuilder<T, T> beginValue(@Nonnull String name, @Nonnull SerializableType<T> type, @Nullable T defaultValue) {
+        return ConfigLeafBuilder.create(this, name, type).withDefaultValue(defaultValue);
+    }
+
+    public <T, R> ConfigLeafBuilder<T, R> beginValue(@Nonnull String name, @Nonnull ConfigType<R, T, ?> type, @Nullable R defaultValue) {
+        return ConfigLeafBuilder.create(this, name, type).withDefaultValue(defaultValue);
     }
 
     /**
      * Adds a {@code ConfigLeaf} with the given type and default value to the tree.
      *
      * <p> This method allows only basic configuration of the created leaf.
-     * For more flexibility, one of the {@code begin*Value} methods can be used.
+     * For more flexibility, {@link #beginValue} can be used.
      *
      * @param name         the name of the child leaf
      * @param type         the type of values held by the leaf
      * @param defaultValue the default value of the {@link ConfigLeaf} to create.
      * @param <T>          the type of value the {@link ConfigLeaf} holds.
      * @return {@code this}, for chaining
-     * @see #beginValue(String, Class, Object)
-     * @see #beginAggregateValue(String, Object[])
-     * @see #beginAggregateValue(String, Class, Class, Collection)
-     * @see #beginListValue(String, Class, Object[])
-     * @see #beginSetValue(String, Class, Object[])
+     * @see #beginValue(String, SerializableType, Object)
+     * @see ConfigTypes
      */
-    public <T> ConfigTreeBuilder withValue(@Nonnull String name, @Nonnull Class<T> type, @Nullable T defaultValue) {
-        this.items.add(new ConfigLeafImpl<>(name, null, defaultValue, (a, b) -> {}, Collections.emptyList(), type));
+    public <T> ConfigTreeBuilder withValue(@Nonnull String name, @Nonnull SerializableType<T> type, @Nullable T defaultValue) {
+        this.items.add(new ConfigLeafImpl<>(name, type, null, defaultValue, (a, b) -> { }));
         return this;
     }
 
     /**
-     * Creates an aggregate {@code ConfigLeafBuilder}.
+     * Adds a {@code ConfigLeaf} with a type and default value derived from another type.
      *
-     * @param defaultValue the default array of values the {@link ConfigLeaf} will hold.
-     * @param <E>          the type of elements {@code defaultValue} holds
-     * @return the newly created builder
-     * @see ConfigAggregateBuilder Aggregate
+     * <p><strong>The built leaf will only accept values of {@code type}'s
+     * {@linkplain ConfigType#getSerializedType() serializable config type}</strong>.
+     * The full derived type information is only used to convert the provided {@code defaultValue}
+     * to a valid serialized form. {@linkplain PropertyMirror Property mirrors} can be used
+     * to interact seamlessly with the leaf using runtime types.
+     *
+     * <p> This method allows only basic configuration of the created leaf.
+     * For more flexibility, {@link #beginValue} can be used.
+     *
+     * @param name         the name of the child leaf
+     * @param type         the type of values held by the leaf
+     * @param defaultValue the runtime representation of the default value of the {@link ConfigLeaf} to create.
+     * @param <R>          the runtime type of the {@code defaultValue} representation.
+     * @param <S>          the type of value the {@link ConfigLeaf} holds.
+     * @return {@code this}, for chaining
+     * @see #beginValue(String, SerializableType, Object)
+     * @see ConfigTypes
      */
-    public <E> ConfigAggregateBuilder<E[], E> beginAggregateValue(@Nonnull String name, @Nonnull E[] defaultValue) {
-        @SuppressWarnings("unchecked") Class<E[]> type = (Class<E[]>) defaultValue.getClass();
-        return ConfigAggregateBuilder.create(this, name, type).withDefaultValue(defaultValue);
+    public <R, S> ConfigTreeBuilder withValue(@Nonnull String name, @Nonnull ConfigType<R, S, ?> type, @Nullable R defaultValue) {
+        this.items.add(new ConfigLeafImpl<>(name, type.getSerializedType(), null, type.toSerializedType(defaultValue), (a, b) -> { }));
+        return this;
     }
 
-    /**
-     * Creates a {@code ConfigAggregateBuilder} for a {@link List} settings with the given default elements.
-     *
-     * <p> This method should not be called by intermediary generic methods
-     * (eg. {@code <T> void f(ConfigTreeBuilder b, T t) {b.beginListValue("", t);}}),
-     * as it will prevent type checking while building the tree.
-     * Use {@link #beginAggregateValue(String, Class, Class, Collection)} in those cases instead.
-     *
-     * @param defaultValues the default values of the
-     * @param <E>            the type of elements contained by the set
-     * @return the newly created builder
-     */
-    @SuppressWarnings("unchecked")
-    public <E> ConfigAggregateBuilder<List<E>, E> beginListValue(@Nonnull String name, Class<E> elementType, E... defaultValues) {
-        return this.beginAggregateValue(name, List.class, elementType, Collections.unmodifiableList(Arrays.asList(defaultValues)));
-    }
-
-    /**
-     * Creates a {@code ConfigAggregateBuilder} for a {@link Set} settings with the given default elements.
-     *
-     * @param defaultElements the elements contained by default in the set setting
-     * @param <E>            the type of elements contained by the set
-     * @return the newly created builder
-     */
-    @SuppressWarnings("unchecked")
-    public <E> ConfigAggregateBuilder<Set<E>, E> beginSetValue(@Nonnull String name, Class<E> elementType, E... defaultElements) {
-        return this.beginAggregateValue(name, Set.class, elementType, Collections.unmodifiableSet(new HashSet<>(Arrays.asList(defaultElements))));
-    }
-
-    /**
-     * Creates an aggregate {@code ConfigLeafBuilder}.
-     *
-     * @param collectionType the class object representing the type of collection to create a setting for
-     * @param elementType    the class object representing the type of elements {@code defaultValue} holds
-     * @param defaultValue   the default collection of values the {@link ConfigLeaf} will hold.
-     * @param <C>            the type of collection {@code defaultValue} is
-     * @param <E>            the type {@code elementType} represents
-     * @return the newly created builder
-     */
-    public <C extends Collection<E>, E> ConfigAggregateBuilder<C, E> beginAggregateValue(@Nonnull String name, @Nonnull Class<? super C> collectionType, @Nullable Class<E> elementType, @Nonnull C defaultValue) {
-        return ConfigAggregateBuilder.<C, E>create(this, name, collectionType, elementType).withDefaultValue(defaultValue);
+    public <R, S> ConfigTreeBuilder withMirroredValue(@Nonnull String name, @Nonnull ConfigType<R, S, ?> type, @Nullable R defaultValue) {
+        this.items.add(new ConfigLeafImpl<>(name, type.getSerializedType(), null, type.toSerializedType(defaultValue), (a, b) -> { }));
+        return this;
     }
 
     /**

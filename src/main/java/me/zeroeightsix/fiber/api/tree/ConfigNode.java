@@ -3,6 +3,8 @@ package me.zeroeightsix.fiber.api.tree;
 import me.zeroeightsix.fiber.api.FiberId;
 import me.zeroeightsix.fiber.api.exception.DuplicateChildException;
 import me.zeroeightsix.fiber.api.exception.IllegalTreeStateException;
+import me.zeroeightsix.fiber.api.schema.type.SerializableType;
+import me.zeroeightsix.fiber.api.schema.type.derived.ConfigType;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -35,28 +37,42 @@ public interface ConfigNode {
     Map<FiberId, ConfigAttribute<?>> getAttributes();
 
     /**
+     * Retrieves the value of the attribute with the given id and converts it to a runtime type.
+     *
+     * @param id   the attribute's id
+     * @param type a {@code ConfigType} describing the type of values expected and
+     *             how to convert them to the desired runtime type
+     * @param <R>  the runtime type to which the attribute value will be converted
+     * @param <A>  the type of values expected from the attribute
+     * @return an {@code Optional} describing the value of the attribute,
+     * or an empty {@code Optional} if the attribute does not exist
+     * @throws ClassCastException if the attribute exists but has a type that is not assignable to {@code type}
+     */
+    <R, A> Optional<R> getAttributeValue(FiberId id, ConfigType<R, A, ?> type);
+
+    /**
      * Retrieves the value of the attribute with the given id.
      *
      * @param id           the attribute's id
-     * @param expectedType the class object describing the type of values expected
+     * @param expectedType a {@code SerializableType} describing the type of values expected
      * @param <A>          the type of values expected from the attribute
      * @return an {@code Optional} describing the value of the attribute,
      * or an empty {@code Optional} if the attribute does not exist
      * @throws ClassCastException if the attribute exists but has a type that is not assignable to {@code expectedType}
      */
-    <A> Optional<A> getAttributeValue(FiberId id, Class<A> expectedType);
+    <A> Optional<A> getAttributeValue(FiberId id, SerializableType<A> expectedType);
 
     /**
      * Retrieves the attribute with the given id. If it does not exist, one is created with the given type and default value.
      *
+     * @param <A>           the type of value stored by the attribute
      * @param id            the id of the desired attribute
      * @param attributeType the type of values held by the attribute
      * @param defaultValue  the default value, used if the attribute does not exist
-     * @param <A>           the type of value stored by the attribute
      * @return the current (existing or computed) attribute associated with the given id
      * @see #getAttributes()
      */
-    <A> ConfigAttribute<A> getOrCreateAttribute(FiberId id, Class<A> attributeType, @Nullable A defaultValue);
+    <A> ConfigAttribute<A> getOrCreateAttribute(FiberId id, SerializableType<A> attributeType, @Nullable A defaultValue);
 
     /**
      * Returns this node's parent, if any.

@@ -1,94 +1,81 @@
 package me.zeroeightsix.fiber.impl.tree;
 
 import me.zeroeightsix.fiber.api.builder.ConfigLeafBuilder;
-import me.zeroeightsix.fiber.api.constraint.Constraint;
-import me.zeroeightsix.fiber.api.constraint.ConstraintType;
+import me.zeroeightsix.fiber.api.schema.type.SerializableType;
+import me.zeroeightsix.fiber.api.schema.type.TypeCheckResult;
 import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
-import me.zeroeightsix.fiber.impl.constraint.FinalConstraint;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.function.BiConsumer;
 
-public class ConfigLeafImpl<T> extends ConfigNodeImpl implements ConfigLeaf<T> {
+public final class ConfigLeafImpl<T> extends ConfigNodeImpl implements ConfigLeaf<T> {
 
     @Nullable
     private T value;
     @Nullable
     private final T defaultValue;
     @Nonnull
-    private final BiConsumer<T, T> listener;
+    private BiConsumer<T, T> listener;
     @Nonnull
-    private final List<Constraint<? super T>> constraints;
-    @Nonnull
-    private final Class<T> type;
+    private final SerializableType<T> type;
 
     /**
      * Creates a {@code ConfigLeaf}.
      *
      * @param name         the name for this node
+     * @param type         the type of value this item holds
      * @param comment      the comment for this node
      * @param defaultValue the default value for this node
-     *                     <p> While the default value should generally satisfy the supplied {@code constraints},
-     *                     this is not enforced by this constructor.
-     *                     This allows constraints such as {@link ConstraintType#FINAL} to work as intended.
-     *                     If this {@code ConfigLeaf} is built by a {@link ConfigLeafBuilder}, this criterion will always be met.
      * @param listener     the consumer or listener for this item. When this item's value changes, the consumer will be called with the old value as first argument and the new value as second argument.
-     * @param constraints  the list of constraints for this item. For a value to be accepted, all constraints must be satisfied.
-     * @param type         the type of value this item holds
      * @see ConfigLeafBuilder
-     * @see me.zeroeightsix.fiber.api.builder.ConfigAggregateBuilder
      */
-    public ConfigLeafImpl(@Nonnull String name, @Nullable String comment, @Nullable T defaultValue, @Nonnull BiConsumer<T, T> listener, @Nonnull List<Constraint<? super T>> constraints, @Nonnull Class<T> type) {
+    public ConfigLeafImpl(@Nonnull String name, @Nonnull SerializableType<T> type, @Nullable String comment, @Nullable T defaultValue, @Nonnull BiConsumer<T, T> listener) {
         super(name, comment);
-        this.value = defaultValue;
         this.defaultValue = defaultValue;
         this.listener = listener;
-        this.constraints = constraints;
         this.type = type;
+        if (defaultValue != null) {
+            this.setValue(defaultValue);
+        }
     }
 
     @Override
     @Nullable
     public T getValue() {
-        return value;
+        return this.value;
     }
 
-    @Nonnull
     @Override
-    public Class<T> getType() {
-        return type;
+    public SerializableType<T> getConfigType() {
+        return this.type;
+    }
+
+    @Override
+    public boolean accepts(T value) {
+        // ensure ClassCastException comes sooner than later
+        // maybe accept any Object and return false if not an instance?
+        return this.type.accepts(this.type.getPlatformType().cast(value));
     }
 
     @Override
     public boolean setValue(@Nullable T value) {
-        if (!this.accepts(value)) return false;
-
-        T oldValue = this.value;
-        this.value = value;
-        this.listener.accept(oldValue, value);
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p> A value is accepted if it satisfies every constraint
-     * this setting has. Note that some constraints such as {@link FinalConstraint}
-     * will cause even the current {@linkplain #getValue() value} to be rejected.
-     *
-     * @param value the value to check
-     * @see #setValue(Object)
-     * @see #getConstraints()
-     */
-    @Override
-    public boolean accepts(@Nullable T value) {
-        for (Constraint<? super T> constraint : this.constraints) {
-            if (!constraint.test(value)) {
+        // ensure ClassCastException comes sooner than later
+        // maybe accept any Object and return false if not an instance?
+        T correctedValue;
+        TypeCheckResult<T> result = this.type.test(this.type.getPlatformType().cast(value));
+        if (result.hasPassed()) {
+            correctedValue = value;
+        } else {
+            if (!result.getCorrectedValue().isPresent()) {
                 return false;
             }
+            correctedValue = result.getCorrectedValue().get();
         }
+
+        T oldValue = this.value;
+        this.value = correctedValue;
+        this.listener.accept(oldValue, this.value);
         return true;
     }
 
@@ -99,20 +86,23 @@ public class ConfigLeafImpl<T> extends ConfigNodeImpl implements ConfigLeaf<T> {
     }
 
     @Override
+    public void addChangeListener(BiConsumer<T, T> listener) {
+        this.listener = this.listener.andThen(listener);
+    }
+
+    @Override
     @Nullable
     public T getDefaultValue() {
         return defaultValue;
     }
 
     @Override
-    @Nonnull
-    public List<Constraint<? super T>> getConstraints() {
-        return constraints;
-    }
-
-    @Override
     public String toString() {
-        return getClass().getSimpleName() + '<' + getType().getSimpleName() + ">[name=" + getName() + ", comment=" + getComment() + "]";
+        return this.getClass().getSimpleName()
+                + '<' + this.type.getPlatformType().getSimpleName()
+                + ">[name=" + this.getName()
+                + ", comment=" + this.getComment()
+                + ", value=" + this.getValue()
+                + "]";
     }
-
 }

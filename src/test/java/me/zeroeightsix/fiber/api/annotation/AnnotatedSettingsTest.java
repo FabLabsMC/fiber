@@ -1,51 +1,54 @@
 package me.zeroeightsix.fiber.api.annotation;
 
-import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.api.exception.FiberException;
-import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.api.tree.ConfigTree;
-import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
-import me.zeroeightsix.fiber.api.tree.Property;
-import me.zeroeightsix.fiber.api.tree.ConfigNode;
+import me.zeroeightsix.fiber.api.schema.type.ListSerializableType;
+import me.zeroeightsix.fiber.api.schema.type.StringSerializableType;
+import me.zeroeightsix.fiber.api.schema.type.derived.ConfigTypes;
+import me.zeroeightsix.fiber.api.schema.type.derived.ListConfigType;
+import me.zeroeightsix.fiber.api.tree.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.math.BigDecimal;
+import java.util.*;
 import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+// TODO add tests for user-defined types and processors
+@SuppressWarnings({"unused", "FieldMayBeFinal"})
 class AnnotatedSettingsTest {
 
     private AnnotatedSettings annotatedSettings;
-    private ConfigTreeBuilder node;
+    private ConfigTree node;
 
     @BeforeEach
     void setup() {
-        annotatedSettings = new AnnotatedSettings();
-        node = ConfigTree.builder();
+        this.annotatedSettings = AnnotatedSettings.create();
+        this.node = ConfigTree.builder().build();
     }
 
     @Test
     @DisplayName("Convert POJO to IR")
     void testPojoIR() throws FiberException {
         OneFieldPojo pojo = new OneFieldPojo();
-        annotatedSettings.applyToNode(node, pojo);
+        this.annotatedSettings.applyToNode(this.node, pojo);
 
-        Collection<ConfigNode> items = node.build().getItems();
+        Collection<ConfigNode> items = this.node.getItems();
         assertEquals(1, items.size(), "Setting map is 1 entry large");
-        ConfigNode item = node.lookup("a");
+        ConfigNode item = this.node.lookup("a");
         assertNotNull(item, "Setting exists");
         assertTrue(ConfigLeaf.class.isAssignableFrom(item.getClass()), "Setting is a ConfigLeaf");
         ConfigLeaf<?> leaf = (ConfigLeaf<?>) item;
         assertNotNull(leaf.getValue(), "Setting value is non-null");
-        assertEquals(Integer.class, leaf.getType(), "Setting type is correct");
-        assertEquals(Integer.class, leaf.getValue().getClass(), "Setting value reflects correct type");
-        Integer integer = (Integer) leaf.getValue();
+        assertEquals(ConfigTypes.INTEGER.getSerializedType(), leaf.getConfigType(), "Setting type is correct");
+        assertEquals(BigDecimal.class, leaf.getValue().getClass(), "Setting value reflects correct type");
+        BigDecimal decimal = (BigDecimal) leaf.getValue();
+        assertEquals(decimal, BigDecimal.valueOf(5), "Setting value is correct");
+        PropertyMirror<Integer> converted = PropertyMirror.create(ConfigTypes.INTEGER);
+        converted.mirror(leaf);
+        Integer integer = converted.getValue();
         assertEquals(integer, 5, "Setting value is correct");
     }
 
@@ -53,34 +56,34 @@ class AnnotatedSettingsTest {
     @DisplayName("Throw final exception")
     void testNoFinal() {
         FinalSettingPojo pojo = new FinalSettingPojo();
-        assertThrows(FiberException.class, () -> annotatedSettings.applyToNode(node, pojo));
+        assertThrows(FiberException.class, () -> this.annotatedSettings.applyToNode(this.node, pojo));
     }
 
     @Test
     @DisplayName("Listener")
     void testListener() throws FiberException {
         ListenerPojo pojo = new ListenerPojo();
-        annotatedSettings.applyToNode(node, pojo);
+        this.annotatedSettings.applyToNode(this.node, pojo);
 
-        ConfigNode treeItem = node.lookup("a");
+        ConfigNode treeItem = this.node.lookup("a");
         assertNotNull(treeItem, "Setting A exists");
-        assertTrue(treeItem instanceof Property<?>, "Setting A is a property");
-        @SuppressWarnings("unchecked")
-        Property<Integer> property = (Property<Integer>) treeItem;
+        assertTrue(treeItem instanceof Property, "Setting A is a property");
+        PropertyMirror<Integer> property = PropertyMirror.create(ConfigTypes.INTEGER);
+        property.mirror((Property<?>) treeItem);
         property.setValue(10);
         assertTrue(pojo.listenedA, "Listener for A was triggered");
 
-        treeItem = node.lookup("b");
+        treeItem = this.node.lookup("b");
         assertNotNull(treeItem, "Setting B exists");
-        assertTrue(treeItem instanceof Property<?>, "Setting B is a property");
-        property = (Property<Integer>) treeItem;
+        assertTrue(treeItem instanceof Property, "Setting B is a property");
+        property.mirror((Property<?>) treeItem);
         property.setValue(10);
         assertTrue(pojo.listenedB, "Listener for B was triggered");
 
-        treeItem = node.lookup("c");
+        treeItem = this.node.lookup("c");
         assertNotNull(treeItem, "Setting C exists");
-        assertTrue(treeItem instanceof Property<?>, "Setting C is a property");
-        property = (Property<Integer>) treeItem;
+        assertTrue(treeItem instanceof Property, "Setting C is a property");
+        property.mirror((Property<?>) treeItem);
         property.setValue(10);
         assertTrue(pojo.listenedC, "Listener for C was triggered");
     }
@@ -89,36 +92,42 @@ class AnnotatedSettingsTest {
     @DisplayName("Listener with different generics")
     void testTwoGenerics() {
         NonMatchingListenerPojo pojo = new NonMatchingListenerPojo();
-        assertThrows(FiberException.class, () -> annotatedSettings.applyToNode(node, pojo));
+        assertThrows(FiberException.class, () -> this.annotatedSettings.applyToNode(this.node, pojo));
     }
 
     @Test
     @DisplayName("Listener with wrong generic type")
     void testWrongGenerics() {
         WrongGenericListenerPojo pojo = new WrongGenericListenerPojo();
-        assertThrows(FiberException.class, () -> annotatedSettings.applyToNode(node, pojo));
+        assertThrows(FiberException.class, () -> this.annotatedSettings.applyToNode(this.node, pojo));
     }
 
     @Test
     @DisplayName("Numerical constraints")
     void testNumericalConstraints() throws FiberException {
         NumericalConstraintsPojo pojo = new NumericalConstraintsPojo();
-        annotatedSettings.applyToNode(node, pojo);
-        @SuppressWarnings("unchecked")
-        Property<Integer> value = (Property<Integer>) node.lookup("a");
+        this.annotatedSettings.applyToNode(this.node, pojo);
+        PropertyMirror<Integer> value = PropertyMirror.create(ConfigTypes.INTEGER);
+        assertTrue(this.node.lookupAndBind("a", value));
         assertNotNull(value, "Setting exists");
-        assertFalse(value.setValue(-10));
+        assertFalse(value.accepts(-10));
+        assertTrue(value.setValue(-10));
+        assertEquals(0, value.getValue());
+        assertTrue(value.accepts(5));
         assertTrue(value.setValue(5));
-        assertFalse(value.setValue(20));
+        assertEquals(5, value.getValue());
+        assertFalse(value.accepts(20));
+        assertTrue(value.setValue(20));
+        assertEquals(10, value.getValue());
     }
 
     @Test
     @DisplayName("String constraints")
     void testStringConstraints() throws FiberException {
         StringConstraintsPojo pojo = new StringConstraintsPojo();
-        annotatedSettings.applyToNode(node, pojo);
+        this.annotatedSettings.applyToNode(this.node, pojo);
         @SuppressWarnings("unchecked")
-        Property<String> value = (Property<String>) node.lookup("a");
+        Property<String> value = (Property<String>) this.node.lookup("a");
         assertNotNull(value, "Setting exists");
         assertFalse(value.setValue("BAD STRING::"));
         assertTrue(value.setValue("good:string"));
@@ -130,86 +139,99 @@ class AnnotatedSettingsTest {
     @DisplayName("Array constraints")
     void testArrayConstraints() throws FiberException {
         ArrayConstraintsPojo pojo = new ArrayConstraintsPojo();
-        annotatedSettings.applyToNode(node, pojo);
-        @SuppressWarnings("unchecked")
-        Property<String[]> value1 = (Property<String[]>) node.lookup("nonEmptyArrayShortStrings");
+        this.annotatedSettings.applyToNode(this.node, pojo);
+        ListConfigType<String[], String> type = ConfigTypes.makeArray(ConfigTypes.STRING);
+        PropertyMirror<String[]> mirror1 = PropertyMirror.create(type);
+        Property<List<String>> value1 = this.node.lookupLeaf("nonEmptyArrayShortStrings", type.getSerializedType());
         assertNotNull(value1, "Setting exists");
-        assertTrue(value1.setValue(new String[]{"ab", "", "ba", ""}));
-        assertFalse(value1.setValue(new String[0]), "Empty array");
-        assertFalse(value1.setValue(new String[]{"aaaaaaaaaaaa"}), "Strings too long");
-        @SuppressWarnings("unchecked")
-        Property<int[]> value2 = (Property<int[]>) node.lookup("numbers");
-        assertNotNull(value2, "Setting exists");
-        assertTrue(value2.setValue(new int[]{3, 4, 5}));
-        assertTrue(value2.setValue(new int[0]));
-        assertFalse(value2.setValue(new int[]{1, 2, 3, 4, 5, 6, 7}), "Too many elements");
-        assertFalse(value2.setValue(new int[]{-1, 0, 1}), "Negative number not allowed");
-        assertFalse(value2.setValue(new int[]{9, 10, 11}), "Numbers above 10 not allowed");
-        @SuppressWarnings("unchecked")
-        Property<List<String>> value3 = (Property<List<String>>) node.lookup("shortArrayIdStrings");
+        mirror1.mirror(value1);
+        assertTrue(mirror1.setValue(new String[]{"ab", "", "ba", ""}));
+        assertFalse(mirror1.setValue(new String[0]), "Empty array");
+        assertFalse(mirror1.setValue(new String[]{"aaaaaaaaaaaa"}), "Strings too long");
+        ListConfigType<int[], BigDecimal> type2 = ConfigTypes.makeIntArray(ConfigTypes.INTEGER);
+        PropertyMirror<int[]> mirror2 = PropertyMirror.create(type2);
+        this.node.lookupAndBind("numbers", mirror2);
+        assertNotNull(mirror2, "Setting exists");
+        assertTrue(mirror2.setValue(new int[]{3, 4, 5}));
+        assertArrayEquals(new int[]{3, 4, 5}, mirror2.getValue());
+        assertTrue(mirror2.setValue(new int[0]));
+        assertArrayEquals(new int[0], mirror2.getValue(), "Value should not change after unrecoverable setValue");
+        assertFalse(mirror2.accepts(new int[]{1, 2, 3, 4, 5, 6, 7}), "Too many elements");
+        assertTrue(mirror2.setValue(new int[]{1, 2, 3, 4, 5, 6, 7}), "Recoverable length issue");
+        assertArrayEquals(new int[]{1, 2, 3}, mirror2.getValue(), "Value not properly trimmed");
+        assertFalse(mirror2.accepts(new int[]{1, 11, 3, 4, 5, 6, 7}), "Too many elements and element out of range");
+        assertTrue(mirror2.setValue(new int[]{1, 11, 3, 4, 5, 6, 7}), "Recoverable length issue");
+        assertArrayEquals(new int[]{1, 10, 3}, mirror2.getValue(), "Value not properly trimmed or corrected");
+        assertFalse(mirror2.accepts(new int[]{-1, 0, 1}), "Negative number not allowed");
+        assertTrue(mirror2.setValue(new int[]{-1, 0, 1}), "Correction for out of bounds numbers available");
+        assertArrayEquals(new int[]{0, 0, 1}, mirror2.getValue(), "Negative number should be brought back into range");
+        assertFalse(mirror2.accepts(new int[]{9, 10, 11}), "Numbers above 10 not allowed");
+        assertTrue(mirror2.setValue(new int[]{9, 10, 11}), "Correction for out of bounds numbers available");
+        assertArrayEquals(new int[]{9, 10, 10}, mirror2.getValue(), ">10 number should be brought back into range");
+        Property<List<String>> value3 = this.node.lookupLeaf("shortArrayIdStrings", new ListSerializableType<>(StringSerializableType.DEFAULT_STRING));
         assertNotNull(value3, "Setting exists");
+        assertTrue(value3.accepts(Arrays.asList("a:b", "fabric:test")));
         assertTrue(value3.setValue(Arrays.asList("a:b", "fabric:test")));
+        assertTrue(value3.accepts(Collections.emptyList()));
         assertTrue(value3.setValue(Collections.emptyList()));
-        assertFalse(value3.setValue(Arrays.asList("a:b", "b:c", "c:d", "d:e")), "Too many elements");
-        assertFalse(value3.setValue(Collections.singletonList("aaaaaaaaaaaa")), "Bad regex");
+        assertFalse(value3.accepts(Arrays.asList("a:b", "b:c", "c:d", "d:e")), "Too many elements");
+        assertTrue(value3.setValue(Arrays.asList("a:b", "b:c", "c:d", "d:e")), "Too many elements");
+        assertEquals(Arrays.asList("a:b", "b:c", "c:d"), value3.getValue());
+        assertFalse(value3.accepts(Collections.singletonList("aaaaaaaaaaaa")), "Bad regex");
+        assertTrue(value3.setValue(Collections.singletonList("aaaaaaaaaaaa")), "Bad regex");
+        assertTrue(value3.getValue().isEmpty());
+        assertFalse(value3.accepts(Arrays.asList("do", "do", "do", "while:true")), "Bad regex");
+        assertTrue(value3.setValue(Arrays.asList("do", "do", "do", "while:true")), "Bad regex");
+        assertEquals(Collections.singletonList("while:true"), value3.getValue());
     }
 
     @Test
     @DisplayName("Invalid constraints")
     void testInvalidConstraints() {
-        assertThrows(RuntimeFiberException.class, () -> annotatedSettings.makeTree(new InvalidConstraintPojo()));
+        assertThrows(FiberException.class, () -> this.annotatedSettings.makeTree(new InvalidConstraintPojo()));
     }
 
     @Test
     @DisplayName("Only annotated fields")
     void testOnlyAnnotatedFields() throws FiberException {
         OnlyAnnotatedFieldsPojo pojo = new OnlyAnnotatedFieldsPojo();
-        annotatedSettings.applyToNode(node, pojo);
-        assertEquals(1, node.getItems().size(), "Node has one item");
+        this.annotatedSettings.applyToNode(this.node, pojo);
+        assertEquals(1, this.node.getItems().size(), "Node has one item");
     }
 
     @Test
     @DisplayName("Custom named setting")
     void testCustomNames() throws FiberException {
         CustomNamePojo pojo = new CustomNamePojo();
-        annotatedSettings.applyToNode(node, pojo);
-        assertNotNull(node.lookup("custom_name"), "Custom named setting exists");
-    }
-
-    @Test
-    @DisplayName("Constant setting")
-    void testConstantSetting() throws FiberException {
-        ConstantSettingPojo pojo = new ConstantSettingPojo();
-        annotatedSettings.applyToNode(node, pojo);
-        assertFalse(((ConfigLeaf<Integer>) node.lookup("a")).setValue(0));
+        this.annotatedSettings.applyToNode(this.node, pojo);
+        assertNotNull(this.node.lookup("custom_name"), "Custom named setting exists");
     }
 
     @Test
     @DisplayName("Subnodes")
     void testSubNodes() throws FiberException {
         SubNodePojo pojo = new SubNodePojo();
-        annotatedSettings.applyToNode(node, pojo);
-        assertEquals(1, node.getItems().size(), "Node has one item");
-        ConfigTree subnode = (ConfigTree) node.lookup("a");
+        this.annotatedSettings.applyToNode(this.node, pojo);
+        assertEquals(1, this.node.getItems().size(), "Node has one item");
+        ConfigTree subnode = (ConfigTree) this.node.lookup("a");
         assertNotNull(subnode, "Subnode exists");
         assertEquals(1, subnode.getItems().size(), "Subnode has one item");
     }
 
     @Test
     @DisplayName("Commented setting")
-    @SuppressWarnings("unchecked")
     void testComment() throws FiberException {
         CommentPojo pojo = new CommentPojo();
-        annotatedSettings.applyToNode(node, pojo);
-        assertEquals("comment", ((ConfigLeaf<Integer>) node.lookup("a")).getComment(), "Comment exists and is correct");
+        this.annotatedSettings.applyToNode(this.node, pojo);
+        assertEquals("comment", ((ConfigLeaf<?>) Objects.requireNonNull(this.node.lookup("a"))).getComment(), "Comment exists and is correct");
     }
 
     @Test
     @DisplayName("Ignored settings")
     void testIgnore() throws FiberException {
         IgnoredPojo pojo = new IgnoredPojo();
-        annotatedSettings.applyToNode(node, pojo);
-        assertEquals(0, node.getItems().size(), "Node is empty");
+        this.annotatedSettings.applyToNode(this.node, pojo);
+        assertEquals(0, this.node.getItems().size(), "Node is empty");
     }
 
     private static class FinalSettingPojo {
@@ -230,16 +252,16 @@ class AnnotatedSettingsTest {
         private int c = 5;
 
         @Listener("a")
-        private BiConsumer<Integer, Integer> aListener = (now, then) -> listenedA = true;
+        private transient BiConsumer<Integer, Integer> aListener = (now, then) -> this.listenedA = true;
 
         @Listener("b")
         private void bListener(Integer oldValue, Integer newValue) {
-            listenedB = true;
+            this.listenedB = true;
         }
 
         @Listener("c")
         private void cListener(Integer newValue) {
-            listenedC = true;
+            this.listenedC = true;
         }
     }
 
@@ -299,11 +321,6 @@ class AnnotatedSettingsTest {
         private int a = 5;
     }
 
-    private static class ConstantSettingPojo {
-        @Setting(constant = true)
-        private int a = 5;
-    }
-
     private static class CommentPojo {
         @Setting(comment = "comment")
         private int a = 5;
@@ -320,6 +337,7 @@ class AnnotatedSettingsTest {
         @Setting.Group(name = "a")
         public SubNode node = new SubNode();
 
+        @SuppressWarnings("InnerClassMayBeStatic")  // we want to test this edge case
         class SubNode {
             private int b = 5;
         }
