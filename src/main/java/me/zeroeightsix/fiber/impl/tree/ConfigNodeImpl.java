@@ -3,6 +3,7 @@ package me.zeroeightsix.fiber.impl.tree;
 import me.zeroeightsix.fiber.api.FiberId;
 import me.zeroeightsix.fiber.api.exception.IllegalTreeStateException;
 import me.zeroeightsix.fiber.api.schema.type.SerializableType;
+import me.zeroeightsix.fiber.api.schema.type.derived.ConfigType;
 import me.zeroeightsix.fiber.api.tree.Commentable;
 import me.zeroeightsix.fiber.api.tree.ConfigAttribute;
 import me.zeroeightsix.fiber.api.tree.ConfigBranch;
@@ -70,7 +71,7 @@ public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
     @SuppressWarnings("unchecked")
     @Override
     public <A> ConfigAttribute<A> getOrCreateAttribute(FiberId id, SerializableType<A> attributeType, @Nullable A defaultValue) {
-        ConfigAttribute<?> attr = getAttributes().computeIfAbsent(id, i -> ConfigAttribute.create(i, attributeType, defaultValue));
+        ConfigAttribute<?> attr = this.getAttributes().computeIfAbsent(id, i -> ConfigAttribute.create(i, attributeType, defaultValue));
         checkAttributeType(attributeType, attr);
         return (ConfigAttribute<A>) attr;
     }
@@ -83,6 +84,11 @@ public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
             return Optional.ofNullable(expectedType.getPlatformType().cast(attr.getValue()));
         }
         return Optional.empty();
+    }
+
+    @Override
+    public <R, A> Optional<R> getAttributeValue(FiberId id, ConfigType<R, A, ?> type) {
+        return this.getAttributeValue(id, type.getSerializedType()).map(type::toRuntimeType);
     }
 
     private static <A> void checkAttributeType(SerializableType<A> expectedType, ConfigAttribute<?> attr) {
