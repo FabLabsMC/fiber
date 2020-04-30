@@ -32,7 +32,7 @@ public abstract class ConstraintChecker<V, T extends SerializableType<V>> {
      *
      * <p> A type configuration comprehends another if it accepts every
      * value that the other does.
-     * <pre>forall x, cfg2.accepts(x) => cfg.accepts(x)</pre>
+     * <pre>forall x, cfg2.accepts(x) =&gt; cfg.accepts(x)</pre>
      *
      * @param cfg the tested comprehensive type configuration
      * @param cfg2 the tested comprehended type configuration
