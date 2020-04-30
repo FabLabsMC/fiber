@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
 import static org.junit.jupiter.api.Assertions.*;
 
 class ConfigTypesTest {
@@ -24,8 +23,8 @@ class ConfigTypesTest {
 	@DisplayName("Test numerical constraints")
 	@Test
 	void testNumericalConstraints() {
-		assertThrows(NullPointerException.class, () -> ConfigTypes.UNBOUNDED_DECIMAL.withIncrement(5), "Invalid increment");
-		assertThrows(IllegalArgumentException.class, () -> ConfigTypes.INTEGER.withIncrement(-5), "Invalid increment");
+		assertThrows(IllegalStateException.class, () -> ConfigTypes.UNBOUNDED_DECIMAL.withIncrement(5), "Increment without a minimum");
+		assertThrows(IllegalArgumentException.class, () -> ConfigTypes.INTEGER.withIncrement(-5), "Negative increment");
 
 		DecimalSerializableType type = ConfigTypes.NATURAL.withMinimum(10).withMaximum(20).getSerializedType();
 
@@ -48,7 +47,7 @@ class ConfigTypesTest {
 	void testArrayConstraints() {
 		DecimalSerializableType elementType = ConfigTypes.INTEGER.withValidRange(3, 10, 2).getSerializedType();
 		ListSerializableType<BigDecimal> type = new ListSerializableType<>(elementType, 0, 3, false);
-		Predicate<Integer[]> config = arr -> type.accepts(Arrays.stream(arr).map(BigDecimal::new).collect(Collectors.toList()));
+		Predicate<Integer[]> config = arr -> type.accepts(Arrays.stream(arr).map(BigDecimal::valueOf).collect(Collectors.toList()));
 
 		assertTrue(config.test(new Integer[0]));
 		assertTrue(config.test(new Integer[]{4, 4, 6}));
@@ -81,7 +80,7 @@ class ConfigTypesTest {
 	void testIntArray() {
 		ListConfigType<int[], BigDecimal> type = ConfigTypes.makeIntArray(ConfigTypes.INTEGER);
 		int[] arr = { 1, 2, 3, 4 };
-		List<BigDecimal> ls = Arrays.stream(arr).mapToObj(BigDecimal::valueOf).collect(toList());
+		List<BigDecimal> ls = Arrays.stream(arr).mapToObj(BigDecimal::valueOf).collect(Collectors.toList());
 		List<BigDecimal> err = Collections.singletonList(BigDecimal.valueOf(2L * Integer.MAX_VALUE));
 		assertEquals(ls, type.toSerializedType(arr), "Convert int[] -> List<BigDecimal>");
 		assertArrayEquals(arr, type.toRuntimeType(ls), "Convert List<BigDecimal> -> int[]");

@@ -33,7 +33,7 @@ public final class DecimalSerializableType extends SerializableType<BigDecimal> 
             if (increment != null && max.subtract(min).compareTo(increment) < 0) throw new IllegalArgumentException("Provided step " + increment + " is bigger than range [" + min + ", " + max + "]");
         }
         if (increment != null) {
-            if (min == null) throw new NullPointerException("A nonnull increment requires a minimum value");
+            if (min == null) throw new IllegalStateException("A nonnull increment requires a minimum value");
             if (increment.compareTo(BigDecimal.ZERO) <= 0) throw new IllegalArgumentException("Increment cannot be negative (" + increment + ")");
         }
         this.minimum = min;
