@@ -1,16 +1,15 @@
 package me.zeroeightsix.fiber.api.schema.type.derived;
 
-import me.zeroeightsix.fiber.api.annotation.processor.ConstraintAnnotationProcessor;
-import me.zeroeightsix.fiber.api.schema.type.MapSerializableType;
-import me.zeroeightsix.fiber.api.schema.type.StringSerializableType;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.Map;
 import java.util.function.Function;
 
-public final class MapConfigType<R, V> extends ConfigType<R, Map<String, V>, MapSerializableType<V>> {
+import me.zeroeightsix.fiber.api.annotation.processor.ConstraintAnnotationProcessor;
+import me.zeroeightsix.fiber.api.schema.type.MapSerializableType;
+import me.zeroeightsix.fiber.api.schema.type.StringSerializableType;
 
+public final class MapConfigType<R, V> extends ConfigType<R, Map<String, V>, MapSerializableType<V>> {
     @SuppressWarnings("unchecked")
     public MapConfigType(MapSerializableType<V> serializedType, Class<? super R> runtimeType, Function<Map<String, V>, R> f, Function<R, Map<String, V>> f0) {
         super(serializedType, (Class<R>) runtimeType, f, f0);

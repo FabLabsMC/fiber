@@ -1,18 +1,16 @@
 package me.zeroeightsix.fiber.api.schema.type;
 
-import me.zeroeightsix.fiber.api.serialization.TypeSerializer;
-import me.zeroeightsix.fiber.impl.constraint.ListConstraintChecker;
-
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+import me.zeroeightsix.fiber.api.serialization.TypeSerializer;
+import me.zeroeightsix.fiber.impl.constraint.ListConstraintChecker;
+
 /**
- *
  * @param <E> the type of elements objects of this type hold
  */
 public final class ListSerializableType<E> extends SerializableType<List<E>> {
-
     private final SerializableType<E> elementType;
     private final boolean unique;
     private final int minSize;
@@ -57,10 +55,10 @@ public final class ListSerializableType<E> extends SerializableType<List<E>> {
         if (this == o) return true;
         if (o == null || this.getClass() != o.getClass()) return false;
         ListSerializableType<?> that = (ListSerializableType<?>) o;
-        return this.unique == that.unique &&
-                this.minSize == that.minSize &&
-                this.maxSize == that.maxSize &&
-                Objects.equals(this.elementType, that.elementType);
+        return this.unique == that.unique
+                && this.minSize == that.minSize
+                && this.maxSize == that.maxSize
+                && Objects.equals(this.elementType, that.elementType);
     }
 
     @Override

@@ -1,25 +1,25 @@
 package me.zeroeightsix.fiber.api.tree;
 
-import me.zeroeightsix.fiber.api.builder.ConfigLeafBuilder;
-import me.zeroeightsix.fiber.api.schema.type.SerializableType;
+import java.util.function.BiConsumer;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.function.BiConsumer;
+
+import me.zeroeightsix.fiber.api.builder.ConfigLeafBuilder;
+import me.zeroeightsix.fiber.api.schema.type.SerializableType;
 
 /**
  * A {@code ConfigNode} with some value of type {@code T}.
  *
- * @param <T>  The type of value this class holds
+ * @param <T> The type of value this class holds
  * @see ConfigNode
  * @see ConfigLeafBuilder
  */
 public interface ConfigLeaf<T> extends ConfigNode, Property<T>, Commentable {
-
     /**
      * Sets the value held by this {@code ConfigLeaf}.
      *
-     * <p> If the provided value does not satisfy this setting's
+     * <p>If the provided value does not satisfy this setting's
      * {@linkplain SerializableType#test(Object) type constraints}:
      * <ul>
      *     <li> if a corrected value can be found, this setting is set to the corrected value
@@ -37,7 +37,7 @@ public interface ConfigLeaf<T> extends ConfigNode, Property<T>, Commentable {
     /**
      * Returns {@code true} if this property can be set to the given raw value.
      *
-     * <p> This method does not account for possible corrections offered by the type's constraints.
+     * <p>This method does not account for possible corrections offered by the type's constraints.
      * In other words, it returns {@code true} if and only if every constraint of this property's
      * {@linkplain #getConfigType() config type} accepts the given value as is.
      *
@@ -52,7 +52,7 @@ public interface ConfigLeaf<T> extends ConfigNode, Property<T>, Commentable {
     /**
      * Returns this {@code ConfigLeaf}'s current value.
      *
-     * <p> If no successful call to {@link #setValue(Object)} has been made,
+     * <p>If no successful call to {@link #setValue(Object)} has been made,
      * this method returns this node's {@linkplain #getDefaultValue() default value}.
      *
      * @return this node's value
@@ -70,7 +70,7 @@ public interface ConfigLeaf<T> extends ConfigNode, Property<T>, Commentable {
     /**
      * Returns the listener for this item.
      *
-     * <p> When this item's value changes, the consumer will be called with the old value as first argument and the new value as second argument.
+     * <p>When this item's value changes, the consumer will be called with the old value as first argument and the new value as second argument.
      *
      * @return the listener
      */
@@ -86,5 +86,4 @@ public interface ConfigLeaf<T> extends ConfigNode, Property<T>, Commentable {
      */
     @Nullable
     T getDefaultValue();
-
 }

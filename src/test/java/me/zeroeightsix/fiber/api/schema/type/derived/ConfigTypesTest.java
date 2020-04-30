@@ -1,13 +1,10 @@
 package me.zeroeightsix.fiber.api.schema.type.derived;
 
-import me.zeroeightsix.fiber.api.builder.ConfigLeafBuilder;
-import me.zeroeightsix.fiber.api.exception.FiberConversionException;
-import me.zeroeightsix.fiber.api.schema.type.DecimalSerializableType;
-import me.zeroeightsix.fiber.api.schema.type.ListSerializableType;
-import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
-import me.zeroeightsix.fiber.api.tree.PropertyMirror;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -16,10 +13,17 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.*;
+import me.zeroeightsix.fiber.api.builder.ConfigLeafBuilder;
+import me.zeroeightsix.fiber.api.exception.FiberConversionException;
+import me.zeroeightsix.fiber.api.schema.type.DecimalSerializableType;
+import me.zeroeightsix.fiber.api.schema.type.ListSerializableType;
+import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
+import me.zeroeightsix.fiber.api.tree.PropertyMirror;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 class ConfigTypesTest {
-
 	@DisplayName("Test numerical constraints")
 	@Test
 	void testNumericalConstraints() {
@@ -50,11 +54,11 @@ class ConfigTypesTest {
 		Predicate<Integer[]> config = arr -> type.accepts(Arrays.stream(arr).map(BigDecimal::valueOf).collect(Collectors.toList()));
 
 		assertTrue(config.test(new Integer[0]));
-		assertTrue(config.test(new Integer[]{4, 4, 6}));
-		assertFalse(config.test(new Integer[]{4, 5, 6}));
-		assertFalse(config.test(new Integer[]{1, 2}));
-		assertFalse(config.test(new Integer[]{5, 6, 7, 8}));
-		assertFalse(config.test(new Integer[]{9, 10, 11}));
+		assertTrue(config.test(new Integer[] {4, 4, 6}));
+		assertFalse(config.test(new Integer[] {4, 5, 6}));
+		assertFalse(config.test(new Integer[] {1, 2}));
+		assertFalse(config.test(new Integer[] {5, 6, 7, 8}));
+		assertFalse(config.test(new Integer[] {9, 10, 11}));
 	}
 
 	@DisplayName("Test collection type constraints")
@@ -62,7 +66,7 @@ class ConfigTypesTest {
 	void testCollectionConstraints() {
 		NumberConfigType<Integer> elementType = ConfigTypes.INTEGER.withMinimum(3).withMaximum(10);
 		ListConfigType<List<Integer>, BigDecimal> type = ConfigTypes.makeList(elementType).withMaxSize(3);
-		assertEquals(elementType.getSerializedType(), type.getSerializedType().getElementType());
+		Assertions.assertEquals(elementType.getSerializedType(), type.getSerializedType().getElementType());
 		ConfigLeaf<List<BigDecimal>> config = ConfigLeafBuilder.create(null, "", type).build();
 		PropertyMirror<List<Integer>> mirror = PropertyMirror.create(type);
 		mirror.mirror(config);
@@ -75,11 +79,10 @@ class ConfigTypesTest {
 		assertFalse(mirror.accepts(Arrays.asList(9, 10, 11)));
 	}
 
-
 	@Test
 	void testIntArray() {
 		ListConfigType<int[], BigDecimal> type = ConfigTypes.makeIntArray(ConfigTypes.INTEGER);
-		int[] arr = { 1, 2, 3, 4 };
+		int[] arr = {1, 2, 3, 4};
 		List<BigDecimal> ls = Arrays.stream(arr).mapToObj(BigDecimal::valueOf).collect(Collectors.toList());
 		List<BigDecimal> err = Collections.singletonList(BigDecimal.valueOf(2L * Integer.MAX_VALUE));
 		assertEquals(ls, type.toSerializedType(arr), "Convert int[] -> List<BigDecimal>");
@@ -90,7 +93,7 @@ class ConfigTypesTest {
 	@Test
 	void testCharArray() {
 		ListConfigType<char[], String> type = ConfigTypes.makeCharArray(ConfigTypes.CHARACTER);
-		char[] arr = { 'a', 'b', 'c', 'd' };
+		char[] arr = {'a', 'b', 'c', 'd'};
 		List<String> ls = Arrays.asList("a", "b", "c", "d");
 		List<String> err = Arrays.asList("", "aa");
 		assertEquals(ls, type.toSerializedType(arr), "Convert char[] -> List<String>");
@@ -101,7 +104,7 @@ class ConfigTypesTest {
 	@Test
 	void testBooleanArray() {
 		ListConfigType<boolean[], Boolean> type = ConfigTypes.makeBooleanArray(ConfigTypes.BOOLEAN);
-		boolean[] arr = { false, true };
+		boolean[] arr = {false, true};
 		List<Boolean> ls = Arrays.asList(false, true);
 		assertEquals(ls, type.toSerializedType(arr), "Convert boolean[] -> List<Boolean>");
 		assertArrayEquals(arr, type.toRuntimeType(ls), "Convert List<Boolean> -> boolean[]");
@@ -110,7 +113,7 @@ class ConfigTypesTest {
 	@Test
 	void testObjArray() {
 		ListConfigType<String[], String> type = ConfigTypes.makeArray(ConfigTypes.STRING);
-		String[] arr = { "string1", "string2", "string3", "string4" };
+		String[] arr = {"string1", "string2", "string3", "string4"};
 		List<String> ls = Arrays.asList(arr.clone());
 		assertEquals(ls, type.toSerializedType(arr), "Convert String[] -> List<String>");
 		assertArrayEquals(arr, type.toRuntimeType(ls), "Convert List<String> -> String[]");

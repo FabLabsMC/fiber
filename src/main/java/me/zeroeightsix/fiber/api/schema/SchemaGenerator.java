@@ -1,5 +1,9 @@
 package me.zeroeightsix.fiber.api.schema;
 
+import java.util.Optional;
+
+import javax.annotation.Nullable;
+
 import blue.endless.jankson.JsonElement;
 import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.JsonPrimitive;
@@ -11,11 +15,7 @@ import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
 import me.zeroeightsix.fiber.api.tree.ConfigNode;
 import me.zeroeightsix.fiber.api.tree.ConfigTree;
 
-import javax.annotation.Nullable;
-import java.util.Optional;
-
 public class SchemaGenerator {
-
 	@Nullable
 	private final Marshaller<JsonElement> marshaller;
 	private final JsonTypeSerializer typeSerializer;
@@ -32,12 +32,13 @@ public class SchemaGenerator {
 	public JsonObject createSchema(ConfigTree tree) {
 		JsonObject object = new JsonObject();
 
-		for (ConfigNode item : tree.getItems()) {// TODO: Maybe allow for custom schema deserializers? / generic metadata
+		for (ConfigNode item : tree.getItems()) { // TODO: Maybe allow for custom schema deserializers? / generic metadata
 			if (item instanceof ConfigBranch) {
 				object.put(item.getName(), this.createSchema((ConfigTree) item));
 			} else if (item instanceof ConfigLeaf) {
 				object.put(item.getName(), this.createSchema((ConfigLeaf<?>) item));
 			}
+
 			// TODO attributes
 		}
 
@@ -49,13 +50,16 @@ public class SchemaGenerator {
 		JsonObject type = new JsonObject();
 		this.typeSerializer.serializeType(item.getConfigType(), type);
 		object.put("type", type);
+
 		if (item.getComment() != null) {
 			object.put("comment", new JsonPrimitive(item.getComment()));
 		}
+
 		if (item.getDefaultValue() != null) {
 			Object o = item.getDefaultValue();
 			object.put("defaultValue", Optional.ofNullable(this.marshaller != null ? this.marshaller.marshall(o) : null).orElse(MarshallerImpl.getFallback().serialize(o)));
 		}
+
 		return object;
 	}
 }

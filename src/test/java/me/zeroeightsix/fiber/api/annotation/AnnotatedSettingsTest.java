@@ -1,25 +1,37 @@
 package me.zeroeightsix.fiber.api.annotation;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.BiConsumer;
+
 import me.zeroeightsix.fiber.api.exception.FiberException;
 import me.zeroeightsix.fiber.api.schema.type.ListSerializableType;
 import me.zeroeightsix.fiber.api.schema.type.StringSerializableType;
 import me.zeroeightsix.fiber.api.schema.type.derived.ConfigTypes;
 import me.zeroeightsix.fiber.api.schema.type.derived.ListConfigType;
-import me.zeroeightsix.fiber.api.tree.*;
+import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
+import me.zeroeightsix.fiber.api.tree.ConfigNode;
+import me.zeroeightsix.fiber.api.tree.ConfigTree;
+import me.zeroeightsix.fiber.api.tree.Property;
+import me.zeroeightsix.fiber.api.tree.PropertyMirror;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.function.BiConsumer;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 // TODO add tests for user-defined types and processors
 @SuppressWarnings({"unused", "FieldMayBeFinal"})
 class AnnotatedSettingsTest {
-
     private AnnotatedSettings annotatedSettings;
     private ConfigTree node;
 
@@ -145,29 +157,29 @@ class AnnotatedSettingsTest {
         Property<List<String>> value1 = this.node.lookupLeaf("nonEmptyArrayShortStrings", type.getSerializedType());
         assertNotNull(value1, "Setting exists");
         mirror1.mirror(value1);
-        assertTrue(mirror1.setValue(new String[]{"ab", "", "ba", ""}));
+        assertTrue(mirror1.setValue(new String[] {"ab", "", "ba", ""}));
         assertFalse(mirror1.setValue(new String[0]), "Empty array");
-        assertFalse(mirror1.setValue(new String[]{"aaaaaaaaaaaa"}), "Strings too long");
+        assertFalse(mirror1.setValue(new String[] {"aaaaaaaaaaaa"}), "Strings too long");
         ListConfigType<int[], BigDecimal> type2 = ConfigTypes.makeIntArray(ConfigTypes.INTEGER);
         PropertyMirror<int[]> mirror2 = PropertyMirror.create(type2);
         this.node.lookupAndBind("numbers", mirror2);
         assertNotNull(mirror2, "Setting exists");
-        assertTrue(mirror2.setValue(new int[]{3, 4, 5}));
-        assertArrayEquals(new int[]{3, 4, 5}, mirror2.getValue());
+        assertTrue(mirror2.setValue(new int[] {3, 4, 5}));
+        assertArrayEquals(new int[] {3, 4, 5}, mirror2.getValue());
         assertTrue(mirror2.setValue(new int[0]));
         assertArrayEquals(new int[0], mirror2.getValue(), "Value should not change after unrecoverable setValue");
-        assertFalse(mirror2.accepts(new int[]{1, 2, 3, 4, 5, 6, 7}), "Too many elements");
-        assertTrue(mirror2.setValue(new int[]{1, 2, 3, 4, 5, 6, 7}), "Recoverable length issue");
-        assertArrayEquals(new int[]{1, 2, 3}, mirror2.getValue(), "Value not properly trimmed");
-        assertFalse(mirror2.accepts(new int[]{1, 11, 3, 4, 5, 6, 7}), "Too many elements and element out of range");
-        assertTrue(mirror2.setValue(new int[]{1, 11, 3, 4, 5, 6, 7}), "Recoverable length issue");
-        assertArrayEquals(new int[]{1, 10, 3}, mirror2.getValue(), "Value not properly trimmed or corrected");
-        assertFalse(mirror2.accepts(new int[]{-1, 0, 1}), "Negative number not allowed");
-        assertTrue(mirror2.setValue(new int[]{-1, 0, 1}), "Correction for out of bounds numbers available");
-        assertArrayEquals(new int[]{0, 0, 1}, mirror2.getValue(), "Negative number should be brought back into range");
-        assertFalse(mirror2.accepts(new int[]{9, 10, 11}), "Numbers above 10 not allowed");
-        assertTrue(mirror2.setValue(new int[]{9, 10, 11}), "Correction for out of bounds numbers available");
-        assertArrayEquals(new int[]{9, 10, 10}, mirror2.getValue(), ">10 number should be brought back into range");
+        assertFalse(mirror2.accepts(new int[] {1, 2, 3, 4, 5, 6, 7}), "Too many elements");
+        assertTrue(mirror2.setValue(new int[] {1, 2, 3, 4, 5, 6, 7}), "Recoverable length issue");
+        assertArrayEquals(new int[] {1, 2, 3}, mirror2.getValue(), "Value not properly trimmed");
+        assertFalse(mirror2.accepts(new int[] {1, 11, 3, 4, 5, 6, 7}), "Too many elements and element out of range");
+        assertTrue(mirror2.setValue(new int[] {1, 11, 3, 4, 5, 6, 7}), "Recoverable length issue");
+        assertArrayEquals(new int[] {1, 10, 3}, mirror2.getValue(), "Value not properly trimmed or corrected");
+        assertFalse(mirror2.accepts(new int[] {-1, 0, 1}), "Negative number not allowed");
+        assertTrue(mirror2.setValue(new int[] {-1, 0, 1}), "Correction for out of bounds numbers available");
+        assertArrayEquals(new int[] {0, 0, 1}, mirror2.getValue(), "Negative number should be brought back into range");
+        assertFalse(mirror2.accepts(new int[] {9, 10, 11}), "Numbers above 10 not allowed");
+        assertTrue(mirror2.setValue(new int[] {9, 10, 11}), "Correction for out of bounds numbers available");
+        assertArrayEquals(new int[] {9, 10, 10}, mirror2.getValue(), ">10 number should be brought back into range");
         Property<List<String>> value3 = this.node.lookupLeaf("shortArrayIdStrings", new ListSerializableType<>(StringSerializableType.DEFAULT_STRING));
         assertNotNull(value3, "Setting exists");
         assertTrue(value3.accepts(Arrays.asList("a:b", "fabric:test")));
@@ -269,14 +281,16 @@ class AnnotatedSettingsTest {
         private int a = 5;
 
         @Listener("a")
-        private BiConsumer<Double, Integer> aListener = (now, then) -> {};
+        private BiConsumer<Double, Integer> aListener = (now, then) -> {
+        };
     }
 
     private static class WrongGenericListenerPojo {
         private int a = 5;
 
         @Listener("a")
-        private BiConsumer<Double, Double> aListener = (now, then) -> {};
+        private BiConsumer<Double, Double> aListener = (now, then) -> {
+        };
     }
 
     private static class NumericalConstraintsPojo {
@@ -292,14 +306,13 @@ class AnnotatedSettingsTest {
     }
 
     private static class ArrayConstraintsPojo {
-
         private
         @Setting.Constrain.MaxLength(2) String
         @Setting.Constrain.MinLength(1) [] nonEmptyArrayShortStrings = {""};
 
         private
         @Setting.Constrain.Range(min = 0, max = 10) int
-        @Setting.Constrain.MinLength(0) @Setting.Constrain.MaxLength(3)[] numbers = {};
+        @Setting.Constrain.MinLength(0) @Setting.Constrain.MaxLength(3) [] numbers = {};
 
         private @Setting.Constrain.MaxLength(3) List<@Setting.Constrain.Regex("\\w+:\\w+") String> shortArrayIdStrings = Collections.singletonList("fabric:test");
     }
@@ -337,10 +350,10 @@ class AnnotatedSettingsTest {
         @Setting.Group(name = "a")
         public SubNode node = new SubNode();
 
-        @SuppressWarnings("InnerClassMayBeStatic")  // we want to test this edge case
+        @SuppressWarnings("InnerClassMayBeStatic")
+                // we want to test this edge case
         class SubNode {
             private int b = 5;
         }
     }
-
 }

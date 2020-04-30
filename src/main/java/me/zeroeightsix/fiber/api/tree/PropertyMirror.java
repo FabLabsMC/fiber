@@ -6,7 +6,7 @@ import me.zeroeightsix.fiber.impl.tree.PropertyMirrorImpl;
 /**
  * A {@code Property} that delegates all operations to another.
  *
- * <p> This can be used in conjunction with config builders to
+ * <p>This can be used in conjunction with config builders to
  * easily setup a configuration without reflection. For example:
  * <pre>{@code
  * public final PropertyMirror<Integer> diamondsDropped = new PropertyMirror<>();
@@ -28,7 +28,7 @@ public interface PropertyMirror<T> extends Property<T> {
     /**
      * Sets a property to mirror.
      *
-     * <p> After calling this method with a valid delegate,
+     * <p>After calling this method with a valid delegate,
      * every property method will redirect to {@code delegate}.
      *
      * @param delegate a property to mirror

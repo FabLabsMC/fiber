@@ -1,13 +1,14 @@
 package me.zeroeightsix.fiber.api.schema.type.derived;
 
-import me.zeroeightsix.fiber.api.annotation.processor.ConstraintAnnotationProcessor;
-import me.zeroeightsix.fiber.api.schema.type.DecimalSerializableType;
-
-import javax.annotation.Nonnull;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.math.BigDecimal;
 import java.util.function.Function;
+
+import javax.annotation.Nonnull;
+
+import me.zeroeightsix.fiber.api.annotation.processor.ConstraintAnnotationProcessor;
+import me.zeroeightsix.fiber.api.schema.type.DecimalSerializableType;
 
 public final class NumberConfigType<T> extends ConfigType<T, BigDecimal, DecimalSerializableType> {
     public NumberConfigType(DecimalSerializableType serializedType, Class<T> runtimeType, Function<BigDecimal, T> f, Function<T, BigDecimal> f0) {

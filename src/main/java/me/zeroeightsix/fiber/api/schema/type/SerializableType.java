@@ -1,15 +1,15 @@
 package me.zeroeightsix.fiber.api.schema.type;
 
+import java.math.BigDecimal;
+
 import me.zeroeightsix.fiber.api.schema.type.derived.ConfigType;
 import me.zeroeightsix.fiber.api.serialization.TypeSerializer;
 import me.zeroeightsix.fiber.impl.constraint.ConstraintChecker;
 
-import java.math.BigDecimal;
-
 /**
  * A data type that is convertible to a config primitive.
  *
- * <p> A {@code SerializableType} constrains the range of possible values
+ * <p>A {@code SerializableType} constrains the range of possible values
  * through additional properties. This means that for each kind of
  * {@code SerializableType} there may be an arbitrary amount of different
  * sets of valid values, all being mapped to the same platform type.
@@ -46,7 +46,7 @@ public abstract class SerializableType<T> {
      * object is either the same as, or is a more general description of, the data
      * type represented by the specified {@code type} parameter.
      *
-     * <p> Specifically, this checks whether every value assignable to {@code type}
+     * <p>Specifically, this checks whether every value assignable to {@code type}
      * can also be assigned to this {@code SerializableType}.
      * <pre>forall x, type.accepts(x) =&gt; this.accepts(x)</pre>
      *
@@ -57,6 +57,7 @@ public abstract class SerializableType<T> {
         if (this.getClass() != type.getClass()) {
             return false;
         }
+
         @SuppressWarnings("unchecked") SerializableType<T> that = (SerializableType<T>) type;
         return this.checker.comprehends(this, that);
     }
@@ -79,5 +80,4 @@ public abstract class SerializableType<T> {
 
     @Override
     public abstract int hashCode();
-
 }

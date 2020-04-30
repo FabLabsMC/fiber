@@ -1,18 +1,18 @@
 package me.zeroeightsix.fiber.api.exception;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import me.zeroeightsix.fiber.api.schema.type.SerializableType;
 import me.zeroeightsix.fiber.api.tree.ConfigBranch;
 import me.zeroeightsix.fiber.api.tree.ConfigNode;
 import me.zeroeightsix.fiber.api.tree.ConfigQuery;
 import me.zeroeightsix.fiber.api.tree.ConfigTree;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 /**
  * Signals that an exception occurred while running a {@link ConfigQuery}.
  *
- * <p> This class is the general class of exceptions produced by failed
+ * <p>This class is the general class of exceptions produced by failed
  * config tree queries.
  */
 public class FiberQueryException extends FiberException {
@@ -32,7 +32,7 @@ public class FiberQueryException extends FiberException {
     /**
      * Returns the last valid ancestor before which the error occurred.
      *
-     * <p> The invalid tree may be the tree directly passed to the query,
+     * <p>The invalid tree may be the tree directly passed to the query,
      * or it may be a descendant node.
      *
      * @return the parent of the erroring node.
@@ -94,7 +94,7 @@ public class FiberQueryException extends FiberException {
         /**
          * Returns the type of property values expected by the query.
          *
-         * <p> If the query expected an ancestor node to be found, this method returns {@code null}.
+         * <p>If the query expected an ancestor node to be found, this method returns {@code null}.
          *
          * @return the expected value type, or {@code null} if the query did not expect a property
          */

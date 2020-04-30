@@ -1,13 +1,13 @@
 package me.zeroeightsix.fiber.api.schema.type.derived;
 
-import me.zeroeightsix.fiber.api.annotation.processor.ConstraintAnnotationProcessor;
-import me.zeroeightsix.fiber.api.exception.FiberConversionException;
-import me.zeroeightsix.fiber.api.schema.type.SerializableType;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.StringJoiner;
 import java.util.function.Function;
+
+import me.zeroeightsix.fiber.api.annotation.processor.ConstraintAnnotationProcessor;
+import me.zeroeightsix.fiber.api.exception.FiberConversionException;
+import me.zeroeightsix.fiber.api.schema.type.SerializableType;
 
 /**
  * A {@code ConfigType} contains serializable information describing
@@ -42,7 +42,7 @@ public abstract class ConfigType<R, S, T extends SerializableType<S>> {
     /**
      * Derive a {@code ConfigType} from this type object.
      *
-     * <p> The new {@code ConfigType} will have the same serialized type (with the same constraints),
+     * <p>The new {@code ConfigType} will have the same serialized type (with the same constraints),
      * but a different runtime type. Values will be converted between the two
      * types using composed functions: {@code toSerializedType(x) = this.toSerializedType(partialSerializer(x))}
      * and {@code toRuntimeType(y) = partialDeserializer(this.toRuntimeType(y))}.
@@ -69,9 +69,11 @@ public abstract class ConfigType<R, S, T extends SerializableType<S>> {
      */
     public S toSerializedType(R runtimeValue) throws FiberConversionException {
         S s = this.toPlatformType(runtimeValue);
+
         if (!this.serializedType.accepts(s)) {
             throw new FiberConversionException("Serialized form " + s + "(" + this.serializedType.getPlatformType().getSimpleName() + ") of runtime value " + runtimeValue + "(" + this.runtimeType.getSimpleName() + ") does not satisfy constraints for type " + this.serializedType);
         }
+
         return s;
     }
 
@@ -100,6 +102,7 @@ public abstract class ConfigType<R, S, T extends SerializableType<S>> {
         if (!this.serializedType.accepts(serializedValue)) {
             throw new FiberConversionException("Invalid serialized value " + serializedValue);
         }
+
         return this.deserializer.apply(serializedValue);
     }
 

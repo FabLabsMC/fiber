@@ -1,5 +1,13 @@
 package me.zeroeightsix.fiber.impl.tree;
 
+import java.util.Comparator;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TreeMap;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import me.zeroeightsix.fiber.api.FiberId;
 import me.zeroeightsix.fiber.api.exception.IllegalTreeStateException;
 import me.zeroeightsix.fiber.api.schema.type.SerializableType;
@@ -9,13 +17,6 @@ import me.zeroeightsix.fiber.api.tree.ConfigAttribute;
 import me.zeroeightsix.fiber.api.tree.ConfigBranch;
 import me.zeroeightsix.fiber.api.tree.ConfigNode;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.Optional;
-import java.util.TreeMap;
-
 /**
  * A commentable node.
  *
@@ -24,7 +25,6 @@ import java.util.TreeMap;
  * @see ConfigLeafImpl
  */
 public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
-
     private final Map<FiberId, ConfigAttribute<?>> attributes;
     @Nonnull
     private final String name;
@@ -79,10 +79,12 @@ public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
     @Override
     public <A> Optional<A> getAttributeValue(FiberId id, SerializableType<A> expectedType) {
         ConfigAttribute<?> attr = this.attributes.get(id);
+
         if (attr != null) {
             checkAttributeType(expectedType, attr);
             return Optional.ofNullable(expectedType.getPlatformType().cast(attr.getValue()));
         }
+
         return Optional.empty();
     }
 
@@ -106,6 +108,7 @@ public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
             // thankfully, remove does not cause a CME if it's a no-op
             this.parent.getItems().remove(this);
         }
+
         this.parent = null;
     }
 
@@ -114,10 +117,12 @@ public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
         if (this.parent != null && this.parent != parent) {
             throw new IllegalTreeStateException(this + " needs to be detached before changing the parent");
         }
+
         // this node may have already been added by the collection
         if (parent != null && !parent.getItems().contains(this)) {
             parent.getItems().add(this);
         }
+
         this.parent = parent;
     }
 

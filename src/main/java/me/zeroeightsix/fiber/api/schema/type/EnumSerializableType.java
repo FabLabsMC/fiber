@@ -1,12 +1,16 @@
 package me.zeroeightsix.fiber.api.schema.type;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.StringJoiner;
+
 import me.zeroeightsix.fiber.api.serialization.TypeSerializer;
 import me.zeroeightsix.fiber.impl.constraint.EnumConstraintChecker;
 
-import java.util.*;
-
 public final class EnumSerializableType extends SerializableType<String> {
-
     private final Set<String> validValues;
 
     public EnumSerializableType(String... validValues) {

@@ -1,15 +1,14 @@
 package me.zeroeightsix.fiber.api.schema.type.derived;
 
-import me.zeroeightsix.fiber.api.annotation.processor.ConstraintAnnotationProcessor;
-import me.zeroeightsix.fiber.api.schema.type.RecordSerializableType;
-import me.zeroeightsix.fiber.api.tree.ConfigBranch;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.function.Function;
 
-public final class RecordConfigType<R> extends ConfigType<R, ConfigBranch, RecordSerializableType> {
+import me.zeroeightsix.fiber.api.annotation.processor.ConstraintAnnotationProcessor;
+import me.zeroeightsix.fiber.api.schema.type.RecordSerializableType;
+import me.zeroeightsix.fiber.api.tree.ConfigBranch;
 
+public final class RecordConfigType<R> extends ConfigType<R, ConfigBranch, RecordSerializableType> {
     @SuppressWarnings("unchecked")
     public RecordConfigType(RecordSerializableType serializedType, Class<? super R> runtimeType, Function<ConfigBranch, R> f, Function<R, ConfigBranch> f0) {
         super(serializedType, (Class<R>) runtimeType, f, f0);
@@ -33,12 +32,12 @@ public final class RecordConfigType<R> extends ConfigType<R, ConfigBranch, Recor
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName() +
-                "(" +
-                "[" +
-                String.join(", ", this.getSerializedType().getFields().keySet()) +
-                "]" +
-                " : " + this.getRuntimeType().getSimpleName() +
-                ")";
+        return this.getClass().getSimpleName()
+                + "("
+                + "["
+                + String.join(", ", this.getSerializedType().getFields().keySet())
+                + "]"
+                + " : " + this.getRuntimeType().getSimpleName()
+                + ")";
     }
 }

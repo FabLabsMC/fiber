@@ -1,12 +1,12 @@
 package me.zeroeightsix.fiber.api.schema.type.derived;
 
-import me.zeroeightsix.fiber.api.annotation.processor.ConstraintAnnotationProcessor;
-import me.zeroeightsix.fiber.api.schema.type.StringSerializableType;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+
+import me.zeroeightsix.fiber.api.annotation.processor.ConstraintAnnotationProcessor;
+import me.zeroeightsix.fiber.api.schema.type.StringSerializableType;
 
 public final class StringConfigType<T> extends ConfigType<T, String, StringSerializableType> {
     public StringConfigType(StringSerializableType serializedType, Class<T> runtimeType, Function<String, T> f, Function<T, String> f0) {

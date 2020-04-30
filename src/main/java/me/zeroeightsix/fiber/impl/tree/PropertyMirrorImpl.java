@@ -1,12 +1,13 @@
 package me.zeroeightsix.fiber.impl.tree;
 
+import java.util.Objects;
+
+import javax.annotation.Nullable;
+
 import me.zeroeightsix.fiber.api.schema.type.derived.ConfigType;
 import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
 import me.zeroeightsix.fiber.api.tree.Property;
 import me.zeroeightsix.fiber.api.tree.PropertyMirror;
-
-import javax.annotation.Nullable;
-import java.util.Objects;
 
 public final class PropertyMirrorImpl<R, S> implements PropertyMirror<R> {
     protected Property<S> delegate;
@@ -23,7 +24,7 @@ public final class PropertyMirrorImpl<R, S> implements PropertyMirror<R> {
     /**
      * Sets a property to mirror.
      *
-     * <p> After calling this method with a valid delegate,
+     * <p>After calling this method with a valid delegate,
      * every property method will redirect to {@code delegate}.
      *
      * @param delegate a property to mirror
@@ -33,8 +34,10 @@ public final class PropertyMirrorImpl<R, S> implements PropertyMirror<R> {
         if (!this.converter.getSerializedType().getPlatformType().equals(delegate.getType())) {
             throw new IllegalArgumentException("Unsupported delegate type " + delegate.getType() + ", should be " + this.converter.getSerializedType().getPlatformType());
         }
+
         @SuppressWarnings("unchecked") Property<S> d = (Property<S>) delegate;
         this.delegate = d;
+
         if (d instanceof ConfigLeaf) {
             // passive invalidation
             ((ConfigLeaf<S>) d).addChangeListener((old, cur) -> this.cachedValue = null);
@@ -65,13 +68,16 @@ public final class PropertyMirrorImpl<R, S> implements PropertyMirror<R> {
     @Override
     public R getValue() {
         if (this.delegate == null) throw new IllegalStateException("No delegate property set for this mirror");
+
         if (this.cachedValue == null || this.lastSerializedValue != null) {
             S serializedValue = this.delegate.getValue();
+
             if (!Objects.equals(this.lastSerializedValue, serializedValue)) {
                 this.cachedValue = this.converter.toRuntimeType(serializedValue);
                 this.lastSerializedValue = serializedValue;
             }
         }
+
         return this.cachedValue;
     }
 

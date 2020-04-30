@@ -1,14 +1,13 @@
 package me.zeroeightsix.fiber.impl.constraint;
 
-import me.zeroeightsix.fiber.api.schema.type.MapSerializableType;
-import me.zeroeightsix.fiber.api.schema.type.TypeCheckResult;
-
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class MapConstraintChecker<V> extends ConstraintChecker<Map<String, V>, MapSerializableType<V>> {
+import me.zeroeightsix.fiber.api.schema.type.MapSerializableType;
+import me.zeroeightsix.fiber.api.schema.type.TypeCheckResult;
 
+public class MapConstraintChecker<V> extends ConstraintChecker<Map<String, V>, MapSerializableType<V>> {
     private static final MapConstraintChecker<?> INSTANCE = new MapConstraintChecker<>();
 
     public static <V> MapConstraintChecker<V> instance() {
@@ -16,7 +15,8 @@ public class MapConstraintChecker<V> extends ConstraintChecker<Map<String, V>, M
         return t;
     }
 
-    private MapConstraintChecker() { }
+    private MapConstraintChecker() {
+    }
 
     @Override
     public TypeCheckResult<Map<String, V>> test(MapSerializableType<V> cfg, Map<String, V> values) {
@@ -29,20 +29,25 @@ public class MapConstraintChecker<V> extends ConstraintChecker<Map<String, V>, M
                 valid = false;
                 break;
             }
+
             TypeCheckResult<String> keyTestResult = cfg.getKeyType().test(entry.getKey());
             TypeCheckResult<V> valueTestResult = cfg.getValueType().test(entry.getValue());
+
             if (keyTestResult.hasPassed() && valueTestResult.hasPassed()) {
                 corrected.put(entry.getKey(), entry.getValue());
             } else {
                 valid = false;
                 Optional<String> correctedKey = keyTestResult.getCorrectedValue();
                 Optional<V> correctedValue = valueTestResult.getCorrectedValue();
+
                 if (correctedKey.isPresent() && correctedValue.isPresent()) {
                     corrected.put(correctedKey.get(), correctedValue.get());
                 }
+
                 // if key or value missing, just skip the entry
             }
         }
+
         if (corrected.size() < cfg.getMinSize()) {
             return TypeCheckResult.unrecoverable();
         } else if (!valid) {
@@ -57,9 +62,11 @@ public class MapConstraintChecker<V> extends ConstraintChecker<Map<String, V>, M
         if (cfg.getMinSize() > cfg2.getMinSize()) {
             return false;
         }
+
         if (cfg.getMaxSize() < cfg2.getMaxSize()) {
             return false;
         }
+
         return cfg.getValueType().isAssignableFrom(cfg2.getValueType());
     }
 }

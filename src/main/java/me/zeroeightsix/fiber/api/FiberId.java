@@ -1,7 +1,8 @@
 package me.zeroeightsix.fiber.api;
 
-import javax.annotation.Nonnull;
 import java.util.Objects;
+
+import javax.annotation.Nonnull;
 
 public final class FiberId {
     private final String domain;
@@ -27,11 +28,16 @@ public final class FiberId {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
         FiberId fiberId = (FiberId) o;
-        return domain.equals(fiberId.domain) &&
-                name.equals(fiberId.name);
+        return domain.equals(fiberId.domain) && name.equals(fiberId.name);
     }
 
     @Override

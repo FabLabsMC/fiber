@@ -1,12 +1,11 @@
 package me.zeroeightsix.fiber.api.schema.type.derived;
 
-
-import me.zeroeightsix.fiber.api.annotation.processor.ConstraintAnnotationProcessor;
-import me.zeroeightsix.fiber.api.schema.type.BooleanSerializableType;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.function.Function;
+
+import me.zeroeightsix.fiber.api.annotation.processor.ConstraintAnnotationProcessor;
+import me.zeroeightsix.fiber.api.schema.type.BooleanSerializableType;
 
 public final class BooleanConfigType<T> extends ConfigType<T, Boolean, BooleanSerializableType> {
     public BooleanConfigType(Class<T> actualType, Function<Boolean, T> deserializer, Function<T, Boolean> serializer) {

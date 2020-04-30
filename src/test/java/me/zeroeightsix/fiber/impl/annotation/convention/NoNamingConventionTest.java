@@ -1,12 +1,11 @@
 package me.zeroeightsix.fiber.impl.annotation.convention;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import me.zeroeightsix.fiber.api.annotation.convention.NoNamingConvention;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class NoNamingConventionTest extends NoNamingConvention {
-
     private static String[] STRINGS = {
             "anything",
             "you",
@@ -26,5 +25,4 @@ class NoNamingConventionTest extends NoNamingConvention {
             assertEquals(string, super.name(string));
         }
     }
-
 }

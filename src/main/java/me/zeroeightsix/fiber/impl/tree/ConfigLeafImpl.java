@@ -1,16 +1,16 @@
 package me.zeroeightsix.fiber.impl.tree;
 
+import java.util.function.BiConsumer;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import me.zeroeightsix.fiber.api.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.api.schema.type.SerializableType;
 import me.zeroeightsix.fiber.api.schema.type.TypeCheckResult;
 import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.function.BiConsumer;
-
 public final class ConfigLeafImpl<T> extends ConfigNodeImpl implements ConfigLeaf<T> {
-
     @Nullable
     private T value;
     @Nullable
@@ -35,6 +35,7 @@ public final class ConfigLeafImpl<T> extends ConfigNodeImpl implements ConfigLea
         this.defaultValue = defaultValue;
         this.listener = listener;
         this.type = type;
+
         if (defaultValue != null) {
             this.setValue(defaultValue);
         }
@@ -64,12 +65,14 @@ public final class ConfigLeafImpl<T> extends ConfigNodeImpl implements ConfigLea
         // maybe accept any Object and return false if not an instance?
         T correctedValue;
         TypeCheckResult<T> result = this.type.test(this.type.getPlatformType().cast(value));
+
         if (result.hasPassed()) {
             correctedValue = value;
         } else {
             if (!result.getCorrectedValue().isPresent()) {
                 return false;
             }
+
             correctedValue = result.getCorrectedValue().get();
         }
 

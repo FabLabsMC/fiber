@@ -1,5 +1,30 @@
 package me.zeroeightsix.fiber.impl.annotation;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.AnnotatedArrayType;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.AnnotatedParameterizedType;
+import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import me.zeroeightsix.fiber.api.NodeOperations;
 import me.zeroeightsix.fiber.api.annotation.AnnotatedSettings;
 import me.zeroeightsix.fiber.api.annotation.Listener;
@@ -7,29 +32,27 @@ import me.zeroeightsix.fiber.api.annotation.Setting;
 import me.zeroeightsix.fiber.api.annotation.Settings;
 import me.zeroeightsix.fiber.api.annotation.convention.NoNamingConvention;
 import me.zeroeightsix.fiber.api.annotation.convention.SettingNamingConvention;
-import me.zeroeightsix.fiber.api.annotation.processor.*;
+import me.zeroeightsix.fiber.api.annotation.processor.BranchAnnotationProcessor;
+import me.zeroeightsix.fiber.api.annotation.processor.ConfigAnnotationProcessor;
+import me.zeroeightsix.fiber.api.annotation.processor.ConstraintAnnotationProcessor;
+import me.zeroeightsix.fiber.api.annotation.processor.LeafAnnotationProcessor;
+import me.zeroeightsix.fiber.api.annotation.processor.ParameterizedTypeProcessor;
 import me.zeroeightsix.fiber.api.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.api.exception.FiberException;
 import me.zeroeightsix.fiber.api.exception.FiberTypeProcessingException;
 import me.zeroeightsix.fiber.api.exception.MalformedFieldException;
 import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.api.schema.type.derived.*;
+import me.zeroeightsix.fiber.api.schema.type.derived.ConfigType;
+import me.zeroeightsix.fiber.api.schema.type.derived.ConfigTypes;
+import me.zeroeightsix.fiber.api.schema.type.derived.ListConfigType;
+import me.zeroeightsix.fiber.api.schema.type.derived.NumberConfigType;
+import me.zeroeightsix.fiber.api.schema.type.derived.StringConfigType;
 import me.zeroeightsix.fiber.api.tree.ConfigBranch;
 import me.zeroeightsix.fiber.api.tree.ConfigTree;
 import me.zeroeightsix.fiber.impl.annotation.magic.TypeMagic;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.*;
-import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 public final class AnnotatedSettingsImpl implements AnnotatedSettings {
-
     private final Map<Class<?>, ParameterizedTypeProcessor<?>> registeredGenericTypes = new HashMap<>();
     private final Map<Class<?>, ConfigType<?, ?, ?>> registeredTypes = new HashMap<>();
     private final Map<Class<? extends Annotation>, LeafAnnotationProcessor<?>> valueSettingProcessors = new HashMap<>();
@@ -58,20 +81,25 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
         this.registerTypeMapping(BigInteger.class, ConfigTypes.UNBOUNDED_INTEGER);
         this.registerTypeMapping(List.class, typeArguments -> ConfigTypes.makeList(typeArguments[0]));
         this.registerTypeMapping(Set.class, typeArguments -> ConfigTypes.makeSet(typeArguments[0]));
-        this.registerGroupProcessor(Setting.Group.class, (annotation, field, pojo, node) -> {});
+        this.registerGroupProcessor(Setting.Group.class, (annotation, field, pojo, node) -> {
+        });
         this.registerConstraintProcessor(Setting.Constrain.Range.class, new ConstraintAnnotationProcessor<Setting.Constrain.Range>() {
             @Override
             public <T> NumberConfigType<T> processDecimal(NumberConfigType<T> baseType, Setting.Constrain.Range annotation, AnnotatedElement annotated) {
                 NumberConfigType<T> ret = baseType;
+
                 if (annotation.min() > Double.NEGATIVE_INFINITY) {
                     ret = ret.withMinimum(annotation.min());
                 }
+
                 if (annotation.max() < Double.POSITIVE_INFINITY) {
                     ret = ret.withMaximum(annotation.max());
                 }
+
                 if (annotation.step() > Double.MIN_VALUE) {
                     ret = ret.withIncrement(annotation.step());
                 }
+
                 return ret;
             }
         });
@@ -79,15 +107,19 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
             @Override
             public <T> NumberConfigType<T> processDecimal(NumberConfigType<T> baseType, Setting.Constrain.BigRange annotation, AnnotatedElement annotated) {
                 NumberConfigType<T> ret = baseType;
+
                 if (!annotation.min().isEmpty()) {
                     ret = ret.withMinimum(new BigDecimal(annotation.min()));
                 }
+
                 if (!annotation.max().isEmpty()) {
                     ret = ret.withMaximum(new BigDecimal(annotation.max()));
                 }
+
                 if (!annotation.step().isEmpty()) {
                     ret = ret.withIncrement(new BigDecimal(annotation.step()));
                 }
+
                 return ret;
             }
         });
@@ -124,9 +156,11 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
     @Override
     public <T> AnnotatedSettings registerTypeMapping(Class<? super T> clazz, ConfigType<T, ?, ?> type) {
         if (clazz.isArray()) throw new IllegalArgumentException("Cannot register custom mappings for arrays");
+
         if (this.registeredTypes.containsKey(clazz)) {
             throw new IllegalStateException(clazz + " is already linked with " + this.registeredTypes.get(clazz));
         }
+
         this.registeredTypes.put(clazz, type);
         return this;
     }
@@ -134,9 +168,11 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
     @Override
     public <T> AnnotatedSettings registerTypeMapping(Class<? super T> clazz, ParameterizedTypeProcessor<T> processor) {
         if (clazz.isArray()) throw new IllegalArgumentException("Cannot register custom mappings for arrays");
+
         if (this.registeredGenericTypes.containsKey(clazz)) {
             throw new IllegalStateException(clazz + " is already linked with " + this.registeredGenericTypes.get(clazz));
         }
+
         this.registeredGenericTypes.put(clazz, processor);
         return this;
     }
@@ -154,6 +190,7 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
         if (this.valueSettingProcessors.containsKey(annotationType)) {
             throw new IllegalStateException("Cannot register multiple setting processors for the same annotation (" + annotationType + ")");
         }
+
         this.valueSettingProcessors.put(annotationType, processor);
         return this;
     }
@@ -171,6 +208,7 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
         if (this.groupSettingProcessors.containsKey(annotationType)) {
             throw new IllegalStateException("Cannot register multiple node processors for the same annotation (" + annotationType + ")");
         }
+
         this.groupSettingProcessors.put(annotationType, processor);
         return this;
     }
@@ -188,6 +226,7 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
         if (this.constraintProcessors.containsKey(annotationType)) {
             throw new IllegalStateException("Cannot register multiple processors for the same annotation (" + annotationType + ")");
         }
+
         this.constraintProcessors.put(annotationType, processor);
         return this;
     }
@@ -225,9 +264,11 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 
         for (Field field : pojoClass.getDeclaredFields()) {
             if (field.isSynthetic() || !isIncluded(field, onlyAnnotated)) continue;
+
             try {
                 checkViolation(field);
                 String name = findName(field, convention);
+
                 if (field.isAnnotationPresent(Setting.Group.class)) {
                     this.fieldToNode(pojo, node, field, name);
                 } else {
@@ -257,7 +298,9 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
     }
 
     private static void checkViolation(Field field) throws FiberException {
-        if (Modifier.isFinal(field.getModifiers())) throw new FiberException("Field '" + field.getName() + "' can not be final");
+        if (Modifier.isFinal(field.getModifiers())) {
+            throw new FiberException("Field '" + field.getName() + "' can not be final");
+        }
     }
 
     private static Optional<Setting> getSettingAnnotation(Field field) {
@@ -266,6 +309,7 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 
     private <P> void fieldToNode(P pojo, ConfigTreeBuilder node, Field field, String name) throws FiberException {
         ConfigTreeBuilder sub = node.fork(name);
+
         try {
             field.setAccessible(true);
             this.applyToNode(sub, field.get(pojo));
@@ -305,6 +349,7 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
     private <C> void applyAnnotationProcessors(Object pojo, Field field, C sub, Map<Class<? extends Annotation>, ? extends ConfigAnnotationProcessor<?, Field, C>> settingProcessors) {
         for (Annotation annotation : field.getAnnotations()) {
             @SuppressWarnings("unchecked") ConfigAnnotationProcessor<Annotation, Field, C> processor = (ConfigAnnotationProcessor<Annotation, Field, C>) settingProcessors.get(annotation.annotationType());
+
             if (processor != null) {
                 processor.apply(annotation, field, pojo, sub);
             }
@@ -313,10 +358,13 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 
     private ConfigType<?, ?, ?> toConfigType(AnnotatedType annotatedType) throws FiberTypeProcessingException {
         Class<?> clazz = TypeMagic.classForType(annotatedType.getType());
+
         if (clazz == null) {
             throw new FiberTypeProcessingException("Unknown type " + annotatedType.getType().getTypeName());
         }
+
         ConfigType<?, ?, ?> ret;
+
         if (annotatedType instanceof AnnotatedArrayType) {
             ConfigType<?, ?, ?> componentType = this.toConfigType(((AnnotatedArrayType) annotatedType).getAnnotatedGenericComponentType());
             Class<?> componentClass = clazz.getComponentType();
@@ -324,48 +372,55 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
             ret = makeArrayConfigType(componentClass, componentType);
         } else if (this.registeredGenericTypes.containsKey(clazz)) {
             ParameterizedTypeProcessor<?> parameterizedTypeProcessor = this.registeredGenericTypes.get(clazz);
+
             if (!(annotatedType instanceof AnnotatedParameterizedType)) {
                 throw new FiberTypeProcessingException("Expected type parameters for " + clazz);
             }
+
             AnnotatedType[] annotatedTypeArgs = ((AnnotatedParameterizedType) annotatedType).getAnnotatedActualTypeArguments();
             ConfigType<?, ?, ?>[] typeArguments = new ConfigType[annotatedTypeArgs.length];
+
             for (int i = 0; i < annotatedTypeArgs.length; i++) {
                 typeArguments[i] = this.toConfigType(annotatedTypeArgs[i]);
             }
+
             ret = parameterizedTypeProcessor.process(typeArguments);
         } else {
             ret = this.registeredTypes.get(clazz);
         }
+
         if (ret == null) {
             Optional<Class<?>> closestParent = Stream.concat(this.registeredGenericTypes.keySet().stream(), this.registeredTypes.keySet().stream())
                     .filter(c -> c.isAssignableFrom(clazz))
                     .reduce((c1, c2) -> c1.isAssignableFrom(c2) ? c2 : c1);
             String closestParentSuggestion = closestParent.map(p -> "declaring the element as '" + p.getTypeName() + "', or ").orElse("");
-            throw new FiberTypeProcessingException("Unknown config type " + annotatedType.getType().getTypeName() +
-                    ". Consider marking as transient, or " + closestParentSuggestion + "registering a new Class -> ConfigType mapping.");
+            throw new FiberTypeProcessingException("Unknown config type " + annotatedType.getType().getTypeName()
+                    + ". Consider marking as transient, or " + closestParentSuggestion + "registering a new Class -> ConfigType mapping.");
         }
+
         return this.constrain(ret, annotatedType);
     }
 
     @SuppressWarnings("unchecked")
-    private ConfigType<?,?,?> makeArrayConfigType(Class<?> componentClass, ConfigType<?, ?, ?> componentType) {
+    private ConfigType<?, ?, ?> makeArrayConfigType(Class<?> componentClass, ConfigType<?, ?, ?> componentType) {
         assert TypeMagic.wrapPrimitive(componentClass) == TypeMagic.wrapPrimitive(componentType.getRuntimeType()) : "Class=" + componentClass + ", ConfigType=" + componentType;
-        if(componentClass == boolean.class) {
-            return ConfigTypes.makeBooleanArray((ConfigType<Boolean, ?, ?>)componentType);
-        } else if(componentClass == byte.class) {
-            return ConfigTypes.makeByteArray((ConfigType<Byte, ?, ?>)componentType);
-        } else if(componentClass == short.class) {
-            return ConfigTypes.makeShortArray((ConfigType<Short, ?, ?>)componentType);
-        } else if(componentClass == int.class) {
-            return ConfigTypes.makeIntArray((ConfigType<Integer, ?, ?>)componentType);
-        } else if(componentClass == long.class) {
-            return ConfigTypes.makeLongArray((ConfigType<Long, ?, ?>)componentType);
-        } else if(componentClass == float.class) {
-            return ConfigTypes.makeFloatArray((ConfigType<Float, ?, ?>)componentType);
-        } else if(componentClass == double.class) {
-            return ConfigTypes.makeDoubleArray((ConfigType<Double, ?, ?>)componentType);
-        } else if(componentClass == char.class) {
-            return ConfigTypes.makeCharArray((ConfigType<Character, ?, ?>)componentType);
+
+        if (componentClass == boolean.class) {
+            return ConfigTypes.makeBooleanArray((ConfigType<Boolean, ?, ?>) componentType);
+        } else if (componentClass == byte.class) {
+            return ConfigTypes.makeByteArray((ConfigType<Byte, ?, ?>) componentType);
+        } else if (componentClass == short.class) {
+            return ConfigTypes.makeShortArray((ConfigType<Short, ?, ?>) componentType);
+        } else if (componentClass == int.class) {
+            return ConfigTypes.makeIntArray((ConfigType<Integer, ?, ?>) componentType);
+        } else if (componentClass == long.class) {
+            return ConfigTypes.makeLongArray((ConfigType<Long, ?, ?>) componentType);
+        } else if (componentClass == float.class) {
+            return ConfigTypes.makeFloatArray((ConfigType<Float, ?, ?>) componentType);
+        } else if (componentClass == double.class) {
+            return ConfigTypes.makeDoubleArray((ConfigType<Double, ?, ?>) componentType);
+        } else if (componentClass == char.class) {
+            return ConfigTypes.makeCharArray((ConfigType<Character, ?, ?>) componentType);
         } else {
             assert !componentClass.isPrimitive() : "Primitive component type: " + componentClass;
             return ConfigTypes.makeArray(componentType);
@@ -374,6 +429,7 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 
     private <T extends ConfigType<?, ?, ?>> T constrain(T type, AnnotatedElement annotated) throws FiberTypeProcessingException {
         T ret = type;
+
         for (Annotation annotation : annotated.getAnnotations()) {
             @SuppressWarnings("unchecked") ConstraintAnnotationProcessor<Annotation> processor =
                     (ConstraintAnnotationProcessor<Annotation>) this.constraintProcessors.get(annotation.annotationType());
@@ -385,6 +441,7 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
                 }
             }
         }
+
         return ret;
     }
 
@@ -398,17 +455,20 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
         boolean accessible = field.isAccessible();
         field.setAccessible(true);
         T value;
+
         try {
             value = (T) field.get(pojo);
         } catch (IllegalAccessException e) {
             throw new FiberException("Couldn't get value for field '" + field.getName() + "'", e);
         }
+
         field.setAccessible(accessible);
         return value;
     }
 
     private <T> BiConsumer<T, T> constructListener(Member listener, Object pojo, Class<T> wantedType) throws FiberException {
         BiConsumer<T, T> result;
+
         if (listener instanceof Field) {
             result = this.constructListenerFromField((Field) listener, pojo, wantedType);
         } else if (listener instanceof Method) {
@@ -416,47 +476,52 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
         } else {
             throw new FiberException("Cannot create listener from " + listener + ": must be a field or method");
         }
+
         // note: we assume that a value coming from the IR is valid
         return result;
     }
 
-    private <T, P, A> BiConsumer<T,T> constructListenerFromMethod(Method method, P pojo, Class<A> wantedType) throws FiberException {
+    private <T, P, A> BiConsumer<T, T> constructListenerFromMethod(Method method, P pojo, Class<A> wantedType) throws FiberException {
         int i = this.checkListenerMethod(method, wantedType);
         method.setAccessible(true);
         final boolean staticMethod = Modifier.isStatic(method.getModifiers());
         switch (i) {
-            case 1:
-                return (oldValue, newValue) -> {
-                    try {
-                        method.invoke(staticMethod ? null : pojo, newValue);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        throw new RuntimeFiberException("Failed to invoke listener " + method + " with argument " + newValue, e);
-                    }
-                };
-            case 2:
-                return (oldValue, newValue) -> {
-                    try {
-                        method.invoke(staticMethod ? null : pojo, oldValue, newValue);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        throw new RuntimeFiberException("Failed to invoke listener " + method + " with arguments " + oldValue + ", " + newValue, e);
-                    }
-                };
-            default:
-                throw new FiberException("Listener failed due to an invalid number of arguments.");
+        case 1:
+            return (oldValue, newValue) -> {
+                try {
+                    method.invoke(staticMethod ? null : pojo, newValue);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    throw new RuntimeFiberException("Failed to invoke listener " + method + " with argument " + newValue, e);
+                }
+            };
+        case 2:
+            return (oldValue, newValue) -> {
+                try {
+                    method.invoke(staticMethod ? null : pojo, oldValue, newValue);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    throw new RuntimeFiberException("Failed to invoke listener " + method + " with arguments " + oldValue + ", " + newValue, e);
+                }
+            };
+        default:
+            throw new FiberException("Listener failed due to an invalid number of arguments.");
         }
     }
 
     private <A> int checkListenerMethod(Method method, Class<A> wantedType) throws FiberException {
         if (!method.getReturnType().equals(void.class)) throw new FiberException("Listener method must return void");
         int paramCount = method.getParameterCount();
-        if ((paramCount != 1 && paramCount != 2) || !method.getParameterTypes()[0].equals(wantedType)) throw new FiberException("Listener method must have exactly two parameters of type that it listens for");
+
+        if ((paramCount != 1 && paramCount != 2) || !method.getParameterTypes()[0].equals(wantedType)) {
+            throw new FiberException("Listener method must have exactly two parameters of type that it listens for");
+        }
+
         return paramCount;
     }
 
-    private <T, P, A> BiConsumer<T,T> constructListenerFromField(Field field, P pojo, Class<A> wantedType) throws FiberException {
+    private <T, P, A> BiConsumer<T, T> constructListenerFromField(Field field, P pojo, Class<A> wantedType) throws FiberException {
         this.checkListenerField(field, wantedType);
-
         field.setAccessible(true);
+
         try {
             @SuppressWarnings("unchecked") BiConsumer<T, T> consumer = (BiConsumer<T, T>) field.get(pojo);
             return consumer;
@@ -471,6 +536,7 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
         }
 
         ParameterizedType genericTypes = (ParameterizedType) field.getGenericType();
+
         if (genericTypes.getActualTypeArguments().length != 2) {
             throw new MalformedFieldException("Listener " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must have 2 generic types");
         } else if (genericTypes.getActualTypeArguments()[0] != genericTypes.getActualTypeArguments()[1]) {
@@ -486,9 +552,9 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 
     private static String findName(Field field, SettingNamingConvention convention) {
         return Optional.ofNullable(
-                field.isAnnotationPresent(Setting.Group.class) ?
-                        field.getAnnotation(Setting.Group.class).name() :
-                        getSettingAnnotation(field).map(Setting::name).orElse(null))
+                field.isAnnotationPresent(Setting.Group.class)
+                        ? field.getAnnotation(Setting.Group.class).name()
+                        : getSettingAnnotation(field).map(Setting::name).orElse(null))
                 .filter(s -> !s.isEmpty())
                 .orElse(convention.name(field.getName()));
     }

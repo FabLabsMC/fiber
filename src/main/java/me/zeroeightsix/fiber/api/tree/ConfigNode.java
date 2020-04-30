@@ -1,20 +1,20 @@
 package me.zeroeightsix.fiber.api.tree;
 
+import java.util.Map;
+import java.util.Optional;
+
+import javax.annotation.Nullable;
+
 import me.zeroeightsix.fiber.api.FiberId;
 import me.zeroeightsix.fiber.api.exception.DuplicateChildException;
 import me.zeroeightsix.fiber.api.exception.IllegalTreeStateException;
 import me.zeroeightsix.fiber.api.schema.type.SerializableType;
 import me.zeroeightsix.fiber.api.schema.type.derived.ConfigType;
 
-import javax.annotation.Nullable;
-import java.util.Map;
-import java.util.Optional;
-
 /**
  * The building block of a tree: every node implement this interface.
  */
 public interface ConfigNode {
-
     /**
      * Returns this node's name.
      *
@@ -25,11 +25,11 @@ public interface ConfigNode {
     /**
      * Returns the map describing the attributes of this node.
      *
-     * <p> Attributes store metadata pertaining to the node itself, rather than its value.
+     * <p>Attributes store metadata pertaining to the node itself, rather than its value.
      * The returned map can be mutated by third parties to supplement the default node metadata.
      * Examples of attributes include translation keys or rendering information.
      *
-     * <p> As the returned data structure is shared by every attribute source,
+     * <p>As the returned data structure is shared by every attribute source,
      * attributes should be grouped by namespace.
      *
      * @return this node's configurable attributes
@@ -85,11 +85,11 @@ public interface ConfigNode {
     /**
      * Attaches this node to an existing branch.
      *
-     * <p> After this method has returned normally, this node will be part
+     * <p>After this method has returned normally, this node will be part
      * of the branch's {@linkplain ConfigBranch#getItems() children}, and this
      * node's parent will be set to {@code parent}.
      *
-     * <p> If {@code parent} is {@code null}, this method does not mutate any state.
+     * <p>If {@code parent} is {@code null}, this method does not mutate any state.
      * It will however still throw {@code IllegalTreeStateException} if this node
      * is not in a suitable state to be attached to another parent. To detach the node
      * from its current parent, use {@link #detach()}.
@@ -104,14 +104,13 @@ public interface ConfigNode {
     /**
      * Detaches this node from its parent branch, if any.
      *
-     * <p> After this method has returned, this node will be removed from
+     * <p>After this method has returned, this node will be removed from
      * the current parent's {@linkplain ConfigBranch#getItems() children}, and this
      * node's parent will be set to {@code null}.
      *
-     * <p> This method has no effect is this node has no parent.
+     * <p>This method has no effect is this node has no parent.
      *
      * @see NodeCollection#remove(Object)
      */
     void detach();
-
 }

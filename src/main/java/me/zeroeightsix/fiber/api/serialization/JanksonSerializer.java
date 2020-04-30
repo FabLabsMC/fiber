@@ -1,17 +1,5 @@
 package me.zeroeightsix.fiber.api.serialization;
 
-import blue.endless.jankson.Jankson;
-import blue.endless.jankson.JsonElement;
-import blue.endless.jankson.JsonObject;
-import blue.endless.jankson.JsonPrimitive;
-import blue.endless.jankson.api.SyntaxError;
-import me.zeroeightsix.fiber.api.FiberId;
-import me.zeroeightsix.fiber.api.exception.FiberException;
-import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.api.tree.*;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -20,8 +8,25 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Objects;
 
-public class JanksonSerializer implements Serializer<JsonObject> {
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
+import blue.endless.jankson.Jankson;
+import blue.endless.jankson.JsonElement;
+import blue.endless.jankson.JsonObject;
+import blue.endless.jankson.JsonPrimitive;
+import blue.endless.jankson.api.SyntaxError;
+import me.zeroeightsix.fiber.api.FiberId;
+import me.zeroeightsix.fiber.api.exception.FiberException;
+import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
+import me.zeroeightsix.fiber.api.tree.Commentable;
+import me.zeroeightsix.fiber.api.tree.ConfigBranch;
+import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
+import me.zeroeightsix.fiber.api.tree.ConfigNode;
+import me.zeroeightsix.fiber.api.tree.ConfigTree;
+import me.zeroeightsix.fiber.api.tree.HasValue;
+
+public class JanksonSerializer implements Serializer<JsonObject> {
 	private static final FiberId IDENTIFIER = new FiberId("fiber", "jankson");
 
 	private final boolean compress;
@@ -41,27 +46,31 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 	public JsonObject deserialize(ConfigTree tree, InputStream stream) throws IOException, FiberException {
 		Jankson jankson = Jankson.builder().build();
 		JsonObject object;
+
 		try {
 			object = jankson.load(stream);
 		} catch (SyntaxError syntaxError) {
 			throw new FiberException("Configuration file was malformed", syntaxError);
 		}
+
 		return this.deserialize(tree, object);
 	}
 
 	@Override
 	public JsonObject deserialize(ConfigTree tree, JsonObject element) throws FiberException {
 		JsonObject leftovers = new JsonObject();
+
 		for (Map.Entry<String, JsonElement> entry : element.entrySet()) {
 			String key = entry.getKey();
 			JsonElement child = entry.getValue();
-
 			ConfigNode item = tree.lookup(key);
+
 			if (item != null) {
 				if (item instanceof ConfigLeaf) {
 					this.setPropertyValue((ConfigLeaf<?>) item, child);
 				} else if (item instanceof ConfigBranch && child instanceof JsonObject) {
 					JsonObject childLeftovers = this.deserialize((ConfigTree) item, (JsonObject) child);
+
 					if (!childLeftovers.isEmpty()) {
 						leftovers.put(key, childLeftovers);
 					}
@@ -72,6 +81,7 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 				leftovers.put(key, child);
 			}
 		}
+
 		return leftovers;
 	}
 
@@ -82,9 +92,11 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 	@Override
 	public void serialize(ConfigTree tree, @Nullable JsonObject additionalData, OutputStream out) throws IOException {
 		JsonObject object = this.serialize(tree);
+
 		if (additionalData != null) {
 			object.putAll(additionalData);
 		}
+
 		out.write(object.toJson(!compress, !compress).getBytes(StandardCharsets.UTF_8));
 	}
 
@@ -97,6 +109,7 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 
 			if (treeItem instanceof ConfigBranch) {
 				ConfigBranch subNode = (ConfigBranch) treeItem;
+
 				if (!subNode.isSerializedSeparately()) {
 					name = Objects.requireNonNull(subNode.getName());
 					object.put(name, this.serialize(subNode));
@@ -122,12 +135,14 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 		Class<T> type = property.getType();
 		// TODO figure out how we want to handle null values
 		T deserialized = this.marshall(type, child);
+
 		try {
 			property.setValue(deserialized);
 		} catch (NullPointerException e) {
-			if (deserialized == null) {	// probably caused by the unexpected null input
+			if (deserialized == null) {    // probably caused by the unexpected null input
 				throw new RuntimeFiberException("Failed to deserialize input '" + child + "' for " + property, e);
 			}
+
 			throw e;
 		}
 	}
@@ -160,13 +175,15 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 
 		private final blue.endless.jankson.api.Marshaller marshaller = Jankson.builder().build().getMarshaller();
 
-		private JanksonFallbackMarshaller() {}
+		private JanksonFallbackMarshaller() {
+		}
 
 		@Override
 		public JsonElement marshall(Object value) {
 			if (value instanceof BigDecimal) {
 				return new JsonPrimitive(value);
 			}
+
 			return this.marshaller.serialize(value);
 		}
 
@@ -176,10 +193,11 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 				if (value instanceof JsonPrimitive) {
 					return type.cast(new BigDecimal(((JsonPrimitive) value).asString()));
 				}
+
 				return null;
 			}
+
 			return marshaller.marshall(type, value);
 		}
 	}
-
 }

@@ -1,6 +1,5 @@
 package me.zeroeightsix.fiber.api.schema.type;
 
-
 import me.zeroeightsix.fiber.api.serialization.TypeSerializer;
 import me.zeroeightsix.fiber.impl.constraint.BooleanConstraintChecker;
 

@@ -1,14 +1,18 @@
 package me.zeroeightsix.fiber.impl.constraint;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Optional;
+
 import me.zeroeightsix.fiber.api.schema.type.ListSerializableType;
 import me.zeroeightsix.fiber.api.schema.type.TypeCheckResult;
-
-import java.util.*;
 
 /**
  * A component constraints is satisfied only if all elements in the aggregate type it checks satisfy the constraint.
  *
- * @param <E> the type of elements {@code <A>} holds
+ * @param <E> the type of elements {@code V} holds
  */
 public final class ListConstraintChecker<E> extends ConstraintChecker<List<E>, ListSerializableType<E>> {
     private static final ListConstraintChecker<?> INSTANCE = new ListConstraintChecker<>();
@@ -18,7 +22,8 @@ public final class ListConstraintChecker<E> extends ConstraintChecker<List<E>, L
         return t;
     }
 
-    private ListConstraintChecker() { }
+    private ListConstraintChecker() {
+    }
 
     @Override
     public TypeCheckResult<List<E>> test(ListSerializableType<E> cfg, List<E> values) {
@@ -31,7 +36,9 @@ public final class ListConstraintChecker<E> extends ConstraintChecker<List<E>, L
                 valid = false;
                 break;
             }
+
             TypeCheckResult<E> testResult = cfg.getElementType().test(e);
+
             if (testResult.hasPassed()) {
                 valid &= corrected.add(e);  // UNIQUE check
             } else {
@@ -41,6 +48,7 @@ public final class ListConstraintChecker<E> extends ConstraintChecker<List<E>, L
                 // if not present, just skip it
             }
         }
+
         if (corrected.size() < cfg.getMinSize()) {
             return TypeCheckResult.unrecoverable();
         }
@@ -53,12 +61,15 @@ public final class ListConstraintChecker<E> extends ConstraintChecker<List<E>, L
         if (cfg.getMinSize() > cfg2.getMinSize()) {
             return false;
         }
+
         if (cfg.getMaxSize() < cfg2.getMaxSize()) {
             return false;
         }
+
         if (!cfg.getElementType().isAssignableFrom(cfg2.getElementType())) {
             return false;
         }
+
         // "not unique" comprehends unique
         return !cfg.hasUniqueElements() || cfg2.hasUniqueElements();
     }

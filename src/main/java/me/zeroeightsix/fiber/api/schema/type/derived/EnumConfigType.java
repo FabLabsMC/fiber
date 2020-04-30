@@ -1,11 +1,11 @@
 package me.zeroeightsix.fiber.api.schema.type.derived;
 
-import me.zeroeightsix.fiber.api.annotation.processor.ConstraintAnnotationProcessor;
-import me.zeroeightsix.fiber.api.schema.type.EnumSerializableType;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.function.Function;
+
+import me.zeroeightsix.fiber.api.annotation.processor.ConstraintAnnotationProcessor;
+import me.zeroeightsix.fiber.api.schema.type.EnumSerializableType;
 
 public final class EnumConfigType<T> extends ConfigType<T, String, EnumSerializableType> {
     public EnumConfigType(EnumSerializableType serializedType, Class<T> runtimeType, Function<String, T> f, Function<T, String> f0) {

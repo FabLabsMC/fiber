@@ -1,15 +1,16 @@
 package me.zeroeightsix.fiber.impl.builder;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.annotation.Nullable;
+
 import me.zeroeightsix.fiber.api.FiberId;
 import me.zeroeightsix.fiber.api.schema.type.SerializableType;
 import me.zeroeightsix.fiber.api.tree.ConfigAttribute;
 import me.zeroeightsix.fiber.api.tree.ConfigNode;
 import me.zeroeightsix.fiber.api.tree.ConfigTree;
-
-import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
 
 public abstract class ConfigNodeBuilder {
     @Nullable
@@ -42,7 +43,7 @@ public abstract class ConfigNodeBuilder {
     /**
      * Sets the {@code ConfigNode}'s comment.
      *
-     * <p> If {@code null}, or if this method is never called, the {@code ConfigNode} will not have a comment.
+     * <p>If {@code null}, or if this method is never called, the {@code ConfigNode} will not have a comment.
      * An empty comment (non null, but only consisting of whitespace) will be serialised.
      *
      * @param comment the comment
@@ -61,6 +62,7 @@ public abstract class ConfigNodeBuilder {
         for (ConfigAttribute<?> attribute : attributes) {
             this.withAttribute(attribute);
         }
+
         return this;
     }
 

@@ -1,5 +1,14 @@
 package me.zeroeightsix.fiber.api.builder;
 
+import java.util.Collection;
+import java.util.Objects;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import me.zeroeightsix.fiber.api.FiberId;
 import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.api.schema.type.SerializableType;
@@ -11,14 +20,6 @@ import me.zeroeightsix.fiber.api.tree.ConfigTree;
 import me.zeroeightsix.fiber.impl.builder.ConfigNodeBuilder;
 import me.zeroeightsix.fiber.impl.tree.ConfigLeafImpl;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
 /**
  * A builder for {@code ConfigLeaf}s.
  *
@@ -26,7 +27,6 @@ import java.util.function.Function;
  * @see ConfigLeaf
  */
 public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
-
     public static <T, R> ConfigLeafBuilder<T, R> create(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull ConfigType<R, T, ?> type) {
         return new ConfigLeafBuilder<>(parentNode, name, type.getSerializedType(), type::toRuntimeType, type::toSerializedType);
     }
@@ -43,16 +43,17 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
     @Nullable
     private T defaultValue = null;
 
-    private BiConsumer<T, T> consumer = (t, t2) -> { };
+    private BiConsumer<T, T> consumer = (t, t2) -> {
+    };
 
     /**
      * Creates a new scalar {@code ConfigLeafBuilder}.
      *
-     * @param parentNode the {@code ConfigTreeBuilder} this builder originates from
-     * @param name       the name of the {@code ConfigLeaf} produced by this builder
-     * @param type       the class object representing the type of values this builder will create settings for
-     * @param deserializer          a deserializing function
-     * @param serializer         a serializing function
+     * @param parentNode   the {@code ConfigTreeBuilder} this builder originates from
+     * @param name         the name of the {@code ConfigLeaf} produced by this builder
+     * @param type         the class object representing the type of values this builder will create settings for
+     * @param deserializer a deserializing function
+     * @param serializer   a serializing function
      */
     private ConfigLeafBuilder(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull SerializableType<T> type, Function<T, R> deserializer, Function<R, T> serializer) {
         super(parentNode, name);
@@ -82,7 +83,7 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
     /**
      * Sets the {@code ConfigLeaf}'s comment.
      *
-     * <p> If {@code null}, or if this method is never called, the {@code ConfigLeaf} won't have a comment.
+     * <p>If {@code null}, or if this method is never called, the {@code ConfigLeaf} won't have a comment.
      * An empty comment (non null, but only consisting of whitespace) will be serialised.
      *
      * @param comment the comment
@@ -125,9 +126,9 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
     /**
      * Adds a listener to the {@code ConfigLeaf}.
      *
-     * <p> Listeners are called when the value of a {@code ConfigLeaf} is changed. They are of type {@link BiConsumer}: the first argument being the old value, and the second argument being the new value.
+     * <p>Listeners are called when the value of a {@code ConfigLeaf} is changed. They are of type {@link BiConsumer}: the first argument being the old value, and the second argument being the new value.
      *
-     * <p> Listeners set with this method are chained: if there was already one specified, a new listener is created that calls the old one first, and then the new one.
+     * <p>Listeners set with this method are chained: if there was already one specified, a new listener is created that calls the old one first, and then the new one.
      *
      * @param consumer the listener
      * @return {@code this} builder
@@ -141,9 +142,9 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
     /**
      * Sets the default value.
      *
-     * <p> If {@code null}, or if this method is never called, the {@code ConfigLeaf} will have no default value.
+     * <p>If {@code null}, or if this method is never called, the {@code ConfigLeaf} will have no default value.
      *
-     * <p> Note that every {@code ConfigLeaf} created from this builder will share a reference
+     * <p>Note that every {@code ConfigLeaf} created from this builder will share a reference
      * to the given {@code defaultValue}. Immutability is encouraged.
      *
      * @param defaultValue the default value
@@ -157,9 +158,9 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
     /**
      * Builds the {@code ConfigLeaf}.
      *
-     * <p> If a parent was specified in the constructor, the {@code ConfigLeaf} will also be registered to its parent node.
+     * <p>If a parent was specified in the constructor, the {@code ConfigLeaf} will also be registered to its parent node.
      *
-     * <p> This method should not be called multiple times <em>if the default value is intended to be mutated</em>.
+     * <p>This method should not be called multiple times <em>if the default value is intended to be mutated</em>.
      * Multiple calls will result in duplicated references to the default value.
      *
      * @return the {@code ConfigLeaf}
@@ -171,6 +172,7 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
                 throw new RuntimeFiberException("Default value '" + this.defaultValue + "' does not satisfy constraints on type " + this.type);
             }
         }
+
         ConfigLeaf<T> built = new ConfigLeafImpl<>(Objects.requireNonNull(name, "Cannot build a value without a name"), type, comment, defaultValue, consumer);
         built.getAttributes().putAll(this.attributes);
 
@@ -189,7 +191,8 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
     }
 
     public ConfigTreeBuilder finishValue() {
-        return finishValue(n -> {});
+        return finishValue(n -> {
+        });
     }
 
     public ConfigTreeBuilder finishValue(Consumer<ConfigLeaf<T>> action) {

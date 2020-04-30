@@ -1,5 +1,13 @@
 package me.zeroeightsix.fiber.builder.constraint;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import me.zeroeightsix.fiber.api.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.api.schema.type.derived.ConfigTypes;
@@ -11,16 +19,7 @@ import me.zeroeightsix.fiber.api.tree.PropertyMirror;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 class ConstraintsTest {
-
     @DisplayName("Test numerical constraints")
     @Test
     public void testNumericalConstraints() {
@@ -47,14 +46,14 @@ class ConstraintsTest {
 
         assertFalse(mirror.setValue(new Integer[0]), "unrecoverable size issue");
         assertFalse(mirror.accepts(new Integer[0]), "invalid size");
-        assertTrue(mirror.setValue(new Integer[]{4, 5, 6}), "valid array");
-        assertTrue(mirror.accepts(new Integer[]{4, 5, 6}), "valid array");
-        assertTrue(mirror.setValue(new Integer[]{1, 2}), "recoverable elements");
-        assertFalse(mirror.accepts(new Integer[]{1, 2}), "invalid elements");
-        assertTrue(mirror.setValue(new Integer[]{5, 6, 7, 8}), "recoverable size");
-        assertFalse(mirror.accepts(new Integer[]{5, 6, 7, 8}), "invalid size");
-        assertTrue(mirror.setValue(new Integer[]{9, 10, 11}), "recoverable elements");
-        assertFalse(mirror.accepts(new Integer[]{9, 10, 11}), "invalid elements");
+        assertTrue(mirror.setValue(new Integer[] {4, 5, 6}), "valid array");
+        assertTrue(mirror.accepts(new Integer[] {4, 5, 6}), "valid array");
+        assertTrue(mirror.setValue(new Integer[] {1, 2}), "recoverable elements");
+        assertFalse(mirror.accepts(new Integer[] {1, 2}), "invalid elements");
+        assertTrue(mirror.setValue(new Integer[] {5, 6, 7, 8}), "recoverable size");
+        assertFalse(mirror.accepts(new Integer[] {5, 6, 7, 8}), "invalid size");
+        assertTrue(mirror.setValue(new Integer[] {9, 10, 11}), "recoverable elements");
+        assertFalse(mirror.accepts(new Integer[] {9, 10, 11}), "invalid elements");
     }
 
     @DisplayName("Test collection aggregate constraints")

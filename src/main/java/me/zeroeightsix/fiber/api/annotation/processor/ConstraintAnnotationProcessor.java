@@ -1,17 +1,23 @@
 package me.zeroeightsix.fiber.api.annotation.processor;
 
-import me.zeroeightsix.fiber.api.annotation.AnnotatedSettings;
-import me.zeroeightsix.fiber.api.schema.type.derived.*;
-import me.zeroeightsix.fiber.api.tree.ConfigTree;
-
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.reflect.AnnotatedElement;
 
+import me.zeroeightsix.fiber.api.annotation.AnnotatedSettings;
+import me.zeroeightsix.fiber.api.schema.type.derived.BooleanConfigType;
+import me.zeroeightsix.fiber.api.schema.type.derived.EnumConfigType;
+import me.zeroeightsix.fiber.api.schema.type.derived.ListConfigType;
+import me.zeroeightsix.fiber.api.schema.type.derived.MapConfigType;
+import me.zeroeightsix.fiber.api.schema.type.derived.NumberConfigType;
+import me.zeroeightsix.fiber.api.schema.type.derived.RecordConfigType;
+import me.zeroeightsix.fiber.api.schema.type.derived.StringConfigType;
+import me.zeroeightsix.fiber.api.tree.ConfigTree;
+
 /**
  * An annotation processor for constraints on config types.
  *
- * <p> Annotations made for this type of processor should
+ * <p>Annotations made for this type of processor should
  * specifically target {@link ElementType#TYPE_USE}.
  *
  * @param <A> the type of annotations processed
@@ -69,7 +75,7 @@ public interface ConstraintAnnotationProcessor<A extends Annotation> {
         throw new UnsupportedOperationException("Invalid annotation " + annotation.annotationType() + " for type " + baseType);
     }
 
-    default <R, V> MapConfigType<R,V> processMap(MapConfigType<R, V> baseType, A annotation, AnnotatedElement annotated) {
+    default <R, V> MapConfigType<R, V> processMap(MapConfigType<R, V> baseType, A annotation, AnnotatedElement annotated) {
         throw new UnsupportedOperationException("Invalid annotation " + annotation.annotationType() + " for type " + baseType);
     }
 }

@@ -1,17 +1,24 @@
 package me.zeroeightsix.fiber.impl.tree;
 
-import me.zeroeightsix.fiber.api.tree.ConfigBranch;
-import me.zeroeightsix.fiber.api.tree.ConfigNode;
-import me.zeroeightsix.fiber.api.exception.DuplicateChildException;
-import me.zeroeightsix.fiber.api.tree.NodeCollection;
+import java.util.AbstractCollection;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Spliterator;
+import java.util.TreeMap;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.*;
+
+import me.zeroeightsix.fiber.api.exception.DuplicateChildException;
+import me.zeroeightsix.fiber.api.tree.ConfigBranch;
+import me.zeroeightsix.fiber.api.tree.ConfigNode;
+import me.zeroeightsix.fiber.api.tree.NodeCollection;
 
 public class IndexedNodeCollection extends AbstractCollection<ConfigNode> implements NodeCollection {
     private final Map<String, ConfigNode> items = new TreeMap<>();
-    @Nullable private final ConfigBranch owner;
+    @Nullable
+    private final ConfigBranch owner;
 
     public IndexedNodeCollection(@Nullable ConfigBranch owner) {
         this.owner = owner;
@@ -20,8 +27,9 @@ public class IndexedNodeCollection extends AbstractCollection<ConfigNode> implem
     @Nonnull
     @Override
     public Iterator<ConfigNode> iterator() {
-    return new Iterator<ConfigNode>() {
-            @Nullable private ConfigNode last;
+        return new Iterator<ConfigNode>() {
+            @Nullable
+            private ConfigNode last;
             private final Iterator<ConfigNode> backing = items.values().iterator();
 
             @Override
@@ -58,11 +66,13 @@ public class IndexedNodeCollection extends AbstractCollection<ConfigNode> implem
     @Override
     public boolean add(ConfigNode item, boolean overwrite) throws DuplicateChildException {
         Objects.requireNonNull(item);
+
         if (overwrite) {
             this.removeByName(item.getName());
         } else if (this.items.containsKey(item.getName())) {
             throw new DuplicateChildException("Attempt to replace node " + item.getName());
         }
+
         this.items.put(item.getName(), item);
         item.attachTo(this.owner);
         return true;
@@ -73,6 +83,7 @@ public class IndexedNodeCollection extends AbstractCollection<ConfigNode> implem
         if (o instanceof ConfigNode) {
             return Objects.equals(this.items.get(((ConfigNode) o).getName()), o);
         }
+
         return false;
     }
 
@@ -80,11 +91,13 @@ public class IndexedNodeCollection extends AbstractCollection<ConfigNode> implem
     public boolean remove(@Nullable Object child) {
         if (child instanceof ConfigNode) {
             boolean removed = this.items.remove(((ConfigNode) child).getName(), child);
+
             if (removed) {
                 ((ConfigNode) child).detach();
                 return true;
             }
         }
+
         return false;
     }
 
@@ -102,9 +115,11 @@ public class IndexedNodeCollection extends AbstractCollection<ConfigNode> implem
     @Nullable
     public ConfigNode removeByName(String name) {
         ConfigNode removed = this.items.remove(name);
+
         if (removed != null) {
             removed.detach();
         }
+
         return removed;
     }
 }

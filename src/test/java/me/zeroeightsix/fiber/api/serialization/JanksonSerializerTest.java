@@ -1,5 +1,15 @@
 package me.zeroeightsix.fiber.api.serialization;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.Objects;
+import java.util.function.Function;
+
 import blue.endless.jankson.JsonElement;
 import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.JsonPrimitive;
@@ -14,18 +24,7 @@ import me.zeroeightsix.fiber.api.tree.PropertyMirror;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.util.Objects;
-import java.util.function.Function;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 class JanksonSerializerTest {
-
     public static final NumberConfigType<Integer> INT_TYPE = ConfigTypes.INTEGER.derive(int.class, Function.identity(), Function.identity());
 
     @Test
@@ -55,14 +54,14 @@ class JanksonSerializerTest {
         JanksonSerializer jk = new JanksonSerializer();
         ConfigTree nodeOne = ConfigTree.builder()
                 .fork("child")
-                    .withValue("A", ConfigTypes.INTEGER, 10)
+                .withValue("A", ConfigTypes.INTEGER, 10)
                 .finishBranch()
                 .build();
 
         ConfigTreeBuilder builderTwo = ConfigTree.builder();
         ConfigTree childTwo = builderTwo
                 .fork("child")
-                    .withValue("A", ConfigTypes.INTEGER, 20)
+                .withValue("A", ConfigTypes.INTEGER, 20)
                 .build();
         ConfigTree nodeTwo = builderTwo.build();
 
@@ -81,8 +80,8 @@ class JanksonSerializerTest {
                 .beginValue("version", ConfigTypes.STRING.getSerializedType(), "0.1")
                 .finishValue(versionOne::mirror)
                 .fork("child")
-                    .beginValue("A", ConfigTypes.INTEGER, 30)
-                    .finishValue(settingOne::mirror)
+                .beginValue("A", ConfigTypes.INTEGER, 30)
+                .finishValue(settingOne::mirror)
                 .finishBranch()
                 .build();
 
@@ -152,6 +151,7 @@ class JanksonSerializerTest {
                             object.put("some_b", new JsonPrimitive(((SomeObject) value).b));
                             return object;
                         }
+
                         return null;
                     }
 
@@ -164,6 +164,7 @@ class JanksonSerializerTest {
                                     object.get(String.class, "some_b")
                             ));
                         }
+
                         return null;
                     }
                 }), false
@@ -192,7 +193,7 @@ class JanksonSerializerTest {
         private final int a;
         private final String b;
 
-        public SomeObject(int a, String b) {
+        SomeObject(int a, String b) {
             this.a = a;
             this.b = b;
         }
@@ -202,8 +203,8 @@ class JanksonSerializerTest {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
             SomeObject that = (SomeObject) o;
-            return a == that.a &&
-                    Objects.equals(b, that.b);
+            return a == that.a
+                    && Objects.equals(b, that.b);
         }
 
         @Override
@@ -211,5 +212,4 @@ class JanksonSerializerTest {
             return Objects.hash(a, b);
         }
     }
-
 }

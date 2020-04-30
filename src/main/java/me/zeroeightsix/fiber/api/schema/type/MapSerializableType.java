@@ -1,14 +1,13 @@
 package me.zeroeightsix.fiber.api.schema.type;
 
-import me.zeroeightsix.fiber.api.serialization.TypeSerializer;
-import me.zeroeightsix.fiber.impl.constraint.MapConstraintChecker;
-
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 
-public final class MapSerializableType<V> extends SerializableType<Map<String, V>> {
+import me.zeroeightsix.fiber.api.serialization.TypeSerializer;
+import me.zeroeightsix.fiber.impl.constraint.MapConstraintChecker;
 
+public final class MapSerializableType<V> extends SerializableType<Map<String, V>> {
     private final StringSerializableType keyType;
     private final SerializableType<V> valueType;
     private final int minSize;
@@ -57,9 +56,9 @@ public final class MapSerializableType<V> extends SerializableType<Map<String, V
         if (this == o) return true;
         if (o == null || this.getClass() != o.getClass()) return false;
         MapSerializableType<?> that = (MapSerializableType<?>) o;
-        return this.minSize == that.minSize &&
-                this.maxSize == that.maxSize &&
-                Objects.equals(this.valueType, that.valueType);
+        return this.minSize == that.minSize
+                && this.maxSize == that.maxSize
+                && Objects.equals(this.valueType, that.valueType);
     }
 
     @Override

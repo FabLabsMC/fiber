@@ -1,23 +1,25 @@
 package me.zeroeightsix.fiber.api;
 
-import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
-import me.zeroeightsix.fiber.api.tree.*;
-import me.zeroeightsix.fiber.api.exception.DuplicateChildException;
-
 import java.util.Iterator;
 
-public class NodeOperations {
+import me.zeroeightsix.fiber.api.exception.DuplicateChildException;
+import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
+import me.zeroeightsix.fiber.api.tree.ConfigBranch;
+import me.zeroeightsix.fiber.api.tree.ConfigNode;
+import me.zeroeightsix.fiber.api.tree.ConfigTree;
+import me.zeroeightsix.fiber.api.tree.Property;
 
+public class NodeOperations {
     /**
      * Merges two {@code ConfigTree}s.
      *
-     * <p> The first parameter {@code from} will be stripped of its children,
+     * <p>The first parameter {@code from} will be stripped of its children,
      * and {@code to} will receive all of {@code from}'s children.
      *
-     * <p> If both nodes have one or more children with the same name, the child from {@code from} takes priority.
+     * <p>If both nodes have one or more children with the same name, the child from {@code from} takes priority.
      *
-     * @param from  The {@code ConfigNode} that will be read from, but not mutated.
-     * @param to    The mutated {@link ConfigBranch} that will inherit <code>from</code>'s values and nodes.
+     * @param from The {@code ConfigNode} that will be read from, but not mutated.
+     * @param to   The mutated {@link ConfigBranch} that will inherit <code>from</code>'s values and nodes.
      */
     public static void moveChildren(ConfigTree from, ConfigTree to) {
         try {
@@ -34,7 +36,7 @@ public class NodeOperations {
     /**
      * Moves a node ({@code ConfigNode}) to a new parent {@code ConfigTree}.
      *
-     * <p> If the moved node has an existing parent, it will be detached.
+     * <p>If the moved node has an existing parent, it will be detached.
      * If the new parent has an existing node with the same name, it will be overwritten.
      *
      * @param value The leaf node to be inherited

@@ -1,15 +1,14 @@
 package me.zeroeightsix.fiber.api.schema.type.derived;
 
-import me.zeroeightsix.fiber.api.annotation.processor.ConstraintAnnotationProcessor;
-import me.zeroeightsix.fiber.api.schema.type.ListSerializableType;
-
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.util.List;
 import java.util.function.Function;
 
-public final class ListConfigType<R, E> extends ConfigType<R, List<E>, ListSerializableType<E>> {
+import me.zeroeightsix.fiber.api.annotation.processor.ConstraintAnnotationProcessor;
+import me.zeroeightsix.fiber.api.schema.type.ListSerializableType;
 
+public final class ListConfigType<R, E> extends ConfigType<R, List<E>, ListSerializableType<E>> {
     @SuppressWarnings("unchecked")
     public ListConfigType(ListSerializableType<E> serializedType, Class<? super R> runtimeType, Function<List<E>, R> f, Function<R, List<E>> f0) {
         super(serializedType, (Class<R>) runtimeType, f, f0);

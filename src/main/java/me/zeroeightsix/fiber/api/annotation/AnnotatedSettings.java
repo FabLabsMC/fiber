@@ -1,5 +1,7 @@
 package me.zeroeightsix.fiber.api.annotation;
 
+import java.lang.annotation.Annotation;
+
 import me.zeroeightsix.fiber.api.annotation.processor.BranchAnnotationProcessor;
 import me.zeroeightsix.fiber.api.annotation.processor.ConstraintAnnotationProcessor;
 import me.zeroeightsix.fiber.api.annotation.processor.LeafAnnotationProcessor;
@@ -9,8 +11,6 @@ import me.zeroeightsix.fiber.api.schema.type.derived.ConfigType;
 import me.zeroeightsix.fiber.api.tree.ConfigBranch;
 import me.zeroeightsix.fiber.api.tree.ConfigTree;
 import me.zeroeightsix.fiber.impl.annotation.AnnotatedSettingsImpl;
-
-import java.lang.annotation.Annotation;
 
 public interface AnnotatedSettings {
     AnnotatedSettings DEFAULT_SETTINGS = create();
@@ -60,5 +60,4 @@ public interface AnnotatedSettings {
      * @return {@code this}, for chaining
      */
     <A extends Annotation> AnnotatedSettings registerConstraintProcessor(Class<A> annotationType, ConstraintAnnotationProcessor<A> processor);
-
 }

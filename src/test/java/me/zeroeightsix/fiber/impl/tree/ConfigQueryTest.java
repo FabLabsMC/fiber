@@ -1,5 +1,12 @@
 package me.zeroeightsix.fiber.impl.tree;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.concurrent.atomic.AtomicReference;
+
 import me.zeroeightsix.fiber.api.exception.FiberQueryException;
 import me.zeroeightsix.fiber.api.schema.type.derived.ConfigTypes;
 import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
@@ -7,12 +14,7 @@ import me.zeroeightsix.fiber.api.tree.ConfigQuery;
 import me.zeroeightsix.fiber.api.tree.ConfigTree;
 import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.atomic.AtomicReference;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 class ConfigQueryTest {
-
     @Test
     void run() throws FiberQueryException {
         AtomicReference<ConfigLeaf<?>> a = new AtomicReference<>();

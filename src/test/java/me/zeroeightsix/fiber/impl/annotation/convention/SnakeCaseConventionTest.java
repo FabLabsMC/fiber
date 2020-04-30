@@ -1,13 +1,12 @@
 package me.zeroeightsix.fiber.impl.annotation.convention;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import me.zeroeightsix.fiber.api.annotation.convention.SnakeCaseConvention;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 class SnakeCaseConventionTest extends SnakeCaseConvention {
-
     private static final String[] STRINGS = {
             "Hello world",
             "helloWorld",
@@ -26,5 +25,4 @@ class SnakeCaseConventionTest extends SnakeCaseConvention {
             assertEquals(EXPECTED, name(s), "Converting " + s + " to " + EXPECTED);
         }
     }
-
 }

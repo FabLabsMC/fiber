@@ -1,5 +1,11 @@
 package me.zeroeightsix.fiber.api;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.math.BigDecimal;
+
 import me.zeroeightsix.fiber.api.builder.ConfigLeafBuilder;
 import me.zeroeightsix.fiber.api.builder.ConfigTreeBuilder;
 import me.zeroeightsix.fiber.api.schema.type.SerializableType;
@@ -10,12 +16,7 @@ import me.zeroeightsix.fiber.api.tree.ConfigTree;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
-
-import static org.junit.jupiter.api.Assertions.*;
-
 public class NodeOperationsTest {
-
     @Test
     @DisplayName("Node -> Node")
     void moveChildren() {
@@ -55,7 +56,7 @@ public class NodeOperationsTest {
         testItemFor(ConfigTypes.INTEGER.getSerializedType(), BigDecimal.TEN, valueTwo);
     }
 
-   public static <T> void testNodeFor(ConfigTree node, String name, SerializableType<T> type, T value) {
+    public static <T> void testNodeFor(ConfigTree node, String name, SerializableType<T> type, T value) {
         ConfigNode item = node.lookup(name);
         testItemFor(type, value, item);
     }

@@ -8,11 +8,10 @@ package me.zeroeightsix.fiber.api.tree;
  * @see Property#setValue(Object)
  */
 public interface Property<T> extends HasValue<T> {
-
     /**
      * Sets the value of this property.
      *
-     * <p> This can fail and return {@code false} if, for example, the value did not satisfy the constraints of the property.
+     * <p>This can fail and return {@code false} if, for example, the value did not satisfy the constraints of the property.
      * This operation can still succeed with a {@linkplain #accepts(Object) rejected} value,
      * if eg. a corrected value can be found.
      *

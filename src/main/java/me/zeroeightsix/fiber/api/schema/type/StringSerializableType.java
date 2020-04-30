@@ -1,12 +1,13 @@
 package me.zeroeightsix.fiber.api.schema.type;
 
-import me.zeroeightsix.fiber.api.serialization.TypeSerializer;
-import me.zeroeightsix.fiber.impl.constraint.StringConstraintChecker;
-
-import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.regex.Pattern;
+
+import javax.annotation.Nullable;
+
+import me.zeroeightsix.fiber.api.serialization.TypeSerializer;
+import me.zeroeightsix.fiber.impl.constraint.StringConstraintChecker;
 
 public final class StringSerializableType extends SerializableType<String> {
     public static final StringSerializableType DEFAULT_STRING = new StringSerializableType(0, Integer.MAX_VALUE, null);
@@ -26,7 +27,7 @@ public final class StringSerializableType extends SerializableType<String> {
     /**
      * Specifies a minimum string length.
      *
-     * <p> Values must be of equal or longer length than the returned value to satisfy the constraint.
+     * <p>Values must be of equal or longer length than the returned value to satisfy the constraint.
      * For example: if the min length is 3.
      * <ul>
      *     <li> {@code "AB"} would not satisfy the constraint</li>
@@ -40,11 +41,11 @@ public final class StringSerializableType extends SerializableType<String> {
     /**
      * Specifies a maximum string length.
      *
-     * <p> Values must be of equal or shorter length than the returned value to satisfy the constraint.
+     * <p>Values must be of equal or shorter length than the returned value to satisfy the constraint.
      * For example: if the max length is 3.
      * <ul>
      *     <li> {@code "AB"} and {@code "ABC"} would satisfy the constraint</li>
-     *     <li>{@code "ABCD"} would not satisfy the constraint</li>
+     *     <li> {@code "ABCD"} would not satisfy the constraint</li>
      * </ul>
      */
     public int getMaxLength() {
@@ -54,7 +55,7 @@ public final class StringSerializableType extends SerializableType<String> {
     /**
      * Specifies a pattern that must match.
      *
-     * <p> Values must match the constraint's value, which is a regular expression (regex).
+     * <p>Values must match the constraint's value, which is a regular expression (regex).
      */
     @Nullable
     public Pattern getPattern() {
@@ -71,9 +72,9 @@ public final class StringSerializableType extends SerializableType<String> {
         if (this == o) return true;
         if (o == null || this.getClass() != o.getClass()) return false;
         StringSerializableType that = (StringSerializableType) o;
-        return this.minLength == that.minLength &&
-                this.maxLength == that.maxLength &&
-                Objects.equals(this.pattern, that.pattern);
+        return this.minLength == that.minLength
+                && this.maxLength == that.maxLength
+                && Objects.equals(this.pattern, that.pattern);
     }
 
     @Override

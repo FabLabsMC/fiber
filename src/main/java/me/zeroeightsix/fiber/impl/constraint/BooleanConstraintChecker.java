@@ -10,7 +10,8 @@ public class BooleanConstraintChecker extends ConstraintChecker<Boolean, Boolean
         return INSTANCE;
     }
 
-    private BooleanConstraintChecker() { }
+    private BooleanConstraintChecker() {
+    }
 
     @Override
     public TypeCheckResult<Boolean> test(BooleanSerializableType cfg, Boolean value) {

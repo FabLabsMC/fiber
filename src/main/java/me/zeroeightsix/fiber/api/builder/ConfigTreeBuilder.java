@@ -1,5 +1,11 @@
 package me.zeroeightsix.fiber.api.builder;
 
+import java.util.Collection;
+import java.util.function.Consumer;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+
 import me.zeroeightsix.fiber.api.FiberId;
 import me.zeroeightsix.fiber.api.annotation.AnnotatedSettings;
 import me.zeroeightsix.fiber.api.annotation.Setting;
@@ -11,22 +17,23 @@ import me.zeroeightsix.fiber.api.exception.RuntimeFiberException;
 import me.zeroeightsix.fiber.api.schema.type.SerializableType;
 import me.zeroeightsix.fiber.api.schema.type.derived.ConfigType;
 import me.zeroeightsix.fiber.api.schema.type.derived.ConfigTypes;
-import me.zeroeightsix.fiber.api.tree.*;
+import me.zeroeightsix.fiber.api.tree.ConfigAttribute;
+import me.zeroeightsix.fiber.api.tree.ConfigBranch;
+import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
+import me.zeroeightsix.fiber.api.tree.ConfigNode;
+import me.zeroeightsix.fiber.api.tree.ConfigTree;
+import me.zeroeightsix.fiber.api.tree.NodeCollection;
+import me.zeroeightsix.fiber.api.tree.Property;
+import me.zeroeightsix.fiber.api.tree.PropertyMirror;
 import me.zeroeightsix.fiber.impl.builder.ConfigNodeBuilder;
 import me.zeroeightsix.fiber.impl.tree.ConfigBranchImpl;
 import me.zeroeightsix.fiber.impl.tree.ConfigLeafImpl;
 import me.zeroeightsix.fiber.impl.tree.IndexedNodeCollection;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import java.util.Collection;
-import java.util.function.Consumer;
-
 /**
  * A builder for configuration trees/branches.
  *
- * <p> Usage example:
+ * <p>Usage example:
  * <pre>{@code
  * ConfigBranch config = ConfigTree.builder()
  *         .withValue("A", ConfigTypes.INTEGER, 10)
@@ -66,7 +73,7 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
     /**
      * Returns a collection of this builder's children.
      *
-     * <p> The returned collection is guaranteed to have no two nodes with the same name.
+     * <p>The returned collection is guaranteed to have no two nodes with the same name.
      * Elements may be freely added and removed from it.
      *
      * @return the set of children
@@ -103,18 +110,23 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
     @Override
     public <T> ConfigLeaf<T> lookupLeaf(String name, SerializableType<T> type) {
         ConfigNode ret = this.lookup(name);
-        if (ret instanceof ConfigLeaf<?> && type.isAssignableFrom(((ConfigLeaf<?>) ret).getConfigType()))
+
+        if (ret instanceof ConfigLeaf<?> && type.isAssignableFrom(((ConfigLeaf<?>) ret).getConfigType())) {
             return (ConfigLeaf<T>) ret;
+        }
+
         return null;
     }
 
     @Override
     public boolean lookupAndBind(String name, PropertyMirror<?> mirror) {
         ConfigLeaf<?> leaf = this.lookupLeaf(name, mirror.getConverter().getSerializedType());
+
         if (leaf != null) {
             mirror.mirror(leaf);
             return true;
         }
+
         return false;
     }
 
@@ -141,7 +153,7 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
     /**
      * Sets the {@code ConfigBranch}'s comment.
      *
-     * <p> If {@code null}, or if this method is never called, the {@code ConfigLeaf} won't have a comment.
+     * <p>If {@code null}, or if this method is never called, the {@code ConfigLeaf} won't have a comment.
      * An empty comment (non null, but only consisting of whitespace) will be serialised.
      *
      * @param comment the comment
@@ -184,11 +196,11 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
     /**
      * Marks the built subtree as being serialized separately.
      *
-     * <p> A subtree marked for separate serialization will not appear in the
+     * <p>A subtree marked for separate serialization will not appear in the
      * serialized representation of its ancestors. This property can be useful
      * when partitioning a big configuration tree into several files.
      *
-     * <p> This method has no effect if the built node is a tree root.
+     * <p>This method has no effect if the built node is a tree root.
      *
      * @return {@code this}, for chaining
      * @see #withSeparateSerialization()
@@ -202,12 +214,12 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
     /**
      * Sets whether a subtree should be serialized separately.
      *
-     * <p> If {@code serializeSeparately} is {@code true}, the subtree created
+     * <p>If {@code serializeSeparately} is {@code true}, the subtree created
      * from this builder will not appear in the serialized representation of the
      * ancestor. This property can be especially useful when partitioning a
      * big configuration tree into several files.
      *
-     * <p> This method has no effect if the built node is a tree root.
+     * <p>This method has no effect if the built node is a tree root.
      *
      * @param serializeSeparately {@code true} if the built tree should be serialized separately
      * @return {@code this}, for chaining
@@ -220,11 +232,11 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
     /**
      * Configure this builder using a POJO (Plain Old Java Object).
      *
-     * <p> The node's structure will be based on the {@code pojo}'s fields,
+     * <p>The node's structure will be based on the {@code pojo}'s fields,
      * recursively generating settings. The generated settings can be configured
      * in the {@code pojo}'s class declaration, using annotations such as {@link Setting}.
      *
-     * <p> The generated {@link ConfigLeaf}s will be bound to their respective fields,
+     * <p>The generated {@link ConfigLeaf}s will be bound to their respective fields,
      * setting the latter when the former's value is {@linkplain ConfigLeaf#setValue(Object) updated}.
      *
      * @param pojo an object serving as a base to reflectively generate a config tree
@@ -240,11 +252,11 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
     /**
      * Configure this builder using a POJO (Plain Old Java Object).
      *
-     * <p> The node's structure will be based on the {@code pojo}'s fields,
+     * <p>The node's structure will be based on the {@code pojo}'s fields,
      * recursively generating settings. The generated settings can be configured
      * in the {@code pojo}'s class declaration, using annotations such as {@link Setting}.
      *
-     * <p> The generated {@link ConfigLeaf}s will be bound to their respective fields,
+     * <p>The generated {@link ConfigLeaf}s will be bound to their respective fields,
      * setting the latter when the former's value is {@linkplain ConfigLeaf#setValue(Object) updated}.
      *
      * @param pojo     an object serving as a base to reflectively generate a config tree
@@ -280,7 +292,7 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
     /**
      * Adds a {@code ConfigLeaf} with the given type and default value to the tree.
      *
-     * <p> This method allows only basic configuration of the created leaf.
+     * <p>This method allows only basic configuration of the created leaf.
      * For more flexibility, {@link #beginValue} can be used.
      *
      * @param name         the name of the child leaf
@@ -292,7 +304,8 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
      * @see ConfigTypes
      */
     public <T> ConfigTreeBuilder withValue(@Nonnull String name, @Nonnull SerializableType<T> type, @Nullable T defaultValue) {
-        this.items.add(new ConfigLeafImpl<>(name, type, null, defaultValue, (a, b) -> { }));
+        this.items.add(new ConfigLeafImpl<>(name, type, null, defaultValue, (a, b) -> {
+        }));
         return this;
     }
 
@@ -305,7 +318,7 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
      * to a valid serialized form. {@linkplain PropertyMirror Property mirrors} can be used
      * to interact seamlessly with the leaf using runtime types.
      *
-     * <p> This method allows only basic configuration of the created leaf.
+     * <p>This method allows only basic configuration of the created leaf.
      * For more flexibility, {@link #beginValue} can be used.
      *
      * @param name         the name of the child leaf
@@ -318,12 +331,14 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
      * @see ConfigTypes
      */
     public <R, S> ConfigTreeBuilder withValue(@Nonnull String name, @Nonnull ConfigType<R, S, ?> type, @Nullable R defaultValue) {
-        this.items.add(new ConfigLeafImpl<>(name, type.getSerializedType(), null, type.toSerializedType(defaultValue), (a, b) -> { }));
+        this.items.add(new ConfigLeafImpl<>(name, type.getSerializedType(), null, type.toSerializedType(defaultValue), (a, b) -> {
+        }));
         return this;
     }
 
     public <R, S> ConfigTreeBuilder withMirroredValue(@Nonnull String name, @Nonnull ConfigType<R, S, ?> type, @Nullable R defaultValue) {
-        this.items.add(new ConfigLeafImpl<>(name, type.getSerializedType(), null, type.toSerializedType(defaultValue), (a, b) -> { }));
+        this.items.add(new ConfigLeafImpl<>(name, type.getSerializedType(), null, type.toSerializedType(defaultValue), (a, b) -> {
+        }));
         return this;
     }
 
@@ -366,7 +381,7 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
     /**
      * Construct a new {@code ConfigNode} based on this builder's specifications.
      *
-     * <p> Calling this method more than once with the same parameters (specifically same parent and/or children)
+     * <p>Calling this method more than once with the same parameters (specifically same parent and/or children)
      * may result in exceptions being thrown, as the resulting tree structure will be invalid.
      *
      * @return a new {@code ConfigNode}
@@ -377,10 +392,12 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
         try {
             ConfigBranch built = new ConfigBranchImpl(this.name, this.comment, this.items, this.serializeSeparately);
             built.getAttributes().putAll(this.attributes);
+
             if (this.parent != null) {
                 assert name != null;
                 this.parent.getItems().add(built);
             }
+
             return built;
         } catch (IllegalTreeStateException e) {
             throw new RuntimeFiberException("Failed to build branch '" + this.name + "'", e);
@@ -388,7 +405,8 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
     }
 
     public ConfigTreeBuilder finishBranch() {
-        return finishBranch(n -> {});
+        return finishBranch(n -> {
+        });
     }
 
     public ConfigTreeBuilder finishBranch(Consumer<ConfigBranch> action) {
@@ -399,5 +417,4 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
             throw new IllegalStateException("finishNode should not be called for a root builder. Use build instead.");
         }
     }
-
 }

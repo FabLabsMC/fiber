@@ -1,13 +1,20 @@
 package me.zeroeightsix.fiber.api.serialization;
 
-import blue.endless.jankson.JsonArray;
-import blue.endless.jankson.JsonObject;
-import blue.endless.jankson.JsonPrimitive;
-import me.zeroeightsix.fiber.api.schema.type.*;
-
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.regex.Pattern;
+
+import blue.endless.jankson.JsonArray;
+import blue.endless.jankson.JsonObject;
+import blue.endless.jankson.JsonPrimitive;
+import me.zeroeightsix.fiber.api.schema.type.BooleanSerializableType;
+import me.zeroeightsix.fiber.api.schema.type.DecimalSerializableType;
+import me.zeroeightsix.fiber.api.schema.type.EnumSerializableType;
+import me.zeroeightsix.fiber.api.schema.type.ListSerializableType;
+import me.zeroeightsix.fiber.api.schema.type.MapSerializableType;
+import me.zeroeightsix.fiber.api.schema.type.RecordSerializableType;
+import me.zeroeightsix.fiber.api.schema.type.SerializableType;
+import me.zeroeightsix.fiber.api.schema.type.StringSerializableType;
 
 public class JsonTypeSerializer implements TypeSerializer<JsonObject> {
     @Override
@@ -19,14 +26,19 @@ public class JsonTypeSerializer implements TypeSerializer<JsonObject> {
     public void serialize(DecimalSerializableType type, JsonObject json) {
         json.put("type", new JsonPrimitive("number"));
         BigDecimal min = type.getMinimum();
+
         if (min != null) {
             json.put("min", new JsonPrimitive(min));
         }
+
         BigDecimal maximum = type.getMaximum();
+
         if (maximum != null) {
             json.put("max", new JsonPrimitive(maximum));
         }
+
         BigDecimal increment = type.getIncrement();
+
         if (increment != null) {
             json.put("increment", new JsonPrimitive(increment));
         }
@@ -36,9 +48,11 @@ public class JsonTypeSerializer implements TypeSerializer<JsonObject> {
     public void serialize(EnumSerializableType type, JsonObject json) {
         json.put("type", new JsonPrimitive("enum"));
         JsonArray values = new JsonArray();
+
         for (String value : type.getValidValues()) {
             values.add(new JsonPrimitive(value));
         }
+
         json.put("values", values);
     }
 
@@ -67,6 +81,7 @@ public class JsonTypeSerializer implements TypeSerializer<JsonObject> {
     public void serialize(RecordSerializableType type, JsonObject json) {
         json.put("type", new JsonPrimitive("record"));
         JsonArray fields = new JsonArray();
+
         for (Map.Entry<String, SerializableType<?>> entry : type.getFields().entrySet()) {
             JsonObject field = new JsonObject();
             field.put("name", new JsonPrimitive(entry.getKey()));
@@ -75,6 +90,7 @@ public class JsonTypeSerializer implements TypeSerializer<JsonObject> {
             field.put("type", fieldType);
             fields.add(field);
         }
+
         json.put("fields", fields);
     }
 
@@ -84,6 +100,7 @@ public class JsonTypeSerializer implements TypeSerializer<JsonObject> {
         json.put("minLength", new JsonPrimitive(type.getMinLength()));
         json.put("maxLength", new JsonPrimitive(type.getMaxLength()));
         Pattern pattern = type.getPattern();
+
         if (pattern != null) {
             json.put("pattern", new JsonPrimitive(pattern.toString()));
         }

@@ -1,20 +1,30 @@
 package me.zeroeightsix.fiber.api.schema.type.derived;
 
-
-import me.zeroeightsix.fiber.api.schema.type.*;
-import me.zeroeightsix.fiber.impl.annotation.magic.TypeMagic;
-
-import javax.annotation.Nullable;
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public final class ConfigTypes {
+import javax.annotation.Nullable;
 
+import me.zeroeightsix.fiber.api.schema.type.DecimalSerializableType;
+import me.zeroeightsix.fiber.api.schema.type.EnumSerializableType;
+import me.zeroeightsix.fiber.api.schema.type.ListSerializableType;
+import me.zeroeightsix.fiber.api.schema.type.MapSerializableType;
+import me.zeroeightsix.fiber.api.schema.type.StringSerializableType;
+import me.zeroeightsix.fiber.impl.annotation.magic.TypeMagic;
+
+public final class ConfigTypes {
     /**
      * A {@link BooleanConfigType} representing a bare boolean.
      */
@@ -45,7 +55,7 @@ public final class ConfigTypes {
     /**
      * Creates a {@link NumberConfigType} representing a value of {@code numberType}.
      *
-     * <p> The returned {@code NumberConfigType} converts values between {@code BigDecimal}
+     * <p>The returned {@code NumberConfigType} converts values between {@code BigDecimal}
      * and {@code N} using the given conversion functions.
      * Its {@linkplain ListConfigType#getSerializedType() serialized type} will only accept numerical values
      * that are within the given range, if any ({@code null} min/max/precision result in no bound).
@@ -54,11 +64,13 @@ public final class ConfigTypes {
      * @param <N>        The number type.
      * @return A {@link NumberConfigType} holding a {@code N}.
      * @throws NullPointerException if {@code minValue} is {@code null} but {@code precision} is not,
-     * or if one of {@code numberType}, {@code serializer} or {@code deserializer} is {@code null}.
+     *                              or if one of {@code numberType}, {@code serializer} or {@code deserializer} is {@code null}.
      */
     public static <N> NumberConfigType<N> makeNumber(Class<N> numberType, Function<N, BigDecimal> serializer, Function<BigDecimal, N> deserializer, @Nullable N minValue, @Nullable N maxValue, @Nullable N precision) {
-        if (minValue == null && precision != null)
+        if (minValue == null && precision != null) {
             throw new NullPointerException("A nonnull precision requires a minimum value");
+        }
+
         return new NumberConfigType<>(
                 new DecimalSerializableType(minValue == null ? null : serializer.apply(minValue), maxValue == null ? null : serializer.apply(maxValue), precision == null ? null : serializer.apply(precision)),
                 numberType,
@@ -80,7 +92,7 @@ public final class ConfigTypes {
     /**
      * A {@link StringConfigType} representing a character.
      *
-     * <p> This {@code StringConfigType} converts values between {@code String}
+     * <p>This {@code StringConfigType} converts values between {@code String}
      * and {@code Character} by selecting the first char value in the serialized string.
      * Its {@code SerializableType} will only accept string values which length is exactly 1.
      */
@@ -92,13 +104,13 @@ public final class ConfigTypes {
     /**
      * Creates an {@link EnumConfigType} representing a value of {@code enumType}.
      *
-     * <p> The returned {@code EnumConfigType} converts values between {@code String}
+     * <p>The returned {@code EnumConfigType} converts values between {@code String}
      * and {@code E} using {@link Enum#valueOf(Class, String)}.
      * Its {@linkplain ListConfigType#getSerializedType() serialized type} will only accept string values
      * that correspond to the {@link Enum#name() name} of one of the enum constants.
      *
      * @param enumType The class object of the enum type to represent.
-     * @param <E>         The enum type.
+     * @param <E>      The enum type.
      * @return An {@link EnumConfigType} holding a value of {@code E}.
      */
     public static <E extends Enum<E>> EnumConfigType<E> makeEnum(Class<E> enumType) {
@@ -111,7 +123,7 @@ public final class ConfigTypes {
     /**
      * Creates a {@link ListConfigType} representing a list of {@code elementType}.
      *
-     * <p> The returned {@code ListConfigType} converts values between {@code List<S>}
+     * <p>The returned {@code ListConfigType} converts values between {@code List<S>}
      * and {@code List<E>} by converting individually each element using the given {@code elementType}.
      * Its {@linkplain ListConfigType#getSerializedType() serialized type} will only accept lists
      * where every element is accepted by {@code elementType}.
@@ -126,16 +138,20 @@ public final class ConfigTypes {
                 new ListSerializableType<>(elementType.getSerializedType()), List.class,
                 l -> {
                     List<E> ret = new ArrayList<>();
+
                     for (S s : l) {
                         ret.add(elementType.toRuntimeType(s));
                     }
+
                     return Collections.unmodifiableList(ret);
                 },
                 l -> {
                     List<S> ret = new ArrayList<>();
+
                     for (E e : l) {
                         ret.add(elementType.toPlatformType(e));
                     }
+
                     return Collections.unmodifiableList(ret);
                 }
         );
@@ -144,7 +160,7 @@ public final class ConfigTypes {
     /**
      * Creates a {@link ListConfigType} representing a set of {@code elementType}.
      *
-     * <p> The returned {@code ListConfigType} converts values between {@code List<S>}
+     * <p>The returned {@code ListConfigType} converts values between {@code List<S>}
      * and {@code Set<E>} by converting individually each element using the given {@code elementType}.
      * Its {@linkplain ListConfigType#getSerializedType() serialized type} will only accept lists with
      * no duplicates (according to {@link Object#equals(Object)}) and where every element is accepted
@@ -161,16 +177,20 @@ public final class ConfigTypes {
                 Set.class,
                 l -> {
                     Set<E> ret = new HashSet<>();
+
                     for (S s : l) {
                         ret.add(elementType.toRuntimeType(s));
                     }
+
                     return Collections.unmodifiableSet(ret);
                 },
                 l -> {
                     List<S> ret = new ArrayList<>();
+
                     for (E e : l) {
                         ret.add(elementType.toPlatformType(e));
                     }
+
                     return Collections.unmodifiableList(ret);
                 }
         );
@@ -180,7 +200,7 @@ public final class ConfigTypes {
      * Creates a {@link ListConfigType} representing an array of primitive type {@code boolean}. If {@code elementType}
      * represents the type {@link Boolean}, then the element values are unboxed before being stored in the array.
      *
-     * <p> The returned {@code ListConfigType} converts values between {@code List<S>}
+     * <p>The returned {@code ListConfigType} converts values between {@code List<S>}
      * and {@code boolean[]} by converting individually each element using the given {@code elementType}.
      * Its {@linkplain ListConfigType#getSerializedType() serialized type} will only accept lists
      * where every element is accepted by {@code elementType}.
@@ -197,7 +217,7 @@ public final class ConfigTypes {
      * Creates a {@link ListConfigType} representing an array of primitive type {@code byte}. If {@code elementType}
      * represents the type {@link Byte}, then the element values are unboxed before being stored in the array.
      *
-     * <p> The returned {@code ListConfigType} converts values between {@code List<S>}
+     * <p>The returned {@code ListConfigType} converts values between {@code List<S>}
      * and {@code byte[]} by converting individually each element using the given {@code elementType}.
      * Its {@linkplain ListConfigType#getSerializedType() serialized type} will only accept lists
      * where every element is accepted by {@code elementType}.
@@ -214,7 +234,7 @@ public final class ConfigTypes {
      * Creates a {@link ListConfigType} representing an array of primitive type {@code short}. If {@code elementType}
      * represents the type {@link Short}, then the element values are unboxed before being stored in the array.
      *
-     * <p> The returned {@code ListConfigType} converts values between {@code List<S>}
+     * <p>The returned {@code ListConfigType} converts values between {@code List<S>}
      * and {@code short[]} by converting individually each element using the given {@code elementType}.
      * Its {@linkplain ListConfigType#getSerializedType() serialized type} will only accept lists
      * where every element is accepted by {@code elementType}.
@@ -231,7 +251,7 @@ public final class ConfigTypes {
      * Creates a {@link ListConfigType} representing an array of primitive type {@code int}. If {@code elementType}
      * represents the type {@link Integer}, then the element values are unboxed before being stored in the array.
      *
-     * <p> The returned {@code ListConfigType} converts values between {@code List<S>}
+     * <p>The returned {@code ListConfigType} converts values between {@code List<S>}
      * and {@code int[]} by converting individually each element using the given {@code elementType}.
      * Its {@linkplain ListConfigType#getSerializedType() serialized type} will only accept lists
      * where every element is accepted by {@code elementType}.
@@ -248,7 +268,7 @@ public final class ConfigTypes {
      * Creates a {@link ListConfigType} representing an array of primitive type {@code long}. If {@code elementType}
      * represents the type {@link Long}, then the element values are unboxed before being stored in the array.
      *
-     * <p> The returned {@code ListConfigType} converts values between {@code List<S>}
+     * <p>The returned {@code ListConfigType} converts values between {@code List<S>}
      * and {@code long[]} by converting individually each element using the given {@code elementType}.
      * Its {@linkplain ListConfigType#getSerializedType() serialized type} will only accept lists
      * where every element is accepted by {@code elementType}.
@@ -265,7 +285,7 @@ public final class ConfigTypes {
      * Creates a {@link ListConfigType} representing an array of primitive type {@code float}. If {@code elementType}
      * represents the type {@link Float}, then the element values are unboxed before being stored in the array.
      *
-     * <p> The returned {@code ListConfigType} converts values between {@code List<S>}
+     * <p>The returned {@code ListConfigType} converts values between {@code List<S>}
      * and {@code float[]} by converting individually each element using the given {@code elementType}.
      * Its {@linkplain ListConfigType#getSerializedType() serialized type} will only accept lists
      * where every element is accepted by {@code elementType}.
@@ -282,7 +302,7 @@ public final class ConfigTypes {
      * Creates a {@link ListConfigType} representing an array of primitive type {@code double}. If {@code elementType}
      * represents the type {@link Double}, then the element values are unboxed before being stored in the array.
      *
-     * <p> The returned {@code ListConfigType} converts values between {@code List<S>}
+     * <p>The returned {@code ListConfigType} converts values between {@code List<S>}
      * and {@code double[]} by converting individually each element using the given {@code elementType}.
      * Its {@linkplain ListConfigType#getSerializedType() serialized type} will only accept lists
      * where every element is accepted by {@code elementType}.
@@ -299,7 +319,7 @@ public final class ConfigTypes {
      * Creates a {@link ListConfigType} representing an array of primitive type {@code char}. If {@code elementType}
      * represents the type {@link Character}, then the element values are unboxed before being stored in the array.
      *
-     * <p> The returned {@code ListConfigType} converts values between {@code List<S>}
+     * <p>The returned {@code ListConfigType} converts values between {@code List<S>}
      * and {@code char[]} by converting individually each element using the given {@code elementType}.
      * Its {@linkplain ListConfigType#getSerializedType() serialized type} will only accept lists
      * where every element is accepted by {@code elementType}.
@@ -316,7 +336,7 @@ public final class ConfigTypes {
      * Creates a {@link ListConfigType} representing an array of reference type. If {@code elementType} represents
      * a primitive type, then the element values are boxed before being stored in the array.
      *
-     * <p> The returned {@code ListConfigType} converts values between {@code List<S>}
+     * <p>The returned {@code ListConfigType} converts values between {@code List<S>}
      * and {@code E[]} by converting individually each element using the given {@code elementType}.
      * Its {@linkplain ListConfigType#getSerializedType() serialized type} will only accept lists
      * where every element is accepted by {@code elementType}.
@@ -335,8 +355,8 @@ public final class ConfigTypes {
 
     /**
      * Creates a {@link ListConfigType} representing an array type.
-     * <p>
-     * This internal method is called by the eight primitive array specializations and the object array
+     *
+     * <p>This internal method is called by the eight primitive array specializations and the object array
      * specialization in order to provide a type-safe interface to this implementation.
      *
      * @param arrayType   The type of the array. This component type of the array must be either exactly the runtime
@@ -357,17 +377,21 @@ public final class ConfigTypes {
                 arrayType,
                 l -> {
                     A arr = arrayType.cast(Array.newInstance(componentType, l.size()));
+
                     for (int i = 0; i < Array.getLength(arr); i++) {
                         Array.set(arr, i, elementType.toRuntimeType(l.get(i)));
                     }
+
                     return arr;
                 },
                 arr -> {
                     List<S> ret = new ArrayList<>(Array.getLength(arr));
+
                     for (int i = 0; i < Array.getLength(arr); i++) {
                         E e = boxedComponentType.cast(Array.get(arr, i));
                         ret.add(elementType.toPlatformType(e));
                     }
+
                     return Collections.unmodifiableList(ret);
                 }
         );
@@ -378,7 +402,7 @@ public final class ConfigTypes {
     /**
      * Creates a {@link MapConfigType} representing a map of {@code keyType} to {@code valueType}.
      *
-     * <p> The returned {@code MapConfigType} converts values between {@code Map<String, S>}
+     * <p>The returned {@code MapConfigType} converts values between {@code Map<String, S>}
      * and {@code Map<K, V>} by converting individually each element using their respective {@code ConfigType}.
      * Its {@linkplain ConfigType#getSerializedType() serialized type} will have no size constraint.
      *
