@@ -286,8 +286,8 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 
 	private Map<String, List<Member>> findListeners(Class<?> pojoClass) {
 		return Stream.concat(Arrays.stream(pojoClass.getDeclaredFields()), Arrays.stream(pojoClass.getDeclaredMethods()))
-						.filter(accessibleObject -> accessibleObject.isAnnotationPresent(Listener.class))
-						.collect(Collectors.groupingBy(accessibleObject -> ((AccessibleObject) accessibleObject).getAnnotation(Listener.class).value()));
+				.filter(accessibleObject -> accessibleObject.isAnnotationPresent(Listener.class))
+				.collect(Collectors.groupingBy(accessibleObject -> ((AccessibleObject) accessibleObject).getAnnotation(Listener.class).value()));
 	}
 
 	private static boolean isIncluded(Field field, boolean onlyAnnotated) {
@@ -326,7 +326,7 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 		@SuppressWarnings("unchecked") ConfigType<R, S, ?> type = (ConfigType<R, S, ?>) this.toConfigType(field.getAnnotatedType());
 
 		ConfigLeafBuilder<S, R> builder = node.beginValue(name, type, this.findDefaultValue(field, pojo))
-						.withComment(findComment(field));
+				.withComment(findComment(field));
 
 		for (Member listener : listeners) {
 			BiConsumer<R, R> consumer = this.constructListener(listener, pojo, type.getRuntimeType());
@@ -394,11 +394,11 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 			ret = ConfigTypes.makeEnum(clazz.asSubclass(Enum.class));
 		} else {
 			Optional<Class<?>> closestParent = Stream.concat(this.registeredGenericTypes.keySet().stream(), this.registeredTypes.keySet().stream())
-							.filter(c -> c.isAssignableFrom(clazz))
-							.reduce((c1, c2) -> c1.isAssignableFrom(c2) ? c2 : c1);
+					.filter(c -> c.isAssignableFrom(clazz))
+					.reduce((c1, c2) -> c1.isAssignableFrom(c2) ? c2 : c1);
 			String closestParentSuggestion = closestParent.map(p -> "declaring the element as '" + p.getTypeName() + "', or ").orElse("");
 			throw new FiberTypeProcessingException("Unknown config type " + annotatedType.getType().getTypeName()
-							+ ". Consider marking as transient, or " + closestParentSuggestion + "registering a new Class -> ConfigType mapping.");
+					+ ". Consider marking as transient, or " + closestParentSuggestion + "registering a new Class -> ConfigType mapping.");
 		}
 
 		assert ret != null;
@@ -436,7 +436,7 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 
 		for (Annotation annotation : annotated.getAnnotations()) {
 			@SuppressWarnings("unchecked") ConstraintAnnotationProcessor<Annotation> processor =
-							(ConstraintAnnotationProcessor<Annotation>) this.constraintProcessors.get(annotation.annotationType());
+					(ConstraintAnnotationProcessor<Annotation>) this.constraintProcessors.get(annotation.annotationType());
 			if (processor != null) {
 				try {
 					ret = this.constrain(ret, processor, annotation, annotated);
@@ -556,11 +556,11 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 
 	private static String findName(Field field, SettingNamingConvention convention) {
 		return Optional.ofNullable(
-						field.isAnnotationPresent(Setting.Group.class)
-										? field.getAnnotation(Setting.Group.class).name()
-										: getSettingAnnotation(field).map(Setting::name).orElse(null))
-						.filter(s -> !s.isEmpty())
-						.orElse(convention.name(field.getName()));
+				field.isAnnotationPresent(Setting.Group.class)
+						? field.getAnnotation(Setting.Group.class).name()
+						: getSettingAnnotation(field).map(Setting::name).orElse(null))
+				.filter(s -> !s.isEmpty())
+				.orElse(convention.name(field.getName()));
 	}
 
 	private static SettingNamingConvention createConvention(Class<? extends SettingNamingConvention> namingConvention) throws FiberException {

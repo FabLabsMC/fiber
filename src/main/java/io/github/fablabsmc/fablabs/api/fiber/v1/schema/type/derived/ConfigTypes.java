@@ -114,6 +114,7 @@ public final class ConfigTypes {
 	 * @return An {@link EnumConfigType} holding a value of {@code E}.
 	 */
 	public static <E extends Enum<E>> EnumConfigType<E> makeEnum(Class<E> enumType) {
+		if (!enumType.isEnum()) throw new IllegalArgumentException(enumType + " is not an enum declaration");
 		Set<String> validValues = Arrays.stream(enumType.getEnumConstants()).map(Enum::name).collect(Collectors.toSet());
 		return new EnumConfigType<>(new EnumSerializableType(validValues), enumType, e -> Enum.valueOf(enumType, e), Enum::name);
 	}
