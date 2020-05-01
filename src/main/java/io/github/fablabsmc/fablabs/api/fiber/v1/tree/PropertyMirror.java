@@ -37,5 +37,5 @@ public interface PropertyMirror<T> extends Property<T> {
 
 	Property<?> getMirrored();
 
-	ConfigType<T, ?, ?> getConverter();
+	ConfigType<T, ?, ?> getMirroredType();
 }
