@@ -1,9 +1,9 @@
 package io.github.fablabsmc.fablabs.api.fiber.v1.tree;
 
+import io.github.fablabsmc.fablabs.api.fiber.v1.FiberId;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.SerializableType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigType;
 import io.github.fablabsmc.fablabs.impl.fiber.tree.ConfigAttributeImpl;
-import io.github.fablabsmc.fablabs.api.fiber.v1.FiberId;
 
 public interface ConfigAttribute<T> extends Property<T> {
 	static <R, A> ConfigAttribute<A> create(FiberId id, ConfigType<R, A, ?> type, R defaultValue) {

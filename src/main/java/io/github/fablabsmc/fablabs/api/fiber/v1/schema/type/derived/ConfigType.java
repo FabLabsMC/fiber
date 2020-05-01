@@ -5,8 +5,8 @@ import java.lang.reflect.AnnotatedElement;
 import java.util.StringJoiner;
 import java.util.function.Function;
 
-import io.github.fablabsmc.fablabs.api.fiber.v1.exception.FiberConversionException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.processor.ConstraintAnnotationProcessor;
+import io.github.fablabsmc.fablabs.api.fiber.v1.exception.FiberConversionException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.SerializableType;
 
 /**

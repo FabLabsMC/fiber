@@ -6,10 +6,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.math.BigDecimal;
 
-import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.SerializableType;
-import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigTypes;
 import io.github.fablabsmc.fablabs.api.fiber.v1.builder.ConfigLeafBuilder;
 import io.github.fablabsmc.fablabs.api.fiber.v1.builder.ConfigTreeBuilder;
+import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.SerializableType;
+import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigTypes;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigLeaf;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigNode;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;

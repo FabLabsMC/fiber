@@ -7,8 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigTypes;
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.FiberQueryException;
+import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigTypes;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigLeaf;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigQuery;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;

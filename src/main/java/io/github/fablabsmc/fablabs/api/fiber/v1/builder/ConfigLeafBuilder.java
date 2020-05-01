@@ -9,16 +9,16 @@ import java.util.function.Function;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import io.github.fablabsmc.fablabs.api.fiber.v1.FiberId;
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.RuntimeFiberException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.SerializableType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigType;
-import io.github.fablabsmc.fablabs.impl.fiber.builder.ConfigNodeBuilder;
-import io.github.fablabsmc.fablabs.impl.fiber.tree.ConfigLeafImpl;
-import io.github.fablabsmc.fablabs.api.fiber.v1.FiberId;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigAttribute;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigLeaf;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigNode;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;
+import io.github.fablabsmc.fablabs.impl.fiber.builder.ConfigNodeBuilder;
+import io.github.fablabsmc.fablabs.impl.fiber.tree.ConfigLeafImpl;
 
 /**
  * A builder for {@code ConfigLeaf}s.

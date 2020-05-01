@@ -8,10 +8,10 @@ import java.util.TreeMap;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.SerializableType;
-import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.FiberId;
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.IllegalTreeStateException;
+import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.SerializableType;
+import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.Commentable;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigAttribute;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigBranch;

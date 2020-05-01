@@ -25,12 +25,6 @@ import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigType;
-import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigTypes;
-import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ListConfigType;
-import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.NumberConfigType;
-import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.StringConfigType;
-import io.github.fablabsmc.fablabs.impl.fiber.annotation.magic.TypeMagic;
 import io.github.fablabsmc.fablabs.api.fiber.v1.NodeOperations;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.AnnotatedSettings;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.Listener;
@@ -49,8 +43,14 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.exception.FiberException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.FiberTypeProcessingException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.MalformedFieldException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.RuntimeFiberException;
+import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigType;
+import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigTypes;
+import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ListConfigType;
+import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.NumberConfigType;
+import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.StringConfigType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigBranch;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;
+import io.github.fablabsmc.fablabs.impl.fiber.annotation.magic.TypeMagic;
 
 public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 	private final Map<Class<?>, ParameterizedTypeProcessor<?>> registeredGenericTypes = new HashMap<>();

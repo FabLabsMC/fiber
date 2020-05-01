@@ -16,7 +16,6 @@ import blue.endless.jankson.JsonElement;
 import blue.endless.jankson.JsonObject;
 import blue.endless.jankson.JsonPrimitive;
 import blue.endless.jankson.api.SyntaxError;
-import io.github.fablabsmc.fablabs.api.fiber.v1.tree.HasValue;
 import io.github.fablabsmc.fablabs.api.fiber.v1.FiberId;
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.FiberException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.RuntimeFiberException;
@@ -25,6 +24,7 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigBranch;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigLeaf;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigNode;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;
+import io.github.fablabsmc.fablabs.api.fiber.v1.tree.HasValue;
 
 public class JanksonSerializer implements Serializer<JsonObject> {
 	private static final FiberId IDENTIFIER = new FiberId("fiber", "jankson");

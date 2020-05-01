@@ -5,9 +5,9 @@ import java.util.function.BiConsumer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import io.github.fablabsmc.fablabs.api.fiber.v1.builder.ConfigLeafBuilder;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.SerializableType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.TypeCheckResult;
-import io.github.fablabsmc.fablabs.api.fiber.v1.builder.ConfigLeafBuilder;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigLeaf;
 
 public final class ConfigLeafImpl<T> extends ConfigNodeImpl implements ConfigLeaf<T> {

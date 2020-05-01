@@ -6,8 +6,8 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.SerializableType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.FiberId;
+import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.SerializableType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigAttribute;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigNode;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;

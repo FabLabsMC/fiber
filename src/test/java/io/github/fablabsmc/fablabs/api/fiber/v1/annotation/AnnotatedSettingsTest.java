@@ -15,11 +15,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.function.BiConsumer;
 
+import io.github.fablabsmc.fablabs.api.fiber.v1.exception.FiberException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.ListSerializableType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.StringSerializableType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigTypes;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ListConfigType;
-import io.github.fablabsmc.fablabs.api.fiber.v1.exception.FiberException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigLeaf;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigNode;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;
