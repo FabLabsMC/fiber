@@ -6,6 +6,7 @@ plugins {
     `maven-publish`
     id("com.github.johnrengelman.shadow") version "5.0.0"
     id("moe.nikky.persistentCounter") version "0.0.8-SNAPSHOT"
+    id("checkstyle")
 }
 
 val major: String by project
@@ -37,6 +38,11 @@ dependencies {
     shadow(group = "blue.endless", name = "jankson", version = "1.2.0")
     compileOnly(group = "com.google.code.findbugs", name = "jsr305", version = "3.0.2")
     testImplementation(group = "org.junit.jupiter", name = "junit-jupiter", version = "5.4.1")
+}
+
+checkstyle {
+    configFile = rootProject.file("checkstyle.xml")
+    toolVersion = "8.31"
 }
 
 tasks.withType<Test> {
