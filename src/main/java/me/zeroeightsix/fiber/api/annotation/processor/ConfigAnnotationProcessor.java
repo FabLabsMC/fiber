@@ -18,14 +18,14 @@ import me.zeroeightsix.fiber.api.tree.ConfigTree;
  * @see AnnotatedSettings
  */
 public interface ConfigAnnotationProcessor<A extends Annotation, E extends AnnotatedElement, C> {
-    /**
-     * Called for every field that has an annotation of type {@code A}.
-     *
-     * @param annotation the annotation present on the {@code field}
-     * @param field      a field declared in {@code pojo}'s class
-     * @param pojo       the <em>plain old java object</em> being processed
-     * @param setting    the builder being configured
-     * @see AnnotatedSettings#applyToNode(ConfigTree, Object)
-     */
-    void apply(A annotation, E field, Object pojo, C setting);
+	/**
+	 * Called for every field that has an annotation of type {@code A}.
+	 *
+	 * @param annotation the annotation present on the {@code field}
+	 * @param field      a field declared in {@code pojo}'s class
+	 * @param pojo       the <em>plain old java object</em> being processed
+	 * @param setting    the builder being configured
+	 * @see AnnotatedSettings#applyToNode(ConfigTree, Object)
+	 */
+	void apply(A annotation, E field, Object pojo, C setting);
 }

@@ -10,45 +10,45 @@ import me.zeroeightsix.fiber.api.tree.ConfigLeaf;
 import me.zeroeightsix.fiber.api.tree.ConfigNode;
 
 public class RecordConstraintChecker extends ConstraintChecker<ConfigBranch, RecordSerializableType> {
-    private static final RecordConstraintChecker INSTANCE = new RecordConstraintChecker();
+	private static final RecordConstraintChecker INSTANCE = new RecordConstraintChecker();
 
-    public static RecordConstraintChecker instance() {
-        return INSTANCE;
-    }
+	public static RecordConstraintChecker instance() {
+		return INSTANCE;
+	}
 
-    private RecordConstraintChecker() {
-    }
+	private RecordConstraintChecker() {
+	}
 
-    @Override
-    public TypeCheckResult<ConfigBranch> test(RecordSerializableType cfg, ConfigBranch value) {
-        for (Map.Entry<String, SerializableType<?>> field : cfg.getFields().entrySet()) {
-            ConfigNode child = value.lookup(field.getKey());
+	@Override
+	public TypeCheckResult<ConfigBranch> test(RecordSerializableType cfg, ConfigBranch value) {
+		for (Map.Entry<String, SerializableType<?>> field : cfg.getFields().entrySet()) {
+			ConfigNode child = value.lookup(field.getKey());
 
-            if (!(child instanceof ConfigLeaf)) {
-                return TypeCheckResult.unrecoverable();
-            }
+			if (!(child instanceof ConfigLeaf)) {
+				return TypeCheckResult.unrecoverable();
+			}
 
-            SerializableType<?> leafType = ((ConfigLeaf<?>) child).getConfigType();
-            SerializableType<?> fieldType = field.getValue();
+			SerializableType<?> leafType = ((ConfigLeaf<?>) child).getConfigType();
+			SerializableType<?> fieldType = field.getValue();
 
-            if (!fieldType.isAssignableFrom(leafType)) {
-                return TypeCheckResult.unrecoverable();
-            }
-        }
+			if (!fieldType.isAssignableFrom(leafType)) {
+				return TypeCheckResult.unrecoverable();
+			}
+		}
 
-        return TypeCheckResult.successful(value);
-    }
+		return TypeCheckResult.successful(value);
+	}
 
-    @Override
-    public boolean comprehends(RecordSerializableType cfg, RecordSerializableType cfg2) {
-        for (Map.Entry<String, SerializableType<?>> entry : cfg.getFields().entrySet()) {
-            SerializableType<?> other = cfg2.getFields().get(entry.getKey());
+	@Override
+	public boolean comprehends(RecordSerializableType cfg, RecordSerializableType cfg2) {
+		for (Map.Entry<String, SerializableType<?>> entry : cfg.getFields().entrySet()) {
+			SerializableType<?> other = cfg2.getFields().get(entry.getKey());
 
-            if (!entry.getValue().equals(other)) {
-                return false;
-            }
-        }
+			if (!entry.getValue().equals(other)) {
+				return false;
+			}
+		}
 
-        return true;
-    }
+		return true;
+	}
 }

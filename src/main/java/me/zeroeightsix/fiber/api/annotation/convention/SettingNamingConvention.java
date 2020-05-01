@@ -11,5 +11,5 @@ package me.zeroeightsix.fiber.api.annotation.convention;
  * @see LowercaseConvention
  */
 public interface SettingNamingConvention {
-    String name(String name);
+	String name(String name);
 }

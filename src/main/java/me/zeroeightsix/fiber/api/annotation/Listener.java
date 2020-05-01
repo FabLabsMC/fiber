@@ -11,25 +11,25 @@ import java.lang.annotation.Target;
 @Target({ElementType.FIELD, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Listener {
-    /**
-     * The name of the setting this listener is listening for.
-     *
-     * <p>Note that this must be equal to the resolved name of the setting: if you have specified a naming convention for your settings, or you have set a custom name for the setting, this value must be equal to the name of the setting you're listening for after that naming convention was applied!
-     *
-     * <p>For example, if you are using {@code snake_case}:
-     * <pre>
-     * &#64;Settings(namingConvention = UnderscoredLowerCaseConvention.class)
-     * class MySettings {
-     *     private int fooBar = 5;
-     *
-     *     &#64;Listener("foo_bar") // foo_bar not fooBar
-     *     public void fooBarListener(int newValue) {
-     *         System.out.println("Changed to " + newValue);
-     *     }
-     * }
-     * </pre>
-     *
-     * @return the name of the setting this listener listens for
-     */
-    String value();
+	/**
+	 * The name of the setting this listener is listening for.
+	 *
+	 * <p>Note that this must be equal to the resolved name of the setting: if you have specified a naming convention for your settings, or you have set a custom name for the setting, this value must be equal to the name of the setting you're listening for after that naming convention was applied!
+	 *
+	 * <p>For example, if you are using {@code snake_case}:
+	 * <pre>
+	 * &#64;Settings(namingConvention = UnderscoredLowerCaseConvention.class)
+	 * class MySettings {
+	 *     private int fooBar = 5;
+	 *
+	 *     &#64;Listener("foo_bar") // foo_bar not fooBar
+	 *     public void fooBarListener(int newValue) {
+	 *         System.out.println("Changed to " + newValue);
+	 *     }
+	 * }
+	 * </pre>
+	 *
+	 * @return the name of the setting this listener listens for
+	 */
+	String value();
 }

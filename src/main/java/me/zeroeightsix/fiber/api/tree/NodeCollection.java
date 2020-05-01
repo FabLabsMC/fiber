@@ -26,64 +26,64 @@ import me.zeroeightsix.fiber.api.exception.DuplicateChildException;
  * properly.
  */
 public interface NodeCollection extends Collection<ConfigNode> {
-    /**
-     * Attempts to introduce a new child to this collection.
-     *
-     * <p>This method behaves as if {@code add(node, false)}.
-     *
-     * @param child The child to add
-     * @return {@code true} (as specified by {@link Collection#add})
-     * @throws DuplicateChildException if there was already a child by the same name
-     * @throws IllegalStateException   if the child cannot be added to this tree at this time
-     * @throws NullPointerException    if {@code node} is null
-     */
-    @Override
-    boolean add(ConfigNode child) throws DuplicateChildException;
+	/**
+	 * Attempts to introduce a new child to this collection.
+	 *
+	 * <p>This method behaves as if {@code add(node, false)}.
+	 *
+	 * @param child The child to add
+	 * @return {@code true} (as specified by {@link Collection#add})
+	 * @throws DuplicateChildException if there was already a child by the same name
+	 * @throws IllegalStateException   if the child cannot be added to this tree at this time
+	 * @throws NullPointerException    if {@code node} is null
+	 */
+	@Override
+	boolean add(ConfigNode child) throws DuplicateChildException;
 
-    /**
-     * Attempts to introduce a new child to this collection.
-     *
-     * <p>If this method returns normally, the {@code child} will be attached
-     * to this collection's owner.
-     *
-     * @param child     The child to add
-     * @param overwrite whether existing items with the same name should be overwritten
-     * @return {@code true} (as specified by {@link Collection#add})
-     * @throws DuplicateChildException if there exists a child by the same name that was not overwritten
-     * @throws IllegalStateException   if the child cannot be added to this tree at this time
-     * @throws NullPointerException    if {@code node} is null
-     * @see ConfigNode#attachTo(ConfigBranch)
-     */
-    boolean add(ConfigNode child, boolean overwrite) throws DuplicateChildException;
+	/**
+	 * Attempts to introduce a new child to this collection.
+	 *
+	 * <p>If this method returns normally, the {@code child} will be attached
+	 * to this collection's owner.
+	 *
+	 * @param child     The child to add
+	 * @param overwrite whether existing items with the same name should be overwritten
+	 * @return {@code true} (as specified by {@link Collection#add})
+	 * @throws DuplicateChildException if there exists a child by the same name that was not overwritten
+	 * @throws IllegalStateException   if the child cannot be added to this tree at this time
+	 * @throws NullPointerException    if {@code node} is null
+	 * @see ConfigNode#attachTo(ConfigBranch)
+	 */
+	boolean add(ConfigNode child, boolean overwrite) throws DuplicateChildException;
 
-    /**
-     * Removes a child from this collection.
-     *
-     * <p>When this method returns, the {@code child} will be detached from
-     * this collection's owner. If the given object is not contained within this
-     * collection, this method returns {@code false} with no side effects.
-     *
-     * @param child the child to remove
-     * @return {@code true} if a node was detached as a result of this call
-     * @see ConfigNode#detach()
-     */
-    @Override
-    boolean remove(Object child);
+	/**
+	 * Removes a child from this collection.
+	 *
+	 * <p>When this method returns, the {@code child} will be detached from
+	 * this collection's owner. If the given object is not contained within this
+	 * collection, this method returns {@code false} with no side effects.
+	 *
+	 * @param child the child to remove
+	 * @return {@code true} if a node was detached as a result of this call
+	 * @see ConfigNode#detach()
+	 */
+	@Override
+	boolean remove(Object child);
 
-    /**
-     * Tries to find a child in this collection by name. If a child is found, it will be returned.
-     *
-     * @param name The name of the child to look for
-     * @return the child if found, otherwise {@code null}
-     */
-    ConfigNode getByName(String name);
+	/**
+	 * Tries to find a child in this collection by name. If a child is found, it will be returned.
+	 *
+	 * @param name The name of the child to look for
+	 * @return the child if found, otherwise {@code null}
+	 */
+	ConfigNode getByName(String name);
 
-    /**
-     * Attempts to remove an item from this collection by name.
-     *
-     * @param name the name of the child that should be removed
-     * @return the child if removed, otherwise {@code null}
-     */
-    @Nullable
-    ConfigNode removeByName(String name);
+	/**
+	 * Attempts to remove an item from this collection by name.
+	 *
+	 * @param name the name of the child that should be removed
+	 * @return the child if removed, otherwise {@code null}
+	 */
+	@Nullable
+	ConfigNode removeByName(String name);
 }

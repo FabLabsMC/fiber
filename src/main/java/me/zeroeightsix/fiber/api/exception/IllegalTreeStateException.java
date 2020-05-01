@@ -7,7 +7,7 @@ import me.zeroeightsix.fiber.api.tree.ConfigTree;
  * the requested operation.
  */
 public class IllegalTreeStateException extends IllegalStateException {
-    public IllegalTreeStateException(String message) {
-        super(message);
-    }
+	public IllegalTreeStateException(String message) {
+		super(message);
+	}
 }

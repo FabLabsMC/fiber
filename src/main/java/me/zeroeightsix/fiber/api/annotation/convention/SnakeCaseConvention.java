@@ -6,8 +6,8 @@ package me.zeroeightsix.fiber.api.annotation.convention;
  * @see SnakeCaseConvention#name(String)
  */
 public class SnakeCaseConvention implements SettingNamingConvention {
-    @Override
-    public String name(String name) {
-        return name.replaceAll("(?!^)[ _]*([A-Z])", "_$1").toLowerCase().replace(' ', '_');
-    }
+	@Override
+	public String name(String name) {
+		return name.replaceAll("(?!^)[ _]*([A-Z])", "_$1").toLowerCase().replace(' ', '_');
+	}
 }

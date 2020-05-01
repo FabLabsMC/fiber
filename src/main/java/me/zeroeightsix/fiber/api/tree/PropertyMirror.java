@@ -21,21 +21,21 @@ import me.zeroeightsix.fiber.impl.tree.PropertyMirrorImpl;
  * @param <T> the type of value this property mirrors
  */
 public interface PropertyMirror<T> extends Property<T> {
-    static <T> PropertyMirror<T> create(ConfigType<T, ?, ?> converter) {
-        return new PropertyMirrorImpl<>(converter);
-    }
+	static <T> PropertyMirror<T> create(ConfigType<T, ?, ?> converter) {
+		return new PropertyMirrorImpl<>(converter);
+	}
 
-    /**
-     * Sets a property to mirror.
-     *
-     * <p>After calling this method with a valid delegate,
-     * every property method will redirect to {@code delegate}.
-     *
-     * @param delegate a property to mirror
-     */
-    void mirror(Property<?> delegate);
+	/**
+	 * Sets a property to mirror.
+	 *
+	 * <p>After calling this method with a valid delegate,
+	 * every property method will redirect to {@code delegate}.
+	 *
+	 * @param delegate a property to mirror
+	 */
+	void mirror(Property<?> delegate);
 
-    Property<?> getMirrored();
+	Property<?> getMirrored();
 
-    ConfigType<T, ?, ?> getConverter();
+	ConfigType<T, ?, ?> getConverter();
 }

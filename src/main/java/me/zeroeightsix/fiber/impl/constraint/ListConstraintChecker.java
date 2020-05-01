@@ -15,62 +15,62 @@ import me.zeroeightsix.fiber.api.schema.type.TypeCheckResult;
  * @param <E> the type of elements {@code V} holds
  */
 public final class ListConstraintChecker<E> extends ConstraintChecker<List<E>, ListSerializableType<E>> {
-    private static final ListConstraintChecker<?> INSTANCE = new ListConstraintChecker<>();
+	private static final ListConstraintChecker<?> INSTANCE = new ListConstraintChecker<>();
 
-    public static <E> ListConstraintChecker<E> instance() {
-        @SuppressWarnings("unchecked") ListConstraintChecker<E> t = (ListConstraintChecker<E>) INSTANCE;
-        return t;
-    }
+	public static <E> ListConstraintChecker<E> instance() {
+		@SuppressWarnings("unchecked") ListConstraintChecker<E> t = (ListConstraintChecker<E>) INSTANCE;
+		return t;
+	}
 
-    private ListConstraintChecker() {
-    }
+	private ListConstraintChecker() {
+	}
 
-    @Override
-    public TypeCheckResult<List<E>> test(ListSerializableType<E> cfg, List<E> values) {
-        boolean valid = true;
-        int maxSize = cfg.getMaxSize();
-        Collection<E> corrected = cfg.hasUniqueElements() ? new LinkedHashSet<>(values.size()) : new ArrayList<>(values.size());
+	@Override
+	public TypeCheckResult<List<E>> test(ListSerializableType<E> cfg, List<E> values) {
+		boolean valid = true;
+		int maxSize = cfg.getMaxSize();
+		Collection<E> corrected = cfg.hasUniqueElements() ? new LinkedHashSet<>(values.size()) : new ArrayList<>(values.size());
 
-        for (E e : values) {
-            if (corrected.size() >= maxSize) {
-                valid = false;
-                break;
-            }
+		for (E e : values) {
+			if (corrected.size() >= maxSize) {
+				valid = false;
+				break;
+			}
 
-            TypeCheckResult<E> testResult = cfg.getElementType().test(e);
+			TypeCheckResult<E> testResult = cfg.getElementType().test(e);
 
-            if (testResult.hasPassed()) {
-                valid &= corrected.add(e);  // UNIQUE check
-            } else {
-                valid = false;
-                Optional<E> correctedValue = testResult.getCorrectedValue();
-                correctedValue.ifPresent(corrected::add);
-                // if not present, just skip it
-            }
-        }
+			if (testResult.hasPassed()) {
+				valid &= corrected.add(e);  // UNIQUE check
+			} else {
+				valid = false;
+				Optional<E> correctedValue = testResult.getCorrectedValue();
+				correctedValue.ifPresent(corrected::add);
+				// if not present, just skip it
+			}
+		}
 
-        if (corrected.size() < cfg.getMinSize()) {
-            return TypeCheckResult.unrecoverable();
-        }
+		if (corrected.size() < cfg.getMinSize()) {
+			return TypeCheckResult.unrecoverable();
+		}
 
-        return valid ? TypeCheckResult.successful(values) : TypeCheckResult.failed(new ArrayList<>(corrected));
-    }
+		return valid ? TypeCheckResult.successful(values) : TypeCheckResult.failed(new ArrayList<>(corrected));
+	}
 
-    @Override
-    public boolean comprehends(ListSerializableType<E> cfg, ListSerializableType<E> cfg2) {
-        if (cfg.getMinSize() > cfg2.getMinSize()) {
-            return false;
-        }
+	@Override
+	public boolean comprehends(ListSerializableType<E> cfg, ListSerializableType<E> cfg2) {
+		if (cfg.getMinSize() > cfg2.getMinSize()) {
+			return false;
+		}
 
-        if (cfg.getMaxSize() < cfg2.getMaxSize()) {
-            return false;
-        }
+		if (cfg.getMaxSize() < cfg2.getMaxSize()) {
+			return false;
+		}
 
-        if (!cfg.getElementType().isAssignableFrom(cfg2.getElementType())) {
-            return false;
-        }
+		if (!cfg.getElementType().isAssignableFrom(cfg2.getElementType())) {
+			return false;
+		}
 
-        // "not unique" comprehends unique
-        return !cfg.hasUniqueElements() || cfg2.hasUniqueElements();
-    }
+		// "not unique" comprehends unique
+		return !cfg.hasUniqueElements() || cfg2.hasUniqueElements();
+	}
 }

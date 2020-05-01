@@ -23,15 +23,15 @@ import me.zeroeightsix.fiber.api.tree.ConfigTree;
  */
 @FunctionalInterface
 public interface BranchAnnotationProcessor<A extends Annotation> extends ConfigAnnotationProcessor<A, Field, ConfigTreeBuilder> {
-    /**
-     * Called for every field that has an annotation of type {@code A} and is annotated with {@link Group @Group}.
-     *
-     * @param annotation the annotation present on the {@code field}
-     * @param field      a field declared in {@code pojo}'s class
-     * @param pojo       the <em>plain old java object</em> being processed
-     * @param builder    the builder being configured
-     * @see AnnotatedSettings#applyToNode(ConfigTree, Object)
-     */
-    @Override
-    void apply(A annotation, Field field, Object pojo, ConfigTreeBuilder builder);
+	/**
+	 * Called for every field that has an annotation of type {@code A} and is annotated with {@link Group @Group}.
+	 *
+	 * @param annotation the annotation present on the {@code field}
+	 * @param field      a field declared in {@code pojo}'s class
+	 * @param pojo       the <em>plain old java object</em> being processed
+	 * @param builder    the builder being configured
+	 * @see AnnotatedSettings#applyToNode(ConfigTree, Object)
+	 */
+	@Override
+	void apply(A annotation, Field field, Object pojo, ConfigTreeBuilder builder);
 }

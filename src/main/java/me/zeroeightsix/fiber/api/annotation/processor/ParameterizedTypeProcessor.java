@@ -16,11 +16,11 @@ import me.zeroeightsix.fiber.api.schema.type.derived.ConfigType;
  */
 @FunctionalInterface
 public interface ParameterizedTypeProcessor<T> {
-    /**
-     * Produces usable config type information using the given {@code typeArguments}.
-     *
-     * @param typeArguments the generic type parameters
-     * @return a ConfigType representing the parameterized type
-     */
-    ConfigType<? extends T, ?, ?> process(ConfigType<?, ?, ?>[] typeArguments);
+	/**
+	 * Produces usable config type information using the given {@code typeArguments}.
+	 *
+	 * @param typeArguments the generic type parameters
+	 * @return a ConfigType representing the parameterized type
+	 */
+	ConfigType<? extends T, ?, ?> process(ConfigType<?, ?, ?>[] typeArguments);
 }
