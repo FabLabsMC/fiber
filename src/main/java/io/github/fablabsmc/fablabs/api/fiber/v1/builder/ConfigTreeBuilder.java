@@ -232,21 +232,25 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 	/**
 	 * Configure this builder using a POJO (Plain Old Java Object).
 	 *
-	 * <p>The node's structure will be based on the {@code pojo}'s fields,
+	 * <p>The tree structure will be based on the {@code pojo}'s fields,
 	 * recursively generating settings. The generated settings can be configured
 	 * in the {@code pojo}'s class declaration, using annotations such as {@link Setting}.
 	 *
 	 * <p>The generated {@link ConfigLeaf}s will be bound to their respective fields,
 	 * setting the latter when the former's value is {@linkplain ConfigLeaf#setValue(Object) updated}.
 	 *
+	 * <p>If a {@link FiberException} is thrown when using the underlying {@code AnnotatedSettings},
+	 * it is wrapped in a {@link RuntimeFiberException}.
+	 *
 	 * @param pojo an object serving as a base to reflectively generate a config tree
 	 * @return {@code this}, for chaining
 	 * @see Setting
 	 * @see Settings
 	 * @see AnnotatedSettings#applyToNode(ConfigTree, Object)
+	 * @see #applyFromPojo(Object, AnnotatedSettings)
 	 */
-	public ConfigTreeBuilder applyFromPojo(Object pojo) throws FiberException {
-		return applyFromPojo(pojo, AnnotatedSettings.DEFAULT_SETTINGS);
+	public ConfigTreeBuilder applyFromPojo(Object pojo) throws RuntimeFiberException {
+		return this.applyFromPojo(pojo, AnnotatedSettings.DEFAULT_SETTINGS);
 	}
 
 	/**
@@ -259,6 +263,9 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 	 * <p>The generated {@link ConfigLeaf}s will be bound to their respective fields,
 	 * setting the latter when the former's value is {@linkplain ConfigLeaf#setValue(Object) updated}.
 	 *
+	 * <p>If a {@link FiberException} is thrown when using the underlying {@code AnnotatedSettings},
+	 * it is wrapped in a {@link RuntimeFiberException}.
+	 *
 	 * @param pojo     an object serving as a base to reflectively generate a config tree
 	 * @param settings an {@link AnnotatedSettings} instance used to configure this builder
 	 * @return {@code this}, for chaining
@@ -266,8 +273,13 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 	 * @see Settings @Settings
 	 * @see AnnotatedSettings#applyToNode(ConfigTree, Object)
 	 */
-	public ConfigTreeBuilder applyFromPojo(Object pojo, AnnotatedSettings settings) throws FiberException {
-		settings.applyToNode(this, pojo);
+	public ConfigTreeBuilder applyFromPojo(Object pojo, AnnotatedSettings settings) throws RuntimeFiberException {
+		try {
+			settings.applyToNode(this, pojo);
+		} catch (FiberException e) {
+			throw new RuntimeFiberException("Failed to apply POJO structure to builder", e);
+		}
+
 		return this;
 	}
 
