@@ -2,7 +2,7 @@ package io.github.fablabsmc.fablabs.api.fiber.v1.schema.type;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -14,12 +14,12 @@ public final class EnumSerializableType extends SerializableType<String> {
 	private final Set<String> validValues;
 
 	public EnumSerializableType(String... validValues) {
-		this(new HashSet<>(Arrays.asList(validValues)));
+		this(new LinkedHashSet<>(Arrays.asList(validValues)));
 	}
 
 	public EnumSerializableType(Set<String> validValues) {
 		super(String.class, EnumConstraintChecker.instance());
-		this.validValues = Collections.unmodifiableSet(new HashSet<>(validValues));
+		this.validValues = Collections.unmodifiableSet(new LinkedHashSet<>(validValues));
 	}
 
 	public Set<String> getValidValues() {
