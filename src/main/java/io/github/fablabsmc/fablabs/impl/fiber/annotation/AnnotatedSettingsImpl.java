@@ -43,6 +43,7 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.exception.FiberException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.FiberTypeProcessingException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.MalformedFieldException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.RuntimeFiberException;
+import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.DecimalSerializableType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigTypes;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ListConfigType;
@@ -86,41 +87,47 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 		this.registerConstraintProcessor(Setting.Constrain.Range.class, new ConstraintAnnotationProcessor<Setting.Constrain.Range>() {
 			@Override
 			public <T> NumberConfigType<T> processDecimal(NumberConfigType<T> baseType, Setting.Constrain.Range annotation, AnnotatedElement annotated) {
-				NumberConfigType<T> ret = baseType;
+				DecimalSerializableType serType = baseType.getSerializedType();
+				BigDecimal min = serType.getMaximum();
+				BigDecimal max = serType.getMaximum();
+				BigDecimal inc = serType.getIncrement();
 
 				if (annotation.min() > Double.NEGATIVE_INFINITY) {
-					ret = ret.withMinimum(annotation.min());
+					min = BigDecimal.valueOf(annotation.min());
 				}
 
 				if (annotation.max() < Double.POSITIVE_INFINITY) {
-					ret = ret.withMaximum(annotation.max());
+					max = BigDecimal.valueOf(annotation.max());
 				}
 
 				if (annotation.step() > Double.MIN_VALUE) {
-					ret = ret.withIncrement(annotation.step());
+					inc = BigDecimal.valueOf(annotation.step());
 				}
 
-				return ret;
+				return baseType.withType(new DecimalSerializableType(min, max, inc));
 			}
 		});
 		this.registerConstraintProcessor(Setting.Constrain.BigRange.class, new ConstraintAnnotationProcessor<Setting.Constrain.BigRange>() {
 			@Override
 			public <T> NumberConfigType<T> processDecimal(NumberConfigType<T> baseType, Setting.Constrain.BigRange annotation, AnnotatedElement annotated) {
-				NumberConfigType<T> ret = baseType;
+				DecimalSerializableType serType = baseType.getSerializedType();
+				BigDecimal min = serType.getMaximum();
+				BigDecimal max = serType.getMaximum();
+				BigDecimal inc = serType.getIncrement();
 
 				if (!annotation.min().isEmpty()) {
-					ret = ret.withMinimum(new BigDecimal(annotation.min()));
+					min = new BigDecimal(annotation.min());
 				}
 
 				if (!annotation.max().isEmpty()) {
-					ret = ret.withMaximum(new BigDecimal(annotation.max()));
+					max = new BigDecimal(annotation.max());
 				}
 
 				if (!annotation.step().isEmpty()) {
-					ret = ret.withIncrement(new BigDecimal(annotation.step()));
+					inc = new BigDecimal(annotation.step());
 				}
 
-				return ret;
+				return baseType.withType(new DecimalSerializableType(min, max, inc));
 			}
 		});
 		this.registerConstraintProcessor(Setting.Constrain.MinLength.class, new ConstraintAnnotationProcessor<Setting.Constrain.MinLength>() {

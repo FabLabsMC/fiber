@@ -27,7 +27,7 @@ class ConfigTypesTest {
 	@DisplayName("Test numerical constraints")
 	@Test
 	void testNumericalConstraints() {
-		assertThrows(IllegalStateException.class, () -> ConfigTypes.UNBOUNDED_DECIMAL.withIncrement(5), "Increment without a minimum");
+		assertThrows(IllegalStateException.class, () -> ConfigTypes.UNBOUNDED_DECIMAL.withIncrement(BigDecimal.valueOf(5)), "Increment without a minimum");
 		assertThrows(IllegalArgumentException.class, () -> ConfigTypes.INTEGER.withIncrement(-5), "Negative increment");
 
 		DecimalSerializableType type = ConfigTypes.NATURAL.withMinimum(10).withMaximum(20).getSerializedType();
@@ -117,5 +117,25 @@ class ConfigTypesTest {
 		List<String> ls = Arrays.asList(arr.clone());
 		assertEquals(ls, type.toSerializedType(arr), "Convert String[] -> List<String>");
 		assertArrayEquals(arr, type.toRuntimeType(ls), "Convert List<String> -> String[]");
+	}
+
+	enum TestEnum { A, B }
+
+	@Test
+	void testEnum() {
+		EnumConfigType<TestEnum> type = ConfigTypes.makeEnum(TestEnum.class);
+		Predicate<TestEnum> constraint = a -> type.getSerializedType().accepts(type.toSerializedType(a));
+		assertTrue(constraint.test(TestEnum.A), "Unconstrained enum accepts A");
+		assertTrue(constraint.test(TestEnum.B), "Unconstrained enum accepts B");
+
+		EnumConfigType<TestEnum> constrainedType = type.withValues(TestEnum.A);
+		constraint = a -> constrainedType.getSerializedType().accepts(type.toSerializedType(a));
+		assertTrue(constraint.test(TestEnum.A), "Constrained enum 1 enum accepts A");
+		assertFalse(constraint.test(TestEnum.B), "Constrained enum 1 does not accept B");
+
+		EnumConfigType<TestEnum> constrainedType2 = type.withValues(Collections.singleton(TestEnum.B));
+		constraint = a -> constrainedType2.getSerializedType().accepts(type.toSerializedType(a));
+		assertFalse(constraint.test(TestEnum.A), "Constrained enum 2 does not accept A");
+		assertTrue(constraint.test(TestEnum.B), "Constrained enum 2 accepts B");
 	}
 }
