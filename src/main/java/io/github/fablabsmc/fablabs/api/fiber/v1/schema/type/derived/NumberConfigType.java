@@ -5,8 +5,6 @@ import java.lang.reflect.AnnotatedElement;
 import java.math.BigDecimal;
 import java.util.function.Function;
 
-import javax.annotation.Nonnull;
-
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.processor.ConstraintAnnotationProcessor;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.DecimalSerializableType;
 
@@ -32,27 +30,22 @@ public final class NumberConfigType<T> extends ConfigType<T, BigDecimal, Decimal
 		return processor.processDecimal(this, annotation, annotated);
 	}
 
-	public NumberConfigType<T> withMinimum(Number min) {
+	public NumberConfigType<T> withMinimum(T min) {
 		DecimalSerializableType current = this.getSerializedType();
-		return this.withType(new DecimalSerializableType(this.toBigDecimal(min), current.getMaximum(), current.getIncrement()));
+		return this.withType(new DecimalSerializableType(this.toSerializedType(min), current.getMaximum(), current.getIncrement()));
 	}
 
-	public NumberConfigType<T> withMaximum(Number max) {
+	public NumberConfigType<T> withMaximum(T max) {
 		DecimalSerializableType current = this.getSerializedType();
-		return this.withType(new DecimalSerializableType(current.getMinimum(), this.toBigDecimal(max), current.getIncrement()));
+		return this.withType(new DecimalSerializableType(current.getMinimum(), this.toSerializedType(max), current.getIncrement()));
 	}
 
-	public NumberConfigType<T> withIncrement(Number step) {
+	public NumberConfigType<T> withIncrement(T step) {
 		DecimalSerializableType current = this.getSerializedType();
-		return this.withType(new DecimalSerializableType(current.getMinimum(), current.getMaximum(), this.toBigDecimal(step)));
+		return this.withType(new DecimalSerializableType(current.getMinimum(), current.getMaximum(), this.toSerializedType(step)));
 	}
 
-	public NumberConfigType<T> withValidRange(Number min, Number max, Number step) {
-		return this.withType(new DecimalSerializableType(this.toBigDecimal(min), this.toBigDecimal(max), this.toBigDecimal(step)));
-	}
-
-	@Nonnull
-	private BigDecimal toBigDecimal(Number t) {
-		return new BigDecimal(t.toString());
+	public NumberConfigType<T> withValidRange(T min, T max, T step) {
+		return this.withType(new DecimalSerializableType(this.toSerializedType(min), this.toSerializedType(max), this.toSerializedType(step)));
 	}
 }

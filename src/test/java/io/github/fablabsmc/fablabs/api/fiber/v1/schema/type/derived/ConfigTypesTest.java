@@ -27,7 +27,7 @@ class ConfigTypesTest {
 	@DisplayName("Test numerical constraints")
 	@Test
 	void testNumericalConstraints() {
-		assertThrows(IllegalStateException.class, () -> ConfigTypes.UNBOUNDED_DECIMAL.withIncrement(5), "Increment without a minimum");
+		assertThrows(IllegalStateException.class, () -> ConfigTypes.UNBOUNDED_DECIMAL.withIncrement(BigDecimal.valueOf(5)), "Increment without a minimum");
 		assertThrows(IllegalArgumentException.class, () -> ConfigTypes.INTEGER.withIncrement(-5), "Negative increment");
 
 		DecimalSerializableType type = ConfigTypes.NATURAL.withMinimum(10).withMaximum(20).getSerializedType();
