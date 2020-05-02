@@ -1,5 +1,7 @@
 package io.github.fablabsmc.fablabs.impl.fiber.tree;
 
+import java.util.Objects;
+
 import io.github.fablabsmc.fablabs.api.fiber.v1.FiberId;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.SerializableType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigAttribute;
@@ -12,12 +14,12 @@ public class ConfigAttributeImpl<T> implements ConfigAttribute<T> {
 	public ConfigAttributeImpl(FiberId identifier, SerializableType<T> type, T value) {
 		this.identifier = identifier;
 		this.type = type;
-		this.value = value;
+		this.value = Objects.requireNonNull(value);
 	}
 
 	@Override
 	public boolean setValue(T value) {
-		this.value = value;
+		this.value = Objects.requireNonNull(value);
 		return true;
 	}
 

@@ -151,7 +151,7 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
 	 * @return {@code this} builder
 	 */
 	public ConfigLeafBuilder<T, R> withDefaultValue(R defaultValue) {
-		this.defaultValue = this.serializer.apply(defaultValue);
+		this.defaultValue = this.serializer.apply(Objects.requireNonNull(defaultValue));
 		return this;
 	}
 
@@ -167,10 +167,12 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
 	 */
 	@Override
 	public ConfigLeaf<T> build() {
-		if (this.defaultValue != null) {
-			if (!this.type.accepts(this.defaultValue)) {
-				throw new RuntimeFiberException("Default value '" + this.defaultValue + "' does not satisfy constraints on type " + this.type);
-			}
+		if (this.defaultValue == null) {
+			throw new RuntimeFiberException("Default value is null; a default value must be set before building");
+		}
+
+		if (!this.type.accepts(this.defaultValue)) {
+			throw new RuntimeFiberException("Default value '" + this.defaultValue + "' does not satisfy constraints on type " + this.type);
 		}
 
 		ConfigLeaf<T> built = new ConfigLeafImpl<>(Objects.requireNonNull(name, "Cannot build a value without a name"), type, comment, defaultValue, consumer);

@@ -282,11 +282,23 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 	 * @see ConfigTypes
 	 */
 	public <T> ConfigLeafBuilder<T, T> beginValue(@Nonnull String name, @Nonnull SerializableType<T> type, @Nullable T defaultValue) {
-		return ConfigLeafBuilder.create(this, name, type).withDefaultValue(defaultValue);
+		ConfigLeafBuilder<T, T> ret = ConfigLeafBuilder.create(this, name, type);
+
+		if (defaultValue != null) {
+			ret = ret.withDefaultValue(defaultValue);
+		}
+
+		return ret;
 	}
 
 	public <T, R> ConfigLeafBuilder<T, R> beginValue(@Nonnull String name, @Nonnull ConfigType<R, T, ?> type, @Nullable R defaultValue) {
-		return ConfigLeafBuilder.create(this, name, type).withDefaultValue(defaultValue);
+		ConfigLeafBuilder<T, R> ret = ConfigLeafBuilder.create(this, name, type);
+
+		if (defaultValue != null) {
+			ret = ret.withDefaultValue(defaultValue);
+		}
+
+		return ret;
 	}
 
 	/**
@@ -303,7 +315,7 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 	 * @see #beginValue(String, SerializableType, Object)
 	 * @see ConfigTypes
 	 */
-	public <T> ConfigTreeBuilder withValue(@Nonnull String name, @Nonnull SerializableType<T> type, @Nullable T defaultValue) {
+	public <T> ConfigTreeBuilder withValue(@Nonnull String name, @Nonnull SerializableType<T> type, @Nonnull T defaultValue) {
 		this.items.add(new ConfigLeafImpl<>(name, type, null, defaultValue, (a, b) -> {
 		}));
 		return this;

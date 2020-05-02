@@ -19,6 +19,7 @@ public final class EnumSerializableType extends SerializableType<String> {
 
 	public EnumSerializableType(Set<String> validValues) {
 		super(String.class, EnumConstraintChecker.instance());
+		validValues.forEach(Objects::requireNonNull);
 		this.validValues = Collections.unmodifiableSet(new HashSet<>(validValues));
 	}
 

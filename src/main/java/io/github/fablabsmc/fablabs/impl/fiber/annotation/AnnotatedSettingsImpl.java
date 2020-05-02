@@ -458,6 +458,10 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 
 		try {
 			value = (T) field.get(pojo);
+
+			if (value == null) {
+				throw new MalformedFieldException("Default value for field '" + field.getName() + "' is null");
+			}
 		} catch (IllegalAccessException e) {
 			throw new FiberException("Couldn't get value for field '" + field.getName() + "'", e);
 		}
