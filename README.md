@@ -29,7 +29,7 @@ ConfigTree tree = ConfigTree.builder()
         .build();
 
 // Interacting with the configuration
-System.out.println(someIdentifier.getValue().toString());
+System.out.println(someIdentifier.getValue());
 ```
 
 ### Annotations
@@ -58,7 +58,7 @@ settings.registerTypeMapping(FiberId.class, FIBER_ID);
 // Creating the immediate representation from the annotated POJO
 MyPojo pojo = new MyPojo();
 ConfigTree tree = ConfigTree.builder().applyFromPojo(pojo, settings).build();
-System.out.println(pojo.someIdentifier.toString());
+System.out.println(pojo.someIdentifier);
 ```
 
 ## Getting it
@@ -73,9 +73,9 @@ dependencies {
 
 Add `fiber_version` to your `gradle.properties`:
 ```properties
-fiber_version = VERSION HERE
+fiber_version = <VERSION HERE>
 ```
-Replace `VERSION HERE` with the latest version of fiber, which you can find [here](http://maven.modmuss50.me/me/zeroeightsix/fiber/).
+Replace `<VERSION HERE>` with the latest version of fiber, which you can find [here](http://maven.modmuss50.me/me/zeroeightsix/fiber/).
 
 If you're using fiber in a project without fabric, you may have to add the repository as well:
 ```gradle
