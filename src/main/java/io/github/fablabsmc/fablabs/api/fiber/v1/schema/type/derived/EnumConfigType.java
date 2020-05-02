@@ -2,7 +2,10 @@ package io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.util.Arrays;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.processor.ConstraintAnnotationProcessor;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.EnumSerializableType;
@@ -27,5 +30,16 @@ public final class EnumConfigType<T> extends ConfigType<T, String, EnumSerializa
 	@Override
 	public EnumConfigType<T> constrain(ConstraintAnnotationProcessor<Annotation> processor, Annotation annotation, AnnotatedElement annotated) {
 		return processor.processEnum(this, annotation, annotated);
+	}
+
+	public EnumConfigType<T> withValues(Set<? extends T> values) {
+		Set<String> strValues = values.stream().map(this::toSerializedType).collect(Collectors.toSet());
+		return this.withType(new EnumSerializableType(strValues));
+	}
+
+	@SafeVarargs
+	public final EnumConfigType<T> withValues(T... values) {
+		Set<String> strValues = Arrays.stream(values).map(this::toSerializedType).collect(Collectors.toSet());
+		return this.withType(new EnumSerializableType(strValues));
 	}
 }
