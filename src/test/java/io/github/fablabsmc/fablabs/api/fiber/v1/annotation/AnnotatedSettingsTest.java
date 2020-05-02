@@ -246,6 +246,19 @@ class AnnotatedSettingsTest {
 		assertEquals(0, this.node.getItems().size(), "Node is empty");
 	}
 
+	@Test
+	@DisplayName("Null default value")
+	void testNullDefault() {
+		Object pojo = new NullDefaultPojo();
+		assertThrows(FiberException.class,
+				() -> this.annotatedSettings.applyToNode(this.node, pojo),
+				"Prohibit null default value");
+	}
+
+	private static class NullDefaultPojo {
+		private String a = null;
+	}
+
 	private static class FinalSettingPojo {
 		private final int a = 5;
 	}
