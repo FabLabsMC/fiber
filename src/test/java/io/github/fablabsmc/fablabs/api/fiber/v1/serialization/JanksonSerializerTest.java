@@ -174,6 +174,7 @@ class JanksonSerializerTest {
 			final SomeObject so = new SomeObject(0, "foo");
 
 			@Override
+			// @Nonnull
 			public SomeObject getValue() {
 				return this.so;
 			}

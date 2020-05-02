@@ -1,5 +1,7 @@
 package io.github.fablabsmc.fablabs.api.fiber.v1.tree;
 
+import javax.annotation.Nonnull;
+
 /**
  * Indicates that this class holds some nullable value.
  *
@@ -11,6 +13,7 @@ public interface HasValue<T> {
 	 *
 	 * @return the value
 	 */
+	@Nonnull
 	T getValue();
 
 	/**

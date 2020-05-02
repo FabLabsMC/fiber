@@ -50,7 +50,7 @@ public final class ConfigLeafImpl<T> extends ConfigNodeImpl implements ConfigLea
 	}
 
 	@Override
-	public boolean accepts(T value) {
+	public boolean accepts(@Nonnull T value) {
 		// ensure ClassCastException comes sooner than later
 		// maybe accept any Object and return false if not an instance?
 		return this.type.accepts(this.type.getPlatformType().cast(value));

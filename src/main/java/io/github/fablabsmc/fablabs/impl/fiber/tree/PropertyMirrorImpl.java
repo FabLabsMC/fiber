@@ -2,6 +2,7 @@ package io.github.fablabsmc.fablabs.impl.fiber.tree;
 
 import java.util.Objects;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigType;
@@ -54,17 +55,18 @@ public final class PropertyMirrorImpl<R, S> implements PropertyMirror<R> {
 	}
 
 	@Override
-	public boolean setValue(R value) {
+	public boolean setValue(@Nonnull R value) {
 		if (this.delegate == null) throw new IllegalStateException("No delegate property set for this mirror");
 		return this.delegate.setValue(this.converter.toPlatformType(value));
 	}
 
 	@Override
-	public boolean accepts(R value) {
+	public boolean accepts(@Nonnull R value) {
 		if (this.delegate == null) throw new IllegalStateException("No delegate property set for this mirror");
 		return this.delegate.accepts(this.converter.toPlatformType(value));
 	}
 
+	@Nonnull
 	@Override
 	public R getValue() {
 		if (this.delegate == null) throw new IllegalStateException("No delegate property set for this mirror");
