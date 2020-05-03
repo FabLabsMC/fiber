@@ -344,15 +344,7 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 		try {
 			// Inner classes have an extra parameter in their constructor: a reference to the 'upper class'.
 			boolean isInner = !Modifier.isStatic(clazz.getModifiers());
-
-			if (isInner) {
-				constructor = Arrays.stream(clazz.getDeclaredConstructors())
-						.filter(c -> c.getParameterCount() == 1)
-						.findAny()
-						.orElseThrow(() -> new FiberException("Couldn't create group from inner class " + clazz.getSimpleName() + ", is the class public and does it have a nullary constructor?"));
-			} else { // static nested class
-				constructor = clazz.getDeclaredConstructor();
-			}
+			constructor = isInner ? clazz.getDeclaredConstructor(clazz.getDeclaringClass()) : clazz.getDeclaredConstructor();
 
 			accessible = constructor.isAccessible();
 			constructor.setAccessible(true);

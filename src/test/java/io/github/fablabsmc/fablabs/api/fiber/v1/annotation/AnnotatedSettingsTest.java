@@ -1,13 +1,5 @@
 package io.github.fablabsmc.fablabs.api.fiber.v1.annotation;
 
-import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.BiConsumer;
-
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.FiberException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.ListSerializableType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.StringSerializableType;
@@ -21,6 +13,14 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.tree.PropertyMirror;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.BiConsumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -152,29 +152,29 @@ class AnnotatedSettingsTest {
 		Property<List<String>> value1 = this.node.lookupLeaf("nonEmptyArrayShortStrings", type.getSerializedType());
 		assertNotNull(value1, "Setting exists");
 		mirror1.mirror(value1);
-		assertTrue(mirror1.setValue(new String[] {"ab", "", "ba", ""}));
+		assertTrue(mirror1.setValue(new String[]{"ab", "", "ba", ""}));
 		assertFalse(mirror1.setValue(new String[0]), "Empty array");
-		assertFalse(mirror1.setValue(new String[] {"aaaaaaaaaaaa"}), "Strings too long");
+		assertFalse(mirror1.setValue(new String[]{"aaaaaaaaaaaa"}), "Strings too long");
 		ListConfigType<int[], BigDecimal> type2 = ConfigTypes.makeIntArray(ConfigTypes.INTEGER);
 		PropertyMirror<int[]> mirror2 = PropertyMirror.create(type2);
 		this.node.lookupAndBind("numbers", mirror2);
 		assertNotNull(mirror2, "Setting exists");
-		assertTrue(mirror2.setValue(new int[] {3, 4, 5}));
-		assertArrayEquals(new int[] {3, 4, 5}, mirror2.getValue());
+		assertTrue(mirror2.setValue(new int[]{3, 4, 5}));
+		assertArrayEquals(new int[]{3, 4, 5}, mirror2.getValue());
 		assertTrue(mirror2.setValue(new int[0]));
 		assertArrayEquals(new int[0], mirror2.getValue(), "Value should not change after unrecoverable setValue");
-		assertFalse(mirror2.accepts(new int[] {1, 2, 3, 4, 5, 6, 7}), "Too many elements");
-		assertTrue(mirror2.setValue(new int[] {1, 2, 3, 4, 5, 6, 7}), "Recoverable length issue");
-		assertArrayEquals(new int[] {1, 2, 3}, mirror2.getValue(), "Value not properly trimmed");
-		assertFalse(mirror2.accepts(new int[] {1, 11, 3, 4, 5, 6, 7}), "Too many elements and element out of range");
-		assertTrue(mirror2.setValue(new int[] {1, 11, 3, 4, 5, 6, 7}), "Recoverable length issue");
-		assertArrayEquals(new int[] {1, 10, 3}, mirror2.getValue(), "Value not properly trimmed or corrected");
-		assertFalse(mirror2.accepts(new int[] {-1, 0, 1}), "Negative number not allowed");
-		assertTrue(mirror2.setValue(new int[] {-1, 0, 1}), "Correction for out of bounds numbers available");
-		assertArrayEquals(new int[] {0, 0, 1}, mirror2.getValue(), "Negative number should be brought back into range");
-		assertFalse(mirror2.accepts(new int[] {9, 10, 11}), "Numbers above 10 not allowed");
-		assertTrue(mirror2.setValue(new int[] {9, 10, 11}), "Correction for out of bounds numbers available");
-		assertArrayEquals(new int[] {9, 10, 10}, mirror2.getValue(), ">10 number should be brought back into range");
+		assertFalse(mirror2.accepts(new int[]{1, 2, 3, 4, 5, 6, 7}), "Too many elements");
+		assertTrue(mirror2.setValue(new int[]{1, 2, 3, 4, 5, 6, 7}), "Recoverable length issue");
+		assertArrayEquals(new int[]{1, 2, 3}, mirror2.getValue(), "Value not properly trimmed");
+		assertFalse(mirror2.accepts(new int[]{1, 11, 3, 4, 5, 6, 7}), "Too many elements and element out of range");
+		assertTrue(mirror2.setValue(new int[]{1, 11, 3, 4, 5, 6, 7}), "Recoverable length issue");
+		assertArrayEquals(new int[]{1, 10, 3}, mirror2.getValue(), "Value not properly trimmed or corrected");
+		assertFalse(mirror2.accepts(new int[]{-1, 0, 1}), "Negative number not allowed");
+		assertTrue(mirror2.setValue(new int[]{-1, 0, 1}), "Correction for out of bounds numbers available");
+		assertArrayEquals(new int[]{0, 0, 1}, mirror2.getValue(), "Negative number should be brought back into range");
+		assertFalse(mirror2.accepts(new int[]{9, 10, 11}), "Numbers above 10 not allowed");
+		assertTrue(mirror2.setValue(new int[]{9, 10, 11}), "Correction for out of bounds numbers available");
+		assertArrayEquals(new int[]{9, 10, 10}, mirror2.getValue(), ">10 number should be brought back into range");
 		Property<List<String>> value3 = this.node.lookupLeaf("shortArrayIdStrings", new ListSerializableType<>(StringSerializableType.DEFAULT_STRING));
 		assertNotNull(value3, "Setting exists");
 		assertTrue(value3.accepts(Arrays.asList("a:b", "fabric:test")));
@@ -355,7 +355,7 @@ class AnnotatedSettingsTest {
 		public SubNode nullNode;
 
 		@SuppressWarnings("InnerClassMayBeStatic")
-		// we want to test this edge case
+				// we want to test this edge case
 		class SubNode {
 			private int c = 5;
 		}
