@@ -1,12 +1,5 @@
 package io.github.fablabsmc.fablabs.api.fiber.v1.annotation;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collection;
@@ -28,6 +21,8 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.tree.PropertyMirror;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 // TODO add tests for user-defined types and processors
 @SuppressWarnings({"unused", "FieldMayBeFinal"})
@@ -221,13 +216,19 @@ class AnnotatedSettingsTest {
 
 	@Test
 	@DisplayName("Subnodes")
-	void testSubNodes() throws FiberException {
+	void testSubNodes() {
 		SubNodePojo pojo = new SubNodePojo();
-		this.annotatedSettings.applyToNode(this.node, pojo);
-		assertEquals(1, this.node.getItems().size(), "Node has one item");
+		assertDoesNotThrow(() -> this.annotatedSettings.applyToNode(this.node, pojo), "Applied node successfully");
+		assertEquals(2, this.node.getItems().size(), "Node has two items");
+
 		ConfigTree subnode = (ConfigTree) this.node.lookup("a");
-		assertNotNull(subnode, "Subnode exists");
-		assertEquals(1, subnode.getItems().size(), "Subnode has one item");
+		assertNotNull(subnode, "First subnode exists");
+		assertEquals(1, subnode.getItems().size(), "First subnode has one item");
+
+		assertNotNull(pojo.nullNode, "Second subnode received instance");
+		ConfigTree subnode2 = (ConfigTree) this.node.lookup("b");
+		assertNotNull(subnode, "Second subnode exists");
+		assertEquals(1, subnode.getItems().size(), "Second subnode has one item");
 	}
 
 	@Test
@@ -350,10 +351,13 @@ class AnnotatedSettingsTest {
 		@Setting.Group(name = "a")
 		public SubNode node = new SubNode();
 
+		@Setting.Group(name = "b")
+		public SubNode nullNode;
+
 		@SuppressWarnings("InnerClassMayBeStatic")
 		// we want to test this edge case
 		class SubNode {
-			private int b = 5;
+			private int c = 5;
 		}
 	}
 }

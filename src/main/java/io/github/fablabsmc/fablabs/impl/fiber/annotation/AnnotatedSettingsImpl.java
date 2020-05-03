@@ -6,6 +6,7 @@ import java.lang.reflect.AnnotatedArrayType;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.AnnotatedParameterizedType;
 import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
@@ -319,11 +320,56 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 
 		try {
 			field.setAccessible(true);
-			this.applyToNode(sub, field.get(pojo));
+			Object group = field.get(pojo);
+
+			// If group is null, let's try creating a new instance ourselves:
+			if (group == null) {
+				group = tryInstantiateClass(pojo, field.getType());
+				// sets the field so the POJO receives the object we made
+				field.set(pojo, group);
+			}
+
+			this.applyToNode(sub, group);
 			this.applyAnnotationProcessors(pojo, field, sub, this.groupSettingProcessors);
 			sub.build();
 		} catch (IllegalAccessException e) {
 			throw new FiberException("Couldn't fork and apply sub-node", e);
+		}
+	}
+
+	private <P> Object tryInstantiateClass(P pojo, Class<?> clazz) throws FiberException {
+		Constructor<?> constructor = null;
+		boolean accessible = false;
+
+		try {
+			// Inner classes have an extra parameter in their constructor: a reference to the 'upper class'.
+			boolean isInner = !Modifier.isStatic(clazz.getModifiers());
+
+			if (isInner) {
+				constructor = Arrays.stream(clazz.getDeclaredConstructors())
+						.filter(c -> c.getParameterCount() == 1)
+						.findAny()
+						.orElseThrow(() -> new FiberException("Couldn't create group from inner class " + clazz.getSimpleName() + ", is the class public and does it have a nullary constructor?"));
+			} else { // static nested class
+				constructor = clazz.getDeclaredConstructor();
+			}
+
+			accessible = constructor.isAccessible();
+			constructor.setAccessible(true);
+
+			return isInner ? constructor.newInstance(pojo) : constructor.newInstance();
+		} catch (InstantiationException e) {
+			throw new FiberException("Couldn't create group from class " + clazz.getSimpleName() + ". It may not be an interface or an abstract class, and it must have a nullary constructor.", e);
+		} catch (InvocationTargetException e) {
+			throw new FiberException("Couldn't create group from class " + clazz.getSimpleName(), e);
+		} catch (IllegalAccessException e) {
+			throw new FiberException("Couldn't create group from class " + clazz.getSimpleName() + ", is its constructor private?", e);
+		} catch (NoSuchMethodException e) {
+			throw new FiberException("Couldn't create group from class " + clazz.getSimpleName() + ", is the class public and does it have a nullary constructor?", e);
+		} finally {
+			if (constructor != null) {
+				constructor.setAccessible(accessible);
+			}
 		}
 	}
 
