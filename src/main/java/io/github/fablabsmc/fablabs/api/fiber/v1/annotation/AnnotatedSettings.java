@@ -6,17 +6,28 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.processor.BranchAnnot
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.processor.ConstraintAnnotationProcessor;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.processor.LeafAnnotationProcessor;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.processor.ParameterizedTypeProcessor;
+import io.github.fablabsmc.fablabs.api.fiber.v1.builder.ConfigTreeBuilder;
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.FiberException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigBranch;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;
 import io.github.fablabsmc.fablabs.impl.fiber.annotation.AnnotatedSettingsImpl;
+import io.github.fablabsmc.fablabs.impl.fiber.annotation.MemberCollectorImpl;
+import io.github.fablabsmc.fablabs.impl.fiber.annotation.MemberCollectorRecursiveImpl;
 
 public interface AnnotatedSettings {
 	AnnotatedSettings DEFAULT_SETTINGS = create();
 
 	static AnnotatedSettings create() {
-		return new AnnotatedSettingsImpl();
+		return create(new MemberCollectorImpl());
+	}
+
+	static AnnotatedSettings createRecursive() {
+		return create(new MemberCollectorRecursiveImpl());
+	}
+
+	static AnnotatedSettings create(MemberCollector<ConfigTreeBuilder> collector) {
+		return new AnnotatedSettingsImpl(collector);
 	}
 
 	/* tree building methods */

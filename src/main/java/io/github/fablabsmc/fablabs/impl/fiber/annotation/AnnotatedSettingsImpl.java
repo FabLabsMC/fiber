@@ -28,6 +28,7 @@ import java.util.stream.Stream;
 import io.github.fablabsmc.fablabs.api.fiber.v1.NodeOperations;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.AnnotatedSettings;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.Listener;
+import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.MemberCollector;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.Setting;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.Settings;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.convention.NoNamingConvention;
@@ -59,6 +60,11 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 	private final Map<Class<? extends Annotation>, LeafAnnotationProcessor<?>> valueSettingProcessors = new HashMap<>();
 	private final Map<Class<? extends Annotation>, BranchAnnotationProcessor<?>> groupSettingProcessors = new HashMap<>();
 	private final Map<Class<? extends Annotation>, ConstraintAnnotationProcessor<?>> constraintProcessors = new HashMap<>();
+	private final MemberCollector<ConfigTreeBuilder> memberCollector;
+
+	public AnnotatedSettingsImpl(MemberCollector<ConfigTreeBuilder> memberCollector) {
+		this.memberCollector = memberCollector;
+	}
 
 	{
 		this.registerTypeMapping(boolean.class, ConfigTypes.BOOLEAN);
@@ -267,9 +273,9 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 		ConfigTreeBuilder node = ConfigTree.builder();
 
 		List<Member> defaultEmpty = new ArrayList<>();
-		Map<String, List<Member>> listenerMap = this.findListeners(pojoClass);
+		Map<String, List<Member>> listenerMap = this.findListeners(pojo, node);
 
-		for (Field field : pojoClass.getDeclaredFields()) {
+		for (Field field : memberCollector.collectFields(pojo, node)) {
 			if (field.isSynthetic() || !isIncluded(field, onlyAnnotated)) continue;
 
 			try {
@@ -289,8 +295,8 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 		return node;
 	}
 
-	private Map<String, List<Member>> findListeners(Class<?> pojoClass) {
-		return Stream.concat(Arrays.stream(pojoClass.getDeclaredFields()), Arrays.stream(pojoClass.getDeclaredMethods()))
+	private <P> Map<String, List<Member>> findListeners(P pojo, ConfigTreeBuilder builder) {
+		return Stream.concat(memberCollector.collectFields(pojo, builder).stream(), memberCollector.collectMethods(pojo, builder).stream())
 				.filter(accessibleObject -> accessibleObject.isAnnotationPresent(Listener.class))
 				.collect(Collectors.groupingBy(accessibleObject -> ((AccessibleObject) accessibleObject).getAnnotation(Listener.class).value()));
 	}

@@ -1,6 +1,7 @@
 package io.github.fablabsmc.fablabs.api.fiber.v1.annotation;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -246,6 +247,14 @@ class AnnotatedSettingsTest {
 		assertEquals(0, this.node.getItems().size(), "Node is empty");
 	}
 
+	@Test
+	@DisplayName("POJO with superclass")
+	void testSuperPojo() {
+		AnnotatedSettings settings = AnnotatedSettings.createRecursive();
+		assertDoesNotThrow(() -> settings.applyToNode(this.node, new ExtendingPojo()));
+		assertEquals(2, this.node.getItems().size(), "Node has two items");
+	}
+
 	private static class FinalSettingPojo {
 		private final int a = 5;
 	}
@@ -356,4 +365,13 @@ class AnnotatedSettingsTest {
 			private int b = 5;
 		}
 	}
+
+	private static class SuperPojo {
+		private int a = 5;
+	}
+
+	private static class ExtendingPojo extends SuperPojo {
+		private int b = 5;
+	}
+
 }
