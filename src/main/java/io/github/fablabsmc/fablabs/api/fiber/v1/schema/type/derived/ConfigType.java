@@ -55,6 +55,15 @@ public abstract class ConfigType<R, S, T extends SerializableType<S>> {
 	 */
 	public abstract <U> ConfigType<U, S, T> derive(Class<? super U> runtimeType, Function<R, U> partialDeserializer, Function<U, R> partialSerializer);
 
+	/**
+	 * Replace the current serialized type used for specification with the given serialized type.
+	 * The given serialized type must be the same or more constrained than the current
+	 * serialized type.
+	 *
+	 * @param newSpec The new type specification.
+	 * @return A ConfigType with the new type specification.
+	 * @see SerializableType#isAssignableFrom(SerializableType)
+	 */
 	public abstract ConfigType<R, S, T> withType(T newSpec);
 
 	/**
@@ -106,10 +115,16 @@ public abstract class ConfigType<R, S, T extends SerializableType<S>> {
 		return this.deserializer.apply(serializedValue);
 	}
 
+	/**
+	 * The runtime type of values.
+	 */
 	public Class<R> getRuntimeType() {
 		return this.runtimeType;
 	}
 
+	/**
+	 * The underlying serialized type of values.
+	 */
 	public T getSerializedType() {
 		return this.serializedType;
 	}
@@ -122,6 +137,14 @@ public abstract class ConfigType<R, S, T extends SerializableType<S>> {
 				.toString();
 	}
 
+	/**
+	 * Applies the constraints defined by the given constraint annotation.
+	 *
+	 * @param processor The processor for constraints of this type.
+	 * @param annotation The annotation from which to extract constraints.
+	 * @param annotated The annotated element. For example, a field in a POJO.
+	 * @return a ConfigType representing this type, but constrained by the given constraint annotation.
+	 */
 	public abstract ConfigType<R, S, T> constrain(ConstraintAnnotationProcessor<Annotation> processor, Annotation annotation, AnnotatedElement annotated);
 
 	void checkTypeNarrowing(T newSpec) {

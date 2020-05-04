@@ -86,22 +86,30 @@ public @interface Setting {
 			/**
 			 * The minimum value allowed (inclusive).
 			 *
-			 * <p>Settings being constrained using this annotation must be equal to or bigger than this value.
+			 * <p>Settings being constrained using this annotation must be equal to or greater than this value.
 			 *
 			 * @return the minimum value
 			 */
 			double min() default Double.NEGATIVE_INFINITY;
 
 			/**
-			 * The maximum value allowed.
+			 * The maximum value allowed (inclusive).
 			 *
 			 * <p>Settings being constrained using this annotation must be equal to or
-			 * smaller than this {@code value}.
+			 * less than this {@code value}.
 			 *
 			 * @return the maximum value
 			 */
 			double max() default Double.POSITIVE_INFINITY;
 
+			/**
+			 * The minimum allowed distance between adjacent valid values. Must be positive.
+			 *
+			 * <p>Settings being constrained using this annotation must be a whole
+			 * multiple of the step size greater than the minimum value.
+			 *
+			 * @return the step size
+			 */
 			double step() default Double.MIN_VALUE;
 		}
 
@@ -128,6 +136,16 @@ public @interface Setting {
 			 */
 			String max() default "";
 
+			/**
+			 * The minimum allowed distance between adjacent valid values. If empty,
+			 * equivalent to a step size of zero, otherwise the value must represent
+			 * a positive real number.
+			 *
+			 * <p>Settings being constrained using this annotation must be a whole
+			 * multiple of the step size greater than the minimum value.
+			 *
+			 * @return the step size
+			 */
 			String step() default "";
 		}
 

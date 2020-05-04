@@ -83,10 +83,16 @@ public class FiberQueryException extends FiberException {
 			this.expectedValueType = expectedValueType;
 		}
 
+		/**
+		 * The actual node found, which is of unexpected type.
+		 */
 		public ConfigNode getInvalidNode() {
 			return this.invalidItem;
 		}
 
+		/**
+		 * The expected type given in the config query.
+		 */
 		public Class<?> getExpectedNodeType() {
 			return this.expectedNodeType;
 		}

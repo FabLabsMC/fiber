@@ -45,12 +45,19 @@ public interface ConfigTree {
 	/**
 	 * Tries to find a child in this node by name. If a child is found, it will be returned.
 	 *
-	 * @param name The name of the child to look for
-	 * @return the child if found, otherwise {@code null}
+	 * @param name The name of the child to look for.
+	 * @return the child if found, otherwise {@code null}.
 	 */
 	@Nullable
 	ConfigNode lookup(String name);
 
+	/**
+	 * Tries to find a child branch in this node by name. If a child is found, and it is
+	 * a branch node, it is returned.
+	 *
+	 * @param name The name of the child to look for.
+	 * @return The child branch if found, otherwise null.
+	 */
 	@Nullable
 	ConfigBranch lookupBranch(String name);
 

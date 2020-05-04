@@ -11,5 +11,12 @@ package io.github.fablabsmc.fablabs.api.fiber.v1.annotation.convention;
  * @see LowercaseConvention
  */
 public interface SettingNamingConvention {
+	/**
+	 * For the given {@code lowerCamelCase} name, returns a name using the convention
+	 * define by this object.
+	 *
+	 * @param name The name, in lower camel case.
+	 * @return The name, formatted according to the convention defined by this object.
+	 */
 	String name(String name);
 }
