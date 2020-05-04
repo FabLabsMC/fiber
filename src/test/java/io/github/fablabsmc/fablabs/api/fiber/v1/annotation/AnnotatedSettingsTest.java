@@ -232,6 +232,19 @@ class AnnotatedSettingsTest {
 	}
 
 	@Test
+	@DisplayName("Enum")
+	void testEnum() throws FiberException {
+		EnumPojo pojo = new EnumPojo();
+		this.annotatedSettings.applyToNode(this.node, pojo);
+		assertEquals(1, this.node.getItems().size(), "Node has one item");
+		ConfigNode child = this.node.lookup("a");
+		assertTrue(child instanceof ConfigLeaf);
+		ConfigLeaf<?> leaf = (ConfigLeaf<?>) child;
+		assertEquals(ConfigTypes.makeEnum(EnumPojo.TestEnum.class).getSerializedType(), leaf.getConfigType());
+		assertEquals("A", leaf.getValue());
+	}
+
+	@Test
 	@DisplayName("Commented setting")
 	void testComment() throws FiberException {
 		CommentPojo pojo = new CommentPojo();
@@ -363,6 +376,19 @@ class AnnotatedSettingsTest {
 		// we want to test this edge case
 		class SubNode {
 			private int b = 5;
+		}
+	}
+
+	private static class EnumPojo {
+		public TestEnum a = TestEnum.A;
+
+		enum TestEnum {
+			A {
+				@Override
+				public String toString() {
+					return "hi";
+				}
+			}, B, C
 		}
 	}
 

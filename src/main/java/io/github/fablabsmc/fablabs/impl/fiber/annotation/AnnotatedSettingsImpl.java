@@ -1,6 +1,8 @@
 package io.github.fablabsmc.fablabs.impl.fiber.annotation;
 
 import java.lang.annotation.Annotation;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.AnnotatedArrayType;
 import java.lang.reflect.AnnotatedElement;
@@ -24,6 +26,8 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
 
 import io.github.fablabsmc.fablabs.api.fiber.v1.NodeOperations;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.AnnotatedSettings;
@@ -200,12 +204,20 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 	 */
 	@Override
 	public <A extends Annotation> AnnotatedSettings registerSettingProcessor(Class<A> annotationType, LeafAnnotationProcessor<A> processor) {
+		checkAnnotationValidity(annotationType);
+
 		if (this.valueSettingProcessors.containsKey(annotationType)) {
 			throw new IllegalStateException("Cannot register multiple setting processors for the same annotation (" + annotationType + ")");
 		}
 
 		this.valueSettingProcessors.put(annotationType, processor);
 		return this;
+	}
+
+	private static void checkAnnotationValidity(Class<? extends Annotation> annotationType) {
+		if (!annotationType.isAnnotationPresent(Retention.class) || annotationType.getAnnotation(Retention.class).value() != RetentionPolicy.RUNTIME) {
+			throw new IllegalArgumentException("Annotation type " + annotationType + " does not have RUNTIME retention");
+		}
 	}
 
 	/**
@@ -218,6 +230,8 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 	 */
 	@Override
 	public <A extends Annotation> AnnotatedSettings registerGroupProcessor(Class<A> annotationType, BranchAnnotationProcessor<A> processor) {
+		checkAnnotationValidity(annotationType);
+
 		if (this.groupSettingProcessors.containsKey(annotationType)) {
 			throw new IllegalStateException("Cannot register multiple node processors for the same annotation (" + annotationType + ")");
 		}
@@ -236,6 +250,8 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 	 */
 	@Override
 	public <A extends Annotation> AnnotatedSettings registerConstraintProcessor(Class<A> annotationType, ConstraintAnnotationProcessor<A> processor) {
+		checkAnnotationValidity(annotationType);
+
 		if (this.constraintProcessors.containsKey(annotationType)) {
 			throw new IllegalStateException("Cannot register multiple processors for the same annotation (" + annotationType + ")");
 		}
@@ -369,6 +385,7 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 		}
 	}
 
+	@Nonnull
 	private ConfigType<?, ?, ?> toConfigType(AnnotatedType annotatedType) throws FiberTypeProcessingException {
 		Class<?> clazz = TypeMagic.classForType(annotatedType.getType());
 
@@ -376,13 +393,13 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 			throw new FiberTypeProcessingException("Unknown type " + annotatedType.getType().getTypeName());
 		}
 
-		ConfigType<?, ?, ?> ret;
+		@Nonnull ConfigType<?, ?, ?> ret;
 
 		if (annotatedType instanceof AnnotatedArrayType) {
 			ConfigType<?, ?, ?> componentType = this.toConfigType(((AnnotatedArrayType) annotatedType).getAnnotatedGenericComponentType());
 			Class<?> componentClass = clazz.getComponentType();
 			assert componentClass != null;
-			ret = makeArrayConfigType(componentClass, componentType);
+			ret = this.makeArrayConfigType(componentClass, componentType);
 		} else if (this.registeredGenericTypes.containsKey(clazz)) {
 			ParameterizedTypeProcessor<?> parameterizedTypeProcessor = this.registeredGenericTypes.get(clazz);
 
@@ -398,11 +415,11 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 			}
 
 			ret = parameterizedTypeProcessor.process(typeArguments);
-		} else {
+		} else if (this.registeredTypes.containsKey(clazz)) {
 			ret = this.registeredTypes.get(clazz);
-		}
-
-		if (ret == null) {
+		} else if (clazz.isEnum()) {
+			ret = ConfigTypes.makeEnum(clazz.asSubclass(Enum.class));
+		} else {
 			Optional<Class<?>> closestParent = Stream.concat(this.registeredGenericTypes.keySet().stream(), this.registeredTypes.keySet().stream())
 					.filter(c -> c.isAssignableFrom(clazz))
 					.reduce((c1, c2) -> c1.isAssignableFrom(c2) ? c2 : c1);
@@ -411,6 +428,7 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 					+ ". Consider marking as transient, or " + closestParentSuggestion + "registering a new Class -> ConfigType mapping.");
 		}
 
+		assert ret != null;
 		return this.constrain(ret, annotatedType);
 	}
 
