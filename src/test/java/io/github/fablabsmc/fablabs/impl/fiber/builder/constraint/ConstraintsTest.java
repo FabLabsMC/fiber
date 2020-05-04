@@ -26,8 +26,7 @@ class ConstraintsTest {
 		NumberConfigType<Integer> type = ConfigTypes.INTEGER.withMinimum(5);
 
 		ConfigLeaf<BigDecimal> leaf = ConfigLeafBuilder
-				.create(null, "", type.getSerializedType())
-				.withDefaultValue(BigDecimal.valueOf(5))
+				.create(null, "", type.getSerializedType(), BigDecimal.valueOf(5))
 				.build();
 
 		assertFalse(leaf.accepts(BigDecimal.valueOf(-2)), "Input can't be lower than 5");
@@ -44,8 +43,7 @@ class ConstraintsTest {
 				ConfigTypes.INTEGER.withValidRange(3, 10, 1)
 		).withMaxSize(3).withMinSize(1);
 		ConfigLeaf<List<BigDecimal>> config = ConfigLeafBuilder
-				.create(null, "foo", type)
-				.withDefaultValue(new Integer[] { 3, 10 })
+				.create(null, "foo", type, new Integer[] { 3, 10 })
 				.build();
 		PropertyMirror<Integer[]> mirror = PropertyMirror.create(type);
 		mirror.mirror(config);

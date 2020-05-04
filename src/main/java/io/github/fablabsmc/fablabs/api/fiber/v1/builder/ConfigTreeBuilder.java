@@ -281,24 +281,12 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 	 * @see ConfigLeafBuilder
 	 * @see ConfigTypes
 	 */
-	public <T> ConfigLeafBuilder<T, T> beginValue(@Nonnull String name, @Nonnull SerializableType<T> type, @Nullable T defaultValue) {
-		ConfigLeafBuilder<T, T> ret = ConfigLeafBuilder.create(this, name, type);
-
-		if (defaultValue != null) {
-			ret = ret.withDefaultValue(defaultValue);
-		}
-
-		return ret;
+	public <T> ConfigLeafBuilder<T, T> beginValue(@Nonnull String name, @Nonnull SerializableType<T> type, @Nonnull T defaultValue) {
+		return ConfigLeafBuilder.create(this, name, type, defaultValue);
 	}
 
-	public <T, R> ConfigLeafBuilder<T, R> beginValue(@Nonnull String name, @Nonnull ConfigType<R, T, ?> type, @Nullable R defaultValue) {
-		ConfigLeafBuilder<T, R> ret = ConfigLeafBuilder.create(this, name, type);
-
-		if (defaultValue != null) {
-			ret = ret.withDefaultValue(defaultValue);
-		}
-
-		return ret;
+	public <T, R> ConfigLeafBuilder<T, R> beginValue(@Nonnull String name, @Nonnull ConfigType<R, T, ?> type, @Nonnull R defaultValue) {
+		return ConfigLeafBuilder.create(this, name, type, defaultValue);
 	}
 
 	/**
@@ -351,7 +339,7 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 	/**
 	 * Adds a {@code ConfigLeaf} bound to a {@link PropertyMirror}, using the mirror's type information.
 	 *
-	 * <p> This method behaves as if:
+	 * <p>This method behaves as if:
 	 * <pre>{@code this.beginValue(name, mirror.getMirroredType(), defaultValue).finishValue(mirror::mirror)}</pre>
 	 *
 	 * <p><strong>The built leaf will only accept values of the {@code mirror}'s
@@ -360,7 +348,7 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 	 * to a valid serialized form. The mirror can be used to interact seamlessly
 	 * with the leaf using runtime types.
 	 *
-	 * <p> This method allows only basic configuration of the created leaf.
+	 * <p>This method allows only basic configuration of the created leaf.
 	 * For more flexibility, {@link #beginValue} can be used.
 	 *
 	 * @param name         the name of the child leaf
@@ -371,7 +359,7 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 	 * @see #beginValue(String, SerializableType, Object)
 	 * @see ConfigTypes
 	 */
-	public <R> ConfigTreeBuilder withMirroredValue(@Nonnull String name, @Nonnull PropertyMirror<R> mirror, @Nullable R defaultValue) {
+	public <R> ConfigTreeBuilder withMirroredValue(@Nonnull String name, @Nonnull PropertyMirror<R> mirror, @Nonnull R defaultValue) {
 		this.beginValue(name, mirror.getMirroredType(), defaultValue).finishValue(mirror::mirror);
 		return this;
 	}
