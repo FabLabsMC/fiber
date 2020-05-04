@@ -39,12 +39,7 @@ public final class DecimalConstraintChecker extends ConstraintChecker<BigDecimal
 	public boolean comprehends(DecimalSerializableType cfg, DecimalSerializableType cfg2) {
 		if (cfg.getMinimum() == null || cfg2.getMinimum() != null && cfg.getMinimum().compareTo(cfg2.getMinimum()) <= 0) {
 			if (cfg.getMaximum() == null || cfg2.getMaximum() != null && cfg.getMaximum().compareTo(cfg2.getMaximum()) >= 0) {
-				if (cfg.getIncrement() == null) {
-					return true;
-				} else if (cfg2.getIncrement() != null) {
-					BigDecimal remainder = cfg2.getIncrement().remainder(cfg.getIncrement());
-					return remainder.equals(BigDecimal.ZERO.setScale(remainder.scale(), BigDecimal.ROUND_UNNECESSARY));
-				}
+				return cfg.getIncrement() == null || cfg2.getIncrement() != null && cfg2.getIncrement().remainder(cfg.getIncrement()).compareTo(BigDecimal.ZERO) == 0;
 			}
 		}
 
