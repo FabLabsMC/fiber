@@ -2,18 +2,18 @@ package io.github.fablabsmc.fablabs.api.fiber.v1.annotation;
 
 import java.lang.annotation.Annotation;
 
+import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.collect.MemberCollector;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.processor.BranchAnnotationProcessor;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.processor.ConstraintAnnotationProcessor;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.processor.LeafAnnotationProcessor;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.processor.ParameterizedTypeProcessor;
-import io.github.fablabsmc.fablabs.api.fiber.v1.builder.ConfigTreeBuilder;
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.FiberException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigBranch;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;
 import io.github.fablabsmc.fablabs.impl.fiber.annotation.AnnotatedSettingsImpl;
-import io.github.fablabsmc.fablabs.impl.fiber.annotation.MemberCollectorImpl;
-import io.github.fablabsmc.fablabs.impl.fiber.annotation.MemberCollectorRecursiveImpl;
+import io.github.fablabsmc.fablabs.impl.fiber.annotation.collect.MemberCollectorImpl;
+import io.github.fablabsmc.fablabs.impl.fiber.annotation.collect.MemberCollectorRecursiveImpl;
 
 public interface AnnotatedSettings {
 	AnnotatedSettings DEFAULT_SETTINGS = create();
@@ -26,7 +26,7 @@ public interface AnnotatedSettings {
 		return create(new MemberCollectorRecursiveImpl());
 	}
 
-	static AnnotatedSettings create(MemberCollector<ConfigTreeBuilder> collector) {
+	static AnnotatedSettings create(MemberCollector collector) {
 		return new AnnotatedSettingsImpl(collector);
 	}
 

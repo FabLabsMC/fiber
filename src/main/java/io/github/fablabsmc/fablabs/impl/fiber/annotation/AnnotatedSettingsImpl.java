@@ -3,7 +3,6 @@ package io.github.fablabsmc.fablabs.impl.fiber.annotation;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.AnnotatedArrayType;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.AnnotatedParameterizedType;
@@ -23,17 +22,17 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 
 import io.github.fablabsmc.fablabs.api.fiber.v1.NodeOperations;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.AnnotatedSettings;
-import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.Listener;
-import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.MemberCollector;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.Setting;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.Settings;
+import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.collect.ListenerProcessor;
+import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.collect.MemberCollector;
+import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.collect.SettingProcessor;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.convention.NoNamingConvention;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.convention.SettingNamingConvention;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.processor.BranchAnnotationProcessor;
@@ -46,6 +45,7 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.builder.ConfigTreeBuilder;
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.FiberException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.FiberTypeProcessingException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.MalformedFieldException;
+import io.github.fablabsmc.fablabs.api.fiber.v1.exception.ProcessingMemberException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.RuntimeFiberException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.DecimalSerializableType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigType;
@@ -63,9 +63,9 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 	private final Map<Class<? extends Annotation>, LeafAnnotationProcessor<?>> valueSettingProcessors = new HashMap<>();
 	private final Map<Class<? extends Annotation>, BranchAnnotationProcessor<?>> groupSettingProcessors = new HashMap<>();
 	private final Map<Class<? extends Annotation>, ConstraintAnnotationProcessor<?>> constraintProcessors = new HashMap<>();
-	private final MemberCollector<ConfigTreeBuilder> memberCollector;
+	private final MemberCollector memberCollector;
 
-	public AnnotatedSettingsImpl(MemberCollector<ConfigTreeBuilder> memberCollector) {
+	public AnnotatedSettingsImpl(MemberCollector memberCollector) {
 		this.memberCollector = memberCollector;
 	}
 
@@ -285,33 +285,48 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 		ConfigTreeBuilder node = ConfigTree.builder();
 
 		List<Member> defaultEmpty = new ArrayList<>();
-		Map<String, List<Member>> listenerMap = this.findListeners(pojo, node);
+		Map<String, List<Member>> listenerMap = new HashMap<>();
 
-		for (Field field : memberCollector.collectFields(pojo, node)) {
-			// The MemberCollector should include Listeners (because they too get 'processed'), so we explicitly ignore them here
-			if (field.isAnnotationPresent(Listener.class)) continue;
-
-			try {
-				checkViolation(field);
-				String name = findName(field, convention);
-
-				if (field.isAnnotationPresent(Setting.Group.class)) {
-					this.fieldToNode(pojo, node, field, name);
-				} else {
-					this.fieldToItem(node, field, pojo, name, listenerMap.getOrDefault(name, defaultEmpty));
-				}
-			} catch (FiberException e) {
-				throw new FiberException("Failed to process field '" + Modifier.toString(field.getModifiers()) + " " + field.getType().getSimpleName() + " " + field.getName() + "' in " + pojoClass.getSimpleName(), e);
+		ListenerProcessor listenerProcessor = new ListenerProcessor() {
+			@Override
+			public void processMethod(Method method, String name) {
+				listenerMap.computeIfAbsent(name, v -> new ArrayList<>()).add(method);
 			}
-		}
+
+			@Override
+			public void processField(Field field, String name) {
+				listenerMap.computeIfAbsent(name, v -> new ArrayList<>()).add(field);
+			}
+		};
+
+		SettingProcessor settingProcessor = new SettingProcessor() {
+			@Override
+			public void processSetting(Field setting) throws ProcessingMemberException {
+				try {
+					checkViolation(setting);
+					String name = findName(setting, convention);
+					fieldToItem(node, setting, pojo, name, listenerMap.getOrDefault(name, defaultEmpty));
+				} catch (FiberException e) {
+					throw new ProcessingMemberException("Failed to process setting '" + Modifier.toString(setting.getModifiers()) + " " + setting.getType().getSimpleName() + " " + setting.getName() + "' in " + pojoClass.getSimpleName(), e, setting);
+				}
+			}
+
+			@Override
+			public void processGroup(Field group) throws ProcessingMemberException {
+				try {
+					checkViolation(group);
+					String name = findName(group, convention);
+					fieldToNode(pojo, node, group, name);
+				} catch (FiberException e) {
+					throw new ProcessingMemberException("Failed to process group '" + Modifier.toString(group.getModifiers()) + " " + group.getType().getSimpleName() + " " + group.getName() + "' in " + pojoClass.getSimpleName(), e, group);
+				}
+			}
+		};
+
+		memberCollector.collectListeners(pojo, pojoClass, listenerProcessor);
+		memberCollector.collectSettings(pojo, pojoClass, settingProcessor);
 
 		return node;
-	}
-
-	private <P> Map<String, List<Member>> findListeners(P pojo, ConfigTreeBuilder builder) {
-		return Stream.concat(memberCollector.collectFields(pojo, builder).stream(), memberCollector.collectMethods(pojo, builder).stream())
-				.filter(accessibleObject -> accessibleObject.isAnnotationPresent(Listener.class))
-				.collect(Collectors.groupingBy(accessibleObject -> ((AccessibleObject) accessibleObject).getAnnotation(Listener.class).value()));
 	}
 
 	private static void checkViolation(Field field) throws FiberException {
