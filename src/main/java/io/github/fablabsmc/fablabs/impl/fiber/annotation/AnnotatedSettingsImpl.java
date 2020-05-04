@@ -1,6 +1,8 @@
 package io.github.fablabsmc.fablabs.impl.fiber.annotation;
 
 import java.lang.annotation.Annotation;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.AnnotatedArrayType;
 import java.lang.reflect.AnnotatedElement;
@@ -194,12 +196,20 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 	 */
 	@Override
 	public <A extends Annotation> AnnotatedSettings registerSettingProcessor(Class<A> annotationType, LeafAnnotationProcessor<A> processor) {
+		checkAnnotationValidity(annotationType);
+
 		if (this.valueSettingProcessors.containsKey(annotationType)) {
 			throw new IllegalStateException("Cannot register multiple setting processors for the same annotation (" + annotationType + ")");
 		}
 
 		this.valueSettingProcessors.put(annotationType, processor);
 		return this;
+	}
+
+	private static void checkAnnotationValidity(Class<? extends Annotation> annotationType) {
+		if (!annotationType.isAnnotationPresent(Retention.class) || annotationType.getAnnotation(Retention.class).value() != RetentionPolicy.RUNTIME) {
+			throw new IllegalArgumentException("Annotation type " + annotationType + " does not have RUNTIME retention");
+		}
 	}
 
 	/**
@@ -212,6 +222,8 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 	 */
 	@Override
 	public <A extends Annotation> AnnotatedSettings registerGroupProcessor(Class<A> annotationType, BranchAnnotationProcessor<A> processor) {
+		checkAnnotationValidity(annotationType);
+
 		if (this.groupSettingProcessors.containsKey(annotationType)) {
 			throw new IllegalStateException("Cannot register multiple node processors for the same annotation (" + annotationType + ")");
 		}
@@ -230,6 +242,8 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 	 */
 	@Override
 	public <A extends Annotation> AnnotatedSettings registerConstraintProcessor(Class<A> annotationType, ConstraintAnnotationProcessor<A> processor) {
+		checkAnnotationValidity(annotationType);
+
 		if (this.constraintProcessors.containsKey(annotationType)) {
 			throw new IllegalStateException("Cannot register multiple processors for the same annotation (" + annotationType + ")");
 		}

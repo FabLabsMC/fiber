@@ -38,6 +38,7 @@ public interface AnnotatedSettings {
 	 * @param annotationType a class representing the type of annotation to process
 	 * @param processor      a processor for this annotation
 	 * @return {@code this}, for chaining
+	 * @throws IllegalArgumentException if {@code annotationType} does not have RUNTIME retention
 	 */
 	<A extends Annotation> AnnotatedSettings registerSettingProcessor(Class<A> annotationType, LeafAnnotationProcessor<A> processor);
 
@@ -48,6 +49,7 @@ public interface AnnotatedSettings {
 	 * @param annotationType a class representing the type of annotation to process
 	 * @param processor      a processor for this annotation
 	 * @return {@code this}, for chaining
+	 * @throws IllegalArgumentException if {@code annotationType} does not have RUNTIME retention
 	 */
 	<A extends Annotation> AnnotatedSettings registerGroupProcessor(Class<A> annotationType, BranchAnnotationProcessor<A> processor);
 
@@ -58,6 +60,7 @@ public interface AnnotatedSettings {
 	 * @param processor      a processor for this annotation
 	 * @param <A>            the type of annotation to process
 	 * @return {@code this}, for chaining
+	 * @throws IllegalArgumentException if {@code annotationType} does not have RUNTIME retention
 	 */
 	<A extends Annotation> AnnotatedSettings registerConstraintProcessor(Class<A> annotationType, ConstraintAnnotationProcessor<A> processor);
 }
