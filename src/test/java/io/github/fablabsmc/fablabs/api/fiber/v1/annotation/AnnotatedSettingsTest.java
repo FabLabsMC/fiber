@@ -29,6 +29,7 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.tree.PropertyMirror;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.w3c.dom.Attr;
 
 // TODO add tests for user-defined types and processors
 @SuppressWarnings({"unused", "FieldMayBeFinal"})
@@ -83,7 +84,7 @@ class AnnotatedSettingsTest {
 		assertTrue(treeItem instanceof Property, "Setting A is a property");
 		PropertyMirror<Integer> property = PropertyMirror.create(ConfigTypes.INTEGER);
 		property.mirror((Property<?>) treeItem);
-		property.setValue(10);
+		assertDoesNotThrow(() -> property.setValue(10), "Transient listener is not called");
 		assertTrue(pojo.listenedA, "Listener for A was triggered");
 
 		treeItem = this.node.lookup("b");
@@ -286,7 +287,12 @@ class AnnotatedSettingsTest {
 		private int c = 5;
 
 		@Listener("a")
-		private transient BiConsumer<Integer, Integer> aListener = (now, then) -> this.listenedA = true;
+		private BiConsumer<Integer, Integer> aListener = (now, then) -> this.listenedA = true;
+
+		@Listener("a")
+		private transient BiConsumer<Integer, Integer> aTransientListener = (now, then) -> {
+			throw new IllegalStateException("This listener shouldn't be called!");
+		};
 
 		@Listener("b")
 		private void bListener(Integer oldValue, Integer newValue) {
@@ -392,8 +398,12 @@ class AnnotatedSettingsTest {
 		}
 	}
 
+	@Settings(onlyAnnotated = true)
 	private static class SuperPojo {
+		@Setting
 		private int a = 5;
+
+		private int ignored = 10;
 	}
 
 	private static class ExtendingPojo extends SuperPojo {

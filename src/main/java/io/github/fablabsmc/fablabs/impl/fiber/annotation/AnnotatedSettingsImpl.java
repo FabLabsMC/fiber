@@ -17,7 +17,6 @@ import java.lang.reflect.ParameterizedType;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -270,29 +269,27 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 		@SuppressWarnings("unchecked")
 		Class<P> pojoClass = (Class<P>) pojo.getClass();
 
-		boolean onlyAnnotated;
 		SettingNamingConvention convention;
 
 		if (pojoClass.isAnnotationPresent(Settings.class)) {
 			Settings settingsAnnotation = pojoClass.getAnnotation(Settings.class);
-			onlyAnnotated = settingsAnnotation.onlyAnnotated();
 			convention = createConvention(settingsAnnotation.namingConvention());
 		} else { // Assume defaults
-			onlyAnnotated = false;
 			convention = new NoNamingConvention();
 		}
 
-		NodeOperations.moveChildren(this.constructNode(pojoClass, pojo, onlyAnnotated, convention), mergeTo);
+		NodeOperations.moveChildren(this.constructNode(pojoClass, pojo, convention), mergeTo);
 	}
 
-	private <P> ConfigTreeBuilder constructNode(Class<P> pojoClass, P pojo, boolean onlyAnnotated, SettingNamingConvention convention) throws FiberException {
+	private <P> ConfigTreeBuilder constructNode(Class<P> pojoClass, P pojo, SettingNamingConvention convention) throws FiberException {
 		ConfigTreeBuilder node = ConfigTree.builder();
 
 		List<Member> defaultEmpty = new ArrayList<>();
 		Map<String, List<Member>> listenerMap = this.findListeners(pojo, node);
 
 		for (Field field : memberCollector.collectFields(pojo, node)) {
-			if (field.isSynthetic() || !isIncluded(field, onlyAnnotated)) continue;
+			// The MemberCollector should include Listeners (because they too get 'processed'), so we explicitly ignore them here
+			if (field.isAnnotationPresent(Listener.class)) continue;
 
 			try {
 				checkViolation(field);
@@ -315,15 +312,6 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 		return Stream.concat(memberCollector.collectFields(pojo, builder).stream(), memberCollector.collectMethods(pojo, builder).stream())
 				.filter(accessibleObject -> accessibleObject.isAnnotationPresent(Listener.class))
 				.collect(Collectors.groupingBy(accessibleObject -> ((AccessibleObject) accessibleObject).getAnnotation(Listener.class).value()));
-	}
-
-	private static boolean isIncluded(Field field, boolean onlyAnnotated) {
-		if (isIgnored(field)) return false;
-		return !onlyAnnotated || field.isAnnotationPresent(Setting.class);
-	}
-
-	private static boolean isIgnored(Field field) {
-		return getSettingAnnotation(field).map(Setting::ignore).orElse(false) || Modifier.isTransient(field.getModifiers());
 	}
 
 	private static void checkViolation(Field field) throws FiberException {

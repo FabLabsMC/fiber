@@ -11,7 +11,7 @@ public interface MemberCollector<C> {
 	/**
 	 * Returns the set of fields that the annotation processor should process.
 	 *
-	 * <p>This method does not perform any logic to exclude fields based on
+	 * <p>This method performs logic to exclude fields based on
 	 * their properties, such as visibility or annotations.
 	 *
 	 * @param pojo    the POJO to collect fields from
@@ -23,7 +23,7 @@ public interface MemberCollector<C> {
 	/**
 	 * Returns the set of methods that the annotation processor should process.
 	 *
-	 * <p>This method does not perform any logic to exclude methods based on
+	 * <p>This method performs logic to exclude methods based on
 	 * their properties, such as visibility or annotations.
 	 *
 	 * @param pojo    the POJO to collect methods from
