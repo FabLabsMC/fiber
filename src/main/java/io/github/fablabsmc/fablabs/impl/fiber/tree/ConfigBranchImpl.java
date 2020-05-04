@@ -84,7 +84,7 @@ public class ConfigBranchImpl extends ConfigNodeImpl implements ConfigBranch {
 
 	@Override
 	public boolean lookupAndBind(String name, PropertyMirror<?> mirror) {
-		ConfigLeaf<?> leaf = this.lookupLeaf(name, mirror.getConverter().getSerializedType());
+		ConfigLeaf<?> leaf = this.lookupLeaf(name, mirror.getMirroredType().getSerializedType());
 
 		if (leaf != null) {
 			mirror.mirror(leaf);

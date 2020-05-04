@@ -120,7 +120,7 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 
 	@Override
 	public boolean lookupAndBind(String name, PropertyMirror<?> mirror) {
-		ConfigLeaf<?> leaf = this.lookupLeaf(name, mirror.getConverter().getSerializedType());
+		ConfigLeaf<?> leaf = this.lookupLeaf(name, mirror.getMirroredType().getSerializedType());
 
 		if (leaf != null) {
 			mirror.mirror(leaf);
@@ -348,9 +348,31 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 		return this;
 	}
 
-	public <R, S> ConfigTreeBuilder withMirroredValue(@Nonnull String name, @Nonnull ConfigType<R, S, ?> type, @Nullable R defaultValue) {
-		this.items.add(new ConfigLeafImpl<>(name, type.getSerializedType(), null, type.toSerializedType(defaultValue), (a, b) -> {
-		}));
+	/**
+	 * Adds a {@code ConfigLeaf} bound to a {@link PropertyMirror}, using the mirror's type information.
+	 *
+	 * <p> This method behaves as if:
+	 * <pre>{@code this.beginValue(name, mirror.getMirroredType(), defaultValue).finishValue(mirror::mirror)}</pre>
+	 *
+	 * <p><strong>The built leaf will only accept values of the {@code mirror}'s
+	 * {@linkplain ConfigType#getSerializedType() serializable config type}</strong>.
+	 * The full derived type information is only used to convert the provided {@code defaultValue}
+	 * to a valid serialized form. The mirror can be used to interact seamlessly
+	 * with the leaf using runtime types.
+	 *
+	 * <p> This method allows only basic configuration of the created leaf.
+	 * For more flexibility, {@link #beginValue} can be used.
+	 *
+	 * @param name         the name of the child leaf
+	 * @param mirror       a mirror to be bound to the leaf
+	 * @param defaultValue the runtime representation of the default value of the {@link ConfigLeaf} to create.
+	 * @param <R>          the runtime type of the {@code defaultValue} representation.
+	 * @return {@code this}, for chaining
+	 * @see #beginValue(String, SerializableType, Object)
+	 * @see ConfigTypes
+	 */
+	public <R> ConfigTreeBuilder withMirroredValue(@Nonnull String name, @Nonnull PropertyMirror<R> mirror, @Nullable R defaultValue) {
+		this.beginValue(name, mirror.getMirroredType(), defaultValue).finishValue(mirror::mirror);
 		return this;
 	}
 

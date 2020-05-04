@@ -12,14 +12,14 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.tree.PropertyMirror;
 
 public final class PropertyMirrorImpl<R, S> implements PropertyMirror<R> {
 	protected Property<S> delegate;
-	protected ConfigType<R, S, ?> converter;
+	protected ConfigType<R, S, ?> mirroredType;
 	@Nullable
 	private S lastSerializedValue;
 	@Nullable
 	private R cachedValue;
 
-	public PropertyMirrorImpl(ConfigType<R, S, ?> converter) {
-		this.converter = converter;
+	public PropertyMirrorImpl(ConfigType<R, S, ?> mirroredType) {
+		this.mirroredType = mirroredType;
 	}
 
 	/**
@@ -32,8 +32,8 @@ public final class PropertyMirrorImpl<R, S> implements PropertyMirror<R> {
 	 */
 	@Override
 	public void mirror(Property<?> delegate) {
-		if (!this.converter.getSerializedType().getPlatformType().equals(delegate.getType())) {
-			throw new IllegalArgumentException("Unsupported delegate type " + delegate.getType() + ", should be " + this.converter.getSerializedType().getPlatformType());
+		if (!this.mirroredType.getSerializedType().getPlatformType().equals(delegate.getType())) {
+			throw new IllegalArgumentException("Unsupported delegate type " + delegate.getType() + ", should be " + this.mirroredType.getSerializedType().getPlatformType());
 		}
 
 		@SuppressWarnings("unchecked") Property<S> d = (Property<S>) delegate;
@@ -57,13 +57,13 @@ public final class PropertyMirrorImpl<R, S> implements PropertyMirror<R> {
 	@Override
 	public boolean setValue(@Nonnull R value) {
 		if (this.delegate == null) throw new IllegalStateException("No delegate property set for this mirror");
-		return this.delegate.setValue(this.converter.toPlatformType(value));
+		return this.delegate.setValue(this.mirroredType.toPlatformType(value));
 	}
 
 	@Override
 	public boolean accepts(@Nonnull R value) {
 		if (this.delegate == null) throw new IllegalStateException("No delegate property set for this mirror");
-		return this.delegate.accepts(this.converter.toPlatformType(value));
+		return this.delegate.accepts(this.mirroredType.toPlatformType(value));
 	}
 
 	@Nonnull
@@ -75,7 +75,7 @@ public final class PropertyMirrorImpl<R, S> implements PropertyMirror<R> {
 			S serializedValue = this.delegate.getValue();
 
 			if (!Objects.equals(this.lastSerializedValue, serializedValue)) {
-				this.cachedValue = this.converter.toRuntimeType(serializedValue);
+				this.cachedValue = this.mirroredType.toRuntimeType(serializedValue);
 				this.lastSerializedValue = serializedValue;
 			}
 		}
@@ -85,11 +85,11 @@ public final class PropertyMirrorImpl<R, S> implements PropertyMirror<R> {
 
 	@Override
 	public Class<R> getType() {
-		return this.converter.getRuntimeType();
+		return this.mirroredType.getRuntimeType();
 	}
 
 	@Override
-	public ConfigType<R, S, ?> getConverter() {
-		return this.converter;
+	public ConfigType<R, S, ?> getMirroredType() {
+		return this.mirroredType;
 	}
 }
