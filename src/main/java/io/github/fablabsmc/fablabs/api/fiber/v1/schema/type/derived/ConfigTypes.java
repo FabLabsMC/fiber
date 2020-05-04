@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -114,7 +114,9 @@ public final class ConfigTypes {
 	 * @return An {@link EnumConfigType} holding a value of {@code E}.
 	 */
 	public static <E extends Enum<E>> EnumConfigType<E> makeEnum(Class<E> enumType) {
-		Set<String> validValues = Arrays.stream(enumType.getEnumConstants()).map(Enum::name).collect(Collectors.toSet());
+		if (!enumType.isEnum()) throw new IllegalArgumentException(enumType + " is not an enum declaration");
+		// map constants to their names, while preserving natural ordering
+		Set<String> validValues = Arrays.stream(enumType.getEnumConstants()).map(Enum::name).collect(Collectors.toCollection(LinkedHashSet::new));
 		return new EnumConfigType<>(new EnumSerializableType(validValues), enumType, e -> Enum.valueOf(enumType, e), Enum::name);
 	}
 
@@ -176,7 +178,7 @@ public final class ConfigTypes {
 				new ListSerializableType<>(elementType.getSerializedType(), 0, Integer.MAX_VALUE, true),
 				Set.class,
 				l -> {
-					Set<E> ret = new HashSet<>();
+					Set<E> ret = new LinkedHashSet<>();
 
 					for (S s : l) {
 						ret.add(elementType.toRuntimeType(s));
