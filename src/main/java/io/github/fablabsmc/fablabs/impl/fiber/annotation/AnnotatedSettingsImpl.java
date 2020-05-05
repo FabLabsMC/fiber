@@ -26,6 +26,7 @@ import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import io.github.fablabsmc.fablabs.api.fiber.v1.NodeOperations;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.AnnotatedSettings;
@@ -213,12 +214,6 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 		return this;
 	}
 
-	private static void checkAnnotationValidity(Class<? extends Annotation> annotationType) {
-		if (!annotationType.isAnnotationPresent(Retention.class) || annotationType.getAnnotation(Retention.class).value() != RetentionPolicy.RUNTIME) {
-			throw new IllegalArgumentException("Annotation type " + annotationType + " does not have RUNTIME retention");
-		}
-	}
-
 	/**
 	 * Registers a group annotation processor, tasked with processing annotations on ancestor fields (config fields annotated with {@link Setting.Group}.
 	 *
@@ -267,58 +262,48 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 
 	public <P> void applyToNode(ConfigTree mergeTo, P pojo) throws FiberException {
 		@SuppressWarnings("unchecked") Class<P> pojoClass = (Class<P>) pojo.getClass();
-		SettingNamingConvention convention;
-
-		if (pojoClass.isAnnotationPresent(Settings.class)) {
-			Settings settingsAnnotation = pojoClass.getAnnotation(Settings.class);
-			convention = createConvention(settingsAnnotation.namingConvention());
-		} else { // Assume defaults
-			convention = new NoNamingConvention();
-		}
-
+		SettingNamingConvention convention = findSettingAnnotation(Settings.class, pojoClass)
+				.map(Settings::namingConvention)
+				.map(AnnotatedSettingsImpl::createConvention)
+				.orElseGet(NoNamingConvention::new);
 		ConfigTreeBuilder builder = ConfigTree.builder();
-		PojoProcessorImpl processor = this.new PojoProcessorImpl(pojo, convention, builder);
+		PojoProcessorImpl processor = this.new PojoProcessorImpl(convention, builder);
 		this.memberCollector.collect(pojo, pojoClass, processor);
 		NodeOperations.moveChildren(builder, mergeTo);
 	}
 
+	private static void checkAnnotationValidity(Class<? extends Annotation> annotationType) {
+		if (!annotationType.isAnnotationPresent(Retention.class) || annotationType.getAnnotation(Retention.class).value() != RetentionPolicy.RUNTIME) {
+			throw new IllegalArgumentException("Annotation type " + annotationType + " does not have RUNTIME retention");
+		}
+	}
+
+	private static void checkViolation(Field field) throws FiberException {
+		if (Modifier.isFinal(field.getModifiers())) {
+			throw new FiberException("Field '" + field.getName() + "' can not be final");
+		}
+	}
+
+	private static <A extends Annotation> Optional<A> findSettingAnnotation(Class<A> annotationType, AnnotatedElement field) {
+		return Optional.ofNullable(field.getAnnotation(annotationType));
+	}
+
+	private static SettingNamingConvention createConvention(Class<? extends SettingNamingConvention> namingConvention) {
+		try {
+			return namingConvention.newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new RuntimeFiberException("Could not initialise naming convention", e);
+		}
+	}
+
 	private class PojoProcessorImpl implements SettingProcessor {
-		private final Object pojo;
 		private final SettingNamingConvention convention;
 		private final Map<String, List<Member>> listenerMap = new HashMap<>();
 		private final ConfigTreeBuilder builder;
 
-		PojoProcessorImpl(Object pojo, SettingNamingConvention convention, ConfigTreeBuilder builder) {
-			this.pojo = pojo;
+		PojoProcessorImpl(SettingNamingConvention convention, ConfigTreeBuilder builder) {
 			this.convention = convention;
 			this.builder = builder;
-		}
-
-		@Override
-		public void processSetting(Object pojo, Field setting) throws ProcessingMemberException {
-			try {
-				checkViolation(setting);
-				String name = findName(setting, PojoProcessorImpl.this.convention);
-				ConfigType<?, ?, ?> type = this.toConfigType(setting.getAnnotatedType());
-				this.buildLeaf(setting, name, type);
-			} catch (FiberException e) {
-				throw new ProcessingMemberException("Failed to process setting '" + Modifier.toString(setting.getModifiers()) + " " + setting.getType().getSimpleName() + " " + setting.getName() + "' in " + setting.getDeclaringClass().getSimpleName(), e, setting);
-			}
-		}
-
-		@Override
-		public void processGroup(Field group, Object pojo) throws ProcessingMemberException {
-			try {
-				checkViolation(group);
-				String name = findName(group, this.convention);
-				ConfigTreeBuilder sub = this.builder.fork(name);
-				group.setAccessible(true);
-				AnnotatedSettingsImpl.this.applyToNode(sub, group.get(this.pojo));
-				this.applyAnnotationProcessors(group, this.pojo, sub, AnnotatedSettingsImpl.this.groupSettingProcessors);
-				sub.build();
-			} catch (FiberException | IllegalAccessException e) {
-				throw new ProcessingMemberException("Failed to process group '" + Modifier.toString(group.getModifiers()) + " " + group.getType().getSimpleName() + " " + group.getName() + "' in " + group.getDeclaringClass().getSimpleName(), e, group);
-			}
 		}
 
 		@Override
@@ -331,28 +316,73 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 			this.listenerMap.computeIfAbsent(name, v -> new ArrayList<>()).add(field);
 		}
 
-		private <R, S> void buildLeaf(Field setting, String name, ConfigType<R, S, ?> type) throws FiberException {
+		@Override
+		public void processGroup(Field group, Object pojo) throws ProcessingMemberException {
+			try {
+				checkViolation(group);
+				String name = this.findName(group);
+				ConfigTreeBuilder sub = this.builder.fork(name);
+				group.setAccessible(true);
+				AnnotatedSettingsImpl.this.applyToNode(sub, group.get(pojo));
+				this.applyAnnotationProcessors(group, pojo, sub, AnnotatedSettingsImpl.this.groupSettingProcessors);
+				sub.build();
+			} catch (FiberException | IllegalAccessException e) {
+				throw new ProcessingMemberException("Failed to process group '" + Modifier.toString(group.getModifiers()) + " " + group.getType().getSimpleName() + " " + group.getName() + "' in " + group.getDeclaringClass().getSimpleName(), e, group);
+			}
+		}
+
+		@Override
+		public void processSetting(Object pojo, Field setting) throws ProcessingMemberException {
+			try {
+				checkViolation(setting);
+				this.processSetting(setting, pojo, this.toConfigType(setting.getAnnotatedType()));
+			} catch (FiberException e) {
+				throw new ProcessingMemberException("Failed to process setting '" + Modifier.toString(setting.getModifiers()) + " " + setting.getType().getSimpleName() + " " + setting.getName() + "' in " + setting.getDeclaringClass().getSimpleName(), e, setting);
+			}
+		}
+
+		private <R, S> void processSetting(Field setting, Object pojo, ConfigType<R, S, ?> type) throws FiberException {
+			String name = this.findName(setting);
 			List<Member> listeners = this.listenerMap.getOrDefault(name, Collections.emptyList());
 			ConfigLeafBuilder<S, R> leaf = this.builder
-					.beginValue(name, type, this.findDefaultValue(setting, this.pojo))
-					.withComment(findComment(setting))
-					.withListener((t, newValue) -> {
-						try {
-							setting.setAccessible(true);
-							setting.set(this.pojo, newValue);
-						} catch (IllegalAccessException e) {
-							throw new RuntimeFiberException("Failed to update field value", e);
-						}
-					});
+					.beginValue(name, type, this.findDefaultValue(setting, pojo))
+					.withComment(this.findComment(setting))
+					.withListener(this.constructListener(setting, pojo, listeners, type));
+			this.applyAnnotationProcessors(setting, pojo, leaf, AnnotatedSettingsImpl.this.valueSettingProcessors);
+			leaf.build();
+		}
+
+		@Nonnull
+		private String findName(Field field) {
+			return findSettingAnnotation(Setting.Group.class, field).map(Setting.Group::name).filter(s -> !s.isEmpty()).orElseGet(
+					() -> findSettingAnnotation(Setting.class, field).map(Setting::name).filter(s -> !s.isEmpty()).orElseGet(
+							() -> this.convention.name(field.getName())
+					)
+			);
+		}
+
+		@Nullable
+		private String findComment(Field field) {
+			return findSettingAnnotation(Setting.class, field).map(Setting::comment).filter(s -> !s.isEmpty()).orElse(null);
+		}
+
+		@Nonnull
+		private <R> BiConsumer<R, R> constructListener(Field setting, Object pojo, List<Member> listeners, ConfigType<R, ?, ?> type) throws FiberException {
+			BiConsumer<R, R> ret = (t, newValue) -> {
+				try {
+					setting.setAccessible(true);
+					setting.set(pojo, newValue);
+				} catch (IllegalAccessException e) {
+					throw new RuntimeFiberException("Failed to update field value", e);
+				}
+			};
 
 			for (Member listener : listeners) {
-				BiConsumer<R, R> consumer = this.constructListener(listener, this.pojo, type.getRuntimeType());
-				if (consumer == null) continue;
-				leaf.withListener(consumer);
+				BiConsumer<R, R> consumer = this.constructListenerFromMember(listener, pojo, type.getRuntimeType());
+				if (consumer != null) ret = ret.andThen(consumer);
 			}
 
-			this.applyAnnotationProcessors(setting, this.pojo, leaf, AnnotatedSettingsImpl.this.valueSettingProcessors);
-			leaf.build();
+			return ret;
 		}
 
 		private <C> void applyAnnotationProcessors(Field field, Object pojo, C sub, Map<Class<? extends Annotation>, ? extends ConfigAnnotationProcessor<?, Field, C>> settingProcessors) {
@@ -477,7 +507,7 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 			return value;
 		}
 
-		private <T> BiConsumer<T, T> constructListener(Member listener, Object pojo, Class<T> wantedType) throws FiberException {
+		private <T> BiConsumer<T, T> constructListenerFromMember(Member listener, Object pojo, Class<T> wantedType) throws FiberException {
 			BiConsumer<T, T> result;
 
 			if (listener instanceof Field) {
@@ -558,37 +588,6 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 			} else if (!genericTypes.getActualTypeArguments()[0].equals(wantedType)) {
 				throw new MalformedFieldException("Listener " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must have the same generic type as the field it's listening for");
 			}
-		}
-	}
-
-	private static void checkViolation(Field field) throws FiberException {
-		if (Modifier.isFinal(field.getModifiers())) {
-			throw new FiberException("Field '" + field.getName() + "' can not be final");
-		}
-	}
-
-	private static Optional<Setting> getSettingAnnotation(Field field) {
-		return field.isAnnotationPresent(Setting.class) ? Optional.of(field.getAnnotation(Setting.class)) : Optional.empty();
-	}
-
-	private static String findComment(Field field) {
-		return getSettingAnnotation(field).map(Setting::comment).filter(s -> !s.isEmpty()).orElse(null);
-	}
-
-	private static String findName(Field field, SettingNamingConvention convention) {
-		return Optional.ofNullable(
-				field.isAnnotationPresent(Setting.Group.class)
-						? field.getAnnotation(Setting.Group.class).name()
-						: getSettingAnnotation(field).map(Setting::name).orElse(null))
-				.filter(s -> !s.isEmpty())
-				.orElse(convention.name(field.getName()));
-	}
-
-	private static SettingNamingConvention createConvention(Class<? extends SettingNamingConvention> namingConvention) throws FiberException {
-		try {
-			return namingConvention.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
-			throw new FiberException("Could not initialise naming convention", e);
 		}
 	}
 }
