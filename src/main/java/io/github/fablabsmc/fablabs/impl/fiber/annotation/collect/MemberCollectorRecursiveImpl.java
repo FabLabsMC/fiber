@@ -10,7 +10,7 @@ public class MemberCollectorRecursiveImpl extends MemberCollectorImpl {
 		super.collectListeners(pojo, clazz, processor);
 
 		if (clazz.getSuperclass() != null) {
-			super.collectListeners(pojo, clazz.getSuperclass(), processor);
+			this.collectListeners(pojo, clazz.getSuperclass(), processor);
 		}
 	}
 
