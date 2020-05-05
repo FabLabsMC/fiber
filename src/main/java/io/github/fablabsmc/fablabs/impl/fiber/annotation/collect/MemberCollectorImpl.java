@@ -7,10 +7,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.Listener;
-import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.collect.ListenerProcessor;
-import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.collect.MemberCollector;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.Setting;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.Settings;
+import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.collect.MemberCollector;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.collect.SettingProcessor;
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.ProcessingMemberException;
 
@@ -40,28 +39,25 @@ public class MemberCollectorImpl implements MemberCollector {
 	}
 
 	@Override
-	public <P> void collectListeners(P pojo, Class<P> clazz, ListenerProcessor processor) {
+	public <P> void collect(P pojo, Class<? super P> clazz, SettingProcessor processor) throws ProcessingMemberException {
 		for (Method m : clazz.getDeclaredMethods()) {
 			if (isIncluded(m) && m.isAnnotationPresent(Listener.class)) {
-				processor.processMethod(m, m.getAnnotation(Listener.class).value());
+				processor.processListenerMethod(pojo, m, m.getAnnotation(Listener.class).value());
 			}
 		}
 
 		for (Field f : clazz.getDeclaredFields()) {
 			if (isIncluded(f) && f.isAnnotationPresent(Listener.class)) {
-				processor.processField(f, f.getAnnotation(Listener.class).value());
+				processor.processListenerField(pojo, f, f.getAnnotation(Listener.class).value());
 			}
 		}
-	}
 
-	@Override
-	public <P> void collectSettings(P pojo, Class<P> clazz, SettingProcessor processor) throws ProcessingMemberException {
 		for (Field f : clazz.getDeclaredFields()) {
 			if (isIncluded(f) && !f.isAnnotationPresent(Listener.class)) {
 				if (f.isAnnotationPresent(Setting.Group.class)) {
-					processor.processGroup(f);
+					processor.processGroup(f, pojo);
 				} else {
-					processor.processSetting(f);
+					processor.processSetting(pojo, f);
 				}
 			}
 		}

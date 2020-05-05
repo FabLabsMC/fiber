@@ -31,7 +31,6 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.NodeOperations;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.AnnotatedSettings;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.Setting;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.Settings;
-import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.collect.ListenerProcessor;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.collect.MemberCollector;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.collect.SettingProcessor;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.convention.NoNamingConvention;
@@ -277,106 +276,91 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 			convention = new NoNamingConvention();
 		}
 
-		NodeOperations.moveChildren(this.new PojoProcessorImpl<>(pojo, pojoClass, convention).constructNode(), mergeTo);
+		ConfigTreeBuilder builder = ConfigTree.builder();
+		PojoProcessorImpl processor = this.new PojoProcessorImpl(pojo, convention, builder);
+		this.memberCollector.collect(pojo, pojoClass, processor);
+		NodeOperations.moveChildren(builder, mergeTo);
 	}
 
-	private class PojoProcessorImpl<P> implements ListenerProcessor, SettingProcessor {
-		private final P pojo;
+	private class PojoProcessorImpl implements SettingProcessor {
+		private final Object pojo;
 		private final SettingNamingConvention convention;
-		private final Class<P> pojoClass;
 		private final Map<String, List<Member>> listenerMap = new HashMap<>();
-		private final ConfigTreeBuilder node;
+		private final ConfigTreeBuilder builder;
 
-		PojoProcessorImpl(P pojo, Class<P> pojoClass, SettingNamingConvention convention) {
+		PojoProcessorImpl(Object pojo, SettingNamingConvention convention, ConfigTreeBuilder builder) {
 			this.pojo = pojo;
-			this.pojoClass = pojoClass;
 			this.convention = convention;
-			this.node = ConfigTree.builder();
-		}
-
-		ConfigTreeBuilder constructNode() throws FiberException {
-			AnnotatedSettingsImpl.this.memberCollector.collectListeners(this.pojo, this.pojoClass, this);
-			AnnotatedSettingsImpl.this.memberCollector.collectSettings(this.pojo, this.pojoClass, this);
-			return this.node;
+			this.builder = builder;
 		}
 
 		@Override
-		public void processSetting(Field setting) throws ProcessingMemberException {
+		public void processSetting(Object pojo, Field setting) throws ProcessingMemberException {
 			try {
 				checkViolation(setting);
 				String name = findName(setting, PojoProcessorImpl.this.convention);
-				this.fieldToItem(this.node, setting, name, PojoProcessorImpl.this.listenerMap.getOrDefault(name, Collections.emptyList()));
+				ConfigType<?, ?, ?> type = this.toConfigType(setting.getAnnotatedType());
+				this.buildLeaf(setting, name, type);
 			} catch (FiberException e) {
-				throw new ProcessingMemberException("Failed to process setting '" + Modifier.toString(setting.getModifiers()) + " " + setting.getType().getSimpleName() + " " + setting.getName() + "' in " + this.pojoClass.getSimpleName(), e, setting);
+				throw new ProcessingMemberException("Failed to process setting '" + Modifier.toString(setting.getModifiers()) + " " + setting.getType().getSimpleName() + " " + setting.getName() + "' in " + setting.getDeclaringClass().getSimpleName(), e, setting);
 			}
 		}
 
 		@Override
-		public void processGroup(Field group) throws ProcessingMemberException {
+		public void processGroup(Field group, Object pojo) throws ProcessingMemberException {
 			try {
 				checkViolation(group);
 				String name = findName(group, this.convention);
-				this.fieldToNode(this.node, group, name);
-			} catch (FiberException e) {
-				throw new ProcessingMemberException("Failed to process group '" + Modifier.toString(group.getModifiers()) + " " + group.getType().getSimpleName() + " " + group.getName() + "' in " + this.pojoClass.getSimpleName(), e, group);
+				ConfigTreeBuilder sub = this.builder.fork(name);
+				group.setAccessible(true);
+				AnnotatedSettingsImpl.this.applyToNode(sub, group.get(this.pojo));
+				this.applyAnnotationProcessors(group, this.pojo, sub, AnnotatedSettingsImpl.this.groupSettingProcessors);
+				sub.build();
+			} catch (FiberException | IllegalAccessException e) {
+				throw new ProcessingMemberException("Failed to process group '" + Modifier.toString(group.getModifiers()) + " " + group.getType().getSimpleName() + " " + group.getName() + "' in " + group.getDeclaringClass().getSimpleName(), e, group);
 			}
 		}
 
 		@Override
-		public void processMethod(Method method, String name) {
+		public void processListenerMethod(Object pojo, Method method, String name) {
 			this.listenerMap.computeIfAbsent(name, v -> new ArrayList<>()).add(method);
 		}
 
 		@Override
-		public void processField(Field field, String name) {
+		public void processListenerField(Object pojo, Field field, String name) {
 			this.listenerMap.computeIfAbsent(name, v -> new ArrayList<>()).add(field);
 		}
 
-		private void fieldToNode(ConfigTreeBuilder node, Field field, String name) throws FiberException {
-			ConfigTreeBuilder sub = node.fork(name);
-
-			try {
-				field.setAccessible(true);
-				AnnotatedSettingsImpl.this.applyToNode(sub, field.get(this.pojo));
-				this.applyAnnotationProcessors(field, sub, AnnotatedSettingsImpl.this.groupSettingProcessors);
-				sub.build();
-			} catch (IllegalAccessException e) {
-				throw new FiberException("Couldn't fork and apply sub-node", e);
-			}
-		}
-
-		private <S, R> void fieldToItem(ConfigTreeBuilder node, Field field, String name, List<Member> listeners) throws FiberException {
-			@SuppressWarnings("unchecked") ConfigType<R, S, ?> type = (ConfigType<R, S, ?>) this.toConfigType(field.getAnnotatedType());
-
-			ConfigLeafBuilder<S, R> builder = node.beginValue(name, type, this.findDefaultValue(field))
-					.withComment(findComment(field));
+		private <R, S> void buildLeaf(Field setting, String name, ConfigType<R, S, ?> type) throws FiberException {
+			List<Member> listeners = this.listenerMap.getOrDefault(name, Collections.emptyList());
+			ConfigLeafBuilder<S, R> leaf = this.builder
+					.beginValue(name, type, this.findDefaultValue(setting, this.pojo))
+					.withComment(findComment(setting))
+					.withListener((t, newValue) -> {
+						try {
+							setting.setAccessible(true);
+							setting.set(this.pojo, newValue);
+						} catch (IllegalAccessException e) {
+							throw new RuntimeFiberException("Failed to update field value", e);
+						}
+					});
 
 			for (Member listener : listeners) {
-				BiConsumer<R, R> consumer = this.constructListener(listener, type.getRuntimeType());
+				BiConsumer<R, R> consumer = this.constructListener(listener, this.pojo, type.getRuntimeType());
 				if (consumer == null) continue;
-				builder.withListener(consumer);
+				leaf.withListener(consumer);
 			}
 
-			builder.withListener((t, newValue) -> {
-				try {
-					field.setAccessible(true);
-					field.set(this.pojo, newValue);
-				} catch (IllegalAccessException e) {
-					throw new RuntimeFiberException("Failed to update field value", e);
-				}
-			});
-
-			this.applyAnnotationProcessors(field, builder, AnnotatedSettingsImpl.this.valueSettingProcessors);
-
-			builder.build();
+			this.applyAnnotationProcessors(setting, this.pojo, leaf, AnnotatedSettingsImpl.this.valueSettingProcessors);
+			leaf.build();
 		}
 
-		private <C> void applyAnnotationProcessors(Field field, C sub, Map<Class<? extends Annotation>, ? extends ConfigAnnotationProcessor<?, Field, C>> settingProcessors) {
+		private <C> void applyAnnotationProcessors(Field field, Object pojo, C sub, Map<Class<? extends Annotation>, ? extends ConfigAnnotationProcessor<?, Field, C>> settingProcessors) {
 			for (Annotation annotation : field.getAnnotations()) {
 				@SuppressWarnings("unchecked") ConfigAnnotationProcessor<Annotation, Field, C> processor = (ConfigAnnotationProcessor<Annotation, Field, C>) settingProcessors.get(annotation.annotationType());
 
 				if (processor != null) {
-					processor.apply(annotation, field, this.pojo, sub);
+					processor.apply(annotation, field, pojo, sub);
 				}
 			}
 		}
@@ -478,13 +462,13 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 		}
 
 		@SuppressWarnings("unchecked")
-		private <T> T findDefaultValue(Field field) throws FiberException {
+		private <T> T findDefaultValue(Field field, Object pojo) throws FiberException {
 			boolean accessible = field.isAccessible();
 			field.setAccessible(true);
 			T value;
 
 			try {
-				value = (T) field.get(this.pojo);
+				value = (T) field.get(pojo);
 			} catch (IllegalAccessException e) {
 				throw new FiberException("Couldn't get value for field '" + field.getName() + "'", e);
 			}
@@ -493,13 +477,13 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 			return value;
 		}
 
-		private <T> BiConsumer<T, T> constructListener(Member listener, Class<T> wantedType) throws FiberException {
+		private <T> BiConsumer<T, T> constructListener(Member listener, Object pojo, Class<T> wantedType) throws FiberException {
 			BiConsumer<T, T> result;
 
 			if (listener instanceof Field) {
-				result = this.constructListenerFromField((Field) listener, wantedType);
+				result = this.constructListenerFromField((Field) listener, pojo, wantedType);
 			} else if (listener instanceof Method) {
-				result = this.constructListenerFromMethod((Method) listener, wantedType);
+				result = this.constructListenerFromMethod((Method) listener, pojo, wantedType);
 			} else {
 				throw new FiberException("Cannot create listener from " + listener + ": must be a field or method");
 			}
@@ -508,7 +492,7 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 			return result;
 		}
 
-		private <T, A> BiConsumer<T, T> constructListenerFromMethod(Method method, Class<A> wantedType) throws FiberException {
+		private <T, A> BiConsumer<T, T> constructListenerFromMethod(Method method, Object pojo, Class<A> wantedType) throws FiberException {
 			int i = this.checkListenerMethod(method, wantedType);
 			method.setAccessible(true);
 			final boolean staticMethod = Modifier.isStatic(method.getModifiers());
@@ -516,7 +500,7 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 			case 1:
 				return (oldValue, newValue) -> {
 					try {
-						method.invoke(staticMethod ? null : this.pojo, newValue);
+						method.invoke(staticMethod ? null : pojo, newValue);
 					} catch (IllegalAccessException | InvocationTargetException e) {
 						throw new RuntimeFiberException("Failed to invoke listener " + method + " with argument " + newValue, e);
 					}
@@ -524,7 +508,7 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 			case 2:
 				return (oldValue, newValue) -> {
 					try {
-						method.invoke(staticMethod ? null : this.pojo, oldValue, newValue);
+						method.invoke(staticMethod ? null : pojo, oldValue, newValue);
 					} catch (IllegalAccessException | InvocationTargetException e) {
 						throw new RuntimeFiberException("Failed to invoke listener " + method + " with arguments " + oldValue + ", " + newValue, e);
 					}
@@ -548,12 +532,12 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 			return paramCount;
 		}
 
-		private <T, A> BiConsumer<T, T> constructListenerFromField(Field field, Class<A> wantedType) throws FiberException {
+		private <T, A> BiConsumer<T, T> constructListenerFromField(Field field, Object pojo, Class<A> wantedType) throws FiberException {
 			this.checkListenerField(field, wantedType);
 			field.setAccessible(true);
 
 			try {
-				@SuppressWarnings("unchecked") BiConsumer<T, T> consumer = (BiConsumer<T, T>) field.get(this.pojo);
+				@SuppressWarnings("unchecked") BiConsumer<T, T> consumer = (BiConsumer<T, T>) field.get(pojo);
 				return consumer;
 			} catch (IllegalAccessException e) {
 				throw new FiberException("Could not construct listener", e);
