@@ -16,6 +16,7 @@ import java.lang.reflect.ParameterizedType;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -266,9 +267,7 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 	}
 
 	public <P> void applyToNode(ConfigTree mergeTo, P pojo) throws FiberException {
-		@SuppressWarnings("unchecked")
-		Class<P> pojoClass = (Class<P>) pojo.getClass();
-
+		@SuppressWarnings("unchecked") Class<P> pojoClass = (Class<P>) pojo.getClass();
 		SettingNamingConvention convention;
 
 		if (pojoClass.isAnnotationPresent(Settings.class)) {
@@ -278,55 +277,304 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 			convention = new NoNamingConvention();
 		}
 
-		NodeOperations.moveChildren(this.constructNode(pojoClass, pojo, convention), mergeTo);
+		NodeOperations.moveChildren(this.new PojoProcessorImpl<>(pojo, pojoClass, convention).constructNode(), mergeTo);
 	}
 
-	private <P> ConfigTreeBuilder constructNode(Class<P> pojoClass, P pojo, SettingNamingConvention convention) throws FiberException {
-		ConfigTreeBuilder node = ConfigTree.builder();
+	private class PojoProcessorImpl<P> implements ListenerProcessor, SettingProcessor {
+		private final P pojo;
+		private final SettingNamingConvention convention;
+		private final Class<P> pojoClass;
+		private final Map<String, List<Member>> listenerMap = new HashMap<>();
+		private final ConfigTreeBuilder node;
 
-		List<Member> defaultEmpty = new ArrayList<>();
-		Map<String, List<Member>> listenerMap = new HashMap<>();
+		PojoProcessorImpl(P pojo, Class<P> pojoClass, SettingNamingConvention convention) {
+			this.pojo = pojo;
+			this.pojoClass = pojoClass;
+			this.convention = convention;
+			this.node = ConfigTree.builder();
+		}
 
-		ListenerProcessor listenerProcessor = new ListenerProcessor() {
-			@Override
-			public void processMethod(Method method, String name) {
-				listenerMap.computeIfAbsent(name, v -> new ArrayList<>()).add(method);
+		ConfigTreeBuilder constructNode() throws FiberException {
+			AnnotatedSettingsImpl.this.memberCollector.collectListeners(this.pojo, this.pojoClass, this);
+			AnnotatedSettingsImpl.this.memberCollector.collectSettings(this.pojo, this.pojoClass, this);
+			return this.node;
+		}
+
+		@Override
+		public void processSetting(Field setting) throws ProcessingMemberException {
+			try {
+				checkViolation(setting);
+				String name = findName(setting, PojoProcessorImpl.this.convention);
+				this.fieldToItem(this.node, setting, name, PojoProcessorImpl.this.listenerMap.getOrDefault(name, Collections.emptyList()));
+			} catch (FiberException e) {
+				throw new ProcessingMemberException("Failed to process setting '" + Modifier.toString(setting.getModifiers()) + " " + setting.getType().getSimpleName() + " " + setting.getName() + "' in " + this.pojoClass.getSimpleName(), e, setting);
+			}
+		}
+
+		@Override
+		public void processGroup(Field group) throws ProcessingMemberException {
+			try {
+				checkViolation(group);
+				String name = findName(group, this.convention);
+				this.fieldToNode(this.node, group, name);
+			} catch (FiberException e) {
+				throw new ProcessingMemberException("Failed to process group '" + Modifier.toString(group.getModifiers()) + " " + group.getType().getSimpleName() + " " + group.getName() + "' in " + this.pojoClass.getSimpleName(), e, group);
+			}
+		}
+
+		@Override
+		public void processMethod(Method method, String name) {
+			this.listenerMap.computeIfAbsent(name, v -> new ArrayList<>()).add(method);
+		}
+
+		@Override
+		public void processField(Field field, String name) {
+			this.listenerMap.computeIfAbsent(name, v -> new ArrayList<>()).add(field);
+		}
+
+		private void fieldToNode(ConfigTreeBuilder node, Field field, String name) throws FiberException {
+			ConfigTreeBuilder sub = node.fork(name);
+
+			try {
+				field.setAccessible(true);
+				AnnotatedSettingsImpl.this.applyToNode(sub, field.get(this.pojo));
+				this.applyAnnotationProcessors(field, sub, AnnotatedSettingsImpl.this.groupSettingProcessors);
+				sub.build();
+			} catch (IllegalAccessException e) {
+				throw new FiberException("Couldn't fork and apply sub-node", e);
+			}
+		}
+
+		private <S, R> void fieldToItem(ConfigTreeBuilder node, Field field, String name, List<Member> listeners) throws FiberException {
+			@SuppressWarnings("unchecked") ConfigType<R, S, ?> type = (ConfigType<R, S, ?>) this.toConfigType(field.getAnnotatedType());
+
+			ConfigLeafBuilder<S, R> builder = node.beginValue(name, type, this.findDefaultValue(field))
+					.withComment(findComment(field));
+
+			for (Member listener : listeners) {
+				BiConsumer<R, R> consumer = this.constructListener(listener, type.getRuntimeType());
+				if (consumer == null) continue;
+				builder.withListener(consumer);
 			}
 
-			@Override
-			public void processField(Field field, String name) {
-				listenerMap.computeIfAbsent(name, v -> new ArrayList<>()).add(field);
-			}
-		};
-
-		SettingProcessor settingProcessor = new SettingProcessor() {
-			@Override
-			public void processSetting(Field setting) throws ProcessingMemberException {
+			builder.withListener((t, newValue) -> {
 				try {
-					checkViolation(setting);
-					String name = findName(setting, convention);
-					fieldToItem(node, setting, pojo, name, listenerMap.getOrDefault(name, defaultEmpty));
-				} catch (FiberException e) {
-					throw new ProcessingMemberException("Failed to process setting '" + Modifier.toString(setting.getModifiers()) + " " + setting.getType().getSimpleName() + " " + setting.getName() + "' in " + pojoClass.getSimpleName(), e, setting);
+					field.setAccessible(true);
+					field.set(this.pojo, newValue);
+				} catch (IllegalAccessException e) {
+					throw new RuntimeFiberException("Failed to update field value", e);
+				}
+			});
+
+			this.applyAnnotationProcessors(field, builder, AnnotatedSettingsImpl.this.valueSettingProcessors);
+
+			builder.build();
+		}
+
+		private <C> void applyAnnotationProcessors(Field field, C sub, Map<Class<? extends Annotation>, ? extends ConfigAnnotationProcessor<?, Field, C>> settingProcessors) {
+			for (Annotation annotation : field.getAnnotations()) {
+				@SuppressWarnings("unchecked") ConfigAnnotationProcessor<Annotation, Field, C> processor = (ConfigAnnotationProcessor<Annotation, Field, C>) settingProcessors.get(annotation.annotationType());
+
+				if (processor != null) {
+					processor.apply(annotation, field, this.pojo, sub);
+				}
+			}
+		}
+
+		@Nonnull
+		private ConfigType<?, ?, ?> toConfigType(AnnotatedType annotatedType) throws FiberTypeProcessingException {
+			Class<?> clazz = TypeMagic.classForType(annotatedType.getType());
+
+			if (clazz == null) {
+				throw new FiberTypeProcessingException("Unknown type " + annotatedType.getType().getTypeName());
+			}
+
+			@Nonnull ConfigType<?, ?, ?> ret;
+
+			if (annotatedType instanceof AnnotatedArrayType) {
+				ConfigType<?, ?, ?> componentType = this.toConfigType(((AnnotatedArrayType) annotatedType).getAnnotatedGenericComponentType());
+				Class<?> componentClass = clazz.getComponentType();
+				assert componentClass != null;
+				ret = this.makeArrayConfigType(componentClass, componentType);
+			} else if (AnnotatedSettingsImpl.this.registeredGenericTypes.containsKey(clazz)) {
+				ParameterizedTypeProcessor<?> parameterizedTypeProcessor = AnnotatedSettingsImpl.this.registeredGenericTypes.get(clazz);
+
+				if (!(annotatedType instanceof AnnotatedParameterizedType)) {
+					throw new FiberTypeProcessingException("Expected type parameters for " + clazz);
+				}
+
+				AnnotatedType[] annotatedTypeArgs = ((AnnotatedParameterizedType) annotatedType).getAnnotatedActualTypeArguments();
+				ConfigType<?, ?, ?>[] typeArguments = new ConfigType[annotatedTypeArgs.length];
+
+				for (int i = 0; i < annotatedTypeArgs.length; i++) {
+					typeArguments[i] = this.toConfigType(annotatedTypeArgs[i]);
+				}
+
+				ret = parameterizedTypeProcessor.process(typeArguments);
+			} else if (AnnotatedSettingsImpl.this.registeredTypes.containsKey(clazz)) {
+				ret = AnnotatedSettingsImpl.this.registeredTypes.get(clazz);
+			} else if (clazz.isEnum()) {
+				ret = ConfigTypes.makeEnum(clazz.asSubclass(Enum.class));
+			} else {
+				Optional<Class<?>> closestParent = Stream.concat(AnnotatedSettingsImpl.this.registeredGenericTypes.keySet().stream(), AnnotatedSettingsImpl.this.registeredTypes.keySet().stream())
+						.filter(c -> c.isAssignableFrom(clazz))
+						.reduce((c1, c2) -> c1.isAssignableFrom(c2) ? c2 : c1);
+				String closestParentSuggestion = closestParent.map(p -> "declaring the element as '" + p.getTypeName() + "', or ").orElse("");
+				throw new FiberTypeProcessingException("Unknown config type " + annotatedType.getType().getTypeName()
+						+ ". Consider marking as transient, or " + closestParentSuggestion + "registering a new Class -> ConfigType mapping.");
+			}
+
+			assert ret != null;
+			return this.constrain(ret, annotatedType);
+		}
+
+		@SuppressWarnings("unchecked")
+		private ConfigType<?, ?, ?> makeArrayConfigType(Class<?> componentClass, ConfigType<?, ?, ?> componentType) {
+			assert TypeMagic.wrapPrimitive(componentClass) == TypeMagic.wrapPrimitive(componentType.getRuntimeType()) : "Class=" + componentClass + ", ConfigType=" + componentType;
+
+			if (componentClass == boolean.class) {
+				return ConfigTypes.makeBooleanArray((ConfigType<Boolean, ?, ?>) componentType);
+			} else if (componentClass == byte.class) {
+				return ConfigTypes.makeByteArray((ConfigType<Byte, ?, ?>) componentType);
+			} else if (componentClass == short.class) {
+				return ConfigTypes.makeShortArray((ConfigType<Short, ?, ?>) componentType);
+			} else if (componentClass == int.class) {
+				return ConfigTypes.makeIntArray((ConfigType<Integer, ?, ?>) componentType);
+			} else if (componentClass == long.class) {
+				return ConfigTypes.makeLongArray((ConfigType<Long, ?, ?>) componentType);
+			} else if (componentClass == float.class) {
+				return ConfigTypes.makeFloatArray((ConfigType<Float, ?, ?>) componentType);
+			} else if (componentClass == double.class) {
+				return ConfigTypes.makeDoubleArray((ConfigType<Double, ?, ?>) componentType);
+			} else if (componentClass == char.class) {
+				return ConfigTypes.makeCharArray((ConfigType<Character, ?, ?>) componentType);
+			} else {
+				assert !componentClass.isPrimitive() : "Primitive component type: " + componentClass;
+				return ConfigTypes.makeArray(componentType);
+			}
+		}
+
+		private <T extends ConfigType<?, ?, ?>> T constrain(T type, AnnotatedElement annotated) throws FiberTypeProcessingException {
+			T ret = type;
+
+			for (Annotation annotation : annotated.getAnnotations()) {
+				@SuppressWarnings("unchecked") ConstraintAnnotationProcessor<Annotation> processor =
+						(ConstraintAnnotationProcessor<Annotation>) AnnotatedSettingsImpl.this.constraintProcessors.get(annotation.annotationType());
+				if (processor != null) {
+					try {
+						ret = this.constrain(ret, processor, annotation, annotated);
+					} catch (UnsupportedOperationException e) {
+						throw new FiberTypeProcessingException("Failed to constrain type " + type, e);
+					}
 				}
 			}
 
-			@Override
-			public void processGroup(Field group) throws ProcessingMemberException {
-				try {
-					checkViolation(group);
-					String name = findName(group, convention);
-					fieldToNode(pojo, node, group, name);
-				} catch (FiberException e) {
-					throw new ProcessingMemberException("Failed to process group '" + Modifier.toString(group.getModifiers()) + " " + group.getType().getSimpleName() + " " + group.getName() + "' in " + pojoClass.getSimpleName(), e, group);
-				}
+			return ret;
+		}
+
+		@SuppressWarnings("unchecked")
+		private <T extends ConfigType<?, ?, ?>> T constrain(T type, ConstraintAnnotationProcessor<Annotation> processor, Annotation annotation, AnnotatedElement annotated) {
+			return (T) type.constrain(processor, annotation, annotated);
+		}
+
+		@SuppressWarnings("unchecked")
+		private <T> T findDefaultValue(Field field) throws FiberException {
+			boolean accessible = field.isAccessible();
+			field.setAccessible(true);
+			T value;
+
+			try {
+				value = (T) field.get(this.pojo);
+			} catch (IllegalAccessException e) {
+				throw new FiberException("Couldn't get value for field '" + field.getName() + "'", e);
 			}
-		};
 
-		memberCollector.collectListeners(pojo, pojoClass, listenerProcessor);
-		memberCollector.collectSettings(pojo, pojoClass, settingProcessor);
+			field.setAccessible(accessible);
+			return value;
+		}
 
-		return node;
+		private <T> BiConsumer<T, T> constructListener(Member listener, Class<T> wantedType) throws FiberException {
+			BiConsumer<T, T> result;
+
+			if (listener instanceof Field) {
+				result = this.constructListenerFromField((Field) listener, wantedType);
+			} else if (listener instanceof Method) {
+				result = this.constructListenerFromMethod((Method) listener, wantedType);
+			} else {
+				throw new FiberException("Cannot create listener from " + listener + ": must be a field or method");
+			}
+
+			// note: we assume that a value coming from the IR is valid
+			return result;
+		}
+
+		private <T, A> BiConsumer<T, T> constructListenerFromMethod(Method method, Class<A> wantedType) throws FiberException {
+			int i = this.checkListenerMethod(method, wantedType);
+			method.setAccessible(true);
+			final boolean staticMethod = Modifier.isStatic(method.getModifiers());
+			switch (i) {
+			case 1:
+				return (oldValue, newValue) -> {
+					try {
+						method.invoke(staticMethod ? null : this.pojo, newValue);
+					} catch (IllegalAccessException | InvocationTargetException e) {
+						throw new RuntimeFiberException("Failed to invoke listener " + method + " with argument " + newValue, e);
+					}
+				};
+			case 2:
+				return (oldValue, newValue) -> {
+					try {
+						method.invoke(staticMethod ? null : this.pojo, oldValue, newValue);
+					} catch (IllegalAccessException | InvocationTargetException e) {
+						throw new RuntimeFiberException("Failed to invoke listener " + method + " with arguments " + oldValue + ", " + newValue, e);
+					}
+				};
+			default:
+				throw new FiberException("Listener failed due to an invalid number of arguments.");
+			}
+		}
+
+		private <A> int checkListenerMethod(Method method, Class<A> wantedType) throws FiberException {
+			if (!method.getReturnType().equals(void.class)) {
+				throw new FiberException("Listener method must return void");
+			}
+
+			int paramCount = method.getParameterCount();
+
+			if ((paramCount != 1 && paramCount != 2) || !method.getParameterTypes()[0].equals(wantedType)) {
+				throw new FiberException("Listener method must have exactly two parameters of type that it listens for");
+			}
+
+			return paramCount;
+		}
+
+		private <T, A> BiConsumer<T, T> constructListenerFromField(Field field, Class<A> wantedType) throws FiberException {
+			this.checkListenerField(field, wantedType);
+			field.setAccessible(true);
+
+			try {
+				@SuppressWarnings("unchecked") BiConsumer<T, T> consumer = (BiConsumer<T, T>) field.get(this.pojo);
+				return consumer;
+			} catch (IllegalAccessException e) {
+				throw new FiberException("Could not construct listener", e);
+			}
+		}
+
+		private <A> void checkListenerField(Field field, Class<A> wantedType) throws MalformedFieldException {
+			if (!field.getType().equals(BiConsumer.class)) {
+				throw new MalformedFieldException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must be a BiConsumer");
+			}
+
+			ParameterizedType genericTypes = (ParameterizedType) field.getGenericType();
+
+			if (genericTypes.getActualTypeArguments().length != 2) {
+				throw new MalformedFieldException("Listener " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must have 2 generic types");
+			} else if (genericTypes.getActualTypeArguments()[0] != genericTypes.getActualTypeArguments()[1]) {
+				throw new MalformedFieldException("Listener " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must have 2 identical generic types");
+			} else if (!genericTypes.getActualTypeArguments()[0].equals(wantedType)) {
+				throw new MalformedFieldException("Listener " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must have the same generic type as the field it's listening for");
+			}
+		}
 	}
 
 	private static void checkViolation(Field field) throws FiberException {
@@ -337,247 +585,6 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 
 	private static Optional<Setting> getSettingAnnotation(Field field) {
 		return field.isAnnotationPresent(Setting.class) ? Optional.of(field.getAnnotation(Setting.class)) : Optional.empty();
-	}
-
-	private <P> void fieldToNode(P pojo, ConfigTreeBuilder node, Field field, String name) throws FiberException {
-		ConfigTreeBuilder sub = node.fork(name);
-
-		try {
-			field.setAccessible(true);
-			this.applyToNode(sub, field.get(pojo));
-			this.applyAnnotationProcessors(pojo, field, sub, this.groupSettingProcessors);
-			sub.build();
-		} catch (IllegalAccessException e) {
-			throw new FiberException("Couldn't fork and apply sub-node", e);
-		}
-	}
-
-	private <S, R> void fieldToItem(ConfigTreeBuilder node, Field field, Object pojo, String name, List<Member> listeners) throws FiberException {
-		@SuppressWarnings("unchecked") ConfigType<R, S, ?> type = (ConfigType<R, S, ?>) this.toConfigType(field.getAnnotatedType());
-
-		ConfigLeafBuilder<S, R> builder = node.beginValue(name, type, this.findDefaultValue(field, pojo))
-				.withComment(findComment(field));
-
-		for (Member listener : listeners) {
-			BiConsumer<R, R> consumer = this.constructListener(listener, pojo, type.getRuntimeType());
-			if (consumer == null) continue;
-			builder.withListener(consumer);
-		}
-
-		builder.withListener((t, newValue) -> {
-			try {
-				field.setAccessible(true);
-				field.set(pojo, newValue);
-			} catch (IllegalAccessException e) {
-				throw new RuntimeFiberException("Failed to update field value", e);
-			}
-		});
-
-		this.applyAnnotationProcessors(pojo, field, builder, this.valueSettingProcessors);
-
-		builder.build();
-	}
-
-	private <C> void applyAnnotationProcessors(Object pojo, Field field, C sub, Map<Class<? extends Annotation>, ? extends ConfigAnnotationProcessor<?, Field, C>> settingProcessors) {
-		for (Annotation annotation : field.getAnnotations()) {
-			@SuppressWarnings("unchecked") ConfigAnnotationProcessor<Annotation, Field, C> processor = (ConfigAnnotationProcessor<Annotation, Field, C>) settingProcessors.get(annotation.annotationType());
-
-			if (processor != null) {
-				processor.apply(annotation, field, pojo, sub);
-			}
-		}
-	}
-
-	@Nonnull
-	private ConfigType<?, ?, ?> toConfigType(AnnotatedType annotatedType) throws FiberTypeProcessingException {
-		Class<?> clazz = TypeMagic.classForType(annotatedType.getType());
-
-		if (clazz == null) {
-			throw new FiberTypeProcessingException("Unknown type " + annotatedType.getType().getTypeName());
-		}
-
-		@Nonnull ConfigType<?, ?, ?> ret;
-
-		if (annotatedType instanceof AnnotatedArrayType) {
-			ConfigType<?, ?, ?> componentType = this.toConfigType(((AnnotatedArrayType) annotatedType).getAnnotatedGenericComponentType());
-			Class<?> componentClass = clazz.getComponentType();
-			assert componentClass != null;
-			ret = this.makeArrayConfigType(componentClass, componentType);
-		} else if (this.registeredGenericTypes.containsKey(clazz)) {
-			ParameterizedTypeProcessor<?> parameterizedTypeProcessor = this.registeredGenericTypes.get(clazz);
-
-			if (!(annotatedType instanceof AnnotatedParameterizedType)) {
-				throw new FiberTypeProcessingException("Expected type parameters for " + clazz);
-			}
-
-			AnnotatedType[] annotatedTypeArgs = ((AnnotatedParameterizedType) annotatedType).getAnnotatedActualTypeArguments();
-			ConfigType<?, ?, ?>[] typeArguments = new ConfigType[annotatedTypeArgs.length];
-
-			for (int i = 0; i < annotatedTypeArgs.length; i++) {
-				typeArguments[i] = this.toConfigType(annotatedTypeArgs[i]);
-			}
-
-			ret = parameterizedTypeProcessor.process(typeArguments);
-		} else if (this.registeredTypes.containsKey(clazz)) {
-			ret = this.registeredTypes.get(clazz);
-		} else if (clazz.isEnum()) {
-			ret = ConfigTypes.makeEnum(clazz.asSubclass(Enum.class));
-		} else {
-			Optional<Class<?>> closestParent = Stream.concat(this.registeredGenericTypes.keySet().stream(), this.registeredTypes.keySet().stream())
-					.filter(c -> c.isAssignableFrom(clazz))
-					.reduce((c1, c2) -> c1.isAssignableFrom(c2) ? c2 : c1);
-			String closestParentSuggestion = closestParent.map(p -> "declaring the element as '" + p.getTypeName() + "', or ").orElse("");
-			throw new FiberTypeProcessingException("Unknown config type " + annotatedType.getType().getTypeName()
-					+ ". Consider marking as transient, or " + closestParentSuggestion + "registering a new Class -> ConfigType mapping.");
-		}
-
-		assert ret != null;
-		return this.constrain(ret, annotatedType);
-	}
-
-	@SuppressWarnings("unchecked")
-	private ConfigType<?, ?, ?> makeArrayConfigType(Class<?> componentClass, ConfigType<?, ?, ?> componentType) {
-		assert TypeMagic.wrapPrimitive(componentClass) == TypeMagic.wrapPrimitive(componentType.getRuntimeType()) : "Class=" + componentClass + ", ConfigType=" + componentType;
-
-		if (componentClass == boolean.class) {
-			return ConfigTypes.makeBooleanArray((ConfigType<Boolean, ?, ?>) componentType);
-		} else if (componentClass == byte.class) {
-			return ConfigTypes.makeByteArray((ConfigType<Byte, ?, ?>) componentType);
-		} else if (componentClass == short.class) {
-			return ConfigTypes.makeShortArray((ConfigType<Short, ?, ?>) componentType);
-		} else if (componentClass == int.class) {
-			return ConfigTypes.makeIntArray((ConfigType<Integer, ?, ?>) componentType);
-		} else if (componentClass == long.class) {
-			return ConfigTypes.makeLongArray((ConfigType<Long, ?, ?>) componentType);
-		} else if (componentClass == float.class) {
-			return ConfigTypes.makeFloatArray((ConfigType<Float, ?, ?>) componentType);
-		} else if (componentClass == double.class) {
-			return ConfigTypes.makeDoubleArray((ConfigType<Double, ?, ?>) componentType);
-		} else if (componentClass == char.class) {
-			return ConfigTypes.makeCharArray((ConfigType<Character, ?, ?>) componentType);
-		} else {
-			assert !componentClass.isPrimitive() : "Primitive component type: " + componentClass;
-			return ConfigTypes.makeArray(componentType);
-		}
-	}
-
-	private <T extends ConfigType<?, ?, ?>> T constrain(T type, AnnotatedElement annotated) throws FiberTypeProcessingException {
-		T ret = type;
-
-		for (Annotation annotation : annotated.getAnnotations()) {
-			@SuppressWarnings("unchecked") ConstraintAnnotationProcessor<Annotation> processor =
-					(ConstraintAnnotationProcessor<Annotation>) this.constraintProcessors.get(annotation.annotationType());
-			if (processor != null) {
-				try {
-					ret = this.constrain(ret, processor, annotation, annotated);
-				} catch (UnsupportedOperationException e) {
-					throw new FiberTypeProcessingException("Failed to constrain type " + type, e);
-				}
-			}
-		}
-
-		return ret;
-	}
-
-	@SuppressWarnings("unchecked")
-	private <T extends ConfigType<?, ?, ?>> T constrain(T type, ConstraintAnnotationProcessor<Annotation> processor, Annotation annotation, AnnotatedElement annotated) {
-		return (T) type.constrain(processor, annotation, annotated);
-	}
-
-	@SuppressWarnings("unchecked")
-	private <T> T findDefaultValue(Field field, Object pojo) throws FiberException {
-		boolean accessible = field.isAccessible();
-		field.setAccessible(true);
-		T value;
-
-		try {
-			value = (T) field.get(pojo);
-		} catch (IllegalAccessException e) {
-			throw new FiberException("Couldn't get value for field '" + field.getName() + "'", e);
-		}
-
-		field.setAccessible(accessible);
-		return value;
-	}
-
-	private <T> BiConsumer<T, T> constructListener(Member listener, Object pojo, Class<T> wantedType) throws FiberException {
-		BiConsumer<T, T> result;
-
-		if (listener instanceof Field) {
-			result = this.constructListenerFromField((Field) listener, pojo, wantedType);
-		} else if (listener instanceof Method) {
-			result = this.constructListenerFromMethod((Method) listener, pojo, wantedType);
-		} else {
-			throw new FiberException("Cannot create listener from " + listener + ": must be a field or method");
-		}
-
-		// note: we assume that a value coming from the IR is valid
-		return result;
-	}
-
-	private <T, P, A> BiConsumer<T, T> constructListenerFromMethod(Method method, P pojo, Class<A> wantedType) throws FiberException {
-		int i = this.checkListenerMethod(method, wantedType);
-		method.setAccessible(true);
-		final boolean staticMethod = Modifier.isStatic(method.getModifiers());
-		switch (i) {
-		case 1:
-			return (oldValue, newValue) -> {
-				try {
-					method.invoke(staticMethod ? null : pojo, newValue);
-				} catch (IllegalAccessException | InvocationTargetException e) {
-					throw new RuntimeFiberException("Failed to invoke listener " + method + " with argument " + newValue, e);
-				}
-			};
-		case 2:
-			return (oldValue, newValue) -> {
-				try {
-					method.invoke(staticMethod ? null : pojo, oldValue, newValue);
-				} catch (IllegalAccessException | InvocationTargetException e) {
-					throw new RuntimeFiberException("Failed to invoke listener " + method + " with arguments " + oldValue + ", " + newValue, e);
-				}
-			};
-		default:
-			throw new FiberException("Listener failed due to an invalid number of arguments.");
-		}
-	}
-
-	private <A> int checkListenerMethod(Method method, Class<A> wantedType) throws FiberException {
-		if (!method.getReturnType().equals(void.class)) throw new FiberException("Listener method must return void");
-		int paramCount = method.getParameterCount();
-
-		if ((paramCount != 1 && paramCount != 2) || !method.getParameterTypes()[0].equals(wantedType)) {
-			throw new FiberException("Listener method must have exactly two parameters of type that it listens for");
-		}
-
-		return paramCount;
-	}
-
-	private <T, P, A> BiConsumer<T, T> constructListenerFromField(Field field, P pojo, Class<A> wantedType) throws FiberException {
-		this.checkListenerField(field, wantedType);
-		field.setAccessible(true);
-
-		try {
-			@SuppressWarnings("unchecked") BiConsumer<T, T> consumer = (BiConsumer<T, T>) field.get(pojo);
-			return consumer;
-		} catch (IllegalAccessException e) {
-			throw new FiberException("Could not construct listener", e);
-		}
-	}
-
-	private <A> void checkListenerField(Field field, Class<A> wantedType) throws MalformedFieldException {
-		if (!field.getType().equals(BiConsumer.class)) {
-			throw new MalformedFieldException("Field " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must be a BiConsumer");
-		}
-
-		ParameterizedType genericTypes = (ParameterizedType) field.getGenericType();
-
-		if (genericTypes.getActualTypeArguments().length != 2) {
-			throw new MalformedFieldException("Listener " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must have 2 generic types");
-		} else if (genericTypes.getActualTypeArguments()[0] != genericTypes.getActualTypeArguments()[1]) {
-			throw new MalformedFieldException("Listener " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must have 2 identical generic types");
-		} else if (!genericTypes.getActualTypeArguments()[0].equals(wantedType)) {
-			throw new MalformedFieldException("Listener " + field.getDeclaringClass().getCanonicalName() + "#" + field.getName() + " must have the same generic type as the field it's listening for");
-		}
 	}
 
 	private static String findComment(Field field) {
