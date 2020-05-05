@@ -12,5 +12,5 @@ public interface SettingProcessor {
 
 	void processSetting(Object pojo, Field setting) throws ProcessingMemberException;
 
-	void processGroup(Field group, Object pojo) throws ProcessingMemberException;
+	void processGroup(Object pojo, Field group) throws ProcessingMemberException;
 }

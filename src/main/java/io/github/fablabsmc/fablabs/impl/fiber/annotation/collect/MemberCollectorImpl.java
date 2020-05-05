@@ -55,7 +55,7 @@ public class MemberCollectorImpl implements MemberCollector {
 		for (Field f : clazz.getDeclaredFields()) {
 			if (isIncluded(f) && !f.isAnnotationPresent(Listener.class)) {
 				if (f.isAnnotationPresent(Setting.Group.class)) {
-					processor.processGroup(f, pojo);
+					processor.processGroup(pojo, f);
 				} else {
 					processor.processSetting(pojo, f);
 				}
