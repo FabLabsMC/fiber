@@ -339,7 +339,7 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 	/**
 	 * Adds a {@code ConfigLeaf} bound to a {@link PropertyMirror}, using the mirror's type information.
 	 *
-	 * <p> This method behaves as if:
+	 * <p>This method behaves as if:
 	 * <pre>{@code this.beginValue(name, mirror.getMirroredType(), defaultValue).finishValue(mirror::mirror)}</pre>
 	 *
 	 * <p><strong>The built leaf will only accept values of the {@code mirror}'s
@@ -348,7 +348,7 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 	 * to a valid serialized form. The mirror can be used to interact seamlessly
 	 * with the leaf using runtime types.
 	 *
-	 * <p> This method allows only basic configuration of the created leaf.
+	 * <p>This method allows only basic configuration of the created leaf.
 	 * For more flexibility, {@link #beginValue} can be used.
 	 *
 	 * @param name         the name of the child leaf
