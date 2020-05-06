@@ -262,6 +262,19 @@ class AnnotatedSettingsTest {
 	}
 
 	@Test
+	@DisplayName("Null default value")
+	void testNullDefault() {
+		Object pojo = new NullDefaultPojo();
+		assertThrows(FiberException.class,
+				() -> this.annotatedSettings.applyToNode(this.node, pojo),
+				"Prohibit null default value");
+	}
+
+	private static class NullDefaultPojo {
+		private String a = null;
+	}
+
+	@Test
 	@DisplayName("POJO with superclass")
 	void testSuperPojo() {
 		AnnotatedSettings settings = AnnotatedSettings.createRecursive();

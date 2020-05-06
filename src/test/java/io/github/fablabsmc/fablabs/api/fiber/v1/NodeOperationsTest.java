@@ -45,11 +45,11 @@ public class NodeOperationsTest {
 	@Test
 	@DisplayName("Value -> Value")
 	void copyValue() {
-		ConfigLeaf<BigDecimal> valueOne = ConfigLeafBuilder.create(null, "A", ConfigTypes.INTEGER.getSerializedType())
-				.withDefaultValue(BigDecimal.TEN)
+		ConfigLeaf<BigDecimal> valueOne = ConfigLeafBuilder
+				.create(null, "A", ConfigTypes.INTEGER.getSerializedType(), BigDecimal.TEN)
 				.build();
-		ConfigLeaf<BigDecimal> valueTwo = ConfigLeafBuilder.create(null, "A", ConfigTypes.INTEGER.getSerializedType())
-				.withDefaultValue(BigDecimal.valueOf(20))
+		ConfigLeaf<BigDecimal> valueTwo = ConfigLeafBuilder
+				.create(null, "A", ConfigTypes.INTEGER.getSerializedType(), BigDecimal.valueOf(20))
 				.build();
 
 		NodeOperations.copyValue(valueOne, valueTwo);
