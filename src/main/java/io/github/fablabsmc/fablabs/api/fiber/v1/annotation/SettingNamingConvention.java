@@ -1,8 +1,7 @@
 package io.github.fablabsmc.fablabs.api.fiber.v1.annotation;
 
-import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.convention.LowercaseConvention;
-import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.convention.NoNamingConvention;
-import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.convention.SnakeCaseConvention;
+import java.util.Locale;
+import java.util.regex.Pattern;
 
 /**
  * A setting naming convention decides how a setting is named based upon the variable it was created from.
@@ -15,17 +14,19 @@ public interface SettingNamingConvention {
 	/**
 	 * A naming convention that converts all characters to lowercase.
 	 */
-	SettingNamingConvention LOWERCASE = new LowercaseConvention();
+	SettingNamingConvention LOWERCASE = name -> name.toLowerCase(Locale.ROOT);
 
 	/**
 	 * A naming convention that does not modify any names.
 	 */
-	SettingNamingConvention NONE = new NoNamingConvention();
+	SettingNamingConvention NONE = name -> name;
+
+	Pattern CAMEL_WORD_START = Pattern.compile("(?!^)[ _]*([A-Z])");
 
 	/**
 	 * A naming convention that converts java-styled {@code lowerCamelCase} names and {@code Proper case} names to {@code snake_case}.
 	 */
-	SettingNamingConvention SNAKE_CASE = new SnakeCaseConvention();
+	SettingNamingConvention SNAKE_CASE = name -> CAMEL_WORD_START.matcher(name).replaceAll("_$1").replace(' ', '_').toLowerCase(Locale.ROOT);
 
 	/**
 	 * For the given {@code lowerCamelCase} name, returns a name using the convention
