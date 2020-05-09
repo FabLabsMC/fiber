@@ -6,7 +6,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.convention.NoNamingConvention;
-import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.convention.SettingNamingConvention;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;
 
 /**
@@ -16,10 +15,11 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;
  * it can be used to specify other metadata.
  *
  * @see Settings#onlyAnnotated()
- * @see Settings#namingConvention()
+ * @deprecated use {@link io.github.fablabsmc.fablabs.api.fiber.v1.annotation.AnnotatedSettings.Builder} to configure POJO scanning
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
+@Deprecated
 public @interface Settings {
 	/**
 	 * Specifies whether or not all fields in this class should be serialised, or only those annotated with {@link Setting}.
@@ -28,13 +28,17 @@ public @interface Settings {
 	 * All transient fields are ignored by default.
 	 *
 	 * @return whether or not only annotated fields should be serialised
+	 * @deprecated use {@link AnnotatedSettings.Builder#collectOnlyAnnotatedMembers()}
 	 */
+	@Deprecated
 	boolean onlyAnnotated() default false;
 
 	/**
 	 * Returns the naming convention used for (re)naming the fields in this class during serialisation.
 	 *
 	 * @return the {@link SettingNamingConvention naming convention} for this class
+	 * @deprecated use {@link AnnotatedSettings.Builder#useNamingConvention(SettingNamingConvention)}
 	 */
+	@Deprecated
 	Class<? extends SettingNamingConvention> namingConvention() default NoNamingConvention.class;
 }

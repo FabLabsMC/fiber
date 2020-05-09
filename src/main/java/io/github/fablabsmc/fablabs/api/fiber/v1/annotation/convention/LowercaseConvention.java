@@ -1,7 +1,9 @@
 package io.github.fablabsmc.fablabs.api.fiber.v1.annotation.convention;
 
+import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.SettingNamingConvention;
+
 /**
- * A naming convention that converts any input name to lower case.
+ * @deprecated use {@link SettingNamingConvention#LOWERCASE}.
  */
 public class LowercaseConvention implements SettingNamingConvention {
 	@Override
