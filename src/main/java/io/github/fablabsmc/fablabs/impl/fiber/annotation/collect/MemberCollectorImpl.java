@@ -10,7 +10,7 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.Listener;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.Setting;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.Settings;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.collect.MemberCollector;
-import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.collect.SettingProcessor;
+import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.collect.PojoMemberProcessor;
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.ProcessingMemberException;
 
 public class MemberCollectorImpl implements MemberCollector {
@@ -39,7 +39,7 @@ public class MemberCollectorImpl implements MemberCollector {
 	}
 
 	@Override
-	public <P> void collect(P pojo, Class<? super P> clazz, SettingProcessor processor) throws ProcessingMemberException {
+	public <P> void collect(P pojo, Class<? super P> clazz, PojoMemberProcessor processor) throws ProcessingMemberException {
 		for (Method m : clazz.getDeclaredMethods()) {
 			if (isIncluded(m) && m.isAnnotationPresent(Listener.class)) {
 				processor.processListenerMethod(pojo, m, m.getAnnotation(Listener.class).value());

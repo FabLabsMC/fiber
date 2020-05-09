@@ -20,5 +20,5 @@ public interface MemberCollector {
 	 * @param <P>       the generic pojo type
 	 * @throws ProcessingMemberException if something went wrong while processing a member
 	 */
-	<P> void collect(P pojo, Class<? super P> clazz, SettingProcessor processor) throws ProcessingMemberException;
+	<P> void collect(P pojo, Class<? super P> clazz, PojoMemberProcessor processor) throws ProcessingMemberException;
 }

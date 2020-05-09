@@ -33,7 +33,7 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.AnnotatedSettings;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.Setting;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.Settings;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.collect.MemberCollector;
-import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.collect.SettingProcessor;
+import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.collect.PojoMemberProcessor;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.convention.NoNamingConvention;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.convention.SettingNamingConvention;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.processor.BranchAnnotationProcessor;
@@ -267,7 +267,7 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 				.map(AnnotatedSettingsImpl::createConvention)
 				.orElseGet(NoNamingConvention::new);
 		ConfigTreeBuilder builder = ConfigTree.builder();
-		PojoProcessorImpl processor = this.new PojoProcessorImpl(convention, builder);
+		PojoMemberProcessorImpl processor = this.new PojoMemberProcessorImpl(convention, builder);
 		this.memberCollector.collect(pojo, pojoClass, processor);
 		NodeOperations.moveChildren(builder, mergeTo);
 	}
@@ -296,12 +296,12 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 		}
 	}
 
-	private class PojoProcessorImpl implements SettingProcessor {
+	private class PojoMemberProcessorImpl implements PojoMemberProcessor {
 		private final SettingNamingConvention convention;
 		private final Map<String, List<Member>> listenerMap = new HashMap<>();
 		private final ConfigTreeBuilder builder;
 
-		PojoProcessorImpl(SettingNamingConvention convention, ConfigTreeBuilder builder) {
+		PojoMemberProcessorImpl(SettingNamingConvention convention, ConfigTreeBuilder builder) {
 			this.convention = convention;
 			this.builder = builder;
 		}
