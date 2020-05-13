@@ -26,6 +26,11 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigNode;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.HasValue;
 
+/**
+ * A {@link Serializer} for the Jankson serialization form.
+ *
+ * @see <a href="https://github.com/falkreon/Jankson">Jankson GitHub repository</a>
+ */
 public class JanksonSerializer implements Serializer<JsonObject> {
 	private static final FiberId IDENTIFIER = new FiberId("fiber", "jankson");
 
