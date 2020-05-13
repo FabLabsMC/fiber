@@ -8,6 +8,11 @@ import java.util.function.Function;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.processor.ConstraintAnnotationProcessor;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.DecimalSerializableType;
 
+/**
+ * A {@link ConfigType} for numeric ranges.
+ *
+ * @param <T> The runtime type of the underlying {@link BigDecimal} value.
+ */
 public final class NumberConfigType<T> extends ConfigType<T, BigDecimal, DecimalSerializableType> {
 	public NumberConfigType(DecimalSerializableType serializedType, Class<T> runtimeType, Function<BigDecimal, T> f, Function<T, BigDecimal> f0) {
 		super(serializedType, runtimeType, f, f0);

@@ -141,9 +141,9 @@ public abstract class ConfigType<R, S, T extends SerializableType<S>> {
 	/**
 	 * Applies the constraints defined by the given constraint annotation.
 	 *
-	 * @param processor The processor for constraints of this type.
+	 * @param processor  The processor for constraints of this type.
 	 * @param annotation The annotation from which to extract constraints.
-	 * @param annotated The annotated element. For example, a field in a POJO.
+	 * @param annotated  The annotated element. For example, a field in a POJO.
 	 * @return a ConfigType representing this type, but constrained by the given constraint annotation.
 	 */
 	public abstract ConfigType<R, S, T> constrain(ConstraintAnnotationProcessor<Annotation> processor, Annotation annotation, AnnotatedElement annotated);

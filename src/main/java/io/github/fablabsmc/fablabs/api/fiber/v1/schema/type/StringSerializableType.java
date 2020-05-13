@@ -9,6 +9,9 @@ import javax.annotation.Nullable;
 import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.TypeSerializer;
 import io.github.fablabsmc.fablabs.impl.fiber.constraint.StringConstraintChecker;
 
+/**
+ * The {@link SerializableType} for regex-defined {@link String} values.
+ */
 public final class StringSerializableType extends SerializableType<String> {
 	public static final StringSerializableType DEFAULT_STRING = new StringSerializableType(0, Integer.MAX_VALUE, null);
 

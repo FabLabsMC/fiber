@@ -7,6 +7,11 @@ import java.util.StringJoiner;
 import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.TypeSerializer;
 import io.github.fablabsmc.fablabs.impl.fiber.constraint.MapConstraintChecker;
 
+/**
+ * The {@link SerializableType} for mappings from {@link String} keys to some value type.
+ *
+ * @param <V> The serialized value type.
+ */
 public final class MapSerializableType<V> extends SerializableType<Map<String, V>> {
 	private final StringSerializableType keyType;
 	private final SerializableType<V> valueType;

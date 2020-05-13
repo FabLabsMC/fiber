@@ -9,6 +9,10 @@ import javax.annotation.Nullable;
 import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.TypeSerializer;
 import io.github.fablabsmc.fablabs.impl.fiber.constraint.DecimalConstraintChecker;
 
+/**
+ * The {@link SerializableType} for numeric ranges. This type handles integral as well as real
+ * and fractional ranges using Java's {@link BigDecimal} type.
+ */
 public final class DecimalSerializableType extends SerializableType<BigDecimal> {
 	/**
 	 * Specifies a numerical lower bound.
