@@ -7,7 +7,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import io.github.fablabsmc.fablabs.api.fiber.v1.FiberId;
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.RuntimeFiberException;
@@ -37,8 +36,8 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
 	 * @param <R> The runtime type of values the builder receives.
 	 * @return A new builder.
 	 */
-	public static <T, R> ConfigLeafBuilder<T, R> create(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull ConfigType<R, T, ?> type) {
-		return new ConfigLeafBuilder<>(parentNode, name, type.getSerializedType(), type::toRuntimeType, type::toSerializedType);
+	public static <T, R> ConfigLeafBuilder<T, R> create(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull ConfigType<R, T, ?> type, @Nonnull R defaultValue) {
+		return new ConfigLeafBuilder<>(parentNode, name, type.getSerializedType(), type.toSerializedType(defaultValue), type::toRuntimeType, type::toSerializedType);
 	}
 
 	/**
@@ -50,8 +49,8 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
 	 * @param <T> The type of serialized values the leaf node stores.
 	 * @return A new builder.
 	 */
-	public static <T> ConfigLeafBuilder<T, T> create(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull SerializableType<T> type) {
-		return new ConfigLeafBuilder<>(parentNode, name, type, Function.identity(), Function.identity());
+	public static <T> ConfigLeafBuilder<T, T> create(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull SerializableType<T> type, @Nonnull T defaultValue) {
+		return new ConfigLeafBuilder<>(parentNode, name, type, defaultValue, Function.identity(), Function.identity());
 	}
 
 	@Nonnull
@@ -59,8 +58,8 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
 	protected final Function<T, R> deserializer;
 	protected final Function<R, T> serializer;
 
-	@Nullable
-	private T defaultValue = null;
+	@Nonnull
+	private T defaultValue;
 
 	private BiConsumer<T, T> consumer = (t, t2) -> {
 	};
@@ -71,14 +70,16 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
 	 * @param parentNode   the {@code ConfigTreeBuilder} this builder originates from
 	 * @param name         the name of the {@code ConfigLeaf} produced by this builder
 	 * @param type         the class object representing the type of values this builder will create settings for
+	 * @param defaultValue the nonnull default value to use for the built leaf.
 	 * @param deserializer a deserializing function
 	 * @param serializer   a serializing function
 	 */
-	private ConfigLeafBuilder(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull SerializableType<T> type, Function<T, R> deserializer, Function<R, T> serializer) {
+	private ConfigLeafBuilder(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull SerializableType<T> type, T defaultValue, Function<T, R> deserializer, Function<R, T> serializer) {
 		super(parentNode, name);
 		this.type = type;
 		this.deserializer = deserializer;
 		this.serializer = serializer;
+		this.defaultValue = Objects.requireNonNull(defaultValue);
 	}
 
 	/**
@@ -117,27 +118,18 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
 		return this;
 	}
 
-	/**
-	 * @inheritDoc
-	 */
 	@Override
 	public <A> ConfigLeafBuilder<T, R> withAttribute(FiberId id, SerializableType<A> type, A defaultValue) {
 		super.withAttribute(id, type, defaultValue);
 		return this;
 	}
 
-	/**
-	 * @inheritDoc
-	 */
 	@Override
 	public ConfigLeafBuilder<T, R> withAttributes(Collection<ConfigAttribute<?>> attributes) {
 		super.withAttributes(attributes);
 		return this;
 	}
 
-	/**
-	 * @inheritDoc
-	 */
 	@Override
 	public ConfigLeafBuilder<T, R> withAttribute(ConfigAttribute<?> attribute) {
 		super.withAttribute(attribute);
@@ -172,7 +164,7 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
 	 * @return {@code this} builder
 	 */
 	public ConfigLeafBuilder<T, R> withDefaultValue(R defaultValue) {
-		this.defaultValue = this.serializer.apply(defaultValue);
+		this.defaultValue = this.serializer.apply(Objects.requireNonNull(defaultValue));
 		return this;
 	}
 
@@ -189,10 +181,8 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
 	 */
 	@Override
 	public ConfigLeaf<T> build() {
-		if (this.defaultValue != null) {
-			if (!this.type.accepts(this.defaultValue)) {
-				throw new RuntimeFiberException("Default value '" + this.defaultValue + "' does not satisfy constraints on type " + this.type);
-			}
+		if (!this.type.accepts(this.defaultValue)) {
+			throw new RuntimeFiberException("Default value '" + this.defaultValue + "' does not satisfy constraints on type " + this.type);
 		}
 
 		ConfigLeaf<T> built = new ConfigLeafImpl<>(Objects.requireNonNull(name, "Cannot build a value without a name"), type, comment, defaultValue, consumer);

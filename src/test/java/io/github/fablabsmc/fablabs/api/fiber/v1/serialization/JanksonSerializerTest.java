@@ -33,8 +33,7 @@ class JanksonSerializerTest {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		JanksonSerializer jk = new JanksonSerializer();
 		ConfigTree nodeOne = ConfigTree.builder()
-				.beginValue("A", ConfigTypes.INTEGER.getSerializedType(), null)
-				.withDefaultValue(BigDecimal.TEN)
+				.beginValue("A", ConfigTypes.INTEGER.getSerializedType(), BigDecimal.TEN)
 				.finishValue()
 				.build();
 
@@ -174,6 +173,7 @@ class JanksonSerializerTest {
 			final SomeObject so = new SomeObject(0, "foo");
 
 			@Override
+			// @Nonnull
 			public SomeObject getValue() {
 				return this.so;
 			}

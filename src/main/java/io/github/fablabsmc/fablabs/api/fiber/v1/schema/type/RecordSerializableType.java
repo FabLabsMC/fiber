@@ -14,6 +14,7 @@ public final class RecordSerializableType extends SerializableType<ConfigBranch>
 
 	public RecordSerializableType(Map<String, SerializableType<?>> fields) {
 		super(ConfigBranch.class, RecordConstraintChecker.instance());
+		fields.keySet().forEach(Objects::requireNonNull);
 		this.fields = fields;
 	}
 

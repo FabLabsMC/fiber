@@ -1,6 +1,7 @@
 package io.github.fablabsmc.fablabs.api.fiber.v1.schema.type;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.TypeSerializer;
@@ -81,7 +82,7 @@ public abstract class SerializableType<T> {
 	 * @see TypeCheckResult
 	 */
 	public final TypeCheckResult<T> test(T serializedValue) {
-		return this.checker.test(this, serializedValue);
+		return this.checker.test(this, Objects.requireNonNull(serializedValue));
 	}
 
 	/**

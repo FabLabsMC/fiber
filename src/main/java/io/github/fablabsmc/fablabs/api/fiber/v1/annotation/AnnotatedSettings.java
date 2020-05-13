@@ -2,6 +2,7 @@ package io.github.fablabsmc.fablabs.api.fiber.v1.annotation;
 
 import java.lang.annotation.Annotation;
 
+import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.collect.MemberCollector;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.processor.BranchAnnotationProcessor;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.processor.ConstraintAnnotationProcessor;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.processor.LeafAnnotationProcessor;
@@ -11,6 +12,8 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigBranch;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;
 import io.github.fablabsmc.fablabs.impl.fiber.annotation.AnnotatedSettingsImpl;
+import io.github.fablabsmc.fablabs.impl.fiber.annotation.collect.MemberCollectorImpl;
+import io.github.fablabsmc.fablabs.impl.fiber.annotation.collect.MemberCollectorRecursiveImpl;
 
 /**
  * Types which implement this interface can create a config tree based on an
@@ -30,7 +33,15 @@ public interface AnnotatedSettings {
 	 * for deserializing types supported in Fiber.
 	 */
 	static AnnotatedSettings create() {
-		return new AnnotatedSettingsImpl();
+		return create(new MemberCollectorImpl());
+	}
+
+	static AnnotatedSettings createRecursive() {
+		return create(new MemberCollectorRecursiveImpl());
+	}
+
+	static AnnotatedSettings create(MemberCollector collector) {
+		return new AnnotatedSettingsImpl(collector);
 	}
 
 	/* tree building methods */

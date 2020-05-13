@@ -304,12 +304,12 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 	 * @see ConfigLeafBuilder
 	 * @see ConfigTypes
 	 */
-	public <T> ConfigLeafBuilder<T, T> beginValue(@Nonnull String name, @Nonnull SerializableType<T> type, @Nullable T defaultValue) {
-		return ConfigLeafBuilder.create(this, name, type).withDefaultValue(defaultValue);
+	public <T> ConfigLeafBuilder<T, T> beginValue(@Nonnull String name, @Nonnull SerializableType<T> type, @Nonnull T defaultValue) {
+		return ConfigLeafBuilder.create(this, name, type, defaultValue);
 	}
 
-	public <T, R> ConfigLeafBuilder<T, R> beginValue(@Nonnull String name, @Nonnull ConfigType<R, T, ?> type, @Nullable R defaultValue) {
-		return ConfigLeafBuilder.create(this, name, type).withDefaultValue(defaultValue);
+	public <T, R> ConfigLeafBuilder<T, R> beginValue(@Nonnull String name, @Nonnull ConfigType<R, T, ?> type, @Nonnull R defaultValue) {
+		return ConfigLeafBuilder.create(this, name, type, defaultValue);
 	}
 
 	/**
@@ -326,7 +326,7 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 	 * @see #beginValue(String, SerializableType, Object)
 	 * @see ConfigTypes
 	 */
-	public <T> ConfigTreeBuilder withValue(@Nonnull String name, @Nonnull SerializableType<T> type, @Nullable T defaultValue) {
+	public <T> ConfigTreeBuilder withValue(@Nonnull String name, @Nonnull SerializableType<T> type, @Nonnull T defaultValue) {
 		this.items.add(new ConfigLeafImpl<>(name, type, null, defaultValue, (a, b) -> {
 		}));
 		return this;
@@ -382,7 +382,7 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 	 * @see #beginValue(String, SerializableType, Object)
 	 * @see ConfigTypes
 	 */
-	public <R> ConfigTreeBuilder withMirroredValue(@Nonnull String name, @Nonnull PropertyMirror<R> mirror, @Nullable R defaultValue) {
+	public <R> ConfigTreeBuilder withMirroredValue(@Nonnull String name, @Nonnull PropertyMirror<R> mirror, @Nonnull R defaultValue) {
 		this.beginValue(name, mirror.getMirroredType(), defaultValue).finishValue(mirror::mirror);
 		return this;
 	}

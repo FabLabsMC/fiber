@@ -2,6 +2,7 @@ package io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.function.Function;
 
@@ -97,7 +98,7 @@ public abstract class ConfigType<R, S, T extends SerializableType<S>> {
 	 * @see #toSerializedType(Object)
 	 */
 	public S toPlatformType(R runtimeValue) {
-		return this.serializer.apply(runtimeValue);
+		return this.serializer.apply(Objects.requireNonNull(runtimeValue));
 	}
 
 	/**
@@ -112,7 +113,7 @@ public abstract class ConfigType<R, S, T extends SerializableType<S>> {
 			throw new FiberConversionException("Invalid serialized value " + serializedValue);
 		}
 
-		return this.deserializer.apply(serializedValue);
+		return Objects.requireNonNull(this.deserializer.apply(serializedValue));
 	}
 
 	/**
