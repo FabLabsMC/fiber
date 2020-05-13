@@ -5,6 +5,9 @@ import java.lang.reflect.Method;
 
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.ProcessingMemberException;
 
+/**
+ * Implementors consume and process collected POJO members.
+ */
 public interface PojoMemberProcessor {
 	void processListenerMethod(Object pojo, Method method, String name);
 
