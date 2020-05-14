@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.TypeSerializer;
 import io.github.fablabsmc.fablabs.impl.fiber.constraint.StringConstraintChecker;
 
-public final class StringSerializableType extends SerializableType<String> {
+public final class StringSerializableType extends PlainSerializableType<String> {
 	public static final StringSerializableType DEFAULT_STRING = new StringSerializableType(0, Integer.MAX_VALUE, null);
 
 	private final int minLength;

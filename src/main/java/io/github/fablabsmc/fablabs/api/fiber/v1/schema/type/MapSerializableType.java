@@ -1,5 +1,6 @@
 package io.github.fablabsmc.fablabs.api.fiber.v1.schema.type;
 
+import java.lang.reflect.ParameterizedType;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -7,7 +8,7 @@ import java.util.StringJoiner;
 import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.TypeSerializer;
 import io.github.fablabsmc.fablabs.impl.fiber.constraint.MapConstraintChecker;
 
-public final class MapSerializableType<V> extends SerializableType<Map<String, V>> {
+public final class MapSerializableType<V> extends ParameterizedSerializableType<Map<String, V>> {
 	private final StringSerializableType keyType;
 	private final SerializableType<V> valueType;
 	private final int minSize;
@@ -44,6 +45,11 @@ public final class MapSerializableType<V> extends SerializableType<Map<String, V
 
 	public int getMaxSize() {
 		return this.maxSize;
+	}
+
+	@Override
+	public ParameterizedType getParameterizedType() {
+		return new ParameterizedTypeImpl(this.getErasedPlatformType(), String.class, this.valueType.getGenericPlatformType());
 	}
 
 	@Override

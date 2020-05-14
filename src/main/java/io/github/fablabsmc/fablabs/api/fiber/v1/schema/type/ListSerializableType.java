@@ -1,5 +1,6 @@
 package io.github.fablabsmc.fablabs.api.fiber.v1.schema.type;
 
+import java.lang.reflect.ParameterizedType;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -10,7 +11,7 @@ import io.github.fablabsmc.fablabs.impl.fiber.constraint.ListConstraintChecker;
 /**
  * @param <E> the type of elements objects of this type hold
  */
-public final class ListSerializableType<E> extends SerializableType<List<E>> {
+public final class ListSerializableType<E> extends ParameterizedSerializableType<List<E>> {
 	private final SerializableType<E> elementType;
 	private final boolean unique;
 	private final int minSize;
@@ -43,6 +44,11 @@ public final class ListSerializableType<E> extends SerializableType<List<E>> {
 
 	public boolean hasUniqueElements() {
 		return this.unique;
+	}
+
+	@Override
+	public ParameterizedType getParameterizedType() {
+		return new ParameterizedTypeImpl(this.getErasedPlatformType(), this.elementType.getGenericPlatformType());
 	}
 
 	@Override

@@ -10,7 +10,7 @@ import java.util.StringJoiner;
 import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.TypeSerializer;
 import io.github.fablabsmc.fablabs.impl.fiber.constraint.EnumConstraintChecker;
 
-public final class EnumSerializableType extends SerializableType<String> {
+public final class EnumSerializableType extends PlainSerializableType<String> {
 	private final Set<String> validValues;
 
 	public EnumSerializableType(String... validValues) {

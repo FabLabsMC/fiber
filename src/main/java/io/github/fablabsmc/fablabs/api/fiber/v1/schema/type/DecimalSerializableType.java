@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.TypeSerializer;
 import io.github.fablabsmc.fablabs.impl.fiber.constraint.DecimalConstraintChecker;
 
-public final class DecimalSerializableType extends SerializableType<BigDecimal> {
+public final class DecimalSerializableType extends PlainSerializableType<BigDecimal> {
 	/**
 	 * Specifies a numerical lower bound.
 	 *

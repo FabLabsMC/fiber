@@ -9,7 +9,7 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.TypeSerializer;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigBranch;
 import io.github.fablabsmc.fablabs.impl.fiber.constraint.RecordConstraintChecker;
 
-public final class RecordSerializableType extends SerializableType<ConfigBranch> {
+public final class RecordSerializableType extends PlainSerializableType<ConfigBranch> {
 	private final Map<String, SerializableType<?>> fields;
 
 	public RecordSerializableType(Map<String, SerializableType<?>> fields) {

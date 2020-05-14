@@ -1,5 +1,6 @@
 package io.github.fablabsmc.fablabs.api.fiber.v1.schema.type;
 
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.Objects;
 
@@ -38,9 +39,27 @@ public abstract class SerializableType<T> {
 		this.checker = (ConstraintChecker<T, SerializableType<T>>) checker;
 	}
 
+	/**
+	 * The (erased) Java platform type used to represent values of this type.
+	 *
+	 * @deprecated Use {@link #getErasedPlatformType()} instead.
+	 */
+	@Deprecated
 	public Class<T> getPlatformType() {
 		return this.platformType;
 	}
+
+	/**
+	 * The (erased) Java platform type used to represent values of this type.
+	 */
+	public Class<? super T> getErasedPlatformType() {
+		return this.getPlatformType();
+	}
+
+	/**
+	 * The generic Java platform type used to represent values of this type.
+	 */
+	public abstract Type getGenericPlatformType();
 
 	/**
 	 * Determines if the data type represented by this {@code SerializableType}
