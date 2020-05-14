@@ -7,6 +7,8 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -16,6 +18,7 @@ import blue.endless.jankson.JsonPrimitive;
 import io.github.fablabsmc.fablabs.api.fiber.v1.NodeOperationsTest;
 import io.github.fablabsmc.fablabs.api.fiber.v1.builder.ConfigTreeBuilder;
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.FiberException;
+import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigTypes;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.NumberConfigType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;
@@ -44,6 +47,26 @@ class JanksonSerializerTest {
 		jk.serialize(nodeOne, bos);
 		jk.deserialize(nodeTwo, new ByteArrayInputStream(bos.toByteArray()));
 		NodeOperationsTest.testNodeFor(nodeTwo, "A", ConfigTypes.INTEGER.getSerializedType(), BigDecimal.TEN);
+	}
+
+	@Test
+	@DisplayName("List")
+	void nodeSerializationList() throws IOException, FiberException {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		JanksonSerializer jk = new JanksonSerializer();
+		ConfigType<List<Integer>, List<BigDecimal>, ?> cfgType = ConfigTypes.makeList(ConfigTypes.INTEGER);
+		ConfigTree nodeOne = ConfigTree.builder()
+				.beginValue("A", cfgType.getSerializedType(), Collections.singletonList(BigDecimal.TEN))
+				.finishValue()
+				.build();
+
+		ConfigTree nodeTwo = ConfigTree.builder()
+				.withValue("A", cfgType, Collections.singletonList(20))
+				.build();
+
+		jk.serialize(nodeOne, bos);
+		jk.deserialize(nodeTwo, new ByteArrayInputStream(bos.toByteArray()));
+		NodeOperationsTest.testNodeFor(nodeTwo, "A", cfgType.getSerializedType(), Collections.singletonList(BigDecimal.TEN));
 	}
 
 	@Test
