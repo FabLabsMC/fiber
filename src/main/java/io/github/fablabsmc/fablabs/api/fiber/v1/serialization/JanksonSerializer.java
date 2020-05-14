@@ -3,6 +3,7 @@ package io.github.fablabsmc.fablabs.api.fiber.v1.serialization;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -127,12 +128,12 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 	}
 
 	@Nullable
-	<A> A marshall(Class<A> type, JsonElement value) {
+	<A> A marshall(Type type, JsonElement value) {
 		return marshaller.marshallReverse(type, value);
 	}
 
 	private <T> void setPropertyValue(ConfigLeaf<T> property, JsonElement child) {
-		Class<T> type = property.getType();
+		Type type = property.getConfigType().getGenericPlatformType();
 		// TODO figure out how we want to handle null values
 		T deserialized = this.marshall(type, child);
 
@@ -162,7 +163,7 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 			}
 
 			@Override
-			public <A> A marshallReverse(Class<A> type, JsonElement value) {
+			public <A> A marshallReverse(Type type, JsonElement value) {
 				A object = marshaller.marshallReverse(type, value);
 				if (object == null) return JanksonFallbackMarshaller.INSTANCE.marshallReverse(type, value);
 				return object;
@@ -187,11 +188,12 @@ public class JanksonSerializer implements Serializer<JsonObject> {
 			return this.marshaller.serialize(value);
 		}
 
+		@SuppressWarnings("unchecked")
 		@Override
-		public <A> A marshallReverse(Class<A> type, JsonElement value) {
+		public <A> A marshallReverse(Type type, JsonElement value) {
 			if (type == BigDecimal.class) {
 				if (value instanceof JsonPrimitive) {
-					return type.cast(new BigDecimal(((JsonPrimitive) value).asString()));
+					return (A) new BigDecimal(((JsonPrimitive) value).asString());
 				}
 
 				return null;

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
@@ -50,7 +51,7 @@ class JanksonSerializerTest {
 	}
 
 	@Test
-	@DisplayName("List")
+	@DisplayName("List<Integer> -> List<Integer>")
 	void nodeSerializationList() throws IOException, FiberException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		JanksonSerializer jk = new JanksonSerializer();
@@ -177,14 +178,15 @@ class JanksonSerializerTest {
 						return null;
 					}
 
+					@SuppressWarnings("unchecked")
 					@Override
-					public <A> A marshallReverse(Class<A> type, JsonElement value) {
+					public <A> A marshallReverse(Type type, JsonElement value) {
 						if (type.equals(SomeObject.class)) {
 							JsonObject object = (JsonObject) value;
-							return type.cast(new SomeObject(
+							return (A) new SomeObject(
 									object.getInt("some_a", 0),
 									object.get(String.class, "some_b")
-							));
+							);
 						}
 
 						return null;
