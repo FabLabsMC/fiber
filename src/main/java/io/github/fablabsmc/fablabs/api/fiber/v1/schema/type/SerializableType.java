@@ -30,11 +30,11 @@ import io.github.fablabsmc.fablabs.impl.fiber.constraint.ConstraintChecker;
  * @see StringSerializableType
  */
 public abstract class SerializableType<T> {
-	private final Class<T> platformType;
+	private final Class<? super T> platformType;
 	private final ConstraintChecker<T, SerializableType<T>> checker;
 
 	@SuppressWarnings("unchecked")
-	SerializableType(Class<T> platformType, ConstraintChecker<T, ? extends SerializableType<T>> checker) {
+	SerializableType(Class<? super T> platformType, ConstraintChecker<T, ? extends SerializableType<T>> checker) {
 		this.platformType = platformType;
 		this.checker = (ConstraintChecker<T, SerializableType<T>>) checker;
 	}
@@ -44,16 +44,17 @@ public abstract class SerializableType<T> {
 	 *
 	 * @deprecated Use {@link #getErasedPlatformType()} instead.
 	 */
+	@SuppressWarnings("unchecked")
 	@Deprecated
 	public Class<T> getPlatformType() {
-		return this.platformType;
+		return (Class<T>) this.getErasedPlatformType();
 	}
 
 	/**
 	 * The (erased) Java platform type used to represent values of this type.
 	 */
 	public Class<? super T> getErasedPlatformType() {
-		return this.getPlatformType();
+		return this.platformType;
 	}
 
 	/**

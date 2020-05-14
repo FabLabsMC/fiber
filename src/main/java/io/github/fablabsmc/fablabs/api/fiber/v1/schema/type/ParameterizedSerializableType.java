@@ -9,7 +9,7 @@ import io.github.fablabsmc.fablabs.impl.fiber.constraint.ConstraintChecker;
  * A {@link SerializableType} that represents a {@link ParameterizedType}.
  */
 public abstract class ParameterizedSerializableType<T> extends SerializableType<T> {
-	ParameterizedSerializableType(Class<T> platformType, ConstraintChecker<T, ? extends SerializableType<T>> checker) {
+	ParameterizedSerializableType(Class<? super T> platformType, ConstraintChecker<T, ? extends ParameterizedSerializableType<T>> checker) {
 		super(platformType, checker);
 	}
 

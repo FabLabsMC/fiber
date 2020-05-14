@@ -21,9 +21,8 @@ public final class ListSerializableType<E> extends ParameterizedSerializableType
 		this(elementType, 0, Integer.MAX_VALUE, false);
 	}
 
-	@SuppressWarnings("unchecked")
 	public ListSerializableType(SerializableType<E> elementType, int minSize, int maxSize, boolean unique) {
-		super((Class<List<E>>) (Class<?>) List.class, ListConstraintChecker.instance());
+		super(List.class, ListConstraintChecker.instance());
 		this.elementType = elementType;
 		this.minSize = minSize;
 		this.maxSize = maxSize;

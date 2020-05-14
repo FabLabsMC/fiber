@@ -10,7 +10,7 @@ import io.github.fablabsmc.fablabs.impl.fiber.constraint.ConstraintChecker;
  * @param <T> The Java platform type.
  */
 public abstract class PlainSerializableType<T> extends SerializableType<T> {
-	PlainSerializableType(Class<T> platformType, ConstraintChecker<T, ? extends SerializableType<T>> checker) {
+	PlainSerializableType(Class<T> platformType, ConstraintChecker<T, ? extends PlainSerializableType<T>> checker) {
 		super(platformType, checker);
 	}
 

@@ -22,9 +22,8 @@ public final class MapSerializableType<V> extends ParameterizedSerializableType<
 		this(keyType, valueType, 0, Integer.MAX_VALUE);
 	}
 
-	@SuppressWarnings("unchecked")
 	public MapSerializableType(StringSerializableType keyType, SerializableType<V> valueType, int minSize, int maxSize) {
-		super((Class<Map<String, V>>) (Class<?>) Map.class, MapConstraintChecker.instance());
+		super(Map.class, MapConstraintChecker.instance());
 		this.keyType = keyType;
 		this.valueType = valueType;
 		this.minSize = minSize;
