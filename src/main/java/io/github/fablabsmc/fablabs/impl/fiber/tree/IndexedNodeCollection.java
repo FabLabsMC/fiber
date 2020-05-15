@@ -2,10 +2,10 @@ package io.github.fablabsmc.fablabs.impl.fiber.tree;
 
 import java.util.AbstractCollection;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Spliterator;
-import java.util.TreeMap;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -16,7 +16,7 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigNode;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.NodeCollection;
 
 public class IndexedNodeCollection extends AbstractCollection<ConfigNode> implements NodeCollection {
-	private final Map<String, ConfigNode> items = new TreeMap<>();
+	private final Map<String, ConfigNode> items = new LinkedHashMap<>();
 	@Nullable
 	private final ConfigBranch owner;
 
