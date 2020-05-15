@@ -66,7 +66,7 @@ public final class FiberSerialization {
 					serializeNode(subNode, subTarget, ctx);
 				}
 
-				ctx.addElement(branch.getName(), ctx.serializeTarget(subTarget), target);
+				ctx.addSubElement(branch.getName(), subTarget, target);
 			}
 		} else if (node instanceof ConfigLeaf<?>) {
 			ConfigLeaf<?> leaf = (ConfigLeaf<?>) node;
@@ -81,9 +81,8 @@ public final class FiberSerialization {
 	public static <A, T> void deserializeNode(ConfigNode node, A elem, ValueSerializer<A, T> ctx) throws ValueDeserializationException {
 		if (node instanceof ConfigBranch) {
 			ConfigBranch branch = (ConfigBranch) node;
-			T subTarget = ctx.deserializeTarget(elem);
 
-			for (Iterator<Map.Entry<String, A>> itr = ctx.elements(subTarget); itr.hasNext(); ) {
+			for (Iterator<Map.Entry<String, A>> itr = ctx.subElements(elem); itr.hasNext(); ) {
 				Map.Entry<String, A> entry = itr.next();
 				ConfigNode subNode = branch.lookup(entry.getKey());
 				A subElem = entry.getValue();

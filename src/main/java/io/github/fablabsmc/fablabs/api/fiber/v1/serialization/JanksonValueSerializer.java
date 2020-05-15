@@ -202,27 +202,27 @@ public class JanksonValueSerializer implements ValueSerializer<JsonElement, Json
 	}
 
 	@Override
-	public JsonElement serializeTarget(JsonObject value) {
-		return value;
-	}
-
-	@Override
-	public JsonObject deserializeTarget(JsonElement elem) throws ValueDeserializationException {
-		if (elem instanceof JsonObject) {
-			return (JsonObject) elem;
-		}
-
-		throw new ValueDeserializationException(elem, JsonObject.class, "JsonElement of wrong type");
-	}
-
-	@Override
 	public void addElement(String name, JsonElement elem, JsonObject target) {
+		target.put(name, elem);
+	}
+
+	@Override
+	public void addSubElement(String name, JsonObject elem, JsonObject target) {
 		target.put(name, elem);
 	}
 
 	@Override
 	public Iterator<Map.Entry<String, JsonElement>> elements(JsonObject target) {
 		return target.entrySet().iterator();
+	}
+
+	@Override
+	public Iterator<Map.Entry<String, JsonElement>> subElements(JsonElement elem) throws ValueDeserializationException {
+		if (elem instanceof JsonObject) {
+			return ((JsonObject) elem).entrySet().iterator();
+		}
+
+		throw new ValueDeserializationException(elem, JsonObject.class, "JsonElement of wrong type");
 	}
 
 	@Override

@@ -22,8 +22,9 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.StringSerializableTy
  * GSON, Jankson, etc. with Fiber, simply implement this interface.
  *
  * @param <A> The type of the serialized element representation, e.g. JsonElement.
- *            This can be the same as T, but may be different.
- * @param <T> The type of the serialized object representation, e.g. JsonObject.
+ * @param <T> The type of the serialized aggregate representation, e.g. JsonObject. For recursive
+ *            serialized forms, like JSON, this may be the same as or a subtype of A, but
+ *            for non-recursive serialized forms this is may be an unrelated type.
  */
 public interface ValueSerializer<A, T> {
 	A serializeBoolean(boolean value, BooleanSerializableType type);
@@ -54,13 +55,13 @@ public interface ValueSerializer<A, T> {
 
 	Map<String, Object> deserializeRecord(A elem, RecordSerializableType type) throws ValueDeserializationException;
 
-	A serializeTarget(T value);
-
-	T deserializeTarget(A elem) throws ValueDeserializationException;
-
 	void addElement(String name, A elem, T target);
 
+	void addSubElement(String name, T elem, T target);
+
 	Iterator<Map.Entry<String, A>> elements(T target);
+
+	Iterator<Map.Entry<String, A>> subElements(A elem) throws ValueDeserializationException;
 
 	void writeTarget(T target, OutputStream out) throws IOException;
 
