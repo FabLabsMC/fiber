@@ -4,8 +4,10 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.Objects;
 
+import io.github.fablabsmc.fablabs.api.fiber.v1.exception.ValueDeserializationException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.TypeSerializer;
+import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.ValueSerializer;
 import io.github.fablabsmc.fablabs.impl.fiber.constraint.ConstraintChecker;
 
 /**
@@ -92,6 +94,27 @@ public abstract class SerializableType<T> {
 	}
 
 	public abstract <S> void serialize(TypeSerializer<S> serializer, S target);
+
+	/**
+	 * Serializes a config primitive to a serialized form.
+	 *
+	 * @param value      The value to serialize.
+	 * @param serializer A ValueSerializer defining the serialized form.
+	 * @param <S>        The type of the serialized form.
+	 * @return The serialized form of value.
+	 */
+	public abstract <S> S serializeValue(T value, ValueSerializer<S, ?> serializer);
+
+	/**
+	 * Deserializes a config primitive from a serialized form.
+	 *
+	 * @param elem       The serialized form of the value.
+	 * @param serializer A ValueSerializer defining the serialized form.
+	 * @param <S>        The type of the serialized form.
+	 * @return The deserialized value.
+	 * @throws ValueDeserializationException If a value cannot be deserialized.
+	 */
+	public abstract <S> T deserializeValue(S elem, ValueSerializer<S, ?> serializer) throws ValueDeserializationException;
 
 	@Override
 	public abstract String toString();

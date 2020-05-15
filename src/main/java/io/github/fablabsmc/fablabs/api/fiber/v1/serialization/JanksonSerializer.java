@@ -27,6 +27,7 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigNode;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.HasValue;
 
+@Deprecated
 public class JanksonSerializer implements Serializer<JsonObject> {
 	private static final FiberId IDENTIFIER = new FiberId("fiber", "jankson");
 

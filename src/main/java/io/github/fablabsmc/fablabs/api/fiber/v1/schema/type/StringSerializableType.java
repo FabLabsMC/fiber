@@ -6,7 +6,9 @@ import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 
+import io.github.fablabsmc.fablabs.api.fiber.v1.exception.ValueDeserializationException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.TypeSerializer;
+import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.ValueSerializer;
 import io.github.fablabsmc.fablabs.impl.fiber.constraint.StringConstraintChecker;
 
 public final class StringSerializableType extends PlainSerializableType<String> {
@@ -65,6 +67,16 @@ public final class StringSerializableType extends PlainSerializableType<String> 
 	@Override
 	public <S> void serialize(TypeSerializer<S> serializer, S target) {
 		serializer.serialize(this, target);
+	}
+
+	@Override
+	public <S> S serializeValue(String value, ValueSerializer<S, ?> serializer) {
+		return serializer.serializeString(value);
+	}
+
+	@Override
+	public <S> String deserializeValue(S elem, ValueSerializer<S, ?> serializer) throws ValueDeserializationException {
+		return serializer.deserializeString(elem);
 	}
 
 	@Override

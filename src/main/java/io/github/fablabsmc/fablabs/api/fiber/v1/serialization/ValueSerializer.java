@@ -46,4 +46,6 @@ public interface ValueSerializer<A, T> {
 	void writeTarget(T target, OutputStream out) throws IOException;
 
 	T readTarget(InputStream in) throws ValueDeserializationException, IOException;
+
+	T newTarget();
 }

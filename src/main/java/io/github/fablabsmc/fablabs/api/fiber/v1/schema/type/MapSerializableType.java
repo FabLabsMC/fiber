@@ -1,11 +1,14 @@
 package io.github.fablabsmc.fablabs.api.fiber.v1.schema.type;
 
 import java.lang.reflect.ParameterizedType;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+import io.github.fablabsmc.fablabs.api.fiber.v1.exception.ValueDeserializationException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.TypeSerializer;
+import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.ValueSerializer;
 import io.github.fablabsmc.fablabs.impl.fiber.constraint.MapConstraintChecker;
 
 public final class MapSerializableType<V> extends ParameterizedSerializableType<Map<String, V>> {
@@ -54,6 +57,29 @@ public final class MapSerializableType<V> extends ParameterizedSerializableType<
 	@Override
 	public <S> void serialize(TypeSerializer<S> serializer, S target) {
 		serializer.serialize(this, target);
+	}
+
+	@Override
+	public <S> S serializeValue(Map<String, V> value, ValueSerializer<S, ?> serializer) {
+		Map<String, S> map = new HashMap<>(value.size());
+
+		for (Map.Entry<String, V> entry : value.entrySet()) {
+			map.put(entry.getKey(), this.valueType.serializeValue(entry.getValue(), serializer));
+		}
+
+		return serializer.serializeMap(map);
+	}
+
+	@Override
+	public <S> Map<String, V> deserializeValue(S elem, ValueSerializer<S, ?> serializer) throws ValueDeserializationException {
+		Map<String, S> map = serializer.deserializeMap(elem);
+		Map<String, V> map2 = new HashMap<>(map.size());
+
+		for (Map.Entry<String, S> entry : map.entrySet()) {
+			map2.put(entry.getKey(), this.valueType.deserializeValue(entry.getValue(), serializer));
+		}
+
+		return map2;
 	}
 
 	@Override

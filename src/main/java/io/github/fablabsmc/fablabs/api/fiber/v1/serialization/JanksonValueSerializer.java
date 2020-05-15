@@ -21,7 +21,15 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.exception.ValueDeserializationEx
  * {@link ValueSerializer} for Jankson.
  */
 public class JanksonValueSerializer implements ValueSerializer<JsonElement, JsonObject> {
-	Jankson jankson = Jankson.builder().build();
+	private final Jankson jankson;
+
+	public JanksonValueSerializer() {
+		this(Jankson.builder().build());
+	}
+
+	public JanksonValueSerializer(Jankson jankson) {
+		this.jankson = jankson;
+	}
 
 	@Override
 	public JsonElement serializeBoolean(boolean value) {
@@ -135,5 +143,10 @@ public class JanksonValueSerializer implements ValueSerializer<JsonElement, Json
 		} catch (SyntaxError e) {
 			throw new ValueDeserializationException(null, JsonObject.class, "Syntax error deserializing JSON", e);
 		}
+	}
+
+	@Override
+	public JsonObject newTarget() {
+		return new JsonObject();
 	}
 }
