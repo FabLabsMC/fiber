@@ -170,8 +170,9 @@ public class JanksonValueSerializer implements ValueSerializer<JsonElement, Json
 		JsonObject obj = new JsonObject();
 		Map<String, SerializableType<?>> fields = type.getFields();
 
-		for (Map.Entry<String, Object> entry : value.entrySet()) {
-			obj.put(entry.getKey(), this.serializeRecordField(entry.getValue(), fields.get(entry.getKey())));
+		for (Map.Entry<String, SerializableType<?>> entry : fields.entrySet()) {
+			Object fieldValue = value.get(entry.getKey());
+			obj.put(entry.getKey(), this.serializeRecordField(fieldValue, entry.getValue()));
 		}
 
 		return obj;
@@ -189,8 +190,9 @@ public class JanksonValueSerializer implements ValueSerializer<JsonElement, Json
 			Map<String, Object> map = new LinkedHashMap<>(obj.size());
 			Map<String, SerializableType<?>> fields = type.getFields();
 
-			for (Map.Entry<String, JsonElement> entry : obj.entrySet()) {
-				map.put(entry.getKey(), fields.get(entry.getKey()).deserializeValue(elem, this));
+			for (Map.Entry<String, SerializableType<?>> entry : fields.entrySet()) {
+				JsonElement subElem = obj.get(entry.getKey());
+				map.put(entry.getKey(), entry.getValue().deserializeValue(subElem, this));
 			}
 
 			return map;
