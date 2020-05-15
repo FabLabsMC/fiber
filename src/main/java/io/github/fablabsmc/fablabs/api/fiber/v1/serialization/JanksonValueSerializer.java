@@ -21,13 +21,15 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.exception.ValueDeserializationEx
  * {@link ValueSerializer} for Jankson.
  */
 public class JanksonValueSerializer implements ValueSerializer<JsonElement, JsonObject> {
+	private final boolean minify;
 	private final Jankson jankson;
 
-	public JanksonValueSerializer() {
-		this(Jankson.builder().build());
+	public JanksonValueSerializer(boolean minify) {
+		this(minify, Jankson.builder().build());
 	}
 
-	public JanksonValueSerializer(Jankson jankson) {
+	public JanksonValueSerializer(boolean minify, Jankson jankson) {
+		this.minify = minify;
 		this.jankson = jankson;
 	}
 
@@ -133,7 +135,7 @@ public class JanksonValueSerializer implements ValueSerializer<JsonElement, Json
 
 	@Override
 	public void writeTarget(JsonObject target, OutputStream out) throws IOException {
-		out.write(target.toJson(true, true).getBytes(StandardCharsets.UTF_8));
+		out.write(target.toJson(!minify, !minify).getBytes(StandardCharsets.UTF_8));
 	}
 
 	@Override

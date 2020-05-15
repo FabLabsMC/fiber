@@ -66,7 +66,7 @@ public final class FiberSerialization {
 				Map<String, A> map = new HashMap<>();
 
 				for (ConfigNode subNode : branch.getItems()) {
-					map.put(subNode.getName(), serializeNode(node, ctx));
+					map.put(subNode.getName(), serializeNode(subNode, ctx));
 				}
 
 				return ctx.serializeMap(map);
