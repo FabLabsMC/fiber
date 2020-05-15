@@ -3,8 +3,9 @@ package io.github.fablabsmc.fablabs.impl.fiber.serialization;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.ValueDeserializationException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.ValueSerializer;
@@ -34,11 +35,13 @@ public final class FiberSerialization {
 	public static <A, T> void deserialize(ConfigTree tree, InputStream in, ValueSerializer<A, T> ctx) throws IOException, ValueDeserializationException {
 		T target = ctx.readTarget(in);
 
-		for (ConfigNode node : tree.getItems()) {
-			Optional<A> elem = ctx.getElement(node.getName(), target);
+		for (Iterator<Map.Entry<String, A>> itr = ctx.elements(target); itr.hasNext(); ) {
+			Map.Entry<String, A> entry = itr.next();
+			ConfigNode node = tree.lookup(entry.getKey());
+			A elem = entry.getValue();
 
-			if (elem.isPresent()) {
-				deserializeNode(node, elem.get(), ctx);
+			if (node != null) {
+				deserializeNode(node, elem, ctx);
 			}
 		}
 	}
@@ -63,11 +66,11 @@ public final class FiberSerialization {
 					serializeNode(subNode, subTarget, ctx);
 				}
 
-				ctx.putElement(branch.getName(), ctx.serializeTarget(subTarget), target);
+				ctx.addElement(branch.getName(), ctx.serializeTarget(subTarget), target);
 			}
 		} else if (node instanceof ConfigLeaf<?>) {
 			ConfigLeaf<?> leaf = (ConfigLeaf<?>) node;
-			ctx.putElement(leaf.getName(), serializeValue(leaf, ctx), target);
+			ctx.addElement(leaf.getName(), serializeValue(leaf, ctx), target);
 		}
 	}
 
@@ -80,11 +83,13 @@ public final class FiberSerialization {
 			ConfigBranch branch = (ConfigBranch) node;
 			T subTarget = ctx.deserializeTarget(elem);
 
-			for (ConfigNode subNode : branch.getItems()) {
-				Optional<A> subElem = ctx.getElement(subNode.getName(), subTarget);
+			for (Iterator<Map.Entry<String, A>> itr = ctx.elements(subTarget); itr.hasNext(); ) {
+				Map.Entry<String, A> entry = itr.next();
+				ConfigNode subNode = branch.lookup(entry.getKey());
+				A subElem = entry.getValue();
 
-				if (subElem.isPresent()) {
-					deserializeNode(subNode, subElem.get(), ctx);
+				if (subNode != null) {
+					deserializeNode(subNode, subElem, ctx);
 				}
 			}
 		} else if (node instanceof ConfigLeaf<?>) {

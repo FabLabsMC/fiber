@@ -4,9 +4,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.ValueDeserializationException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.BooleanSerializableType;
@@ -58,9 +58,9 @@ public interface ValueSerializer<A, T> {
 
 	T deserializeTarget(A elem) throws ValueDeserializationException;
 
-	void putElement(String name, A elem, T target);
+	void addElement(String name, A elem, T target);
 
-	Optional<A> getElement(String name, T target);
+	Iterator<Map.Entry<String, A>> elements(T target);
 
 	void writeTarget(T target, OutputStream out) throws IOException;
 

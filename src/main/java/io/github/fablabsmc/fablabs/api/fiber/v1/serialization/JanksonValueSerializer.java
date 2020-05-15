@@ -6,10 +6,10 @@ import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import blue.endless.jankson.Jankson;
 import blue.endless.jankson.JsonArray;
@@ -216,13 +216,13 @@ public class JanksonValueSerializer implements ValueSerializer<JsonElement, Json
 	}
 
 	@Override
-	public void putElement(String name, JsonElement elem, JsonObject target) {
+	public void addElement(String name, JsonElement elem, JsonObject target) {
 		target.put(name, elem);
 	}
 
 	@Override
-	public Optional<JsonElement> getElement(String name, JsonObject target) {
-		return Optional.ofNullable(target.get(name));
+	public Iterator<Map.Entry<String, JsonElement>> elements(JsonObject target) {
+		return target.entrySet().iterator();
 	}
 
 	@Override
