@@ -16,7 +16,9 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;
  * @param <T> the type of serialized objects processed by this serializer
  * @see ConfigTree
  * @see JanksonSerializer
+ * @deprecated Use {@link ValueSerializer} instead.
  */
+@Deprecated
 public interface Serializer<T> {
 	FiberId getIdentifier();
 
