@@ -36,12 +36,12 @@ public final class EnumSerializableType extends PlainSerializableType<String> {
 
 	@Override
 	public <S> S serializeValue(String value, ValueSerializer<S, ?> serializer) {
-		return serializer.serializeString(value);
+		return serializer.serializeEnum(value, this);
 	}
 
 	@Override
 	public <S> String deserializeValue(S elem, ValueSerializer<S, ?> serializer) throws ValueDeserializationException {
-		return serializer.deserializeString(elem);
+		return serializer.deserializeEnum(elem, this);
 	}
 
 	@Override

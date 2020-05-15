@@ -1,7 +1,6 @@
 package io.github.fablabsmc.fablabs.api.fiber.v1.schema.type;
 
 import java.lang.reflect.ParameterizedType;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
@@ -60,25 +59,12 @@ public final class ListSerializableType<E> extends ParameterizedSerializableType
 
 	@Override
 	public <S> S serializeValue(List<E> value, ValueSerializer<S, ?> serializer) {
-		List<S> ls = new ArrayList<>(value.size());
-
-		for (E e : value) {
-			ls.add(this.elementType.serializeValue(e, serializer));
-		}
-
-		return serializer.serializeList(ls);
+		return serializer.serializeList(value, this);
 	}
 
 	@Override
 	public <S> List<E> deserializeValue(S elem, ValueSerializer<S, ?> serializer) throws ValueDeserializationException {
-		List<S> ls = serializer.deserializeList(elem);
-		List<E> ls2 = new ArrayList<>(ls.size());
-
-		for (S s : ls) {
-			ls2.add(this.elementType.deserializeValue(s, serializer));
-		}
-
-		return ls2;
+		return serializer.deserializeList(elem, this);
 	}
 
 	@Override

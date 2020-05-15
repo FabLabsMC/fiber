@@ -71,12 +71,12 @@ public final class StringSerializableType extends PlainSerializableType<String> 
 
 	@Override
 	public <S> S serializeValue(String value, ValueSerializer<S, ?> serializer) {
-		return serializer.serializeString(value);
+		return serializer.serializeString(value, this);
 	}
 
 	@Override
 	public <S> String deserializeValue(S elem, ValueSerializer<S, ?> serializer) throws ValueDeserializationException {
-		return serializer.deserializeString(elem);
+		return serializer.deserializeString(elem, this);
 	}
 
 	@Override

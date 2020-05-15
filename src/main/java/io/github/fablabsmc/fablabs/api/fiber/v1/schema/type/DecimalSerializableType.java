@@ -77,12 +77,12 @@ public final class DecimalSerializableType extends PlainSerializableType<BigDeci
 
 	@Override
 	public <S> S serializeValue(BigDecimal value, ValueSerializer<S, ?> serializer) {
-		return serializer.serializeNumber(value);
+		return serializer.serializeNumber(value, this);
 	}
 
 	@Override
 	public <S> BigDecimal deserializeValue(S elem, ValueSerializer<S, ?> serializer) throws ValueDeserializationException {
-		return serializer.deserializeNumber(elem);
+		return serializer.deserializeNumber(elem, this);
 	}
 
 	@Override

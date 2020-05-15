@@ -3,8 +3,6 @@ package io.github.fablabsmc.fablabs.impl.fiber.serialization;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -27,11 +25,7 @@ public final class FiberSerialization {
 		T target = ctx.newTarget();
 
 		for (ConfigNode node : tree.getItems()) {
-			A elem = serializeNode(node, ctx);
-
-			if (elem != null) {
-				ctx.putElement(node.getName(), elem, target);
-			}
+			serializeNode(node, target, ctx);
 		}
 
 		ctx.writeTarget(target, out);
@@ -49,7 +43,7 @@ public final class FiberSerialization {
 		}
 	}
 
-	public static <A> A serializeNode(ConfigNode node, ValueSerializer<A, ?> ctx) {
+	public static <A, T> void serializeNode(ConfigNode node, T target, ValueSerializer<A, T> ctx) {
 		String name = Objects.requireNonNull(node.getName());
 		String comment;
 
@@ -63,36 +57,34 @@ public final class FiberSerialization {
 			ConfigBranch branch = (ConfigBranch) node;
 
 			if (!branch.isSerializedSeparately()) {
-				Map<String, A> map = new HashMap<>();
+				T subTarget = ctx.newTarget();
 
 				for (ConfigNode subNode : branch.getItems()) {
-					map.put(subNode.getName(), serializeNode(subNode, ctx));
+					serializeNode(subNode, subTarget, ctx);
 				}
 
-				return ctx.serializeMap(map);
+				ctx.putElement(branch.getName(), ctx.serializeTarget(subTarget), target);
 			}
 		} else if (node instanceof ConfigLeaf<?>) {
 			ConfigLeaf<?> leaf = (ConfigLeaf<?>) node;
-			return serializeValue(leaf, ctx);
+			ctx.putElement(leaf.getName(), serializeValue(leaf, ctx), target);
 		}
-
-		return null;
 	}
 
 	private static <T, A> A serializeValue(ConfigLeaf<T> leaf, ValueSerializer<A, ?> ctx) {
 		return leaf.getConfigType().serializeValue(leaf.getValue(), ctx);
 	}
 
-	public static <A> void deserializeNode(ConfigNode node, A elem, ValueSerializer<A, ?> ctx) throws ValueDeserializationException {
+	public static <A, T> void deserializeNode(ConfigNode node, A elem, ValueSerializer<A, T> ctx) throws ValueDeserializationException {
 		if (node instanceof ConfigBranch) {
 			ConfigBranch branch = (ConfigBranch) node;
-			Map<String, A> map = ctx.deserializeMap(elem);
+			T subTarget = ctx.deserializeTarget(elem);
 
 			for (ConfigNode subNode : branch.getItems()) {
-				A subElem = map.get(subNode.getName());
+				Optional<A> subElem = ctx.getElement(subNode.getName(), subTarget);
 
-				if (subElem != null) {
-					deserializeNode(subNode, subElem, ctx);
+				if (subElem.isPresent()) {
+					deserializeNode(subNode, subElem.get(), ctx);
 				}
 			}
 		} else if (node instanceof ConfigLeaf<?>) {

@@ -9,6 +9,13 @@ import java.util.Map;
 import java.util.Optional;
 
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.ValueDeserializationException;
+import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.BooleanSerializableType;
+import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.DecimalSerializableType;
+import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.EnumSerializableType;
+import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.ListSerializableType;
+import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.MapSerializableType;
+import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.RecordSerializableType;
+import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.StringSerializableType;
 
 /**
  * Adapter between a tree serialization library and Fiber. To use a library like
@@ -19,25 +26,37 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.exception.ValueDeserializationEx
  * @param <T> The type of the serialized object representation, e.g. JsonObject.
  */
 public interface ValueSerializer<A, T> {
-	A serializeBoolean(boolean value);
+	A serializeBoolean(boolean value, BooleanSerializableType type);
 
-	boolean deserializeBoolean(A elem) throws ValueDeserializationException;
+	boolean deserializeBoolean(A elem, BooleanSerializableType type) throws ValueDeserializationException;
 
-	A serializeNumber(BigDecimal value);
+	A serializeNumber(BigDecimal value, DecimalSerializableType type);
 
-	BigDecimal deserializeNumber(A elem) throws ValueDeserializationException;
+	BigDecimal deserializeNumber(A elem, DecimalSerializableType type) throws ValueDeserializationException;
 
-	A serializeString(String value);
+	A serializeString(String value, StringSerializableType type);
 
-	String deserializeString(A elem) throws ValueDeserializationException;
+	String deserializeString(A elem, StringSerializableType type) throws ValueDeserializationException;
 
-	A serializeList(List<A> value);
+	A serializeEnum(String value, EnumSerializableType type);
 
-	List<A> deserializeList(A elem) throws ValueDeserializationException;
+	String deserializeEnum(A elem, EnumSerializableType type) throws ValueDeserializationException;
 
-	A serializeMap(Map<String, A> value);
+	<E> A serializeList(List<E> value, ListSerializableType<E> type);
 
-	Map<String, A> deserializeMap(A elem) throws ValueDeserializationException;
+	<E> List<E> deserializeList(A elem, ListSerializableType<E> type) throws ValueDeserializationException;
+
+	<V> A serializeMap(Map<String, V> value, MapSerializableType<V> type);
+
+	<V> Map<String, V> deserializeMap(A elem, MapSerializableType<V> type) throws ValueDeserializationException;
+
+	A serializeRecord(Map<String, Object> value, RecordSerializableType type);
+
+	Map<String, Object> deserializeRecord(A elem, RecordSerializableType type) throws ValueDeserializationException;
+
+	A serializeTarget(T value);
+
+	T deserializeTarget(A elem) throws ValueDeserializationException;
 
 	void putElement(String name, A elem, T target);
 

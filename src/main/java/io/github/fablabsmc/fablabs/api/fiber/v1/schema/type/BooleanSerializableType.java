@@ -19,12 +19,12 @@ public final class BooleanSerializableType extends PlainSerializableType<Boolean
 
 	@Override
 	public <S> S serializeValue(Boolean value, ValueSerializer<S, ?> serializer) {
-		return serializer.serializeBoolean(value);
+		return serializer.serializeBoolean(value, this);
 	}
 
 	@Override
 	public <S> Boolean deserializeValue(S elem, ValueSerializer<S, ?> serializer) throws ValueDeserializationException {
-		return serializer.deserializeBoolean(elem);
+		return serializer.deserializeBoolean(elem, this);
 	}
 
 	@Override
