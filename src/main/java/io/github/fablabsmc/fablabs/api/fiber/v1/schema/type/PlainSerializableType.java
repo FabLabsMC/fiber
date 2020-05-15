@@ -14,6 +14,13 @@ public abstract class PlainSerializableType<T> extends SerializableType<T> {
 		super(platformType, checker);
 	}
 
+	@SuppressWarnings("unchecked")
+	@Override
+	public Class<T> getErasedPlatformType() {
+		// this unchecked cast is safe when T is not a parameterized type.
+		return (Class<T>) super.getErasedPlatformType();
+	}
+
 	@Override
 	public Type getGenericPlatformType() {
 		return this.getErasedPlatformType();
