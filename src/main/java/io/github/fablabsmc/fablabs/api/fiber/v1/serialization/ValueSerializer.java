@@ -19,7 +19,7 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.StringSerializableTy
 
 /**
  * Adapter between a tree serialization library and Fiber. To use a library like
- * JSON, Jankson, etc. with Fiber, simply implement this interface.
+ * GSON, Jankson, etc. with Fiber, simply implement this interface.
  *
  * @param <A> The type of the serialized element representation, e.g. JsonElement.
  *            This can be the same as T, but may be different.
