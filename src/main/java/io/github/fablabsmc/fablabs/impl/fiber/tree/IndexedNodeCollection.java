@@ -16,6 +16,7 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigNode;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.NodeCollection;
 
 public class IndexedNodeCollection extends AbstractCollection<ConfigNode> implements NodeCollection {
+	// the node ordering is important, it will be kept in the config file
 	private final Map<String, ConfigNode> items = new LinkedHashMap<>();
 	@Nullable
 	private final ConfigBranch owner;
