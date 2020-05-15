@@ -43,17 +43,6 @@ public abstract class SerializableType<T> {
 
 	/**
 	 * The (erased) Java platform type used to represent values of this type.
-	 *
-	 * @deprecated Use {@link #getErasedPlatformType()} instead.
-	 */
-	@SuppressWarnings("unchecked")
-	@Deprecated
-	public Class<T> getPlatformType() {
-		return (Class<T>) this.getErasedPlatformType();
-	}
-
-	/**
-	 * The (erased) Java platform type used to represent values of this type.
 	 */
 	public Class<? super T> getErasedPlatformType() {
 		return this.platformType;

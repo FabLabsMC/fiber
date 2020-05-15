@@ -64,8 +64,8 @@ public interface ConfigLeaf<T> extends ConfigNode, Property<T>, Commentable {
 	SerializableType<T> getConfigType();
 
 	@Override
-	default Class<T> getType() {
-		return this.getConfigType().getPlatformType();
+	default Class<? super T> getType() {
+		return this.getConfigType().getErasedPlatformType();
 	}
 
 	/**

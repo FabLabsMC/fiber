@@ -17,8 +17,8 @@ public interface ConfigAttribute<T> extends Property<T> {
 	}
 
 	@Override
-	default Class<T> getType() {
-		return this.getConfigType().getPlatformType();
+	default Class<? super T> getType() {
+		return this.getConfigType().getErasedPlatformType();
 	}
 
 	SerializableType<T> getConfigType();

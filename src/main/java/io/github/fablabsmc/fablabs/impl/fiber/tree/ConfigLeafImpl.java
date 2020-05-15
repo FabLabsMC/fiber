@@ -53,7 +53,8 @@ public final class ConfigLeafImpl<T> extends ConfigNodeImpl implements ConfigLea
 	public boolean accepts(@Nonnull T value) {
 		// ensure ClassCastException comes sooner than later
 		// maybe accept any Object and return false if not an instance?
-		return this.type.accepts(this.type.getPlatformType().cast(value));
+		this.type.getErasedPlatformType().cast(value);
+		return this.type.accepts(value);
 	}
 
 	@Override
@@ -61,7 +62,8 @@ public final class ConfigLeafImpl<T> extends ConfigNodeImpl implements ConfigLea
 		// ensure ClassCastException comes sooner than later
 		// maybe accept any Object and return false if not an instance?
 		T correctedValue;
-		TypeCheckResult<T> result = this.type.test(this.type.getPlatformType().cast(value));
+		this.type.getErasedPlatformType().cast(value);
+		TypeCheckResult<T> result = this.type.test(value);
 
 		if (result.hasPassed()) {
 			correctedValue = value;
@@ -99,7 +101,7 @@ public final class ConfigLeafImpl<T> extends ConfigNodeImpl implements ConfigLea
 	@Override
 	public String toString() {
 		return this.getClass().getSimpleName()
-				+ '<' + this.type.getPlatformType().getSimpleName()
+				+ '<' + this.type.getGenericPlatformType().getTypeName()
 				+ ">[name=" + this.getName()
 				+ ", comment=" + this.getComment()
 				+ ", value=" + this.getValue()
