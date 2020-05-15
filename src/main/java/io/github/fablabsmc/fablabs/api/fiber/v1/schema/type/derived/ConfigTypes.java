@@ -6,7 +6,7 @@ import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -420,12 +420,13 @@ public final class ConfigTypes {
 				new MapSerializableType<>(keyType.getSerializedType(), valueType.getSerializedType()),
 				Map.class,
 				map -> {
-					Map<K, V> ret = new HashMap<>();
+					// this map is likely to contain user-facing data, preserve ordering
+					Map<K, V> ret = new LinkedHashMap<>();
 					map.forEach((k, v) -> ret.put(keyType.toRuntimeType(k), valueType.toRuntimeType(v)));
 					return Collections.unmodifiableMap(ret);
 				},
 				map -> {
-					Map<String, S> ret = new HashMap<>();
+					Map<String, S> ret = new LinkedHashMap<>();
 					map.forEach((k, v) -> ret.put(keyType.toPlatformType(k), valueType.toPlatformType(v)));
 					return ret;
 				}
