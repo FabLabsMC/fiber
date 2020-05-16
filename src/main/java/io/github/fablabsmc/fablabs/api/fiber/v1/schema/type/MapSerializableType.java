@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+import javax.annotation.Nonnull;
+
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.ValueDeserializationException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.TypeSerializer;
 import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.ValueSerializer;
@@ -51,6 +53,28 @@ public final class MapSerializableType<V> extends ParameterizedSerializableType<
 	@Override
 	public ParameterizedType getParameterizedType() {
 		return new ParameterizedTypeImpl(this.getErasedPlatformType(), String.class, this.valueType.getGenericPlatformType());
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String, V> cast(@Nonnull Object value) {
+		Map<?, ?> map = (Map<?, ?>) value;
+
+		for (Map.Entry<?, ?> entry : map.entrySet()) {
+			if (!(entry.getKey() instanceof String)) {
+				throw new ClassCastException("non-String map key " + entry.getKey());
+			}
+
+			try {
+				this.valueType.cast(entry.getValue());
+			} catch (ClassCastException e) {
+				ClassCastException ex = new ClassCastException("map value " + entry.getValue());
+				ex.initCause(e);
+				throw ex;
+			}
+		}
+
+		return (Map<String, V>) map;
 	}
 
 	@Override

@@ -50,18 +50,11 @@ public class RecordConstraintChecker extends ConstraintChecker<Map<String, Objec
 		return successful ? TypeCheckResult.successful(value) : TypeCheckResult.failed(corrected);
 	}
 
+	@SuppressWarnings("unchecked")
 	private <T> TypeCheckResult<T> testChild(SerializableType<T> type, Object value) {
-		T t;
-
-		try {
-			@SuppressWarnings("unchecked")
-			T t1 = (T) type.getErasedPlatformType().cast(value);
-			t = t1;
-		} catch (ClassCastException e) {
-			return TypeCheckResult.unrecoverable();
-		}
-
-		return type.test(t);
+		// value has already been validated, so this is always valid
+		// type.test also calls type.cast inside it, so double casting serves no purpose
+		return type.test((T) value);
 	}
 
 	@Override

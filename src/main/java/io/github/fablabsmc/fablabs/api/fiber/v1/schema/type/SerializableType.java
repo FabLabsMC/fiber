@@ -4,6 +4,8 @@ import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.Objects;
 
+import javax.annotation.Nonnull;
+
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.ValueDeserializationException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.TypeSerializer;
@@ -54,6 +56,18 @@ public abstract class SerializableType<T> {
 	public abstract Type getGenericPlatformType();
 
 	/**
+	 * Casts an object to the type represented by this type.
+	 *
+	 * <p>This method does not check the value against this type's constraints.
+	 * For parameterized types, this method may inspect the object and thus not run in constant time.
+	 *
+	 * @param value The value.
+	 * @return The value, casted to the platform type.
+	 * @throws ClassCastException If the value is not of the platform type.
+	 */
+	public abstract T cast(@Nonnull Object value);
+
+	/**
 	 * Determines if the data type represented by this {@code SerializableType}
 	 * object is either the same as, or is a more general description of, the data
 	 * type represented by the specified {@code type} parameter.
@@ -79,7 +93,7 @@ public abstract class SerializableType<T> {
 	}
 
 	public final TypeCheckResult<T> test(T serializedValue) {
-		return this.checker.test(this, Objects.requireNonNull(serializedValue));
+		return this.checker.test(this, this.cast(Objects.requireNonNull(serializedValue)));
 	}
 
 	public abstract <S> void serialize(TypeSerializer<S> serializer, S target);

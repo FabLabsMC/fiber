@@ -6,6 +6,8 @@ import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nonnull;
+
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.ValueDeserializationException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.TypeSerializer;
 import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.ValueSerializer;
@@ -26,7 +28,29 @@ public final class RecordSerializableType extends ParameterizedSerializableType<
 
 	@Override
 	public ParameterizedType getParameterizedType() {
-		return new ParameterizedTypeImpl(Map.class, String.class, Object.class);
+		return new ParameterizedTypeImpl(this.getErasedPlatformType(), String.class, Object.class);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public Map<String, Object> cast(@Nonnull Object value) {
+		Map<?, ?> map = (Map<?, ?>) value;
+
+		if (!this.fields.keySet().equals(map.keySet())) {
+			throw new ClassCastException("value Map " + map.keySet() + " is not structurally equivalent to fields " + this.fields.keySet());
+		}
+
+		for (Map.Entry<String, SerializableType<?>> entry : this.fields.entrySet()) {
+			try {
+				entry.getValue().cast(map.get(entry.getKey()));
+			} catch (ClassCastException e) {
+				ClassCastException ex = new ClassCastException("field " + entry.getKey());
+				ex.initCause(e);
+				throw ex;
+			}
+		}
+
+		return (Map<String, Object>) map;
 	}
 
 	@Override

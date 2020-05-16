@@ -178,9 +178,8 @@ public class JanksonValueSerializer implements ValueSerializer<JsonElement, Json
 		return obj;
 	}
 
-	@SuppressWarnings("unchecked")
 	private <T> JsonElement serializeRecordField(Object value, SerializableType<T> type) {
-		return type.serializeValue((T) type.getErasedPlatformType().cast(value), this);
+		return type.serializeValue(type.cast(value), this);
 	}
 
 	@Override

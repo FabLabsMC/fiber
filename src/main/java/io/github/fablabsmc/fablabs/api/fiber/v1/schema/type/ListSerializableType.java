@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+import javax.annotation.Nonnull;
+
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.ValueDeserializationException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.TypeSerializer;
 import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.ValueSerializer;
@@ -50,6 +52,24 @@ public final class ListSerializableType<E> extends ParameterizedSerializableType
 	@Override
 	public ParameterizedType getParameterizedType() {
 		return new ParameterizedTypeImpl(this.getErasedPlatformType(), this.elementType.getGenericPlatformType());
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<E> cast(@Nonnull Object value) {
+		List<?> ls = (List<?>) value;
+
+		for (Object obj : ls) {
+			try {
+				this.elementType.cast(obj);
+			} catch (ClassCastException e) {
+				ClassCastException ex = new ClassCastException("element " + obj);
+				ex.initCause(e);
+				throw ex;
+			}
+		}
+
+		return (List<E>) ls;
 	}
 
 	@Override

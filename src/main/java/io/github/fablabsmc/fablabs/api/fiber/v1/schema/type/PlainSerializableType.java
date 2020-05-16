@@ -2,6 +2,8 @@ package io.github.fablabsmc.fablabs.api.fiber.v1.schema.type;
 
 import java.lang.reflect.Type;
 
+import javax.annotation.Nonnull;
+
 import io.github.fablabsmc.fablabs.impl.fiber.constraint.ConstraintChecker;
 
 /**
@@ -24,5 +26,10 @@ public abstract class PlainSerializableType<T> extends SerializableType<T> {
 	@Override
 	public Type getGenericPlatformType() {
 		return this.getErasedPlatformType();
+	}
+
+	@Override
+	public T cast(@Nonnull Object value) {
+		return this.getErasedPlatformType().cast(value);
 	}
 }
