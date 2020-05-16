@@ -15,11 +15,9 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;
  * it can be used to specify other metadata.
  *
  * @see Settings#onlyAnnotated()
- * @deprecated use {@link io.github.fablabsmc.fablabs.api.fiber.v1.annotation.AnnotatedSettings.Builder} to configure POJO scanning
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
-@Deprecated
 public @interface Settings {
 	/**
 	 * Specifies whether or not all fields in this class should be serialised, or only those annotated with {@link Setting}.
@@ -28,9 +26,8 @@ public @interface Settings {
 	 * All transient fields are ignored by default.
 	 *
 	 * @return whether or not only annotated fields should be serialised
-	 * @deprecated use {@link AnnotatedSettings.Builder#collectOnlyAnnotatedMembers()}
+	 * @see AnnotatedSettings.Builder#collectOnlyAnnotatedMembers()
 	 */
-	@Deprecated
 	boolean onlyAnnotated() default false;
 
 	/**

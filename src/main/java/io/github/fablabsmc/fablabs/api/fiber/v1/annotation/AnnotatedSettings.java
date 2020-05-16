@@ -32,6 +32,15 @@ public interface AnnotatedSettings {
 
 		AnnotatedSettings.Builder collectMembersRecursively();
 
+		/**
+		 * Specifies whether or not all fields in processed classes should be considered
+		 * as config value candidates, or only those annotated with {@link Setting}.
+		 *
+		 * <p>This setting has no effect on classes annotated with {@link Settings @Settings},
+		 * as it is superseded by {@link Settings#onlyAnnotated()}.
+		 *
+		 * @see Settings#onlyAnnotated()
+		 */
 		AnnotatedSettings.Builder collectOnlyAnnotatedMembers();
 
 		AnnotatedSettings.Builder collectMembersWith(MemberCollector collector);
