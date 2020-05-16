@@ -29,7 +29,6 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.tree.PropertyMirror;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.w3c.dom.Attr;
 
 // TODO add tests for user-defined types and processors
 @SuppressWarnings({"unused", "FieldMayBeFinal"})
@@ -39,7 +38,7 @@ class AnnotatedSettingsTest {
 
 	@BeforeEach
 	void setup() {
-		this.annotatedSettings = AnnotatedSettings.create();
+		this.annotatedSettings = AnnotatedSettings.DEFAULT_SETTINGS;
 		this.node = ConfigTree.builder().build();
 	}
 
@@ -209,7 +208,7 @@ class AnnotatedSettingsTest {
 	@DisplayName("Only annotated fields")
 	void testOnlyAnnotatedFields() throws FiberException {
 		OnlyAnnotatedFieldsPojo pojo = new OnlyAnnotatedFieldsPojo();
-		this.annotatedSettings.applyToNode(this.node, pojo);
+		AnnotatedSettings.builder().collectOnlyAnnotatedMembers().build().applyToNode(this.node, pojo);
 		assertEquals(1, this.node.getItems().size(), "Node has one item");
 	}
 
@@ -277,7 +276,7 @@ class AnnotatedSettingsTest {
 	@Test
 	@DisplayName("POJO with superclass")
 	void testSuperPojo() {
-		AnnotatedSettings settings = AnnotatedSettings.createRecursive();
+		AnnotatedSettings settings = AnnotatedSettings.builder().collectMembersRecursively().build();
 		assertDoesNotThrow(() -> settings.applyToNode(this.node, new ExtendingPojo()));
 		assertEquals(2, this.node.getItems().size(), "Node has two items");
 	}
@@ -362,7 +361,6 @@ class AnnotatedSettingsTest {
 		private @Setting.Constrain.Regex("\\d") int i;
 	}
 
-	@Settings(onlyAnnotated = true)
 	private static class OnlyAnnotatedFieldsPojo {
 		@Setting
 		private int a = 5;
@@ -422,5 +420,4 @@ class AnnotatedSettingsTest {
 	private static class ExtendingPojo extends SuperPojo {
 		private int b = 5;
 	}
-
 }

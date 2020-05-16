@@ -2,11 +2,11 @@ package io.github.fablabsmc.fablabs.impl.fiber.annotation.convention;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.convention.SnakeCaseConvention;
+import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.SettingNamingConvention;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class SnakeCaseConventionTest extends SnakeCaseConvention {
+class SnakeCaseConventionTest {
 	private static final String[] STRINGS = {
 			"Hello world",
 			"helloWorld",
@@ -22,7 +22,7 @@ class SnakeCaseConventionTest extends SnakeCaseConvention {
 	@DisplayName("Name conversions")
 	void testName() {
 		for (String s : STRINGS) {
-			assertEquals(EXPECTED, name(s), "Converting " + s + " to " + EXPECTED);
+			assertEquals(EXPECTED, SettingNamingConvention.SNAKE_CASE.name(s), "Converting " + s + " to " + EXPECTED);
 		}
 	}
 }

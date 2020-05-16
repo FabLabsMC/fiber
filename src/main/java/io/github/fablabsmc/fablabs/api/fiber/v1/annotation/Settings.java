@@ -6,7 +6,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.convention.NoNamingConvention;
-import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.convention.SettingNamingConvention;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;
 
 /**
@@ -16,7 +15,6 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;
  * it can be used to specify other metadata.
  *
  * @see Settings#onlyAnnotated()
- * @see Settings#namingConvention()
  */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
@@ -28,6 +26,7 @@ public @interface Settings {
 	 * All transient fields are ignored by default.
 	 *
 	 * @return whether or not only annotated fields should be serialised
+	 * @see AnnotatedSettings.Builder#collectOnlyAnnotatedMembers()
 	 */
 	boolean onlyAnnotated() default false;
 
@@ -35,6 +34,8 @@ public @interface Settings {
 	 * Returns the naming convention used for (re)naming the fields in this class during serialisation.
 	 *
 	 * @return the {@link SettingNamingConvention naming convention} for this class
+	 * @deprecated use {@link AnnotatedSettings.Builder#useNamingConvention(SettingNamingConvention)}
 	 */
+	@Deprecated
 	Class<? extends SettingNamingConvention> namingConvention() default NoNamingConvention.class;
 }

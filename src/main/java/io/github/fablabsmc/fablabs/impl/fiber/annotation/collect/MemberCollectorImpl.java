@@ -14,10 +14,17 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.collect.PojoMemberPro
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.ProcessingMemberException;
 
 public class MemberCollectorImpl implements MemberCollector {
-	public static boolean isIncluded(Member member) {
+	private final boolean onlyAnnotated;
+
+	public MemberCollectorImpl(boolean onlyAnnotated) {
+		this.onlyAnnotated = onlyAnnotated;
+	}
+
+	private boolean isIncluded(Member member) {
 		if (member.isSynthetic() || Modifier.isTransient(member.getModifiers())) return false;
 
-		boolean onlyAnnotated = false; // Assume defaults, see Settings annotation
+		// Assume defaults, see Settings annotation
+		boolean onlyAnnotated = this.onlyAnnotated;
 
 		Class<?> owningClass = member.getDeclaringClass();
 
