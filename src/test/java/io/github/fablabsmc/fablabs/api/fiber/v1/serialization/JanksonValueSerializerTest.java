@@ -7,6 +7,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -14,9 +15,12 @@ import java.util.function.Function;
 import io.github.fablabsmc.fablabs.api.fiber.v1.NodeOperationsTest;
 import io.github.fablabsmc.fablabs.api.fiber.v1.builder.ConfigTreeBuilder;
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.FiberException;
+import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.RecordSerializableType;
+import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.SerializableType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigTypes;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.NumberConfigType;
+import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.RecordConfigType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.PropertyMirror;
 import io.github.fablabsmc.fablabs.impl.fiber.serialization.FiberSerialization;
@@ -86,6 +90,40 @@ class JanksonValueSerializerTest {
 		FiberSerialization.deserialize(nodeTwo, new ByteArrayInputStream(bos.toByteArray()), jk);
 		NodeOperationsTest.testNodeFor(nodeTwo, "A", cfgType.getSerializedType(), Collections.singletonMap("K", BigDecimal.TEN));
 		assertEquals("{ \"A\": { \"K\": 10 } }", bos.toString("UTF-8"));
+	}
+
+	@Test
+	@DisplayName("Record<Integer, String> -> Record<Integer, String>")
+	void nodeSerializationRecord() throws IOException, FiberException {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		JanksonValueSerializer jk = new JanksonValueSerializer(true);
+
+		Map<String, SerializableType<?>> fields = new LinkedHashMap<>();
+		fields.put("I", ConfigTypes.INTEGER.getSerializedType());
+		fields.put("S", ConfigTypes.STRING.getSerializedType());
+		ConfigType<Map<String, Object>, Map<String, Object>, ?> cfgType = new RecordConfigType<>(
+				new RecordSerializableType(fields),
+				Map.class,
+				Function.identity(),
+				Function.identity());
+		Map<String, Object> r = new LinkedHashMap<>();
+		r.put("I", BigDecimal.TEN);
+		r.put("S", "hello");
+		ConfigTree nodeOne = ConfigTree.builder()
+				.withValue("A", cfgType, r)
+				.build();
+
+		Map<String, Object> r2 = new LinkedHashMap<>();
+		r2.put("I", BigDecimal.valueOf(5));
+		r2.put("S", "world");
+		ConfigTree nodeTwo = ConfigTree.builder()
+				.withValue("A", cfgType, r2)
+				.build();
+
+		FiberSerialization.serialize(nodeOne, bos, jk);
+		FiberSerialization.deserialize(nodeTwo, new ByteArrayInputStream(bos.toByteArray()), jk);
+		NodeOperationsTest.testNodeFor(nodeTwo, "A", cfgType.getSerializedType(), r);
+		assertEquals("{ \"A\": { \"I\": 10, \"S\": \"hello\" } }", bos.toString("UTF-8"));
 	}
 
 	@Test
