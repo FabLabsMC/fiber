@@ -99,7 +99,8 @@ public abstract class SerializableType<T> {
 	public abstract <S> void serialize(TypeSerializer<S> serializer, S target);
 
 	/**
-	 * Serializes a config primitive to a serialized form.
+	 * Serializes a config primitive to a serialized form. The value given <em>must</em>
+	 * be compatible with the platform type as given by {@link #cast(Object)}.
 	 *
 	 * @param value      The value to serialize.
 	 * @param serializer A ValueSerializer defining the serialized form.

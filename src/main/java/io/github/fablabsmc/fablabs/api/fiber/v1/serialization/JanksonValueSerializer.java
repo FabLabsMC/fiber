@@ -191,6 +191,11 @@ public class JanksonValueSerializer implements ValueSerializer<JsonElement, Json
 
 			for (Map.Entry<String, SerializableType<?>> entry : fields.entrySet()) {
 				JsonElement subElem = obj.get(entry.getKey());
+
+				if (subElem == null) {
+					throw new ValueDeserializationException(null, entry.getValue().getErasedPlatformType(), "Record field is absent: " + entry.getKey());
+				}
+
 				map.put(entry.getKey(), entry.getValue().deserializeValue(subElem, this));
 			}
 
