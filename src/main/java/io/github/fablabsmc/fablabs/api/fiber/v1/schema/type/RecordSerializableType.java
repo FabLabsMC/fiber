@@ -36,6 +36,7 @@ public final class RecordSerializableType extends ParameterizedSerializableType<
 	public Map<String, Object> cast(@Nonnull Object value) {
 		Map<?, ?> map = (Map<?, ?>) value;
 
+		// we can potentially allow extra fields in value, but choose not to allow them for now
 		if (!this.fields.keySet().equals(map.keySet())) {
 			throw new ClassCastException("value Map " + map.keySet() + " is not structurally equivalent to fields " + this.fields.keySet());
 		}

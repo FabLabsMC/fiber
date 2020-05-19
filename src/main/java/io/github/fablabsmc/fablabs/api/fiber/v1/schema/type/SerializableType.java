@@ -51,7 +51,8 @@ public abstract class SerializableType<T> {
 	}
 
 	/**
-	 * The generic Java platform type used to represent values of this type.
+	 * The generic Java platform type used to represent values of this type, with parameterized
+	 * type information preserved.
 	 */
 	public abstract Type getGenericPlatformType();
 
@@ -100,7 +101,8 @@ public abstract class SerializableType<T> {
 
 	/**
 	 * Serializes a config primitive to a serialized form. The value given <em>must</em>
-	 * be compatible with the platform type as given by {@link #cast(Object)}.
+	 * be compatible with the platform type as given by {@link #cast(Object)} and additionally
+	 * satisfy this type's particular constraints.
 	 *
 	 * @param value      The value to serialize.
 	 * @param serializer A ValueSerializer defining the serialized form.
