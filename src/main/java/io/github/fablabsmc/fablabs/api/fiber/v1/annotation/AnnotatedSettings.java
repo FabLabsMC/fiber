@@ -16,7 +16,7 @@ import io.github.fablabsmc.fablabs.impl.fiber.annotation.AnnotatedSettingsBuilde
 
 /**
  * Types which implement this interface can create a config tree based on an
- *  annotated POJO "plain old Java object" representation.
+ * annotated POJO "plain old Java object" representation.
  */
 public interface AnnotatedSettings {
 	/**
@@ -27,6 +27,11 @@ public interface AnnotatedSettings {
 	 */
 	AnnotatedSettings DEFAULT_SETTINGS = AnnotatedSettings.builder().build();
 
+	/**
+	 * Returns a annotated settings builder.
+	 *
+	 * @see Builder
+	 */
 	static AnnotatedSettings.Builder builder() {
 		return new AnnotatedSettingsBuilderImpl();
 	}
@@ -44,8 +49,8 @@ public interface AnnotatedSettings {
 	 * Applies the schema defined by {@code pojo} to the given {@link ConfigTree}.
 	 *
 	 * @param mergeTo The config tree.
-	 * @param pojo The config schema.
-	 * @param <P> The type of the pojo.
+	 * @param pojo    The config schema.
+	 * @param <P>     The type of the pojo.
 	 * @throws FiberException If pojo cannot be parsed.
 	 */
 	<P> void applyToNode(ConfigTree mergeTo, P pojo) throws FiberException;
@@ -80,8 +85,8 @@ public interface AnnotatedSettings {
 		 * {@link #registerTypeMapping(Class, ParameterizedTypeProcessor)} instead.
 		 *
 		 * @param clazz The Class object for the type of fields to map.
-		 * @param type The mapped to ConfigType.
-		 * @param <T> The type of fields to map.
+		 * @param type  The mapped to ConfigType.
+		 * @param <T>   The type of fields to map.
 		 * @return This instance.
 		 * @see #registerTypeMapping(Class, ParameterizedTypeProcessor)
 		 * @see ConfigType
@@ -97,10 +102,10 @@ public interface AnnotatedSettings {
 		 * For registering type mappings for non-parameterized types, use
 		 * {@link #registerTypeMapping(Class, ConfigType)} instead.
 		 *
-		 * @param clazz The Class object for the type of fields to map.
+		 * @param clazz     The Class object for the type of fields to map.
 		 * @param processor A function taking actual type arguments and returning a suitable
 		 *                  ConfigType.
-		 * @param <T> The type of fields to map.
+		 * @param <T>       The type of fields to map.
 		 * @return This instance.
 		 * @see #registerTypeMapping(Class, ConfigType)
 		 * @see ParameterizedTypeProcessor

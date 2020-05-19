@@ -21,7 +21,7 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;
  * specifically target {@link ElementType#TYPE_USE}.
  *
  * @param <A> the type of annotations processed
- * @see AnnotatedSettings#registerConstraintProcessor(Class, ConstraintAnnotationProcessor)
+ * @see AnnotatedSettings.Builder#registerConstraintProcessor(Class, ConstraintAnnotationProcessor)
  */
 public interface ConstraintAnnotationProcessor<A extends Annotation> {
 	/**
