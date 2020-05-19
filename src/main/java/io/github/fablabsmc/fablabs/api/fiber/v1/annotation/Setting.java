@@ -7,7 +7,6 @@ import java.lang.annotation.Target;
 
 import javax.annotation.RegEx;
 
-import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.convention.SettingNamingConvention;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigAttribute;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigBranch;
 

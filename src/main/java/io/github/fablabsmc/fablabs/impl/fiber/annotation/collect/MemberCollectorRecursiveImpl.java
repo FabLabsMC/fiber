@@ -4,6 +4,10 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.collect.PojoMemberPro
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.ProcessingMemberException;
 
 public class MemberCollectorRecursiveImpl extends MemberCollectorImpl {
+	public MemberCollectorRecursiveImpl(boolean onlyAnnotated) {
+		super(onlyAnnotated);
+	}
+
 	@Override
 	public <P> void collect(P pojo, Class<? super P> clazz, PojoMemberProcessor processor) throws ProcessingMemberException {
 		super.collect(pojo, clazz, processor);
