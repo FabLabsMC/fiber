@@ -70,6 +70,7 @@ public abstract class ConfigNodeBuilder {
 
 	/**
 	 * Adds a collection of {@link ConfigAttribute} to the built {@code ConfigNode}.
+	 *
 	 * @param attributes A collection of attributes.
 	 * @return This builder.
 	 */
@@ -83,6 +84,7 @@ public abstract class ConfigNodeBuilder {
 
 	/**
 	 * Adds a single {@link ConfigAttribute} to the built {@code ConfigNode}.
+	 *
 	 * @param attribute The attribute.
 	 * @return This builder.
 	 */

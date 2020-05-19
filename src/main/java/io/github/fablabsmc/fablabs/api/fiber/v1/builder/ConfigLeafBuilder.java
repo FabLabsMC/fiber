@@ -29,11 +29,11 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
 	 * Creates a builder for a leaf node with the given parent, name, and type.
 	 *
 	 * @param parentNode The parent node builder.
-	 * @param name The name for the leaf node.
-	 * @param type The {@link ConfigType} for values stored in this leaf node.
-	 *             The actual type stored in the leaf node is represented by {@code type.getSerializedType()}.
-	 * @param <T> The type of serialized values the leaf node stores.
-	 * @param <R> The runtime type of values the builder receives.
+	 * @param name       The name for the leaf node.
+	 * @param type       The {@link ConfigType} for values stored in this leaf node.
+	 *                   The actual type stored in the leaf node is represented by {@code type.getSerializedType()}.
+	 * @param <T>        The type of serialized values the leaf node stores.
+	 * @param <R>        The runtime type of values the builder receives.
 	 * @return A new builder.
 	 */
 	public static <T, R> ConfigLeafBuilder<T, R> create(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull ConfigType<R, T, ?> type, @Nonnull R defaultValue) {
@@ -44,9 +44,9 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
 	 * Creates a builder for a leaf node with the given parent, name, and serialized type.
 	 *
 	 * @param parentNode The parent node builder.
-	 * @param name The name for the leaf node.
-	 * @param type The {@link SerializableType} for values stored in this leaf node.
-	 * @param <T> The type of serialized values the leaf node stores.
+	 * @param name       The name for the leaf node.
+	 * @param type       The {@link SerializableType} for values stored in this leaf node.
+	 * @param <T>        The type of serialized values the leaf node stores.
 	 * @return A new builder.
 	 */
 	public static <T> ConfigLeafBuilder<T, T> create(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull SerializableType<T> type, @Nonnull T defaultValue) {

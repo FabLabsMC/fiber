@@ -89,8 +89,8 @@ public abstract class SerializableType<T> {
 	 * Serializes this type to a persistent format using the given {@link TypeSerializer}.
 	 *
 	 * @param serializer The type serializer to use.
-	 * @param target The place to which this type is serialized.
-	 * @param <S> The type to serialize to.
+	 * @param target     The place to which this type is serialized.
+	 * @param <S>        The type to serialize to.
 	 * @see TypeSerializer
 	 */
 	public abstract <S> void serialize(TypeSerializer<S> serializer, S target);
