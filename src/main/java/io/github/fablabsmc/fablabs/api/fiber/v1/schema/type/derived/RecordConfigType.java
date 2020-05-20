@@ -2,15 +2,15 @@ package io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
+import java.util.Map;
 import java.util.function.Function;
 
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.processor.ConstraintAnnotationProcessor;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.RecordSerializableType;
-import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigBranch;
 
-public final class RecordConfigType<R> extends ConfigType<R, ConfigBranch, RecordSerializableType> {
+public final class RecordConfigType<R> extends ConfigType<R, Map<String, Object>, RecordSerializableType> {
 	@SuppressWarnings("unchecked")
-	public RecordConfigType(RecordSerializableType serializedType, Class<? super R> runtimeType, Function<ConfigBranch, R> f, Function<R, ConfigBranch> f0) {
+	public RecordConfigType(RecordSerializableType serializedType, Class<? super R> runtimeType, Function<Map<String, Object>, R> f, Function<R, Map<String, Object>> f0) {
 		super(serializedType, (Class<R>) runtimeType, f, f0);
 	}
 

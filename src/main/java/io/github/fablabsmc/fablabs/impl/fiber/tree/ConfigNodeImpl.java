@@ -82,7 +82,8 @@ public abstract class ConfigNodeImpl implements ConfigNode, Commentable {
 
 		if (attr != null) {
 			checkAttributeType(expectedType, attr);
-			return Optional.ofNullable(expectedType.getPlatformType().cast(attr.getValue()));
+			A a = expectedType.cast(attr.getValue());
+			return Optional.of(a);
 		}
 
 		return Optional.empty();

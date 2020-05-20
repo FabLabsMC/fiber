@@ -1,15 +1,14 @@
 package io.github.fablabsmc.fablabs.impl.fiber.constraint;
 
+import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.RecordSerializableType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.SerializableType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.TypeCheckResult;
-import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigBranch;
-import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigLeaf;
-import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigNode;
 
-public class RecordConstraintChecker extends ConstraintChecker<ConfigBranch, RecordSerializableType> {
+public class RecordConstraintChecker extends ConstraintChecker<Map<String, Object>, RecordSerializableType> {
 	private static final RecordConstraintChecker INSTANCE = new RecordConstraintChecker();
 
 	public static RecordConstraintChecker instance() {
@@ -20,23 +19,42 @@ public class RecordConstraintChecker extends ConstraintChecker<ConfigBranch, Rec
 	}
 
 	@Override
-	public TypeCheckResult<ConfigBranch> test(RecordSerializableType cfg, ConfigBranch value) {
-		for (Map.Entry<String, SerializableType<?>> field : cfg.getFields().entrySet()) {
-			ConfigNode child = value.lookup(field.getKey());
+	public TypeCheckResult<Map<String, Object>> test(RecordSerializableType cfg, Map<String, Object> value) {
+		// if value does not have enough fields -> unrecoverable
+		if (!value.keySet().containsAll(cfg.getFields().keySet())) {
+			return TypeCheckResult.unrecoverable();
+		}
 
-			if (!(child instanceof ConfigLeaf)) {
-				return TypeCheckResult.unrecoverable();
+		// if value has extra fields -> failed
+		boolean successful = cfg.getFields().keySet().containsAll(value.keySet());
+		// keep track of a corrected value map
+		Map<String, Object> corrected = new LinkedHashMap<>(value.size());
+
+		for (Map.Entry<String, SerializableType<?>> field : cfg.getFields().entrySet()) {
+			Object child = value.get(field.getKey());
+			SerializableType<?> fieldType = field.getValue();
+			TypeCheckResult<?> result = this.testChild(fieldType, child);
+			Optional<?> correctedFieldValue = result.getCorrectedValue();
+
+			if (!result.hasPassed()) {
+				successful = false;
 			}
 
-			SerializableType<?> leafType = ((ConfigLeaf<?>) child).getConfigType();
-			SerializableType<?> fieldType = field.getValue();
-
-			if (!fieldType.isAssignableFrom(leafType)) {
+			if (correctedFieldValue.isPresent()) {
+				corrected.put(field.getKey(), correctedFieldValue.get());
+			} else {
 				return TypeCheckResult.unrecoverable();
 			}
 		}
 
-		return TypeCheckResult.successful(value);
+		return successful ? TypeCheckResult.successful(value) : TypeCheckResult.failed(corrected);
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> TypeCheckResult<T> testChild(SerializableType<T> type, Object value) {
+		// value has already been validated, so this is always valid
+		// type.test also calls type.cast inside it, so double casting serves no purpose
+		return type.test((T) value);
 	}
 
 	@Override

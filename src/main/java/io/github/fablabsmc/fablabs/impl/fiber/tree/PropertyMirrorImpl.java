@@ -32,8 +32,8 @@ public final class PropertyMirrorImpl<R, S> implements PropertyMirror<R> {
 	 */
 	@Override
 	public void mirror(Property<?> delegate) {
-		if (!this.mirroredType.getSerializedType().getPlatformType().equals(delegate.getType())) {
-			throw new IllegalArgumentException("Unsupported delegate type " + delegate.getType() + ", should be " + this.mirroredType.getSerializedType().getPlatformType());
+		if (!this.mirroredType.getSerializedType().getErasedPlatformType().equals(delegate.getType())) {
+			throw new IllegalArgumentException("Unsupported delegate type " + delegate.getType() + ", should be " + this.mirroredType.getSerializedType().getErasedPlatformType());
 		}
 
 		@SuppressWarnings("unchecked") Property<S> d = (Property<S>) delegate;

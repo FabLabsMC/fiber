@@ -7,10 +7,12 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.StringJoiner;
 
+import io.github.fablabsmc.fablabs.api.fiber.v1.exception.ValueDeserializationException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.TypeSerializer;
+import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.ValueSerializer;
 import io.github.fablabsmc.fablabs.impl.fiber.constraint.EnumConstraintChecker;
 
-public final class EnumSerializableType extends SerializableType<String> {
+public final class EnumSerializableType extends PlainSerializableType<String> {
 	private final Set<String> validValues;
 
 	public EnumSerializableType(String... validValues) {
@@ -30,6 +32,16 @@ public final class EnumSerializableType extends SerializableType<String> {
 	@Override
 	public <S> void serialize(TypeSerializer<S> serializer, S target) {
 		serializer.serialize(this, target);
+	}
+
+	@Override
+	public <S> S serializeValue(String value, ValueSerializer<S, ?> serializer) {
+		return serializer.serializeEnum(value, this);
+	}
+
+	@Override
+	public <S> String deserializeValue(S elem, ValueSerializer<S, ?> serializer) throws ValueDeserializationException {
+		return serializer.deserializeEnum(elem, this);
 	}
 
 	@Override
