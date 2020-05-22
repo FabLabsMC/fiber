@@ -16,7 +16,7 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;
  * specifically target {@link ElementType#FIELD}.
  *
  * @param <A> the type of annotations processed
- * @see AnnotatedSettings#registerSettingProcessor(Class, LeafAnnotationProcessor)
+ * @see AnnotatedSettings.Builder#registerSettingProcessor(Class, LeafAnnotationProcessor)
  */
 @FunctionalInterface
 public interface LeafAnnotationProcessor<A extends Annotation> extends ConfigAnnotationProcessor<A, Field, ConfigLeafBuilder<?, ?>> {
