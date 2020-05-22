@@ -184,7 +184,7 @@ class JanksonValueSerializerTest {
 		FiberSerialization.deserialize(nodeTwo, new ByteArrayInputStream(bos.toByteArray()), jk);
 		assertEquals("1.0.0", versionTwo.getValue(), "RegEx constraint bypassed");
 		assertEquals(20, settingTwo.getValue(), "Range constraint bypassed");
-		assertEquals("{ \"child\": { \"A\": 30 }, \"version\": \"0.1\" }", bos.toString("UTF-8"));
+		assertEquals("{ \"version\": \"0.1\", \"child\": { \"A\": 30 } }", bos.toString("UTF-8"));
 
 		bos.reset();
 
@@ -194,7 +194,7 @@ class JanksonValueSerializerTest {
 		FiberSerialization.deserialize(nodeTwo, new ByteArrayInputStream(bos.toByteArray()), jk);
 		assertEquals("0.1.0", versionTwo.getValue(), "Valid value rejected");
 		assertEquals(-5, settingTwo.getValue(), "Valid value rejected");
-		assertEquals("{ \"child\": { \"A\": -5 }, \"version\": \"0.1.0\" }", bos.toString("UTF-8"));
+		assertEquals("{ \"version\": \"0.1.0\", \"child\": { \"A\": -5 } }", bos.toString("UTF-8"));
 	}
 
 	@Test
