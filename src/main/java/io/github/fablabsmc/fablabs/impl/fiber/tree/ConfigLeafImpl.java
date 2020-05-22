@@ -1,5 +1,6 @@
 package io.github.fablabsmc.fablabs.impl.fiber.tree;
 
+import java.util.Objects;
 import java.util.function.BiConsumer;
 
 import javax.annotation.Nonnull;
@@ -11,9 +12,8 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.TypeCheckResult;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigLeaf;
 
 public final class ConfigLeafImpl<T> extends ConfigNodeImpl implements ConfigLeaf<T> {
-	@Nullable
 	private T value;
-	@Nullable
+	@Nonnull
 	private final T defaultValue;
 	@Nonnull
 	private BiConsumer<T, T> listener;
@@ -30,19 +30,16 @@ public final class ConfigLeafImpl<T> extends ConfigNodeImpl implements ConfigLea
 	 * @param listener     the consumer or listener for this item. When this item's value changes, the consumer will be called with the old value as first argument and the new value as second argument.
 	 * @see ConfigLeafBuilder
 	 */
-	public ConfigLeafImpl(@Nonnull String name, @Nonnull SerializableType<T> type, @Nullable String comment, @Nullable T defaultValue, @Nonnull BiConsumer<T, T> listener) {
+	public ConfigLeafImpl(@Nonnull String name, @Nonnull SerializableType<T> type, @Nullable String comment, @Nonnull T defaultValue, @Nonnull BiConsumer<T, T> listener) {
 		super(name, comment);
-		this.defaultValue = defaultValue;
+		this.defaultValue = Objects.requireNonNull(defaultValue);
 		this.listener = listener;
 		this.type = type;
-
-		if (defaultValue != null) {
-			this.setValue(defaultValue);
-		}
+		this.setValue(defaultValue);
 	}
 
 	@Override
-	@Nullable
+	@Nonnull
 	public T getValue() {
 		return this.value;
 	}
@@ -53,18 +50,14 @@ public final class ConfigLeafImpl<T> extends ConfigNodeImpl implements ConfigLea
 	}
 
 	@Override
-	public boolean accepts(T value) {
-		// ensure ClassCastException comes sooner than later
-		// maybe accept any Object and return false if not an instance?
-		return this.type.accepts(this.type.getPlatformType().cast(value));
+	public boolean accepts(@Nonnull T value) {
+		return this.type.accepts(value);
 	}
 
 	@Override
-	public boolean setValue(@Nullable T value) {
-		// ensure ClassCastException comes sooner than later
-		// maybe accept any Object and return false if not an instance?
+	public boolean setValue(@Nonnull T value) {
 		T correctedValue;
-		TypeCheckResult<T> result = this.type.test(this.type.getPlatformType().cast(value));
+		TypeCheckResult<T> result = this.type.test(value);
 
 		if (result.hasPassed()) {
 			correctedValue = value;
@@ -77,7 +70,7 @@ public final class ConfigLeafImpl<T> extends ConfigNodeImpl implements ConfigLea
 		}
 
 		T oldValue = this.value;
-		this.value = correctedValue;
+		this.value = Objects.requireNonNull(correctedValue);
 		this.listener.accept(oldValue, this.value);
 		return true;
 	}
@@ -94,7 +87,7 @@ public final class ConfigLeafImpl<T> extends ConfigNodeImpl implements ConfigLea
 	}
 
 	@Override
-	@Nullable
+	@Nonnull
 	public T getDefaultValue() {
 		return defaultValue;
 	}
@@ -102,7 +95,7 @@ public final class ConfigLeafImpl<T> extends ConfigNodeImpl implements ConfigLea
 	@Override
 	public String toString() {
 		return this.getClass().getSimpleName()
-				+ '<' + this.type.getPlatformType().getSimpleName()
+				+ '<' + this.type.getGenericPlatformType().getTypeName()
 				+ ">[name=" + this.getName()
 				+ ", comment=" + this.getComment()
 				+ ", value=" + this.getValue()

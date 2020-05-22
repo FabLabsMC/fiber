@@ -1,6 +1,7 @@
 package io.github.fablabsmc.fablabs.api.fiber.v1.annotation;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -37,7 +38,7 @@ class AnnotatedSettingsTest {
 
 	@BeforeEach
 	void setup() {
-		this.annotatedSettings = AnnotatedSettings.create();
+		this.annotatedSettings = AnnotatedSettings.DEFAULT_SETTINGS;
 		this.node = ConfigTree.builder().build();
 	}
 
@@ -82,7 +83,7 @@ class AnnotatedSettingsTest {
 		assertTrue(treeItem instanceof Property, "Setting A is a property");
 		PropertyMirror<Integer> property = PropertyMirror.create(ConfigTypes.INTEGER);
 		property.mirror((Property<?>) treeItem);
-		property.setValue(10);
+		assertDoesNotThrow(() -> property.setValue(10), "Transient listener is not called");
 		assertTrue(pojo.listenedA, "Listener for A was triggered");
 
 		treeItem = this.node.lookup("b");
@@ -207,7 +208,7 @@ class AnnotatedSettingsTest {
 	@DisplayName("Only annotated fields")
 	void testOnlyAnnotatedFields() throws FiberException {
 		OnlyAnnotatedFieldsPojo pojo = new OnlyAnnotatedFieldsPojo();
-		this.annotatedSettings.applyToNode(this.node, pojo);
+		AnnotatedSettings.builder().collectOnlyAnnotatedMembers().build().applyToNode(this.node, pojo);
 		assertEquals(1, this.node.getItems().size(), "Node has one item");
 	}
 
@@ -231,6 +232,19 @@ class AnnotatedSettingsTest {
 	}
 
 	@Test
+	@DisplayName("Enum")
+	void testEnum() throws FiberException {
+		EnumPojo pojo = new EnumPojo();
+		this.annotatedSettings.applyToNode(this.node, pojo);
+		assertEquals(1, this.node.getItems().size(), "Node has one item");
+		ConfigNode child = this.node.lookup("a");
+		assertTrue(child instanceof ConfigLeaf);
+		ConfigLeaf<?> leaf = (ConfigLeaf<?>) child;
+		assertEquals(ConfigTypes.makeEnum(EnumPojo.TestEnum.class).getSerializedType(), leaf.getConfigType());
+		assertEquals("A", leaf.getValue());
+	}
+
+	@Test
 	@DisplayName("Commented setting")
 	void testComment() throws FiberException {
 		CommentPojo pojo = new CommentPojo();
@@ -244,6 +258,27 @@ class AnnotatedSettingsTest {
 		IgnoredPojo pojo = new IgnoredPojo();
 		this.annotatedSettings.applyToNode(this.node, pojo);
 		assertEquals(0, this.node.getItems().size(), "Node is empty");
+	}
+
+	@Test
+	@DisplayName("Null default value")
+	void testNullDefault() {
+		Object pojo = new NullDefaultPojo();
+		assertThrows(FiberException.class,
+				() -> this.annotatedSettings.applyToNode(this.node, pojo),
+				"Prohibit null default value");
+	}
+
+	private static class NullDefaultPojo {
+		private String a = null;
+	}
+
+	@Test
+	@DisplayName("POJO with superclass")
+	void testSuperPojo() {
+		AnnotatedSettings settings = AnnotatedSettings.builder().collectMembersRecursively().build();
+		assertDoesNotThrow(() -> settings.applyToNode(this.node, new ExtendingPojo()));
+		assertEquals(2, this.node.getItems().size(), "Node has two items");
 	}
 
 	private static class FinalSettingPojo {
@@ -264,7 +299,12 @@ class AnnotatedSettingsTest {
 		private int c = 5;
 
 		@Listener("a")
-		private transient BiConsumer<Integer, Integer> aListener = (now, then) -> this.listenedA = true;
+		private BiConsumer<Integer, Integer> aListener = (now, then) -> this.listenedA = true;
+
+		@Listener("a")
+		private transient BiConsumer<Integer, Integer> aTransientListener = (now, then) -> {
+			throw new IllegalStateException("This listener shouldn't be called!");
+		};
 
 		@Listener("b")
 		private void bListener(Integer oldValue, Integer newValue) {
@@ -321,7 +361,6 @@ class AnnotatedSettingsTest {
 		private @Setting.Constrain.Regex("\\d") int i;
 	}
 
-	@Settings(onlyAnnotated = true)
 	private static class OnlyAnnotatedFieldsPojo {
 		@Setting
 		private int a = 5;
@@ -355,5 +394,30 @@ class AnnotatedSettingsTest {
 		class SubNode {
 			private int b = 5;
 		}
+	}
+
+	private static class EnumPojo {
+		public TestEnum a = TestEnum.A;
+
+		enum TestEnum {
+			A {
+				@Override
+				public String toString() {
+					return "hi";
+				}
+			}, B, C
+		}
+	}
+
+	@Settings(onlyAnnotated = true)
+	private static class SuperPojo {
+		@Setting
+		private int a = 5;
+
+		private int ignored = 10;
+	}
+
+	private static class ExtendingPojo extends SuperPojo {
+		private int b = 5;
 	}
 }

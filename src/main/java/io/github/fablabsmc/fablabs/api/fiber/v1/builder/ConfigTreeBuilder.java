@@ -232,21 +232,25 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 	/**
 	 * Configure this builder using a POJO (Plain Old Java Object).
 	 *
-	 * <p>The node's structure will be based on the {@code pojo}'s fields,
+	 * <p>The tree structure will be based on the {@code pojo}'s fields,
 	 * recursively generating settings. The generated settings can be configured
 	 * in the {@code pojo}'s class declaration, using annotations such as {@link Setting}.
 	 *
 	 * <p>The generated {@link ConfigLeaf}s will be bound to their respective fields,
 	 * setting the latter when the former's value is {@linkplain ConfigLeaf#setValue(Object) updated}.
 	 *
+	 * <p>If a {@link FiberException} is thrown when using the underlying {@code AnnotatedSettings},
+	 * it is wrapped in a {@link RuntimeFiberException}.
+	 *
 	 * @param pojo an object serving as a base to reflectively generate a config tree
 	 * @return {@code this}, for chaining
 	 * @see Setting
 	 * @see Settings
 	 * @see AnnotatedSettings#applyToNode(ConfigTree, Object)
+	 * @see #applyFromPojo(Object, AnnotatedSettings)
 	 */
-	public ConfigTreeBuilder applyFromPojo(Object pojo) throws FiberException {
-		return applyFromPojo(pojo, AnnotatedSettings.DEFAULT_SETTINGS);
+	public ConfigTreeBuilder applyFromPojo(Object pojo) throws RuntimeFiberException {
+		return this.applyFromPojo(pojo, AnnotatedSettings.DEFAULT_SETTINGS);
 	}
 
 	/**
@@ -259,6 +263,9 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 	 * <p>The generated {@link ConfigLeaf}s will be bound to their respective fields,
 	 * setting the latter when the former's value is {@linkplain ConfigLeaf#setValue(Object) updated}.
 	 *
+	 * <p>If a {@link FiberException} is thrown when using the underlying {@code AnnotatedSettings},
+	 * it is wrapped in a {@link RuntimeFiberException}.
+	 *
 	 * @param pojo     an object serving as a base to reflectively generate a config tree
 	 * @param settings an {@link AnnotatedSettings} instance used to configure this builder
 	 * @return {@code this}, for chaining
@@ -266,8 +273,13 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 	 * @see Settings @Settings
 	 * @see AnnotatedSettings#applyToNode(ConfigTree, Object)
 	 */
-	public ConfigTreeBuilder applyFromPojo(Object pojo, AnnotatedSettings settings) throws FiberException {
-		settings.applyToNode(this, pojo);
+	public ConfigTreeBuilder applyFromPojo(Object pojo, AnnotatedSettings settings) throws RuntimeFiberException {
+		try {
+			settings.applyToNode(this, pojo);
+		} catch (FiberException e) {
+			throw new RuntimeFiberException("Failed to apply POJO structure to builder", e);
+		}
+
 		return this;
 	}
 
@@ -281,12 +293,12 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 	 * @see ConfigLeafBuilder
 	 * @see ConfigTypes
 	 */
-	public <T> ConfigLeafBuilder<T, T> beginValue(@Nonnull String name, @Nonnull SerializableType<T> type, @Nullable T defaultValue) {
-		return ConfigLeafBuilder.create(this, name, type).withDefaultValue(defaultValue);
+	public <T> ConfigLeafBuilder<T, T> beginValue(@Nonnull String name, @Nonnull SerializableType<T> type, @Nonnull T defaultValue) {
+		return ConfigLeafBuilder.create(this, name, type, defaultValue);
 	}
 
-	public <T, R> ConfigLeafBuilder<T, R> beginValue(@Nonnull String name, @Nonnull ConfigType<R, T, ?> type, @Nullable R defaultValue) {
-		return ConfigLeafBuilder.create(this, name, type).withDefaultValue(defaultValue);
+	public <T, R> ConfigLeafBuilder<T, R> beginValue(@Nonnull String name, @Nonnull ConfigType<R, T, ?> type, @Nonnull R defaultValue) {
+		return ConfigLeafBuilder.create(this, name, type, defaultValue);
 	}
 
 	/**
@@ -303,7 +315,7 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 	 * @see #beginValue(String, SerializableType, Object)
 	 * @see ConfigTypes
 	 */
-	public <T> ConfigTreeBuilder withValue(@Nonnull String name, @Nonnull SerializableType<T> type, @Nullable T defaultValue) {
+	public <T> ConfigTreeBuilder withValue(@Nonnull String name, @Nonnull SerializableType<T> type, @Nonnull T defaultValue) {
 		this.items.add(new ConfigLeafImpl<>(name, type, null, defaultValue, (a, b) -> {
 		}));
 		return this;
@@ -359,7 +371,7 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 	 * @see #beginValue(String, SerializableType, Object)
 	 * @see ConfigTypes
 	 */
-	public <R> ConfigTreeBuilder withMirroredValue(@Nonnull String name, @Nonnull PropertyMirror<R> mirror, @Nullable R defaultValue) {
+	public <R> ConfigTreeBuilder withMirroredValue(@Nonnull String name, @Nonnull PropertyMirror<R> mirror, @Nonnull R defaultValue) {
 		this.beginValue(name, mirror.getMirroredType(), defaultValue).finishValue(mirror::mirror);
 		return this;
 	}

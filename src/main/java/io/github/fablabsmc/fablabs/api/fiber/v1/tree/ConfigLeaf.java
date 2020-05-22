@@ -32,7 +32,7 @@ public interface ConfigLeaf<T> extends ConfigNode, Property<T>, Commentable {
 	 * @see ConfigLeaf#accepts(Object)
 	 */
 	@Override
-	boolean setValue(T value);
+	boolean setValue(@Nonnull T value);
 
 	/**
 	 * Returns {@code true} if this property can be set to the given raw value.
@@ -45,7 +45,7 @@ public interface ConfigLeaf<T> extends ConfigNode, Property<T>, Commentable {
 	 * @return {@code true} if this property accepts the given value, {@code false} otherwise.
 	 * @see SerializableType#accepts(Object)
 	 */
-	default boolean accepts(T rawValue) {
+	default boolean accepts(@Nonnull T rawValue) {
 		return true;
 	}
 
@@ -57,14 +57,15 @@ public interface ConfigLeaf<T> extends ConfigNode, Property<T>, Commentable {
 	 *
 	 * @return this node's value
 	 */
+	@Nonnull
 	@Override
 	T getValue();
 
 	SerializableType<T> getConfigType();
 
 	@Override
-	default Class<T> getType() {
-		return this.getConfigType().getPlatformType();
+	default Class<? super T> getType() {
+		return this.getConfigType().getErasedPlatformType();
 	}
 
 	/**

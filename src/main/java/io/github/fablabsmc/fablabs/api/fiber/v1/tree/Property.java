@@ -1,5 +1,7 @@
 package io.github.fablabsmc.fablabs.api.fiber.v1.tree;
 
+import javax.annotation.Nonnull;
+
 /**
  * Implementing this interface means that this class has a nullable value
  * which can be mutated using the {@link Property#setValue(Object) setValue} method.
@@ -19,7 +21,7 @@ public interface Property<T> extends HasValue<T> {
 	 * @return {@code true} if this property changed as a result of the call
 	 * @see #accepts(Object)
 	 */
-	boolean setValue(T value);
+	boolean setValue(@Nonnull T value);
 
 	/**
 	 * Returns {@code true} if this property can be set to the given value.
@@ -28,7 +30,7 @@ public interface Property<T> extends HasValue<T> {
 	 * @return {@code true} if this property accepts the given value, {@code false} otherwise.
 	 * @see #setValue(Object)
 	 */
-	default boolean accepts(T value) {
+	default boolean accepts(@Nonnull T value) {
 		return true;
 	}
 }

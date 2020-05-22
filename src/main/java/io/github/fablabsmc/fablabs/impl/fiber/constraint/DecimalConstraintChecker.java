@@ -37,9 +37,13 @@ public final class DecimalConstraintChecker extends ConstraintChecker<BigDecimal
 
 	@Override
 	public boolean comprehends(DecimalSerializableType cfg, DecimalSerializableType cfg2) {
-		return (cfg.getMinimum() == null || cfg2.getMinimum() != null && cfg.getMinimum().compareTo(cfg2.getMinimum()) <= 0)
-				&& (cfg.getMaximum() == null || cfg2.getMaximum() != null && cfg.getMaximum().compareTo(cfg2.getMaximum()) >= 0)
-				&& (cfg.getIncrement() == null || cfg2.getIncrement() != null && cfg2.getIncrement().remainder(cfg.getIncrement()).intValue() == 0);
+		if (cfg.getMinimum() == null || cfg2.getMinimum() != null && cfg.getMinimum().compareTo(cfg2.getMinimum()) <= 0) {
+			if (cfg.getMaximum() == null || cfg2.getMaximum() != null && cfg.getMaximum().compareTo(cfg2.getMaximum()) >= 0) {
+				return cfg.getIncrement() == null || cfg2.getIncrement() != null && cfg2.getIncrement().remainder(cfg.getIncrement()).compareTo(BigDecimal.ZERO) == 0;
+			}
+		}
+
+		return false;
 	}
 
 	private static BigDecimal nearest(BigDecimal less, BigDecimal value, BigDecimal more) {

@@ -1,9 +1,11 @@
 package io.github.fablabsmc.fablabs.api.fiber.v1.schema.type;
 
+import io.github.fablabsmc.fablabs.api.fiber.v1.exception.ValueDeserializationException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.TypeSerializer;
+import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.ValueSerializer;
 import io.github.fablabsmc.fablabs.impl.fiber.constraint.BooleanConstraintChecker;
 
-public final class BooleanSerializableType extends SerializableType<Boolean> {
+public final class BooleanSerializableType extends PlainSerializableType<Boolean> {
 	public static final BooleanSerializableType BOOLEAN = new BooleanSerializableType();
 
 	private BooleanSerializableType() {
@@ -13,6 +15,16 @@ public final class BooleanSerializableType extends SerializableType<Boolean> {
 	@Override
 	public <S> void serialize(TypeSerializer<S> serializer, S target) {
 		serializer.serialize(this, target);
+	}
+
+	@Override
+	public <S> S serializeValue(Boolean value, ValueSerializer<S, ?> serializer) {
+		return serializer.serializeBoolean(value, this);
+	}
+
+	@Override
+	public <S> Boolean deserializeValue(S elem, ValueSerializer<S, ?> serializer) throws ValueDeserializationException {
+		return serializer.deserializeBoolean(elem, this);
 	}
 
 	@Override

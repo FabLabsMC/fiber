@@ -2,10 +2,10 @@ package io.github.fablabsmc.fablabs.impl.fiber.annotation.convention;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.convention.NoNamingConvention;
+import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.SettingNamingConvention;
 import org.junit.jupiter.api.Test;
 
-class NoNamingConventionTest extends NoNamingConvention {
+class NoNamingConventionTest {
 	private static String[] STRINGS = {
 			"anything",
 			"you",
@@ -22,7 +22,7 @@ class NoNamingConventionTest extends NoNamingConvention {
 	@Test
 	void name() {
 		for (String string : STRINGS) {
-			assertEquals(string, super.name(string));
+			assertEquals(string, SettingNamingConvention.NONE.name(string));
 		}
 	}
 }

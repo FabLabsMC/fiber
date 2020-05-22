@@ -67,7 +67,9 @@ class ConfigTypesTest {
 		NumberConfigType<Integer> elementType = ConfigTypes.INTEGER.withMinimum(3).withMaximum(10);
 		ListConfigType<List<Integer>, BigDecimal> type = ConfigTypes.makeList(elementType).withMaxSize(3);
 		Assertions.assertEquals(elementType.getSerializedType(), type.getSerializedType().getElementType());
-		ConfigLeaf<List<BigDecimal>> config = ConfigLeafBuilder.create(null, "", type).build();
+		ConfigLeaf<List<BigDecimal>> config = ConfigLeafBuilder
+				.create(null, "", type, Collections.emptyList())
+				.build();
 		PropertyMirror<List<Integer>> mirror = PropertyMirror.create(type);
 		mirror.mirror(config);
 
