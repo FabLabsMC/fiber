@@ -7,6 +7,7 @@ import java.util.function.Function;
 
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.processor.ConstraintAnnotationProcessor;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.RecordSerializableType;
+import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigBranch;
 
 /**
  * A {@link ConfigType} for fixed heterogeneous records. This is typically used to store POJOs or tuples,
