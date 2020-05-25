@@ -7,9 +7,12 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.NodeOperations;
 import io.github.fablabsmc.fablabs.api.fiber.v1.builder.ConfigTreeBuilder;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.SerializableType;
 
+/**
+ * A container for a tree structure of {@link ConfigNode}.
+ */
 public interface ConfigTree {
 	/**
-	 * @return a new builder for a root config node
+	 * Creates a new builder for a root config node.
 	 */
 	static ConfigTreeBuilder builder() {
 		return builder(null, null);
