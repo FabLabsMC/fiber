@@ -1,10 +1,15 @@
 package io.github.fablabsmc.fablabs.api.fiber.v1.schema.type;
 
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.util.Objects;
 
+import javax.annotation.Nonnull;
+
+import io.github.fablabsmc.fablabs.api.fiber.v1.exception.ValueDeserializationException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.TypeSerializer;
+import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.ValueSerializer;
 import io.github.fablabsmc.fablabs.impl.fiber.constraint.ConstraintChecker;
 
 /**
@@ -29,21 +34,39 @@ import io.github.fablabsmc.fablabs.impl.fiber.constraint.ConstraintChecker;
  * @see StringSerializableType
  */
 public abstract class SerializableType<T> {
-	private final Class<T> platformType;
+	private final Class<? super T> platformType;
 	private final ConstraintChecker<T, SerializableType<T>> checker;
 
 	@SuppressWarnings("unchecked")
-	SerializableType(Class<T> platformType, ConstraintChecker<T, ? extends SerializableType<T>> checker) {
+	SerializableType(Class<? super T> platformType, ConstraintChecker<T, ? extends SerializableType<T>> checker) {
 		this.platformType = platformType;
 		this.checker = (ConstraintChecker<T, SerializableType<T>>) checker;
 	}
 
 	/**
-	 * The Java platform type used to represent values of this type.
+	 * The (erased) Java platform type used to represent values of this type.
 	 */
-	public Class<T> getPlatformType() {
+	public Class<? super T> getErasedPlatformType() {
 		return this.platformType;
 	}
+
+	/**
+	 * The generic Java platform type used to represent values of this type, with parameterized
+	 * type information preserved.
+	 */
+	public abstract Type getGenericPlatformType();
+
+	/**
+	 * Casts an object to the type represented by this type.
+	 *
+	 * <p>This method does not check the value against this type's constraints.
+	 * For parameterized types, this method may inspect the object and thus not run in constant time.
+	 *
+	 * @param value The value.
+	 * @return The value, casted to the platform type.
+	 * @throws ClassCastException If the value is not of the platform type.
+	 */
+	public abstract T cast(@Nonnull Object value);
 
 	/**
 	 * Determines if the data type represented by this {@code SerializableType}
@@ -82,7 +105,7 @@ public abstract class SerializableType<T> {
 	 * @see TypeCheckResult
 	 */
 	public final TypeCheckResult<T> test(T serializedValue) {
-		return this.checker.test(this, Objects.requireNonNull(serializedValue));
+		return this.checker.test(this, this.cast(Objects.requireNonNull(serializedValue)));
 	}
 
 	/**
@@ -94,6 +117,29 @@ public abstract class SerializableType<T> {
 	 * @see TypeSerializer
 	 */
 	public abstract <S> void serialize(TypeSerializer<S> serializer, S target);
+
+	/**
+	 * Serializes a config primitive to a serialized form. The value given <em>must</em>
+	 * be compatible with the platform type as given by {@link #cast(Object)} and additionally
+	 * satisfy this type's particular constraints.
+	 *
+	 * @param value      The value to serialize.
+	 * @param serializer A ValueSerializer defining the serialized form.
+	 * @param <S>        The type of the serialized form.
+	 * @return The serialized form of value.
+	 */
+	public abstract <S> S serializeValue(T value, ValueSerializer<S, ?> serializer);
+
+	/**
+	 * Deserializes a config primitive from a serialized form.
+	 *
+	 * @param elem       The serialized form of the value.
+	 * @param serializer A ValueSerializer defining the serialized form.
+	 * @param <S>        The type of the serialized form.
+	 * @return The deserialized value.
+	 * @throws ValueDeserializationException If a value cannot be deserialized.
+	 */
+	public abstract <S> T deserializeValue(S elem, ValueSerializer<S, ?> serializer) throws ValueDeserializationException;
 
 	@Override
 	public abstract String toString();

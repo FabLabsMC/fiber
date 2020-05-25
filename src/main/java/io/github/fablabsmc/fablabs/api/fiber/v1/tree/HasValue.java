@@ -21,5 +21,5 @@ public interface HasValue<T> {
 	 *
 	 * @return the class of the type of the value
 	 */
-	Class<T> getType();
+	Class<? super T> getType();
 }

@@ -6,14 +6,16 @@ import java.util.StringJoiner;
 
 import javax.annotation.Nullable;
 
+import io.github.fablabsmc.fablabs.api.fiber.v1.exception.ValueDeserializationException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.TypeSerializer;
+import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.ValueSerializer;
 import io.github.fablabsmc.fablabs.impl.fiber.constraint.DecimalConstraintChecker;
 
 /**
  * The {@link SerializableType} for numeric ranges. This type handles integral as well as real
  * and fractional ranges using Java's {@link BigDecimal} type.
  */
-public final class DecimalSerializableType extends SerializableType<BigDecimal> {
+public final class DecimalSerializableType extends PlainSerializableType<BigDecimal> {
 	/**
 	 * Specifies a numerical lower bound.
 	 *
@@ -75,6 +77,16 @@ public final class DecimalSerializableType extends SerializableType<BigDecimal> 
 	@Override
 	public <S> void serialize(TypeSerializer<S> serializer, S target) {
 		serializer.serialize(this, target);
+	}
+
+	@Override
+	public <S> S serializeValue(BigDecimal value, ValueSerializer<S, ?> serializer) {
+		return serializer.serializeNumber(value, this);
+	}
+
+	@Override
+	public <S> BigDecimal deserializeValue(S elem, ValueSerializer<S, ?> serializer) throws ValueDeserializationException {
+		return serializer.deserializeNumber(elem, this);
 	}
 
 	@Override

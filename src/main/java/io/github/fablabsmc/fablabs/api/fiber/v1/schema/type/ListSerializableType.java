@@ -1,10 +1,15 @@
 package io.github.fablabsmc.fablabs.api.fiber.v1.schema.type;
 
+import java.lang.reflect.ParameterizedType;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+import javax.annotation.Nonnull;
+
+import io.github.fablabsmc.fablabs.api.fiber.v1.exception.ValueDeserializationException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.TypeSerializer;
+import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.ValueSerializer;
 import io.github.fablabsmc.fablabs.impl.fiber.constraint.ListConstraintChecker;
 
 /**
@@ -12,7 +17,7 @@ import io.github.fablabsmc.fablabs.impl.fiber.constraint.ListConstraintChecker;
  *
  * @param <E> The type of elements objects of this type hold.
  */
-public final class ListSerializableType<E> extends SerializableType<List<E>> {
+public final class ListSerializableType<E> extends ParameterizedSerializableType<List<E>> {
 	private final SerializableType<E> elementType;
 	private final boolean unique;
 	private final int minSize;
@@ -22,9 +27,8 @@ public final class ListSerializableType<E> extends SerializableType<List<E>> {
 		this(elementType, 0, Integer.MAX_VALUE, false);
 	}
 
-	@SuppressWarnings("unchecked")
 	public ListSerializableType(SerializableType<E> elementType, int minSize, int maxSize, boolean unique) {
-		super((Class<List<E>>) (Class<?>) List.class, ListConstraintChecker.instance());
+		super(List.class, ListConstraintChecker.instance());
 		this.elementType = elementType;
 		this.minSize = minSize;
 		this.maxSize = maxSize;
@@ -48,8 +52,41 @@ public final class ListSerializableType<E> extends SerializableType<List<E>> {
 	}
 
 	@Override
+	public ParameterizedType getParameterizedType() {
+		return new ParameterizedTypeImpl(this.getErasedPlatformType(), this.elementType.getGenericPlatformType());
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<E> cast(@Nonnull Object value) {
+		List<?> ls = (List<?>) value;
+
+		for (Object obj : ls) {
+			try {
+				this.elementType.cast(obj);
+			} catch (ClassCastException e) {
+				ClassCastException ex = new ClassCastException("element " + obj);
+				ex.initCause(e);
+				throw ex;
+			}
+		}
+
+		return (List<E>) ls;
+	}
+
+	@Override
 	public <S> void serialize(TypeSerializer<S> serializer, S target) {
 		serializer.serialize(this, target);
+	}
+
+	@Override
+	public <S> S serializeValue(List<E> value, ValueSerializer<S, ?> serializer) {
+		return serializer.serializeList(value, this);
+	}
+
+	@Override
+	public <S> List<E> deserializeValue(S elem, ValueSerializer<S, ?> serializer) throws ValueDeserializationException {
+		return serializer.deserializeList(elem, this);
 	}
 
 	@Override
