@@ -74,7 +74,7 @@ public final class PropertyMirrorImpl<R, S> implements PropertyMirror<R> {
 		if (this.cachedValue == null || this.lastSerializedValue != null) {
 			S serializedValue = this.delegate.getValue();
 
-			if (!Objects.equals(this.lastSerializedValue, serializedValue)) {
+			if (cachedValue == null || !Objects.equals(this.lastSerializedValue, serializedValue)) {
 				this.cachedValue = this.mirroredType.toRuntimeType(serializedValue);
 				this.lastSerializedValue = serializedValue;
 			}
