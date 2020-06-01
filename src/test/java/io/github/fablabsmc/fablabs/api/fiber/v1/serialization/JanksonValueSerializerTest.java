@@ -34,9 +34,10 @@ class JanksonValueSerializerTest {
 	@DisplayName("Node -> Node")
 	void nodeSerialization() throws IOException, FiberException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		JanksonValueSerializer jk = new JanksonValueSerializer(true);
+		JanksonValueSerializer jk = new JanksonValueSerializer(false);
 		ConfigTree nodeOne = ConfigTree.builder()
 				.beginValue("A", ConfigTypes.INTEGER.getSerializedType(), BigDecimal.TEN)
+				.withComment("An int")
 				.finishValue()
 				.build();
 
@@ -47,7 +48,7 @@ class JanksonValueSerializerTest {
 		FiberSerialization.serialize(nodeOne, bos, jk);
 		FiberSerialization.deserialize(nodeTwo, new ByteArrayInputStream(bos.toByteArray()), jk);
 		NodeOperationsTest.testNodeFor(nodeTwo, "A", ConfigTypes.INTEGER.getSerializedType(), BigDecimal.TEN);
-		assertEquals("{ \"A\": 10 }", bos.toString("UTF-8"));
+		assertEquals("{\n\t// An int\n\t\"A\": 10\n}", bos.toString("UTF-8"));
 	}
 
 	@Test

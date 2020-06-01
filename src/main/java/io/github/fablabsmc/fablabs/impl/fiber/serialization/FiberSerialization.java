@@ -66,11 +66,11 @@ public final class FiberSerialization {
 					serializeNode(subNode, subTarget, ctx);
 				}
 
-				ctx.addSubElement(branch.getName(), subTarget, target);
+				ctx.addSubElement(name, subTarget, target, comment);
 			}
 		} else if (node instanceof ConfigLeaf<?>) {
 			ConfigLeaf<?> leaf = (ConfigLeaf<?>) node;
-			ctx.addElement(leaf.getName(), serializeValue(leaf, ctx), target);
+			ctx.addElement(name, serializeValue(leaf, ctx), target, comment);
 		}
 	}
 

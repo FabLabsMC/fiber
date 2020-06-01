@@ -11,6 +11,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import blue.endless.jankson.Jankson;
 import blue.endless.jankson.JsonArray;
 import blue.endless.jankson.JsonElement;
@@ -206,13 +208,21 @@ public class JanksonValueSerializer implements ValueSerializer<JsonElement, Json
 	}
 
 	@Override
-	public void addElement(String name, JsonElement elem, JsonObject target) {
+	public void addElement(String name, JsonElement elem, JsonObject target, @Nullable String comment) {
 		target.put(name, elem);
+
+		if (comment != null) {
+			target.setComment(name, comment);
+		}
 	}
 
 	@Override
-	public void addSubElement(String name, JsonObject elem, JsonObject target) {
+	public void addSubElement(String name, JsonObject elem, JsonObject target, @Nullable String comment) {
 		target.put(name, elem);
+
+		if (comment != null) {
+			target.setComment(name, comment);
+		}
 	}
 
 	@Override
@@ -231,13 +241,13 @@ public class JanksonValueSerializer implements ValueSerializer<JsonElement, Json
 
 	@Override
 	public void writeTarget(JsonObject target, OutputStream out) throws IOException {
-		out.write(target.toJson(!minify, !minify).getBytes(StandardCharsets.UTF_8));
+		out.write(target.toJson(!this.minify, !this.minify).getBytes(StandardCharsets.UTF_8));
 	}
 
 	@Override
 	public JsonObject readTarget(InputStream in) throws ValueDeserializationException, IOException {
 		try {
-			return jankson.load(in);
+			return this.jankson.load(in);
 		} catch (SyntaxError e) {
 			throw new ValueDeserializationException(null, JsonObject.class, "Syntax error deserializing JSON", e);
 		}
