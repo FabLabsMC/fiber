@@ -23,7 +23,6 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.NumberConfig
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.RecordConfigType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.PropertyMirror;
-import io.github.fablabsmc.fablabs.impl.fiber.serialization.FiberSerialization;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

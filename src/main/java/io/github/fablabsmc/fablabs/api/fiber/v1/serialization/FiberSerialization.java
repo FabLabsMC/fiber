@@ -1,4 +1,4 @@
-package io.github.fablabsmc.fablabs.impl.fiber.serialization;
+package io.github.fablabsmc.fablabs.api.fiber.v1.serialization;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Objects;
 
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.ValueDeserializationException;
-import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.ValueSerializer;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.Commentable;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigBranch;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigLeaf;
