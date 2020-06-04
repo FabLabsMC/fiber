@@ -1,4 +1,4 @@
-package io.github.fablabsmc.fablabs.impl.fiber.serialization;
+package io.github.fablabsmc.fablabs.api.fiber.v1.serialization;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Objects;
 
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.ValueDeserializationException;
-import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.ValueSerializer;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.Commentable;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigBranch;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigLeaf;
@@ -66,11 +65,11 @@ public final class FiberSerialization {
 					serializeNode(subNode, subTarget, ctx);
 				}
 
-				ctx.addSubElement(branch.getName(), subTarget, target);
+				ctx.addSubElement(name, subTarget, target, comment);
 			}
 		} else if (node instanceof ConfigLeaf<?>) {
 			ConfigLeaf<?> leaf = (ConfigLeaf<?>) node;
-			ctx.addElement(leaf.getName(), serializeValue(leaf, ctx), target);
+			ctx.addElement(name, serializeValue(leaf, ctx), target, comment);
 		}
 	}
 
