@@ -130,7 +130,11 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 				String name = this.findName(group);
 				ConfigTreeBuilder sub = this.builder.fork(name);
 				group.setAccessible(true);
-				AnnotatedSettingsImpl.this.applyToNode(sub, group.get(pojo));
+				Object subPojo = group.get(pojo);
+				if (subPojo == null) {
+					throw new ProcessingMemberException("Group " + name + " is null. Did you forget to initialize it?", group);
+				}
+				AnnotatedSettingsImpl.this.applyToNode(sub, subPojo);
 				this.applyAnnotationProcessors(pojo, group, sub, AnnotatedSettingsImpl.this.groupSettingProcessors);
 				sub.build();
 			} catch (FiberException | IllegalAccessException e) {
