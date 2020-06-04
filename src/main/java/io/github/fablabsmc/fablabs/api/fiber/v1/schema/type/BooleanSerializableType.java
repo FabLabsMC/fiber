@@ -5,6 +5,9 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.TypeSerializer;
 import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.ValueSerializer;
 import io.github.fablabsmc.fablabs.impl.fiber.constraint.BooleanConstraintChecker;
 
+/**
+ * The {@link SerializableType} for {@code boolean} values.
+ */
 public final class BooleanSerializableType extends PlainSerializableType<Boolean> {
 	public static final BooleanSerializableType BOOLEAN = new BooleanSerializableType();
 

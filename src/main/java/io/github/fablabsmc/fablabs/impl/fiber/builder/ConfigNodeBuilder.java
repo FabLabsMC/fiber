@@ -54,10 +54,26 @@ public abstract class ConfigNodeBuilder {
 		return this;
 	}
 
+	/**
+	 * Adds a {@link ConfigAttribute} to the built {@code ConfigNode}.
+	 *
+	 * @param id           the id of the attribute
+	 * @param type         the class object representing the type of values stored in the attribute
+	 * @param defaultValue the attribute's default value
+	 * @param <A>          the type of values stored in the attribute
+	 * @return {@code this}, for chaining
+	 * @see ConfigNode#getAttributes()
+	 */
 	public <A> ConfigNodeBuilder withAttribute(FiberId id, SerializableType<A> type, A defaultValue) {
 		return this.withAttribute(ConfigAttribute.create(id, type, defaultValue));
 	}
 
+	/**
+	 * Adds a collection of {@link ConfigAttribute} to the built {@code ConfigNode}.
+	 *
+	 * @param attributes A collection of attributes.
+	 * @return This builder.
+	 */
 	public ConfigNodeBuilder withAttributes(Collection<ConfigAttribute<?>> attributes) {
 		for (ConfigAttribute<?> attribute : attributes) {
 			this.withAttribute(attribute);
@@ -66,10 +82,19 @@ public abstract class ConfigNodeBuilder {
 		return this;
 	}
 
+	/**
+	 * Adds a single {@link ConfigAttribute} to the built {@code ConfigNode}.
+	 *
+	 * @param attribute The attribute.
+	 * @return This builder.
+	 */
 	public ConfigNodeBuilder withAttribute(ConfigAttribute<?> attribute) {
 		this.attributes.put(attribute.getIdentifier(), attribute);
 		return this;
 	}
 
+	/**
+	 * Builds and returns a new {@code ConfigNode} with the parent and name stored in this builder.
+	 */
 	public abstract ConfigNode build();
 }

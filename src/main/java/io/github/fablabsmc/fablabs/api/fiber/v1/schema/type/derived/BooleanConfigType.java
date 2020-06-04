@@ -7,6 +7,11 @@ import java.util.function.Function;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.processor.ConstraintAnnotationProcessor;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.BooleanSerializableType;
 
+/**
+ * A config type for boolean values.
+ *
+ * @param <T> The runtime type of the underlying boolean values.
+ */
 public final class BooleanConfigType<T> extends ConfigType<T, Boolean, BooleanSerializableType> {
 	public BooleanConfigType(Class<T> actualType, Function<Boolean, T> deserializer, Function<T, Boolean> serializer) {
 		super(BooleanSerializableType.BOOLEAN, actualType, deserializer, serializer);

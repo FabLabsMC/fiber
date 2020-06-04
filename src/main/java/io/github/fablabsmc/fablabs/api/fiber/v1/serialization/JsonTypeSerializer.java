@@ -16,6 +16,11 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.RecordSerializableTy
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.SerializableType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.StringSerializableType;
 
+/**
+ * A {@link TypeSerializer} for the JSON serialization form.
+ *
+ * @see <a href="https://www.json.org/json-en.html">json.org</a>
+ */
 public class JsonTypeSerializer implements TypeSerializer<JsonObject> {
 	@Override
 	public void serialize(BooleanSerializableType type, JsonObject json) {

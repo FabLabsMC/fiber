@@ -4,6 +4,10 @@ import java.lang.annotation.ElementType;
 
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.ProcessingMemberException;
 
+/**
+ * Implementors of this interface search for and collect config settings and metadata
+ * within POJO instances.
+ */
 public interface MemberCollector {
 	/**
 	 * Tries to find all listeners, settings, and groups in a specified POJO,

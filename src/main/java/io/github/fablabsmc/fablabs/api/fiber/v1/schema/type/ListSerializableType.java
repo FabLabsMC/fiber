@@ -13,7 +13,9 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.ValueSerializer;
 import io.github.fablabsmc.fablabs.impl.fiber.constraint.ListConstraintChecker;
 
 /**
- * @param <E> the type of elements objects of this type hold
+ * The {@link SerializableType} for a generic {@link List}.
+ *
+ * @param <E> The type of elements objects of this type hold.
  */
 public final class ListSerializableType<E> extends ParameterizedSerializableType<List<E>> {
 	private final SerializableType<E> elementType;

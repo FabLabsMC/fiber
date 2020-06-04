@@ -11,16 +11,28 @@ import javax.annotation.Nullable;
  * @see SerializableType#test(Object)
  */
 public final class TypeCheckResult<V> {
+	/**
+	 * The singleton unrecoverable failed result.
+	 */
 	private static final TypeCheckResult<?> UNRECOVERABLE = new TypeCheckResult<>(false, null);
 
+	/**
+	 * Creates a successful {@link TypeCheckResult} with the given value.
+	 */
 	public static <V> TypeCheckResult<V> successful(V initialValue) {
 		return new TypeCheckResult<>(true, initialValue);
 	}
 
+	/**
+	 * Creates a failed {@link TypeCheckResult} with the given value.
+	 */
 	public static <V> TypeCheckResult<V> failed(V correctedValue) {
 		return new TypeCheckResult<>(false, correctedValue);
 	}
 
+	/**
+	 * Creates a failed {@link TypeCheckResult} with no value.
+	 */
 	public static <V> TypeCheckResult<V> unrecoverable() {
 		@SuppressWarnings("unchecked") TypeCheckResult<V> t = (TypeCheckResult<V>) UNRECOVERABLE;
 		return t;

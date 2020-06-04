@@ -7,15 +7,8 @@ import javax.annotation.Nullable;
  * cannot deserialize a value.
  */
 public class ValueDeserializationException extends FiberException {
-	/**
-	 * The value that could not be deserialized.
-	 */
 	@Nullable
 	private final Object value;
-
-	/**
-	 * The target type that could not be deserialized to.
-	 */
 	private final Class<?> targetType;
 
 	public ValueDeserializationException(@Nullable Object value, Class<?> targetType, String message) {
@@ -30,11 +23,17 @@ public class ValueDeserializationException extends FiberException {
 		this.targetType = targetType;
 	}
 
+	/**
+	 * The value that could not be deserialized.
+	 */
 	@Nullable
 	public Object getValue() {
 		return value;
 	}
 
+	/**
+	 * The target type that could not be deserialized to.
+	 */
 	public Class<?> getTargetType() {
 		return targetType;
 	}

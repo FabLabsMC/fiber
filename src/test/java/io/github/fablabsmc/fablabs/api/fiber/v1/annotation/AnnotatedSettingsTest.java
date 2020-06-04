@@ -347,11 +347,13 @@ class AnnotatedSettingsTest {
 
 	private static class ArrayConstraintsPojo {
 		private
-		@Setting.Constrain.MaxLength(2) String
+		@Setting.Constrain.MaxLength(2)
+		String
 		@Setting.Constrain.MinLength(1) [] nonEmptyArrayShortStrings = {""};
 
 		private
-		@Setting.Constrain.Range(min = 0, max = 10) int
+		@Setting.Constrain.Range(min = 0, max = 10)
+		int
 		@Setting.Constrain.MinLength(0) @Setting.Constrain.MaxLength(3) [] numbers = {};
 
 		private @Setting.Constrain.MaxLength(3) List<@Setting.Constrain.Regex("\\w+:\\w+") String> shortArrayIdStrings = Collections.singletonList("fabric:test");
@@ -389,8 +391,8 @@ class AnnotatedSettingsTest {
 		@Setting.Group(name = "a")
 		public SubNode node = new SubNode();
 
-		@SuppressWarnings("InnerClassMayBeStatic")
 		// we want to test this edge case
+		@SuppressWarnings("InnerClassMayBeStatic")
 		class SubNode {
 			private int b = 5;
 		}

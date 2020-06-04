@@ -12,6 +12,9 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.TypeSerializer;
 import io.github.fablabsmc.fablabs.api.fiber.v1.serialization.ValueSerializer;
 import io.github.fablabsmc.fablabs.impl.fiber.constraint.EnumConstraintChecker;
 
+/**
+ * The {@link SerializableType} for fixed sets of {@link String} values.
+ */
 public final class EnumSerializableType extends PlainSerializableType<String> {
 	private final Set<String> validValues;
 

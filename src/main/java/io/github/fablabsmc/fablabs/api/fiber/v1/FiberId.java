@@ -4,6 +4,13 @@ import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
+/**
+ * A namespaced string, representing an identifier without
+ * character restrictions.
+ *
+ * <p>A {@code FiberId} contains two names: the domain and the name. The domain and name
+ * may be represented as a single string by separating them with a colon ({@code :}).
+ */
 public final class FiberId {
 	private final String domain;
 	private final String name;

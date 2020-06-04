@@ -62,7 +62,17 @@ val sourcesJar = tasks.create<Jar>("sourcesJar") {
     from(sourceSets["main"].allSource)
 }
 
-val javadoc = tasks.getByName<Javadoc>("javadoc") {}
+val javadoc = tasks.getByName<Javadoc>("javadoc") {
+    val options = this.options
+    if(options is StandardJavadocDocletOptions) {
+        options.links = listOf(
+                "https://javadoc.io/doc/com.google.code.findbugs/jsr305/3.0.2/",
+                "https://docs.oracle.com/javase/8/docs/api/"
+                // could not find Jankson docs on the web
+        )
+    }
+}
+
 val javadocJar = tasks.create<Jar>("javadocJar") {
     archiveClassifier.set("javadoc")
     from(javadoc)

@@ -7,7 +7,14 @@ import java.util.function.Function;
 
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.processor.ConstraintAnnotationProcessor;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.RecordSerializableType;
+import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigBranch;
 
+/**
+ * A {@link ConfigType} for fixed heterogeneous records. This is typically used to store POJOs or tuples,
+ * but may be used for any parametric serialized form.
+ *
+ * @param <R> The runtime type of the underlying {@link ConfigBranch} value.
+ */
 public final class RecordConfigType<R> extends ConfigType<R, Map<String, Object>, RecordSerializableType> {
 	@SuppressWarnings("unchecked")
 	public RecordConfigType(RecordSerializableType serializedType, Class<? super R> runtimeType, Function<Map<String, Object>, R> f, Function<R, Map<String, Object>> f0) {

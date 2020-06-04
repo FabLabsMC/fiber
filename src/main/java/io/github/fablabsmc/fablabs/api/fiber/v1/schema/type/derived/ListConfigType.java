@@ -8,6 +8,12 @@ import java.util.function.Function;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.processor.ConstraintAnnotationProcessor;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.ListSerializableType;
 
+/**
+ * A {@link ConfigType} for collections of values. This may be used to represent lists, sets, or vectors.
+ *
+ * @param <R> The runtime type of the underlying {@link List} value.
+ * @param <E> The element type of the underlying {@link List} value.
+ */
 public final class ListConfigType<R, E> extends ConfigType<R, List<E>, ListSerializableType<E>> {
 	@SuppressWarnings("unchecked")
 	public ListConfigType(ListSerializableType<E> serializedType, Class<? super R> runtimeType, Function<List<E>, R> f, Function<R, List<E>> f0) {
@@ -30,16 +36,25 @@ public final class ListConfigType<R, E> extends ConfigType<R, List<E>, ListSeria
 		return processor.processList(this, annotation, annotated);
 	}
 
+	/**
+	 * Returns a new {@link ListConfigType} with a minimum size constraint.
+	 */
 	public ListConfigType<R, E> withMinSize(int min) {
 		ListSerializableType<E> current = this.getSerializedType();
 		return this.withType(new ListSerializableType<>(current.getElementType(), min, current.getMaxSize(), current.hasUniqueElements()));
 	}
 
+	/**
+	 * Returns a new {@link ListConfigType} with a maximum size constraint.
+	 */
 	public ListConfigType<R, E> withMaxSize(int max) {
 		ListSerializableType<E> current = this.getSerializedType();
 		return this.withType(new ListSerializableType<>(current.getElementType(), current.getMinSize(), max, current.hasUniqueElements()));
 	}
 
+	/**
+	 * Returns a new {@link ListConfigType} with a uniqueness constraint.
+	 */
 	public ListConfigType<R, E> withUniqueElements() {
 		ListSerializableType<E> current = this.getSerializedType();
 		return this.withType(new ListSerializableType<>(current.getElementType(), current.getMinSize(), current.getMaxSize(), true));
