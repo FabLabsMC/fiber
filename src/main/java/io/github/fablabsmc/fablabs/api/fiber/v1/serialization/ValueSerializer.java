@@ -8,6 +8,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import io.github.fablabsmc.fablabs.api.fiber.v1.exception.ValueDeserializationException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.BooleanSerializableType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.DecimalSerializableType;
@@ -173,21 +175,23 @@ public interface ValueSerializer<A, T> {
 	 * Aggregates a serialized value, associated with the given key, into the target. It is unspecified
 	 * whether duplicate keys are allowed.
 	 *
-	 * @param name   The key with which to associate the value.
-	 * @param elem   The serialized value.
-	 * @param target The target aggregate.
+	 * @param name    The key with which to associate the value.
+	 * @param elem    The serialized value.
+	 * @param target  The target aggregate.
+	 * @param comment an optional comment associated with the element.
 	 */
-	void addElement(String name, A elem, T target);
+	void addElement(String name, A elem, T target, @Nullable String comment);
 
 	/**
 	 * Aggregates an existing target, associated with the given key, into the target as a sub-target. It
 	 * is unspecified whether duplicate keys are allowed.
 	 *
-	 * @param name   The key with which to associate the sub-target.
-	 * @param elem   The sub-target.
-	 * @param target The target aggregate.
+	 * @param name    The key with which to associate the sub-target.
+	 * @param elem    The sub-target.
+	 * @param target  The target aggregate.
+	 * @param comment an optional comment associated with the element
 	 */
-	void addSubElement(String name, T elem, T target);
+	void addSubElement(String name, T elem, T target, @Nullable String comment);
 
 	/**
 	 * Extracts an {@link Iterator} over all aggregated key-value pairs in the given target.
