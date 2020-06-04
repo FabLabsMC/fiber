@@ -127,7 +127,6 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 		@Override
 		public void processGroup(Object pojo, Field group) throws ProcessingMemberException {
 			try {
-				checkViolation(group);
 				String name = this.findName(group);
 				ConfigTreeBuilder sub = this.builder.fork(name);
 				group.setAccessible(true);
