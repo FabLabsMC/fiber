@@ -97,6 +97,9 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 		return items.getByName(name);
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	@Nullable
 	@Override
 	public ConfigBranch lookupBranch(String name) {
@@ -105,6 +108,9 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 		return null;
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	@SuppressWarnings("unchecked")
 	@Nullable
 	@Override
@@ -118,6 +124,9 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 		return null;
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	@Override
 	public boolean lookupAndBind(String name, PropertyMirror<?> mirror) {
 		ConfigLeaf<?> leaf = this.lookupLeaf(name, mirror.getMirroredType().getSerializedType());
@@ -130,6 +139,14 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 		return false;
 	}
 
+	/**
+	 * Sets the parent builder for this builder. This builder must represent
+	 * a named node.
+	 *
+	 * @param parent The parent builder.
+	 * @return This builder.
+	 * @throws IllegalStateException If no name has been set in this builder.
+	 */
 	public ConfigTreeBuilder withParent(ConfigTreeBuilder parent) {
 		if (name == null && parent != null) throw new IllegalStateException("A child node needs a name");
 		this.parent = parent;
@@ -181,12 +198,18 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 		return this;
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	@Override
 	public ConfigTreeBuilder withAttributes(Collection<ConfigAttribute<?>> attributes) {
 		super.withAttributes(attributes);
 		return this;
 	}
 
+	/**
+	 * @inheritDoc
+	 */
 	@Override
 	public ConfigTreeBuilder withAttribute(ConfigAttribute<?> attribute) {
 		super.withAttribute(attribute);
@@ -438,11 +461,24 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 		}
 	}
 
+	/**
+	 * Builds and registers the {@code ConfigNode} with the parent node.
+	 * This method is equivalent to {@code this.finishBranch(branch -> {})}.
+	 *
+	 * @return The parent builder.
+	 */
 	public ConfigTreeBuilder finishBranch() {
 		return finishBranch(n -> {
 		});
 	}
 
+	/**
+	 * Builds and registers the {@code ConfigNode} with the parent node before
+	 * running the given action on the newly built node.
+	 *
+	 * @param action An operation to run on the built ConfigBranch.
+	 * @return The parent builder.
+	 */
 	public ConfigTreeBuilder finishBranch(Consumer<ConfigBranch> action) {
 		if (parent instanceof ConfigTreeBuilder) {
 			action.accept(build());

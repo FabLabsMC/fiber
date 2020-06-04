@@ -13,7 +13,7 @@ import io.github.fablabsmc.fablabs.impl.fiber.tree.PropertyMirrorImpl;
  *
  * private final Node config = ConfigNode.builder()
  *     .beginValue("diamondsDropped", Integer.class)
- *      .beginConstraints().atLeast(1).finishConstraints()
+ * 		   .beginConstraints().atLeast(1).finishConstraints()
  *     .finishValue(diamondsDropped::mirror)
  *     .build();
  * }</pre>
@@ -21,6 +21,12 @@ import io.github.fablabsmc.fablabs.impl.fiber.tree.PropertyMirrorImpl;
  * @param <T> the type of value this property mirrors
  */
 public interface PropertyMirror<T> extends Property<T> {
+	/**
+	 * Creates a new {@link PropertyMirror} that can mirror values of the given {@link ConfigType}.
+	 *
+	 * @param converter The ConfigType of the mirrored values.
+	 * @param <T>       The type of the mirrored values.
+	 */
 	static <T> PropertyMirror<T> create(ConfigType<T, ?, ?> converter) {
 		return new PropertyMirrorImpl<>(converter);
 	}
@@ -35,7 +41,13 @@ public interface PropertyMirror<T> extends Property<T> {
 	 */
 	void mirror(Property<?> delegate);
 
+	/**
+	 * Returns the mirrored property.
+	 */
 	Property<?> getMirrored();
 
+	/**
+	 * Returns the {@link ConfigType} of the mirrored property.
+	 */
 	ConfigType<T, ?, ?> getMirroredType();
 }

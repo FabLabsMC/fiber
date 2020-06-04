@@ -9,6 +9,12 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigNode;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.Property;
 
+/**
+ * Static utility class for operations on {@link ConfigNode} objects.
+ *
+ * @see ConfigTree
+ * @see ConfigNode
+ */
 public class NodeOperations {
 	/**
 	 * Merges two {@code ConfigTree}s.

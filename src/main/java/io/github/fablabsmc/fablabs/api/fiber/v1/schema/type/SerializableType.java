@@ -89,14 +89,33 @@ public abstract class SerializableType<T> {
 		return this.checker.comprehends(this, that);
 	}
 
+	/**
+	 * Returns whether this type's constraints accept the given value.
+	 *
+	 * @see #test(Object)
+	 */
 	public final boolean accepts(T serializedValue) {
 		return this.test(serializedValue).hasPassed();
 	}
 
+	/**
+	 * Tests the given value against this type's constraints.
+	 *
+	 * @see #accepts(Object)
+	 * @see TypeCheckResult
+	 */
 	public final TypeCheckResult<T> test(T serializedValue) {
 		return this.checker.test(this, this.cast(Objects.requireNonNull(serializedValue)));
 	}
 
+	/**
+	 * Serializes this type to a persistent format using the given {@link TypeSerializer}.
+	 *
+	 * @param serializer The type serializer to use.
+	 * @param target     The place to which this type is serialized.
+	 * @param <S>        The type to serialize to.
+	 * @see TypeSerializer
+	 */
 	public abstract <S> void serialize(TypeSerializer<S> serializer, S target);
 
 	/**
@@ -125,6 +144,10 @@ public abstract class SerializableType<T> {
 	@Override
 	public abstract String toString();
 
+	/**
+	 * Two serialized types are equal if and only if they are of the same kind
+	 * and both have the same constraints.
+	 */
 	@Override
 	public abstract boolean equals(Object o);
 

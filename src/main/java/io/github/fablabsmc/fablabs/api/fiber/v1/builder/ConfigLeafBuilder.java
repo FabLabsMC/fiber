@@ -14,7 +14,6 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.SerializableType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigAttribute;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigLeaf;
-import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigNode;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;
 import io.github.fablabsmc.fablabs.impl.fiber.builder.ConfigNodeBuilder;
 import io.github.fablabsmc.fablabs.impl.fiber.tree.ConfigLeafImpl;
@@ -26,10 +25,30 @@ import io.github.fablabsmc.fablabs.impl.fiber.tree.ConfigLeafImpl;
  * @see ConfigLeaf
  */
 public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
+	/**
+	 * Creates a builder for a leaf node with the given parent, name, and type.
+	 *
+	 * @param parentNode The parent node builder.
+	 * @param name       The name for the leaf node.
+	 * @param type       The {@link ConfigType} for values stored in this leaf node.
+	 *                   The actual type stored in the leaf node is represented by {@code type.getSerializedType()}.
+	 * @param <T>        The type of serialized values the leaf node stores.
+	 * @param <R>        The runtime type of values the builder receives.
+	 * @return A new builder.
+	 */
 	public static <T, R> ConfigLeafBuilder<T, R> create(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull ConfigType<R, T, ?> type, @Nonnull R defaultValue) {
 		return new ConfigLeafBuilder<>(parentNode, name, type.getSerializedType(), type.toSerializedType(defaultValue), type::toRuntimeType, type::toSerializedType);
 	}
 
+	/**
+	 * Creates a builder for a leaf node with the given parent, name, and serialized type.
+	 *
+	 * @param parentNode The parent node builder.
+	 * @param name       The name for the leaf node.
+	 * @param type       The {@link SerializableType} for values stored in this leaf node.
+	 * @param <T>        The type of serialized values the leaf node stores.
+	 * @return A new builder.
+	 */
 	public static <T> ConfigLeafBuilder<T, T> create(ConfigTreeBuilder parentNode, @Nonnull String name, @Nonnull SerializableType<T> type, @Nonnull T defaultValue) {
 		return new ConfigLeafBuilder<>(parentNode, name, type, defaultValue, Function.identity(), Function.identity());
 	}
@@ -63,6 +82,9 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
 		this.defaultValue = Objects.requireNonNull(defaultValue);
 	}
 
+	/**
+	 * Returns the type of values stored in the leaf node.
+	 */
 	@Nonnull
 	public SerializableType<T> getType() {
 		return type;
@@ -96,16 +118,6 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
 		return this;
 	}
 
-	/**
-	 * Adds a {@link ConfigAttribute} to the built {@code ConfigLeaf}.
-	 *
-	 * @param id           the id of the attribute
-	 * @param type         the class object representing the type of values stored in the attribute
-	 * @param defaultValue the attribute's default value
-	 * @param <A>          the type of values stored in the attribute
-	 * @return {@code this}, for chaining
-	 * @see ConfigNode#getAttributes()
-	 */
 	@Override
 	public <A> ConfigLeafBuilder<T, R> withAttribute(FiberId id, SerializableType<A> type, A defaultValue) {
 		super.withAttribute(id, type, defaultValue);
@@ -165,6 +177,7 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
 	 * Multiple calls will result in duplicated references to the default value.
 	 *
 	 * @return the {@code ConfigLeaf}
+	 * @see #finishValue(Consumer)
 	 */
 	@Override
 	public ConfigLeaf<T> build() {
@@ -189,11 +202,27 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
 		return built;
 	}
 
+	/**
+	 * Builds and registers the {@code ConfigLeaf} with the parent node.
+	 * This method is equivalent to {@code this.finishValue(leaf -> {})}.
+	 *
+	 * @return The parent builder.
+	 * @see #finishValue(Consumer)
+	 * @see #build()
+	 */
 	public ConfigTreeBuilder finishValue() {
 		return finishValue(n -> {
 		});
 	}
 
+	/**
+	 * Builds and registers the {@code ConfigLeaf} with the parent node before
+	 * running the given action on the newly built leaf.
+	 *
+	 * @param action An operation to run on the built ConfigLeaf.
+	 * @return The parent builder.
+	 * @see #build()
+	 */
 	public ConfigTreeBuilder finishValue(Consumer<ConfigLeaf<T>> action) {
 		if (parent instanceof ConfigTreeBuilder) {
 			action.accept(build());

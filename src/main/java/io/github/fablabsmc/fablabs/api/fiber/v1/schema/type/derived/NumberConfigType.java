@@ -8,6 +8,11 @@ import java.util.function.Function;
 import io.github.fablabsmc.fablabs.api.fiber.v1.annotation.processor.ConstraintAnnotationProcessor;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.DecimalSerializableType;
 
+/**
+ * A {@link ConfigType} for numeric ranges.
+ *
+ * @param <T> The runtime type of the underlying {@link BigDecimal} value.
+ */
 public final class NumberConfigType<T> extends ConfigType<T, BigDecimal, DecimalSerializableType> {
 	public NumberConfigType(DecimalSerializableType serializedType, Class<T> runtimeType, Function<BigDecimal, T> f, Function<T, BigDecimal> f0) {
 		super(serializedType, runtimeType, f, f0);
@@ -30,21 +35,33 @@ public final class NumberConfigType<T> extends ConfigType<T, BigDecimal, Decimal
 		return processor.processDecimal(this, annotation, annotated);
 	}
 
+	/**
+	 * Returns a {@link NumberConfigType} with the given minimum value.
+	 */
 	public NumberConfigType<T> withMinimum(T min) {
 		DecimalSerializableType current = this.getSerializedType();
 		return this.withType(new DecimalSerializableType(this.toSerializedType(min), current.getMaximum(), current.getIncrement()));
 	}
 
+	/**
+	 * Returns a {@link NumberConfigType} with the given maximum value.
+	 */
 	public NumberConfigType<T> withMaximum(T max) {
 		DecimalSerializableType current = this.getSerializedType();
 		return this.withType(new DecimalSerializableType(current.getMinimum(), this.toSerializedType(max), current.getIncrement()));
 	}
 
+	/**
+	 * Returns a {@link NumberConfigType} with the given step.
+	 */
 	public NumberConfigType<T> withIncrement(T step) {
 		DecimalSerializableType current = this.getSerializedType();
 		return this.withType(new DecimalSerializableType(current.getMinimum(), current.getMaximum(), this.toSerializedType(step)));
 	}
 
+	/**
+	 * Returns a {@link NumberConfigType} with the given range.
+	 */
 	public NumberConfigType<T> withValidRange(T min, T max, T step) {
 		return this.withType(new DecimalSerializableType(this.toSerializedType(min), this.toSerializedType(max), this.toSerializedType(step)));
 	}
