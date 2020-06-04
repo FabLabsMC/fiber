@@ -5,7 +5,7 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 
 /**
- * A namespaced string, similar to Minecraft's {@code Identifier} but without
+ * A namespaced string, representing an identifier without
  * character restrictions.
  *
  * <p>A {@code FiberId} contains two names: the domain and the name. The domain and name
