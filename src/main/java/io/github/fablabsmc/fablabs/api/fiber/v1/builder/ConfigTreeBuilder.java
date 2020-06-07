@@ -98,7 +98,7 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 	}
 
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	@Nullable
 	@Override
@@ -109,7 +109,7 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 	}
 
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	@SuppressWarnings("unchecked")
 	@Nullable
@@ -125,7 +125,7 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 	}
 
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	@Override
 	public boolean lookupAndBind(String name, PropertyMirror<?> mirror) {
@@ -199,7 +199,7 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 	}
 
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	@Override
 	public ConfigTreeBuilder withAttributes(Collection<ConfigAttribute<?>> attributes) {
@@ -208,7 +208,7 @@ public class ConfigTreeBuilder extends ConfigNodeBuilder implements ConfigTree {
 	}
 
 	/**
-	 * @inheritDoc
+	 * {@inheritDoc}
 	 */
 	@Override
 	public ConfigTreeBuilder withAttribute(ConfigAttribute<?> attribute) {
