@@ -4,7 +4,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 plugins {
     `java-library`
     `maven-publish`
-    id("com.github.johnrengelman.shadow") version "5.0.0"
+    id("com.github.johnrengelman.shadow") version "5.2.0"
     id("moe.nikky.persistentCounter") version "0.0.8-SNAPSHOT"
     id("checkstyle")
 }
@@ -87,22 +87,16 @@ val processResources = tasks.getByName<ProcessResources>("processResources") {
 publishing {
     publications {
         val main = create("main", MavenPublication::class.java) {
-            artifact(shadowJar) {
-                classifier = "" // why do i need this GRADLE ?
-            }
+            artifact(shadowJar)
             artifact(sourcesJar)
             artifact(javadocJar)
-            project.shadow.component(this)
         }
         if(isCI) {
             create("snapshot", MavenPublication::class.java) {
                 version = "$major.$minor.$patch-SNAPSHOT"
-                artifact(shadowJar) {
-                    classifier = "" // why do i need this GRADLE ?
-                }
+                artifact(shadowJar)
                 artifact(sourcesJar)
                 artifact(javadocJar)
-                project.shadow.component(this)
             }
         }
     }
