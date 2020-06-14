@@ -70,6 +70,15 @@ public @interface Setting {
 		 * @return An empty string ({@code ""}) if no custom name was set, or the custom name if one was set.
 		 */
 		String name() default "";
+
+		/**
+		 * Sets the comment that will be used for this setting group.
+		 *
+		 * <p>If empty, no comment will be set.
+		 *
+		 * @return An empty string ({@code ""}) if no comment was set, or the comment if one was set.
+		 */
+		String comment() default "";
 	}
 
 	@Target({})

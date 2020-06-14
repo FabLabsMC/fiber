@@ -127,8 +127,9 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 		@Override
 		public void processGroup(Object pojo, Field group) throws ProcessingMemberException {
 			try {
-				String name = this.findName(group);
-				ConfigTreeBuilder sub = this.builder.fork(name);
+				String name = findSettingAnnotation(Setting.Group.class, group).map(Setting.Group::name).filter(s -> !s.isEmpty()).orElse(null);
+				String comment = findSettingAnnotation(Setting.Group.class, group).map(Setting.Group::comment).filter(s -> !s.isEmpty()).orElse(null);
+				ConfigTreeBuilder sub = this.builder.fork(name).withComment(comment);
 				group.setAccessible(true);
 				Object subPojo = group.get(pojo);
 
@@ -167,11 +168,10 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 
 		@Nonnull
 		private String findName(Field field) {
-			return findSettingAnnotation(Setting.Group.class, field).map(Setting.Group::name).filter(s -> !s.isEmpty()).orElseGet(
-					() -> findSettingAnnotation(Setting.class, field).map(Setting::name).filter(s -> !s.isEmpty()).orElseGet(
-							() -> this.convention.name(field.getName())
-					)
-			);
+			return findSettingAnnotation(Setting.class, field)
+					.map(Setting::name)
+					.filter(s -> !s.isEmpty())
+					.orElseGet(() -> this.convention.name(field.getName()));
 		}
 
 		@Nullable
@@ -304,24 +304,20 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 			return (T) type.constrain(processor, annotation, annotated);
 		}
 
-		@SuppressWarnings("unchecked")
 		private <T> T findDefaultValue(Object pojo, Field field) throws FiberException {
-			boolean accessible = field.isAccessible();
 			field.setAccessible(true);
-			T value;
 
 			try {
-				value = (T) field.get(pojo);
+				@SuppressWarnings("unchecked") T value = (T) field.get(pojo);
 
 				if (value == null) {
 					throw new MalformedFieldException("Default value for field '" + field.getName() + "' is null");
 				}
+
+				return value;
 			} catch (IllegalAccessException e) {
 				throw new FiberException("Couldn't get value for field '" + field.getName() + "'", e);
 			}
-
-			field.setAccessible(accessible);
-			return value;
 		}
 
 		private <T> BiConsumer<T, T> constructListenerFromMember(Object pojo, Member listener, Class<T> wantedType) throws FiberException {

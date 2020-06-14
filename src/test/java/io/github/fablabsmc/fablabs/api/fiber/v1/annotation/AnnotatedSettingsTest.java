@@ -21,6 +21,7 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.ListSerializableType
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.StringSerializableType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigTypes;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ListConfigType;
+import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigBranch;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigLeaf;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigNode;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;
@@ -226,9 +227,10 @@ class AnnotatedSettingsTest {
 		SubNodePojo pojo = new SubNodePojo();
 		this.annotatedSettings.applyToNode(this.node, pojo);
 		assertEquals(1, this.node.getItems().size(), "Node has one item");
-		ConfigTree subnode = (ConfigTree) this.node.lookup("a");
+		ConfigBranch subnode = this.node.lookupBranch("a");
 		assertNotNull(subnode, "Subnode exists");
 		assertEquals(1, subnode.getItems().size(), "Subnode has one item");
+		assertEquals("A subnode", subnode.getComment());
 	}
 
 	@Test
@@ -388,7 +390,7 @@ class AnnotatedSettingsTest {
 	}
 
 	private static class SubNodePojo {
-		@Setting.Group(name = "a")
+		@Setting.Group(name = "a", comment = "A subnode")
 		public SubNode node = new SubNode();
 
 		// we want to test this edge case
