@@ -189,9 +189,6 @@ public class ConfigLeafBuilder<T, R> extends ConfigNodeBuilder {
 		built.getAttributes().putAll(this.attributes);
 
 		if (parent != null) {
-			// We don't know what kind of evil collection we're about to add a node to.
-			// Though, we don't really want to throw an exception on this method because no developer likes try-catching every setting they build.
-			// Let's tread with caution.
 			try {
 				parent.getItems().add(built);
 			} catch (RuntimeFiberException e) {
