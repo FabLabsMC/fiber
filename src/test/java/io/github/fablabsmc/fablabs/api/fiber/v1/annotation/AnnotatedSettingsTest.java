@@ -281,6 +281,16 @@ class AnnotatedSettingsTest {
 		assertEquals(2, this.node.getItems().size(), "Node has two items");
 	}
 
+	@Test
+	@DisplayName("Directly mutated POJO")
+	void lateChangePojo() throws FiberException {
+		LateChangePojo pojo = new LateChangePojo();
+		this.annotatedSettings.applyToNode(this.node, pojo);
+		ConfigLeaf<BigDecimal> a = this.node.lookupLeaf("a", ConfigTypes.INTEGER.getSerializedType());
+		pojo.a = 10;
+		assertEquals(10, a.getValue().intValue());
+	}
+
 	private static class FinalSettingPojo {
 		private final int a = 5;
 	}
@@ -421,5 +431,9 @@ class AnnotatedSettingsTest {
 
 	private static class ExtendingPojo extends SuperPojo {
 		private int b = 5;
+	}
+
+	private static class LateChangePojo {
+		private int a = 5;
 	}
 }
