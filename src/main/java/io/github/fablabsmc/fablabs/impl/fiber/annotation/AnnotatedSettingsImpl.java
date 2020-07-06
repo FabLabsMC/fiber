@@ -46,6 +46,7 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.exception.RuntimeFiberException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigTypes;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigBranch;
+import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigLeaf;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;
 import io.github.fablabsmc.fablabs.impl.fiber.annotation.magic.TypeMagic;
 
@@ -157,12 +158,16 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 		private <R, S> void processSetting(Object pojo, Field setting, ConfigType<R, S, ?> type) throws FiberException {
 			String name = this.findName(setting);
 			List<Member> listeners = this.listenerMap.getOrDefault(name, Collections.emptyList());
-			ConfigLeafBuilder<S, R> leaf = this.builder
+			ConfigLeafBuilder<S, R> leafBuilder = this.builder
 					.beginValue(name, type, this.findDefaultValue(pojo, setting))
 					.withComment(this.findComment(setting))
 					.withListener(this.constructListener(pojo, setting, listeners, type));
-			this.applyAnnotationProcessors(pojo, setting, leaf, AnnotatedSettingsImpl.this.valueSettingProcessors);
-			leaf.build();
+			this.applyAnnotationProcessors(pojo, setting, leafBuilder, AnnotatedSettingsImpl.this.valueSettingProcessors);
+			ConfigLeaf<S> leaf = leafBuilder.build();
+			leaf.detach();
+			builder.getItems().remove(leaf);
+			BackedConfigLeaf<R, S> deferred = new BackedConfigLeaf<>(leaf, type, pojo, setting);
+			builder.getItems().add(deferred); // This will also attach deferred
 		}
 
 		@Nonnull
