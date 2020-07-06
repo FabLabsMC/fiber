@@ -161,7 +161,7 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 			ConfigLeafBuilder<S, R> leafBuilder = this.builder
 					.beginValue(name, type, this.findDefaultValue(pojo, setting))
 					.withComment(this.findComment(setting))
-					.withListener(this.constructListener(pojo, setting, listeners, type));
+					.withListener(this.constructListener(pojo, listeners, type));
 			this.applyAnnotationProcessors(pojo, setting, leafBuilder, AnnotatedSettingsImpl.this.valueSettingProcessors);
 			ConfigLeaf<S> leaf = leafBuilder.build();
 			leaf.detach();
@@ -185,19 +185,23 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 		}
 
 		@Nonnull
-		private <R> BiConsumer<R, R> constructListener(Object pojo, Field setting, List<Member> listeners, ConfigType<R, ?, ?> type) throws FiberException {
-			BiConsumer<R, R> ret = (t, newValue) -> {
-				try {
-					setting.setAccessible(true);
-					setting.set(pojo, newValue);
-				} catch (IllegalAccessException e) {
-					throw new RuntimeFiberException("Failed to update field value", e);
-				}
-			};
+		private <R> BiConsumer<R, R> constructListener(Object pojo, List<Member> listeners, ConfigType<R, ?, ?> type) throws FiberException {
+			BiConsumer<R, R> ret = null;
 
 			for (Member listener : listeners) {
 				BiConsumer<R, R> consumer = this.constructListenerFromMember(pojo, listener, type.getRuntimeType());
-				if (consumer != null) ret = ret.andThen(consumer);
+
+				if (consumer != null) {
+					if (ret == null) {
+						ret = consumer;
+					} else {
+						ret = ret.andThen(consumer);
+					}
+				}
+			}
+
+			if (ret == null) {
+				ret = (r, r2) -> { };
 			}
 
 			return ret;

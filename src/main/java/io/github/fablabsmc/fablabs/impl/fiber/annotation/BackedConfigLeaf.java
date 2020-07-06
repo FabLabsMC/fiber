@@ -104,7 +104,19 @@ public class BackedConfigLeaf<R, S> implements ConfigLeaf<S> {
 
 	@Override
 	public boolean setValue(@Nonnull S value) {
-		return backing.setValue(value);
+		if (this.backing.setValue(value)) {
+			try {
+				this.backingField.setAccessible(true);
+				value = backing.getValue(); // Might've changed after a type check + correction, so we fetch again
+				this.backingField.set(pojo, type.toRuntimeType(value));
+			} catch (IllegalAccessException e) {
+				throw new RuntimeFiberException("Failed to update field value", e);
+			}
+
+			return true;
+		}
+
+		return false;
 	}
 
 	@Nonnull
@@ -116,7 +128,7 @@ public class BackedConfigLeaf<R, S> implements ConfigLeaf<S> {
 			R fieldValue = (R) backingField.get(pojo);
 
 			if (!Objects.equals(fieldValue, cachedValue)) {
-				this.setValue(type.toSerializedType(fieldValue));
+				this.backing.setValue(type.toSerializedType(fieldValue));
 				cachedValue = fieldValue;
 			}
 		} catch (IllegalAccessException e) {
