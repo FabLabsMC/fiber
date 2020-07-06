@@ -121,7 +121,7 @@ public class BackedConfigLeaf<R, S> implements ConfigLeaf<S> {
 			}
 		} catch (IllegalAccessException e) {
 			// Because this exception might appear to happen 'at random' to the user, we wrap it to at least provide more information about what just happened
-			(new RuntimeFiberException("Couldn't fetch setting value from POJO", e)).printStackTrace();
+			throw new RuntimeFiberException("Couldn't fetch setting value from POJO", e);
 		}
 
 		return backing.getValue();
