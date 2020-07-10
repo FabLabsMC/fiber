@@ -27,10 +27,10 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigLeaf;
  * @param <S>
  */
 public class BackedConfigLeaf<R, S> implements ConfigLeaf<S> {
-	final ConfigLeaf<S> backing;
-	final ConfigType<R, S, ?> type;
-	final Object pojo;
-	final Field backingField;
+	private final ConfigLeaf<S> backing;
+	private final ConfigType<R, S, ?> type;
+	private final Object pojo;
+	private final Field backingField;
 	private R cachedValue = null;
 	private ConfigBranch parent;
 
