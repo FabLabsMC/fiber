@@ -165,7 +165,6 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 					.withListener(this.constructListener(pojo, listeners, type));
 			this.applyAnnotationProcessors(pojo, setting, leafBuilder, AnnotatedSettingsImpl.this.valueSettingProcessors);
 			ConfigLeaf<S> leaf = leafBuilder.build();
-			leaf.detach();
 			builder.getItems().remove(leaf);
 			BackedConfigLeaf<R, S> deferred = new BackedConfigLeaf<>(leaf, type, pojo, setting);
 			builder.getItems().add(deferred); // This will also attach deferred
