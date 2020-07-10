@@ -158,6 +158,7 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 		private <R, S> void processSetting(Object pojo, Field setting, ConfigType<R, S, ?> type) throws FiberException {
 			String name = this.findName(setting);
 			List<Member> listeners = this.listenerMap.getOrDefault(name, Collections.emptyList());
+			setting.setAccessible(true);
 			ConfigLeafBuilder<S, R> leafBuilder = this.builder
 					.beginValue(name, type, this.findDefaultValue(pojo, setting))
 					.withComment(this.findComment(setting))
@@ -315,8 +316,6 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 
 		@SuppressWarnings("unchecked")
 		private <T> T findDefaultValue(Object pojo, Field field) throws FiberException {
-			boolean accessible = field.isAccessible();
-			field.setAccessible(true);
 			T value;
 
 			try {
@@ -329,7 +328,6 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 				throw new FiberException("Couldn't get value for field '" + field.getName() + "'", e);
 			}
 
-			field.setAccessible(accessible);
 			return value;
 		}
 

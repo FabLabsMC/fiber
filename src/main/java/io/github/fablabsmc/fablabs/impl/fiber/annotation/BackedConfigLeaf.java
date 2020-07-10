@@ -106,7 +106,6 @@ public class BackedConfigLeaf<R, S> implements ConfigLeaf<S> {
 	public boolean setValue(@Nonnull S value) {
 		if (this.backing.setValue(value)) {
 			try {
-				this.backingField.setAccessible(true);
 				value = backing.getValue(); // Might've changed after a type check + correction, so we fetch again
 				this.backingField.set(pojo, type.toRuntimeType(value));
 			} catch (IllegalAccessException e) {
@@ -124,7 +123,6 @@ public class BackedConfigLeaf<R, S> implements ConfigLeaf<S> {
 	@SuppressWarnings("unchecked")
 	public S getValue() {
 		try {
-			backingField.setAccessible(true);
 			R fieldValue = (R) backingField.get(pojo);
 
 			if (!Objects.equals(fieldValue, cachedValue)) {
