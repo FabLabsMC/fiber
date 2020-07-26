@@ -35,6 +35,8 @@ public class BackedConfigLeaf<R, S> implements ConfigLeaf<S> {
 	private ConfigBranch parent;
 
 	public BackedConfigLeaf(ConfigLeaf<S> backing, ConfigType<R, S, ?> type, Object pojo, Field backingField) {
+		if (!backingField.isAccessible()) throw new RuntimeFiberException("A BackedConfigLeaf may only be made for an accessible field!");
+
 		this.backing = backing;
 		this.type = type;
 		this.pojo = pojo;
