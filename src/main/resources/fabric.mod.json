@@ -13,5 +13,8 @@
   },
   "license": "Apache License 2.0",
   "icon": "assets/fiber_logo.png",
-  "environment": "*"
+  "environment": "*",
+  "custom": {
+    "modmenu:api": true
+  }
 }
