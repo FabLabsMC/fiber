@@ -46,6 +46,7 @@ import io.github.fablabsmc.fablabs.api.fiber.v1.exception.RuntimeFiberException;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigType;
 import io.github.fablabsmc.fablabs.api.fiber.v1.schema.type.derived.ConfigTypes;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigBranch;
+import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigLeaf;
 import io.github.fablabsmc.fablabs.api.fiber.v1.tree.ConfigTree;
 import io.github.fablabsmc.fablabs.impl.fiber.annotation.magic.TypeMagic;
 
@@ -157,12 +158,16 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 		private <R, S> void processSetting(Object pojo, Field setting, ConfigType<R, S, ?> type) throws FiberException {
 			String name = this.findName(setting);
 			List<Member> listeners = this.listenerMap.getOrDefault(name, Collections.emptyList());
-			ConfigLeafBuilder<S, R> leaf = this.builder
+			setting.setAccessible(true);
+			ConfigLeafBuilder<S, R> leafBuilder = this.builder
 					.beginValue(name, type, this.findDefaultValue(pojo, setting))
 					.withComment(this.findComment(setting))
-					.withListener(this.constructListener(pojo, setting, listeners, type));
-			this.applyAnnotationProcessors(pojo, setting, leaf, AnnotatedSettingsImpl.this.valueSettingProcessors);
-			leaf.build();
+					.withListener(this.constructListener(pojo, listeners, type));
+			this.applyAnnotationProcessors(pojo, setting, leafBuilder, AnnotatedSettingsImpl.this.valueSettingProcessors);
+			ConfigLeaf<S> leaf = leafBuilder.build();
+			builder.getItems().remove(leaf);
+			BackedConfigLeaf<R, S> deferred = new BackedConfigLeaf<>(leaf, type, pojo, setting);
+			builder.getItems().add(deferred); // This will also attach deferred
 		}
 
 		@Nonnull
@@ -180,19 +185,23 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 		}
 
 		@Nonnull
-		private <R> BiConsumer<R, R> constructListener(Object pojo, Field setting, List<Member> listeners, ConfigType<R, ?, ?> type) throws FiberException {
-			BiConsumer<R, R> ret = (t, newValue) -> {
-				try {
-					setting.setAccessible(true);
-					setting.set(pojo, newValue);
-				} catch (IllegalAccessException e) {
-					throw new RuntimeFiberException("Failed to update field value", e);
-				}
-			};
+		private <R> BiConsumer<R, R> constructListener(Object pojo, List<Member> listeners, ConfigType<R, ?, ?> type) throws FiberException {
+			BiConsumer<R, R> ret = null;
 
 			for (Member listener : listeners) {
 				BiConsumer<R, R> consumer = this.constructListenerFromMember(pojo, listener, type.getRuntimeType());
-				if (consumer != null) ret = ret.andThen(consumer);
+
+				if (consumer != null) {
+					if (ret == null) {
+						ret = consumer;
+					} else {
+						ret = ret.andThen(consumer);
+					}
+				}
+			}
+
+			if (ret == null) {
+				ret = (r, r2) -> { };
 			}
 
 			return ret;
@@ -306,8 +315,6 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 
 		@SuppressWarnings("unchecked")
 		private <T> T findDefaultValue(Object pojo, Field field) throws FiberException {
-			boolean accessible = field.isAccessible();
-			field.setAccessible(true);
 			T value;
 
 			try {
@@ -320,7 +327,6 @@ public final class AnnotatedSettingsImpl implements AnnotatedSettings {
 				throw new FiberException("Couldn't get value for field '" + field.getName() + "'", e);
 			}
 
-			field.setAccessible(accessible);
 			return value;
 		}
 
