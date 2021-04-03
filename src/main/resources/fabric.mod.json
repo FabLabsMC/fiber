@@ -15,6 +15,6 @@
   "icon": "assets/fiber_logo.png",
   "environment": "*",
   "custom": {
-    "modmenu:api": true
+    "badges": [ "library" ]
   }
 }
